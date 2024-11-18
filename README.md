@@ -25,6 +25,9 @@ Remarks
 | B.5         | Triggers can be an arbitrary signal, like an API call                                       | HIGH     |
 | B.6         | Triggers can be the setting of a tag                                                        | HIGH     |
 | B.7         | Pipelines should be able to create content to be presented in the web interface [FSD B.1.I] | HIGH     |
+| B.8         | Pipeline execution                                                                          |          |
+| B.8.1       | Pipelines consume data sets (incl. single files) and produce artifacts (also data sets?)    | HIGH     |
+| B.8.2       | For efficiency reasons, input pipelines should exist, that directly process raw data on device. | MOD      |
 | C           | **Backend**                                                                                 |          |
 | C.1         | (Entire) system configuration should be file-based/readonly/non-runtime [FSD C.1]           |          |
 | C.1.I       | Non-runtime configuration of connection info for file storages, S3-buckets, etc.            | T.B.D.   |
