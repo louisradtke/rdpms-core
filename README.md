@@ -2,7 +2,7 @@
 
 RDPMS is a project that follows a twofold approach: (1) it may store and process data that was collected especially in robotics and autonomous driving context and (2) may supports sharing and tracking (for legal compliance reasons) of data across multiple instances.
 
-Find more information in the [RDMxSE workshop](https://nfdixcs.org/event/working-workshop-on-research-data-management-for-and-in-software-engineering-rdmxse%EF%BB%BF) proposal. 
+More information can be found in [our proposal](./docs/radtke-proposal-distributed-rdm-system-2024.pdf) for the [RDMxSE workshop](https://nfdixcs.org/event/working-workshop-on-research-data-management-for-and-in-software-engineering-rdmxse%EF%BB%BF). 
 
 ## List of requirements and potentially planned features
 
@@ -13,9 +13,10 @@ Remarks
 | Enumeration | Requirement Text                                                                            | Priority |
 | ----------- | ------------------------------------------------------------------------------------------- | -------- |
 | A           | **General**                                                                                 |          |
-| A.1         | Group multiple data files to a dataset (1:1, 1:many) [FSD A.1]                              | HIGH     |
+| A.1         | Group multiple data files to a set (1:1, 1:many) [FSD A.1]                                  | HIGH     |
 | A.2         | Search/Filter by existence of topics, content of topics, metadata [FSD 1.2]                 | MOD      |
 | A.3         | Tagging data [FSD A.5]                                                                      | MOD      |
+| A.4         | Grouping data (A.1) can be done by a plugin                                                 | MOD      |
 | B           | **Pipeline-related. A pipeline consists of several jobs.**                                  |          |
 | B.1         | Pipelines are executed on behalf of triggers                                                | HIGH     |
 | B.2         | Job-executors should be able to process any type of file                                    | HIGH     |
@@ -52,10 +53,11 @@ Remarks
 | F.2         | Passkeys                                                                                    | LOW      |
 | F.3         | Google/Microsoft accounts                                                                   | LOW      |
 | F.4         | OAuth 2.0                                                                                   | LOW      |
-| F.5         | Support permissions [FSD F.4]                                                               | MOD      |
-| F.5.I       | Support organizations                                                                       | T.B.D.   |
-| F.5.II      | Support groups                                                                              | LOW      |
-| F.5.III     | Support roles                                                                               | LOW      |
+| F.5         | Support permissions [FSD F.4]                                                               |          |
+| F.5.I       | Support users                                                                               | HIGH     |
+| F.5.II      | Support organizations                                                                       | T.B.D.   |
+| F.5.III     | Support groups                                                                              | LOW      |
+| F.5.IV      | Support roles                                                                               | LOW      |
 | G           | **Supported file formats**                                                                  |          |
 | G.1         | Base system should be file-type agnostic                                                    | HIGH     |
 | G.2         | System should have a notion of file types through plugins [FSD G.4]                         | MOD      |
