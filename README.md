@@ -4,6 +4,43 @@ RDPMS is a project that follows a twofold approach: (1) it may store and process
 
 More information can be found in [our proposal](./docs/radtke-proposal-distributed-rdm-system-2024.pdf) for the [RDMxSE workshop](https://nfdixcs.org/event/working-workshop-on-research-data-management-for-and-in-software-engineering-rdmxse%EF%BB%BF). 
 
+
+## Roadmap
+
+### Phase 1: Backend setup
+
+1. create ASP.NET solution and EF data context (Postgres)
+2. build debugging system (eval docker)
+3. establish basic data model containing at least:
+  - data files
+  - data sets
+  - data stores
+  - metadata for data sets
+    - tags
+    - json
+  - pipeline instances
+  - pipeline job instances
+  - job queue (not for dispatchment or scheduling)
+  - artifacts (redundant to data files/sets? UI may accept data of specific type (PNG vs. MCAP) instead of artifact in general.)
+4. create interfaces and mockups for:
+  - general system configuration
+  - data stores
+  - pipelines
+5. create REST ASP.NET API
+7. permission system/user ids (a lot depends on this and it will be horror to retrofit)
+  - users
+  - abstraction for ownership entities (user/group/organizations)
+  - username + password auth
+
+### Phase 2: Web UI setup
+
+1. decide on UI framework and JS vs. TS (e.g. Svelte switched back to annotated JS, still supporting TS)
+2. build auto generation of JS REST client
+3. create basic dialogues
+  - data sets
+  - pipelines viewer and job viewer
+
+
 ## List of requirements and potentially planned features
 
 Remarks
