@@ -27,10 +27,6 @@ More information can be found in [our proposal](./docs/radtke-proposal-distribut
   - data stores
   - pipelines
 5. create REST ASP.NET API
-7. permission system/user ids (a lot depends on this and it will be horror to retrofit)
-  - users
-  - abstraction for ownership entities (user/group/organizations)
-  - username + password auth
 
 ### Phase 2: Web UI setup
 
@@ -39,6 +35,14 @@ More information can be found in [our proposal](./docs/radtke-proposal-distribut
 3. create basic dialogues
   - data sets
   - pipelines viewer and job viewer
+
+### Phase 3: Setting up base security infrastructure
+
+1. permission system/user ids (a lot depends on this and it will be horror to retrofit)
+  - users
+  - abstraction for ownership entities (user/group/organizations)
+  - username + password auth
+2. Embedding of auth into Web UI
 
 
 ## List of requirements and potentially planned features
