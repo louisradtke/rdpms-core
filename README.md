@@ -12,20 +12,20 @@ More information can be found in [our proposal](./docs/radtke-proposal-distribut
 1. create ASP.NET solution and EF data context (Postgres)
 2. build debugging system (eval docker)
 3. establish basic data model containing at least:
-  - data files
-  - data sets
-  - data stores
-  - metadata for data sets
-    - tags
-    - json
-  - pipeline instances
-  - pipeline job instances
-  - job queue (not for dispatchment or scheduling)
-  - artifacts (redundant to data files/sets? UI may accept data of specific type (PNG vs. MCAP) instead of artifact in general.)
+   - data files
+   - data sets
+   - data stores
+   - metadata for data sets
+     - tags
+     - json
+   - pipeline instances
+   - pipeline job instances
+   - job queue (not for dispatchment or scheduling)
+   - artifacts (redundant to data files/sets? UI may accept data of specific type (PNG vs. MCAP) instead of artifact in general.)
 4. create interfaces and mockups for:
-  - general system configuration
-  - data stores
-  - pipelines
+   - general system configuration
+   - data stores
+   - pipelines
 5. create REST ASP.NET API
 
 ### Phase 2: Web UI setup
@@ -33,23 +33,23 @@ More information can be found in [our proposal](./docs/radtke-proposal-distribut
 1. decide on UI framework and JS vs. TS (e.g. Svelte switched back to annotated JS, still supporting TS)
 2. build auto generation of JS REST client
 3. create basic dialogues
-  - data sets
-  - pipelines viewer and job viewer
+   - data sets
+   - pipelines viewer and job viewer
 
 ### Phase 3: Setting up base security infrastructure
 
 1. permission system/user ids (a lot depends on this and it will be horror to retrofit)
-  - users
-  - abstraction for ownership entities (user/group/organizations)
-  - username + password auth
+   - users
+   - abstraction for ownership entities (user/group/organizations)
+   - username + password auth
 2. Embedding of auth into Web UI
 
 ### Phase 4: Setting up pipeline system
 
 1. decide on pipeline backend (Snakemake vs. ..., see below)
 2. create microservice for pipeline tool
-  - trigger pipelines by core
-  - add core as target for dispatching jobs
+   - trigger pipelines by core
+   - add core as target for dispatching jobs
 
 What speaks against Snakemake and other DAG-workflow tools: pipelines are demand-triggered instead of being triggered by new content. But maybe this is not necessary, since inputs of a specific form come in, we want to transform them into a standardized format. Still, we won't need the DAG-features, unless we want to aggregate multiple data sets (like multiple traces we want to process using [STARS](https://github.com/tudo-aqua/stars)).
 
@@ -62,7 +62,7 @@ What speaks against Snakemake and other DAG-workflow tools: pipelines are demand
 
 ## List of requirements and potentially planned features
 
-Remarks
+Remarks:
 - The current list does not include any requirements related to sharing data.
 - "FSD" refers to a project and concepts by a group of Formula Student teams: ETH Zürich, TU Hamburg, KIT, NTNU Trondheim, Uni Bayreuth, and TU Dortmund.
 
