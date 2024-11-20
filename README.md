@@ -7,7 +7,7 @@ More information can be found in [our proposal](./docs/radtke-proposal-distribut
 
 ## Roadmap
 
-### Phase 1: Backend setup
+### Phase 1: Backend setup (core)
 
 1. create ASP.NET solution and EF data context (Postgres)
 2. build debugging system (eval docker)
@@ -43,6 +43,21 @@ More information can be found in [our proposal](./docs/radtke-proposal-distribut
   - abstraction for ownership entities (user/group/organizations)
   - username + password auth
 2. Embedding of auth into Web UI
+
+### Phase 4: Setting up pipeline system
+
+1. decide on pipeline backend (Snakemake vs. ..., see below)
+2. create microservice for pipeline tool
+  - trigger pipelines by core
+  - add core as target for dispatching jobs
+
+What speaks against Snakemake and other DAG-workflow tools: pipelines are demand-triggered instead of being triggered by new content. But maybe this is not necessary, since inputs of a specific form come in, we want to transform them into a standardized format. Still, we won't need the DAG-features, unless we want to aggregate multiple data sets (like multiple traces we want to process using [STARS](https://github.com/tudo-aqua/stars)).
+
+### Phase 5: Build distributed worker system
+
+1. determine requirements to work dispatchment system
+2. decide on worker engine (sth. existing vs. abusing GitLab vs. self-made)
+3. implementation (either directly into backend or as microservice)
 
 
 ## List of requirements and potentially planned features
