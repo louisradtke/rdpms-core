@@ -1,0 +1,12 @@
+﻿services:
+  aqua.rdpms.core.main:
+    image: aqua.rdpms.core.main
+    build:
+      context: .
+      dockerfile: RDPMS.Core.Main/Dockerfile
+
+  aqua.rdpms.core.data:
+    image: aqua.rdpms.core.data
+    build:
+      context: .
+      dockerfile: RDPMS.Core.Data/Dockerfile

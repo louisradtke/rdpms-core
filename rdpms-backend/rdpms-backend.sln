@@ -1,0 +1,21 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RDPMS.Core.Main", "src\RDPMS.Core.Main\RDPMS.Core.Main.csproj", "{D5DEA0C0-1EAF-4A2E-8A00-647186C5CDC0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4B11E150-2A14-4B83-A4EE-03F670F22C38}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5DEA0C0-1EAF-4A2E-8A00-647186C5CDC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5DEA0C0-1EAF-4A2E-8A00-647186C5CDC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5DEA0C0-1EAF-4A2E-8A00-647186C5CDC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5DEA0C0-1EAF-4A2E-8A00-647186C5CDC0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
