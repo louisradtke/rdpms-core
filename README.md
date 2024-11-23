@@ -10,8 +10,7 @@ More information can be found in [our proposal](./docs/radtke-proposal-distribut
 ### Phase 1: Backend setup (core)
 
 1. create ASP.NET solution and EF data context (Postgres)
-2. build debugging system (eval docker)
-3. establish basic data model containing at least:
+2. establish basic data model containing at least:
    - data files
    - data sets
    - data stores
@@ -22,11 +21,13 @@ More information can be found in [our proposal](./docs/radtke-proposal-distribut
    - pipeline job instances
    - job queue (not for dispatchment or scheduling)
    - artifacts (redundant to data files/sets? UI may accept data of specific type (PNG vs. MCAP) instead of artifact in general.)
-4. create interfaces and mockups for:
+   - Think of mutability of datasets and files
+3. create interfaces and mockups for:
    - general system configuration
    - data stores
    - pipelines
-5. create REST ASP.NET API
+4. create REST ASP.NET API
+5. build debugging system (eval docker)
 
 ### Phase 2: Web UI setup
 
