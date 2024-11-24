@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		compose.yaml = compose.yaml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RDPMS.Core.Persistence", "src\RDPMS.Core.Persistence\RDPMS.Core.Persistence.csproj", "{B49C12BD-CA68-457F-A570-D0C4CCAB609C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RDPMS.Core.Tests.Data", "test\RDPMS.Core.Tests.Data\RDPMS.Core.Tests.Data.csproj", "{F1C16AE4-8E97-49A2-A7E9-8E041D4573C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,5 +21,13 @@ Global
 		{D5DEA0C0-1EAF-4A2E-8A00-647186C5CDC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5DEA0C0-1EAF-4A2E-8A00-647186C5CDC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5DEA0C0-1EAF-4A2E-8A00-647186C5CDC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B49C12BD-CA68-457F-A570-D0C4CCAB609C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B49C12BD-CA68-457F-A570-D0C4CCAB609C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B49C12BD-CA68-457F-A570-D0C4CCAB609C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B49C12BD-CA68-457F-A570-D0C4CCAB609C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1C16AE4-8E97-49A2-A7E9-8E041D4573C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1C16AE4-8E97-49A2-A7E9-8E041D4573C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1C16AE4-8E97-49A2-A7E9-8E041D4573C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1C16AE4-8E97-49A2-A7E9-8E041D4573C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
