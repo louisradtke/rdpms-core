@@ -11,7 +11,7 @@ using RDPMS.Core.Persistence;
 namespace RDPMS.Core.Persistence.Migrations
 {
     [DbContext(typeof(RDPMSPersistenceContext))]
-    [Migration("20241126115313_InitialCreate")]
+    [Migration("20241203220150_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -86,6 +86,9 @@ namespace RDPMS.Core.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("BeginStamp")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreationStamp")
                         .HasColumnType("TEXT");
 
@@ -101,11 +104,11 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<Guid>("FileTypeId")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsTimeSeries")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("OriginInstanceId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -177,17 +180,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DataStores");
-                });
-
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.InstanceId", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Instance");
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.Job", b =>

@@ -14,10 +14,6 @@ public static class Generator
     {
         ctx.Database.EnsureCreated();
         
-        var instanceId = new InstanceId(Guid.NewGuid());
-        ctx.Instance.Add(instanceId);
-        ctx.SaveChanges();
-
         var store = new DataStore("DefaultStore");
         var containter = new DataContainer("DefaultContainer")
         {
@@ -31,8 +27,8 @@ public static class Generator
 
         var dataFile = new DataFile("test.txt")
         {
-            OriginInstanceId = ctx.Instance.Single().Id,
-            FileType = type
+            FileType = type,
+            IsTimeSeries = false
         };
 
         var existingDataset = new DataSet("OriginDataset")

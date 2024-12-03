@@ -14,7 +14,6 @@ public class RDPMSPersistenceContext : DbContext
     public DbSet<PipelineInstance> PipelineInstances { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<DataSetUsedForJobs> DataSetsUsedForJobs { get; set; }
-    public DbSet<InstanceId> Instance { get; set; }
 
     public string DbPath { get; }
     public RDPMSPersistenceContext()

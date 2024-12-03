@@ -7,6 +7,11 @@ The "tracking" may be implemented as "taint": it shall be clearly traceable, whi
 More information can be found in [our proposal](./docs/radtke-proposal-distributed-rdm-system-2024.pdf) for the [RDMxSE workshop](https://nfdixcs.org/event/working-workshop-on-research-data-management-for-and-in-software-engineering-rdmxse%EF%BB%BF). 
 
 
+## Conventions
+
+- All timestamps are UTC. Only on the visualization "layer", they may be converted to local time.
+
+
 ## Roadmap
 
 ### Phase 1: Backend setup (core)
@@ -24,6 +29,7 @@ More information can be found in [our proposal](./docs/radtke-proposal-distribut
    - job queue (not for dispatchment or scheduling)
    - artifacts (redundant to data files/sets? UI may accept data of specific type (PNG vs. MCAP) instead of artifact in general.)
    - taint of data (files and sets)
+   - Q: what, if some data was just uploaded to an S3 bucket and now has to be indexed, just like in RBB? can a job alter the metadata of its source, but not create an artifact?
 3. create interfaces and mockups for:
    - general system configuration
    - data stores

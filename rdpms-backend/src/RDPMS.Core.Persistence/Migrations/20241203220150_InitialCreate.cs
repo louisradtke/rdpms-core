@@ -36,17 +36,6 @@ namespace RDPMS.Core.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Instance",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Instance", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PipelineInstances",
                 columns: table => new
                 {
@@ -162,10 +151,11 @@ namespace RDPMS.Core.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    OriginInstanceId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     FileTypeId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CreationStamp = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsTimeSeries = table.Column<bool>(type: "INTEGER", nullable: false),
+                    BeginStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
                     DeletedStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
                     DataSetId = table.Column<Guid>(type: "TEXT", nullable: true),
                     DataStoreId = table.Column<Guid>(type: "TEXT", nullable: true)
@@ -355,9 +345,6 @@ namespace RDPMS.Core.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "DataSetUsedForJobs");
-
-            migrationBuilder.DropTable(
-                name: "Instance");
 
             migrationBuilder.DropTable(
                 name: "LogSection");
