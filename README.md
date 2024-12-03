@@ -1,6 +1,8 @@
 # Research Data and Pipe Management System (RDPMS)
 
-RDPMS is a project that follows a twofold approach: (1) it may store and process data that was collected especially in robotics and autonomous driving context and (2) may supports sharing and tracking (for legal compliance reasons) of data across multiple instances.
+RDPMS is a project that follows a twofold approach: (1) it may store and process data that was collected especially in robotics and autonomous driving context and (2) may support sharing and tracking (for legal compliance reasons) of data across multiple instances.
+
+The "tracking" may be implemented as "taint": it shall be clearly traceable, which parts (in time) of a dataset were processed to which datasets. Thus, a deletion request may be performed with minimal loss and effort.
 
 More information can be found in [our proposal](./docs/radtke-proposal-distributed-rdm-system-2024.pdf) for the [RDMxSE workshop](https://nfdixcs.org/event/working-workshop-on-research-data-management-for-and-in-software-engineering-rdmxse%EF%BB%BF). 
 
@@ -9,10 +11,10 @@ More information can be found in [our proposal](./docs/radtke-proposal-distribut
 
 ### Phase 1: Backend setup (core)
 
-1. create ASP.NET solution and EF data context (Postgres)
+1. create ASP.NET solution and EF data context (Sqlite vs. Postgres)
 2. establish basic data model containing at least:
-   - data files
-   - data sets
+   - data files (immutable)
+   - data sets (immutable after creation, needs some kind of state)
    - data stores
    - metadata for data sets
      - tags
@@ -21,12 +23,12 @@ More information can be found in [our proposal](./docs/radtke-proposal-distribut
    - pipeline job instances
    - job queue (not for dispatchment or scheduling)
    - artifacts (redundant to data files/sets? UI may accept data of specific type (PNG vs. MCAP) instead of artifact in general.)
-   - Think of mutability of datasets and files
+   - taint of data (files and sets)
 3. create interfaces and mockups for:
    - general system configuration
    - data stores
    - pipelines
-4. create REST ASP.NET API
+4. create REST ASP.NET API and basic types
 5. build debugging system (eval docker)
 
 ### Phase 2: Web UI setup
