@@ -30,6 +30,8 @@ public class RDPMSPersistenceContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder model)
     {
+        base.OnModelCreating(model);
+
         model.Entity<DataFile>()
             .Ignore(e => e.IsTimeSeries);
         model.Entity<DataFile>()
