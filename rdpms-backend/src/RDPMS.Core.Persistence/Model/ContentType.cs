@@ -13,7 +13,7 @@ public record ContentType()
     public Guid Id { get; init; } = Guid.NewGuid();
 
     /// <summary>
-    /// the common file ending this file would have, without leading dot (bag, png, json, ...)
+    /// the common file ending this file would have, lowercase, without leading dot (e.g. bag, png, json, ...)
     /// </summary>
     public required string Abbreviation
     {

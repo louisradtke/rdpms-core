@@ -28,12 +28,11 @@ public static class Generator
         var dataFile = new DataFile("test.txt")
         {
             FileType = type,
-            IsTimeSeries = false
         };
 
         var existingDataset = new DataSet("OriginDataset")
         {
-            AncestorIds = [],
+            AncestorDatasetIds = [],
             CreateJob = null,
             Files = [dataFile]
         };

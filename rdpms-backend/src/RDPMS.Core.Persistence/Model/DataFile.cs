@@ -1,4 +1,6 @@
-﻿namespace RDPMS.Core.Persistence.Model;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace RDPMS.Core.Persistence.Model;
 
 public record DataFile(string Name)
 {
@@ -13,14 +15,9 @@ public record DataFile(string Name)
     public DateTime CreationStamp { get; init; } = DateTime.UtcNow;
 
     /// <summary>
-    /// Whether this file represents multiple data points, each being associated with a timestamp. e.g. MCAP or MP4
-    /// </summary>
-    public required bool IsTimeSeries { get; set; }
-    
-    /// <summary>
     /// The stamp of the first data point, if <see cref="IsTimeSeries"/> is true.
     /// </summary>
-    public DateTime? BeginStamp { get; set; }
+    public DateTime? BeginStamp { get; init; }
 
     /// <summary>
     /// Respective stamp in <b>UTC</b>. If this file was deleted, the value represents the deletion stamp.
@@ -29,8 +26,13 @@ public record DataFile(string Name)
     public DateTime? DeletedStamp { get; set; }
     
     /// <summary>
-    /// Whether this file was deleted
+    /// Read-only property indicating, whether this file represents multiple data points, each being associated with a
+    /// timestamp. e.g. MCAP or MP4. true if <see cref="BeginStamp"/> != null
     /// </summary>
-    /// <returns>true if DeletedStamp != null, false otherwise</returns>
-    public bool IsDeleted() => DeletedStamp != null;
+    public bool IsTimeSeries => BeginStamp != null;
+
+    /// <summary>
+    /// Read-only property indicating, whether this file was deleted. true if <see cref="DeletedStamp"/> != null
+    /// </summary>
+    public bool IsDeleted => DeletedStamp != null;
 }

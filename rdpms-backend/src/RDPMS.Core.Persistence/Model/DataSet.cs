@@ -6,9 +6,10 @@ public record DataSet(string Name)
 
     /// <summary>
     /// List of all data sets influencing this data set. Those may also be data sets from other instances, why this is
-    /// not directly referring other data sets
+    /// not directly referring other data sets. If this is empty, and there is no <see cref="CreateJob"/>, then this
+    /// data set contains raw data, that has not been processed by the system.
     /// </summary>
-    public required List<Guid> AncestorIds { get; set; }
+    public required List<Guid> AncestorDatasetIds { get; set; }
     
     /// <summary>
     /// Non-unique name of a dataset

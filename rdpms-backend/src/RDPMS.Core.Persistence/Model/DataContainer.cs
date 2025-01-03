@@ -12,8 +12,8 @@ public record DataContainer(string Name)
     /// <summary>
     /// List of all data sets this container holds
     /// </summary>
-    public List<DataSet> AssociatedDataSets { get; set; }
-    
+    public List<DataSet> AssociatedDataSets { get; set; } = [];
+
     /// <summary>
     /// When creating a new dataset or adding files, this is where to put it by default
     /// </summary>

@@ -30,9 +30,15 @@ public class RDPMSPersistenceContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder model)
     {
+        model.Entity<DataFile>()
+            .Ignore(e => e.IsTimeSeries);
+        model.Entity<DataFile>()
+            .Ignore(e => e.IsDeleted);
+
         model.Entity<DataSet>()
             .HasOne(e => e.CreateJob);
 
+        // set up many-to-many mapping of PipelineInstance
         model.Entity<DataSetUsedForJobs>()
             .HasKey(e => new {e.JobId, e.SourceDatasetId});
         model.Entity<Job>()
@@ -42,8 +48,10 @@ public class RDPMSPersistenceContext : DbContext
         model.Entity<Job>()
             .HasMany(e => e.OutputDatasets)
             .WithOne(e => e.CreateJob);
+
         model.Entity<Job>()
             .HasAlternateKey(e => e.LocalId);
+
         model.Entity<PipelineInstance>()
             .HasAlternateKey(e => e.LocalId);
     }

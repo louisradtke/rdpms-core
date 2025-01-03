@@ -11,7 +11,7 @@ using RDPMS.Core.Persistence;
 namespace RDPMS.Core.Persistence.Migrations
 {
     [DbContext(typeof(RDPMSPersistenceContext))]
-    [Migration("20241203220150_InitialCreate")]
+    [Migration("20250103212651_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -104,9 +104,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<Guid>("FileTypeId")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsTimeSeries")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -128,7 +125,7 @@ namespace RDPMS.Core.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("AncestorIds")
+                    b.Property<string>("AncestorDatasetIds")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -242,6 +239,10 @@ namespace RDPMS.Core.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LogContent")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SourceName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("StoredFileId")

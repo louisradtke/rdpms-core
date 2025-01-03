@@ -125,7 +125,7 @@ namespace RDPMS.Core.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    AncestorIds = table.Column<string>(type: "TEXT", nullable: false),
+                    AncestorDatasetIds = table.Column<string>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     CreateStamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreateJobId = table.Column<Guid>(type: "TEXT", nullable: true),
@@ -154,7 +154,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     FileTypeId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CreationStamp = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    IsTimeSeries = table.Column<bool>(type: "INTEGER", nullable: false),
                     BeginStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
                     DeletedStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
                     DataSetId = table.Column<Guid>(type: "TEXT", nullable: true),
@@ -247,6 +246,7 @@ namespace RDPMS.Core.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    SourceName = table.Column<string>(type: "TEXT", nullable: false),
                     LogContent = table.Column<string>(type: "TEXT", nullable: true),
                     StoredFileId = table.Column<Guid>(type: "TEXT", nullable: true),
                     JobId = table.Column<Guid>(type: "TEXT", nullable: true)

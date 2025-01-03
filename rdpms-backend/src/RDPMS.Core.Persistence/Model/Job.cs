@@ -20,7 +20,7 @@ public record Job(string Name)
     public JobState State { get; set; } = JobState.Created;
     
     /// <summary>
-    /// Time stamp when the last update came in (important for sanitazion).
+    /// Time stamp when the last update came in (important for sanitization).
     /// </summary>
     public DateTime LastUpdateStamp { get; set; }
     
