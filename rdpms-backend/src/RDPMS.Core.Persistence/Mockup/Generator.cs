@@ -6,7 +6,7 @@ public static class Generator
 {
     public static void FillDatabase()
     {
-        var ctx = new RDPMSPersistenceContext();
+        var ctx = new RDPMSPersistenceContext(new TestDatabaseConnection());
         FillDatabase(ctx);
     }
     
@@ -56,5 +56,18 @@ public static class Generator
         
         ctx.PipelineInstances.Add(pipeline);
         ctx.SaveChanges();
+    }
+
+    class TestDatabaseConnection : DatabaseConfigurationBase
+    {
+        public override string GetConnectionString()
+        {
+            var folder = Environment.SpecialFolder.LocalApplicationData;
+            var folderPath = Environment.GetFolderPath(folder);
+            var path = Path.Join(folderPath, "rdpms-debug.db");
+            return $"Data Source={path}";
+        }
+        
+        public override DatabaseProvider Provider => DatabaseProvider.Sqlite;
     }
 }

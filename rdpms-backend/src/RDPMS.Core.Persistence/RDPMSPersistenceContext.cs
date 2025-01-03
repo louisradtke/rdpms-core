@@ -5,6 +5,7 @@ namespace RDPMS.Core.Persistence;
 
 public class RDPMSPersistenceContext : DbContext
 {
+    public DatabaseConfigurationBase Configuration { get; }
     public DbSet<ContentType> Types { get; set; }
     public DbSet<DataFile> DataFiles { get; set; }
     public DbSet<DataSet> DataSets { get; set; }
@@ -15,17 +16,24 @@ public class RDPMSPersistenceContext : DbContext
     public DbSet<Tag> Tags { get; set; }
     public DbSet<DataSetUsedForJobs> DataSetsUsedForJobs { get; set; }
 
-    public string DbPath { get; }
-    public RDPMSPersistenceContext()
+    public RDPMSPersistenceContext(DatabaseConfigurationBase configuration)
     {
-        var folder = Environment.SpecialFolder.LocalApplicationData;
-        var path = Environment.GetFolderPath(folder);
-        DbPath = System.IO.Path.Join(path, "rdpms-debug.db");
+        Configuration = configuration;
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        options.UseSqlite($"Data Source={DbPath}");
+        switch (Configuration.Provider)
+        {
+            case DatabaseProvider.Sqlite:
+                options.UseSqlite(Configuration.GetConnectionString());
+                break;
+            case DatabaseProvider.Postgres:
+                options.UseNpgsql(Configuration.GetConnectionString());
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     protected override void OnModelCreating(ModelBuilder model)
