@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RDPMS.Core.Persistence", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RDPMS.Core.Tests.Data", "test\RDPMS.Core.Tests.Data\RDPMS.Core.Tests.Data.csproj", "{F1C16AE4-8E97-49A2-A7E9-8E041D4573C0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RDPMS.Core.Infra", "src\RDPMS.Core.Infra\RDPMS.Core.Infra.csproj", "{12C82B75-61A4-4F06-8273-0F58A4A654DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,5 +31,9 @@ Global
 		{F1C16AE4-8E97-49A2-A7E9-8E041D4573C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1C16AE4-8E97-49A2-A7E9-8E041D4573C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1C16AE4-8E97-49A2-A7E9-8E041D4573C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12C82B75-61A4-4F06-8273-0F58A4A654DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12C82B75-61A4-4F06-8273-0F58A4A654DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12C82B75-61A4-4F06-8273-0F58A4A654DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12C82B75-61A4-4F06-8273-0F58A4A654DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
