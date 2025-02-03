@@ -1,6 +1,6 @@
 using CommandLine;
 
-namespace RDPMS.Core.Main.Configuration;
+namespace RDPMS.Core.Server.Configuration;
 
 public class CLIOptions
 {

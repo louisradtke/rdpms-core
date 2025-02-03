@@ -1,9 +1,9 @@
-using RDPMS.Core.Main.Configuration.Database;
 using RDPMS.Core.Persistence;
+using RDPMS.Core.Server.Configuration.Database;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace RDPMS.Core.Main.Configuration;
+namespace RDPMS.Core.Server.Configuration;
 
 /// <summary>
 /// Settings for the application that won't change during runtime

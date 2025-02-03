@@ -1,5 +1,5 @@
 using CommandLine;
-using RDPMS.Core.Main.Configuration;
+using RDPMS.Core.Server.Configuration;
 
 CLIOptions cliOptions = null!;
 CommandLine.Parser.Default.ParseArguments<CLIOptions>(args)

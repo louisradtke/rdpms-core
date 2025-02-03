@@ -1,6 +1,6 @@
 using RDPMS.Core.Persistence;
 
-namespace RDPMS.Core.Main.Configuration.Database;
+namespace RDPMS.Core.Server.Configuration.Database;
 
 public class PostgresDatabaseConfiguration : DatabaseConfigurationBase
 {

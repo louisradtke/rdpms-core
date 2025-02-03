@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using RDPMS.Core.Main.Model.REST;
+using RDPMS.Core.Server.Model.REST;
 
-namespace RDPMS.Core.Main.Controllers;
+namespace RDPMS.Core.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]

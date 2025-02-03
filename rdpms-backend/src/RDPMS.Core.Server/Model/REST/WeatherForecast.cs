@@ -1,4 +1,4 @@
-namespace RDPMS.Core.Main.Model.REST;
+namespace RDPMS.Core.Server.Model.REST;
 
 public class WeatherForecast
 {

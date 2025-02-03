@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace RDPMS.Core.Main.Configuration;
+namespace RDPMS.Core.Server.Configuration;
 
 /// <summary>
 /// Settings for the application that may be changed during runtime. Logic that depends on this has to react to the
