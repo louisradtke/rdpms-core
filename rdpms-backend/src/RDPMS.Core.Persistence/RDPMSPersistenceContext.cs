@@ -59,8 +59,11 @@ public class RDPMSPersistenceContext : DbContext
             .HasMany(e => e.OutputDatasets)
             .WithOne(e => e.CreateJob);
 
+        // set up fast searching for Job ID and State
         model.Entity<Job>()
             .HasAlternateKey(e => e.LocalId);
+        model.Entity<Job>()
+            .HasAlternateKey(e => e.State);
 
         model.Entity<PipelineInstance>()
             .HasAlternateKey(e => e.LocalId);
