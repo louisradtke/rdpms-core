@@ -8,15 +8,12 @@ namespace RDPMS.Core.Server.Configuration;
 /// <summary>
 /// Settings for the application that won't change during runtime
 /// </summary>
+// ReSharper disable once ClassNeverInstantiated.Global
 public class LaunchConfiguration
 {
-    public DatabaseConfigurationBase DatabaseConfiguration { get; set; } = null!;
+    // ReSharper disable once UnusedMember.Global
+    public DatabaseConfigurationBase? DatabaseConfiguration { get; set; }
     public string ListeningUrl { get; set; } = "http://localhost:5000";
-
-    public void CopyFromCLIOptions(CLIOptions options)
-    {
-        ListeningUrl = string.IsNullOrEmpty(options.ListeningUrl)? ListeningUrl : options.ListeningUrl;
-    }
 
     public static LaunchConfiguration LoadParamsFromYaml(string yamlFilePath)
     {
@@ -38,5 +35,10 @@ public class LaunchConfiguration
         
         var launchConfig = deserializer.Deserialize<LaunchConfiguration>(yaml);
         return launchConfig;
+    }
+
+    public void CopyToRuntimeConfiguration(RuntimeConfiguration runtimeConfiguration)
+    {
+        // nothing to do, yet
     }
 }

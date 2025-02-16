@@ -12,4 +12,10 @@ public class CLIOptions
     
     [Option('c', "config", Required = false, HelpText = "Set path to configuration file.")]
     public string? ConfigurationFilePath { get; set; }
+
+    public void CopyToLaunchConfiguration(LaunchConfiguration launchConfiguration)
+    {
+        launchConfiguration.ListeningUrl =
+            string.IsNullOrEmpty(ListeningUrl) ? launchConfiguration.ListeningUrl : ListeningUrl;
+    }
 }

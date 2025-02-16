@@ -1,6 +1,7 @@
 using CommandLine;
 using RDPMS.Core.Server.Configuration;
 
+// handle config
 CLIOptions cliOptions = null!;
 CommandLine.Parser.Default.ParseArguments<CLIOptions>(args)
     .WithNotParsed(errs =>
@@ -16,14 +17,20 @@ CommandLine.Parser.Default.ParseArguments<CLIOptions>(args)
 
 var launchConfig =
     LaunchConfiguration.LoadParamsFromYaml(cliOptions.ConfigurationFilePath ?? "debug.yaml");
-launchConfig.CopyFromCLIOptions(cliOptions);
+cliOptions.CopyToLaunchConfiguration(launchConfig);
 
+var runtimeConfig = new RuntimeConfiguration();
+launchConfig.CopyToRuntimeConfiguration(runtimeConfig);
+
+// build the app
 var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost
     .UseUrls(launchConfig.ListeningUrl);
 
 // Add services to the container.
+builder.Services.AddSingleton(runtimeConfig);
+builder.Services.AddSingleton(launchConfig);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
