@@ -1,5 +1,11 @@
 ﻿namespace RDPMS.Core.Persistence.Model;
 
+/// <summary>
+/// A dataset is a collection of data files. The workflow is: a worker creates a dataset, then uploads the associated
+/// files (so that we never have files lying around, where we don't know their origin, in case a worker dies while
+/// uploading), and finally seals the dataset. Only sealed datasets can be used for further processing.
+/// </summary>
+/// <param name="Name"></param>
 public record DataSet(string Name)
 {
     public Guid Id { get; init; } = Guid.NewGuid();
@@ -19,6 +25,8 @@ public record DataSet(string Name)
     public List<DataFile> Files { get; set; } = [];
     public List<Tag> AssignedTags { get; set; } = [];
     public DateTime CreateStamp { get; set; } = DateTime.UtcNow;
+    
+    public DataSetState State { get; set; } = DataSetState.Uninitialized;
 
     /// <summary>
     /// If data set was created by a job, refer it
