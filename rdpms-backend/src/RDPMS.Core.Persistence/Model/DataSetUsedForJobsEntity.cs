@@ -5,4 +5,4 @@ namespace RDPMS.Core.Persistence.Model;
 /// </summary>
 /// <param name="SourceDatasetId">Id of a dataset used for a job</param>
 /// <param name="JobId">Id of the job, the dataset was used for</param>
-public record DataSetUsedForJobs(Guid SourceDatasetId, Guid JobId);
+public record DataSetUsedForJobsEntity(Guid SourceDatasetId, Guid JobId);

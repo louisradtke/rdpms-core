@@ -1,6 +1,6 @@
 ﻿namespace RDPMS.Core.Persistence.Model;
 
-public record DataStore(string Name)
+public record DataStoreEntity(string Name)
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 
@@ -12,5 +12,5 @@ public record DataStore(string Name)
     /// <summary>
     /// List of all files stored on this instance
     /// </summary>
-    public List<DataFile> DataFiles { get; set; } = [];
+    public List<DataFileEntity> DataFiles { get; set; } = [];
 }

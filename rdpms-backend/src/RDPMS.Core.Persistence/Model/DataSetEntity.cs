@@ -2,11 +2,10 @@
 
 /// <summary>
 /// A dataset is a collection of data files. The workflow is: a worker creates a dataset, then uploads the associated
-/// files (so that we never have files lying around, where we don't know their origin, in case a worker dies while
-/// uploading), and finally seals the dataset. Only sealed datasets can be used for further processing.
+/// files, and finally seals the dataset. Only sealed datasets can be used for further processing.
 /// </summary>
 /// <param name="Name"></param>
-public record DataSet(string Name)
+public record DataSetEntity(string Name)
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 
@@ -22,24 +21,30 @@ public record DataSet(string Name)
     /// </summary>
     public string Name { get; set; } = Name;
 
-    public List<DataFile> Files { get; set; } = [];
-    public List<Tag> AssignedTags { get; set; } = [];
-    public DateTime CreateStamp { get; set; } = DateTime.UtcNow;
-    
-    public DataSetState State { get; set; } = DataSetState.Uninitialized;
+    public List<DataFileEntity> Files { get; set; } = [];
+    public List<TagEntity> AssignedTags { get; set; } = [];
+    public DateTime CreatedStamp { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Respective stamp in <b>UTC</b>. If this file was deleted, the value represents the deletion stamp.
+    /// false otherwise.
+    /// </summary>
+    public DateTime? DeletedStamp { get; set; }
+
+    public DataSetStateEntity State { get; set; } = DataSetStateEntity.Uninitialized;
 
     /// <summary>
     /// If data set was created by a job, refer it
     /// </summary>
-    public required Job? CreateJob { get; init; }
+    public required JobEntityEntity? CreateJob { get; init; }
 
     /// <summary>
     /// List of all jobs using this dataset
     /// </summary>
-    public List<Job> SourceForJobs { get; set; } = [];
+    public List<JobEntityEntity> SourceForJobs { get; set; } = [];
 
     /// <summary>
     /// Maps a string/name (unique per set) to a JSON field
     /// </summary>
-    public List<MetadataJsonField> MetadataJsonFields { get; set; } = [];
+    public List<MetadataJsonFieldEntity> MetadataJsonFields { get; set; } = [];
 }

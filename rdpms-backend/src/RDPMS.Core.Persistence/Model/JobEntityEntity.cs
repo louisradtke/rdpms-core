@@ -3,7 +3,7 @@ namespace RDPMS.Core.Persistence.Model;
 /// <summary>
 /// Instance of a job
 /// </summary>
-public record Job(string Name)
+public record JobEntityEntity(string Name)
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 
@@ -17,7 +17,7 @@ public record Job(string Name)
     /// <summary>
     /// State of the job.
     /// </summary>
-    public JobState State { get; set; } = JobState.Created;
+    public JobStateEntity State { get; set; } = JobStateEntity.Created;
     
     /// <summary>
     /// Time stamp when the last update came in (important for sanitization).
@@ -27,17 +27,17 @@ public record Job(string Name)
     public DateTime CreatedStamp { get; set; } = DateTime.UtcNow;
     public DateTime? StartedStamp { get; set; }
     public DateTime? TerminatedStamp { get; set; }
-    public List<DataSet> SourceDatasets {get; set; } = [];
-    public List<DataSet> OutputDatasets { get; set; } = [];
-    public List<LogSection> Logs { get; set; } = [];
+    public List<DataSetEntity> SourceDatasets {get; set; } = [];
+    public List<DataSetEntity> OutputDatasets { get; set; } = [];
+    public List<LogSectionEntity> Logs { get; set; } = [];
     
     /// <summary>
-    /// Override the <see cref="DataStore"/> set by OutputContainer.
+    /// Override the <see cref="DataStoreEntity"/> set by OutputContainer.
     /// </summary>
-    public DataStore? OutputDataStore { get; set; }
+    public DataStoreEntity? OutputDataStore { get; set; }
     
     /// <summary>
     /// With which container to associate the file 
     /// </summary>
-    public required DataContainer OutputContainer { get; init; }
+    public required DataContainerEntity OutputContainer { get; init; }
 }

@@ -1,21 +1,15 @@
-namespace RDPMS.Core.Persistence.Model;
+namespace RDPMS.Core.Server.Model.Logic;
 
-/// <summary>
-/// Representing the type of a file according to
-/// <see href="https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types/Common_types">
-/// MIME docs
-/// </see>
-/// </summary>
-public record ContentType()
+public class ContentType
 {
     private string _abbreviation = string.Empty;
-    
+
     public Guid Id { get; init; } = Guid.NewGuid();
 
     /// <summary>
     /// the common file ending this file would have, lowercase, without leading dot (e.g. bag, png, json, ...)
     /// </summary>
-    public required string Abbreviation
+    public string Abbreviation
     {
         get => _abbreviation;
         set => _abbreviation = value.ToLower();

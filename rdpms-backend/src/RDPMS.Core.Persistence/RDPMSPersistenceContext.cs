@@ -6,15 +6,15 @@ namespace RDPMS.Core.Persistence;
 public class RDPMSPersistenceContext : DbContext
 {
     public DatabaseConfigurationBase Configuration { get; }
-    public DbSet<ContentType> Types { get; set; }
-    public DbSet<DataFile> DataFiles { get; set; }
-    public DbSet<DataSet> DataSets { get; set; }
-    public DbSet<DataStore> DataStores { get; set; }
-    public DbSet<DataContainer> DataContainers { get; set; }
-    public DbSet<Job> Jobs { get; set; }
-    public DbSet<PipelineInstance> PipelineInstances { get; set; }
-    public DbSet<Tag> Tags { get; set; }
-    public DbSet<DataSetUsedForJobs> DataSetsUsedForJobs { get; set; }
+    public DbSet<ContentTypeEntity> Types { get; set; }
+    public DbSet<DataFileEntity> DataFiles { get; set; }
+    public DbSet<DataSetEntity> DataSets { get; set; }
+    public DbSet<DataStoreEntity> DataStores { get; set; }
+    public DbSet<DataContainerEntity> DataContainers { get; set; }
+    public DbSet<JobEntityEntity> Jobs { get; set; }
+    public DbSet<PipelineInstanceEntity> PipelineInstances { get; set; }
+    public DbSet<TagEntity> Tags { get; set; }
+    public DbSet<DataSetUsedForJobsEntity> DataSetsUsedForJobs { get; set; }
 
     public RDPMSPersistenceContext(DatabaseConfigurationBase configuration)
     {
@@ -40,32 +40,27 @@ public class RDPMSPersistenceContext : DbContext
     {
         base.OnModelCreating(model);
 
-        model.Entity<DataFile>()
-            .Ignore(e => e.IsTimeSeries);
-        model.Entity<DataFile>()
-            .Ignore(e => e.IsDeleted);
-
-        model.Entity<DataSet>()
+        model.Entity<DataSetEntity>()
             .HasOne(e => e.CreateJob);
 
         // set up many-to-many mapping of PipelineInstance
-        model.Entity<DataSetUsedForJobs>()
+        model.Entity<DataSetUsedForJobsEntity>()
             .HasKey(e => new {e.JobId, e.SourceDatasetId});
-        model.Entity<Job>()
+        model.Entity<JobEntityEntity>()
             .HasMany(e => e.SourceDatasets)
             .WithMany(e => e.SourceForJobs)
-            .UsingEntity(nameof(DataSetUsedForJobs));
-        model.Entity<Job>()
+            .UsingEntity(nameof(DataSetUsedForJobsEntity));
+        model.Entity<JobEntityEntity>()
             .HasMany(e => e.OutputDatasets)
             .WithOne(e => e.CreateJob);
 
         // set up fast searching for Job ID and State
-        model.Entity<Job>()
+        model.Entity<JobEntityEntity>()
             .HasAlternateKey(e => e.LocalId);
-        model.Entity<Job>()
+        model.Entity<JobEntityEntity>()
             .HasAlternateKey(e => e.State);
 
-        model.Entity<PipelineInstance>()
+        model.Entity<PipelineInstanceEntity>()
             .HasAlternateKey(e => e.LocalId);
     }
 }
