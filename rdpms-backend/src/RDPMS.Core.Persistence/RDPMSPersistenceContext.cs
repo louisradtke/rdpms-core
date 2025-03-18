@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using RDPMS.Core.Persistence.Mockup;
 using RDPMS.Core.Persistence.Model;
 
 namespace RDPMS.Core.Persistence;
 
-public class RDPMSPersistenceContext : DbContext
+public class RDPMSPersistenceContext(DatabaseConfiguration configuration) : DbContext
 {
-    public DatabaseConfigurationBase Configuration { get; }
+    public DatabaseConfiguration Configuration { get; } = configuration;
     public DbSet<ContentTypeEntity> Types { get; set; }
     public DbSet<DataFileEntity> DataFiles { get; set; }
     public DbSet<DataSetEntity> DataSets { get; set; }
@@ -16,9 +17,11 @@ public class RDPMSPersistenceContext : DbContext
     public DbSet<TagEntity> Tags { get; set; }
     public DbSet<DataSetUsedForJobsEntity> DataSetsUsedForJobs { get; set; }
 
-    public RDPMSPersistenceContext(DatabaseConfigurationBase configuration)
+    // EF Core requires a public constructor with no parameters. Tho, the DI framework automatically resolves the
+    // constructor with the most resolvable parameters.
+    // see https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#multiple-constructor-discovery-rules
+    public RDPMSPersistenceContext() : this(new SqliteInTempDatabaseConfiguration())
     {
-        Configuration = configuration;
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
@@ -39,6 +42,12 @@ public class RDPMSPersistenceContext : DbContext
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
+        
+        // ignore computed properties
+        model.Entity<DataFileEntity>()
+            .Ignore(e => e.IsTimeSeries);
+        model.Entity<DataFileEntity>()
+            .Ignore(e => e.IsDeleted);
 
         model.Entity<DataSetEntity>()
             .HasOne(e => e.CreateJob);

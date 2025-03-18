@@ -13,7 +13,7 @@ namespace RDPMS.Core.Server.Configuration;
 public class LaunchConfiguration
 {
     // ReSharper disable once UnusedMember.Global
-    public DatabaseConfigurationBase? DatabaseConfiguration { get; set; }
+    public DatabaseConfiguration? DatabaseConfiguration { get; set; }
     public string ListeningUrl { get; set; } = "http://localhost:5000";
 
     public static LaunchConfiguration LoadParamsFromYaml(string yamlFilePath)
@@ -29,7 +29,7 @@ public class LaunchConfiguration
                     { "postgres", typeof(PostgresDatabaseConfiguration) },
                     { "sqlite", typeof(SqliteDatabaseConfiguration) }
                 };
-                o.AddKeyValueTypeDiscriminator<DatabaseConfigurationBase>("type",
+                o.AddKeyValueTypeDiscriminator<DatabaseConfiguration>("type",
                     valueMappings);
             })
             .Build();

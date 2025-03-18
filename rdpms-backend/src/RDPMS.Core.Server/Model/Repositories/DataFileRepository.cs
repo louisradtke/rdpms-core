@@ -1,3 +1,4 @@
+using CommandLine;
 using Microsoft.EntityFrameworkCore;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
@@ -8,31 +9,30 @@ namespace RDPMS.Core.Server.Model.Repositories;
 
 public class DataFileRepository(RDPMSPersistenceContext ctx)
 {
-    public async Task<IEnumerable<DataFile>> GetFilesAsync()
+    public async Task<IEnumerable<DataFileEntity>> GetFilesAsync()
     {
-        return await Task.Run(() => ctx.DataFiles.Select(DataFileEntityMapper.ToDomain).ToList());
-        // return await _ctx.DataFiles.Select(DataFileEntityMapper.ToDomain).ToListAsync();
+        // todo: test cast
+        return await ctx.DataFiles.ToListAsync();
     }
 
-    public async Task<DataFile> GetFileAsync(Guid id)
+    public async Task<DataFileEntity> GetFileAsync(Guid id)
     {
         var entity = await ctx.DataFiles.FindAsync(id);
         if (entity == null) throw new KeyNotFoundException();
-        return DataFileEntityMapper.ToDomain(entity);
+        return entity;
     }
 
-    public async Task<IEnumerable<DataFile>> GetFilesInStoreAsync(Guid storeId)
+    public async Task<IEnumerable<DataFileEntity>> GetFilesInStoreAsync(Guid storeId)
     {
         var storeEntity = await ctx.DataStores.FindAsync(storeId);
-        if (storeEntity == null) return new List<DataFile>();
+        if (storeEntity == null) return new List<DataFileEntity>();
 
         await ctx.Entry(storeEntity).Reference(s => s.DataFiles).LoadAsync();
-        return storeEntity.DataFiles.Select(DataFileEntityMapper.ToDomain);
+        return storeEntity.DataFiles;
     }
 
-    public async Task<FileUploadTarget> AddFileAsync(DataFile file)
+    public async Task<FileUploadTarget> AddFileAsync(DataFileEntity entity)
     {
-        var entity = DataFileEntityMapper.ToEntity(file);
         ctx.DataFiles.Add(entity);
         await ctx.SaveChangesAsync();
         // TODO: gen URL

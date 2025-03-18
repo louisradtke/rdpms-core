@@ -2,7 +2,7 @@ using RDPMS.Core.Persistence;
 
 namespace RDPMS.Core.Server.Configuration.Database;
 
-public class SqliteDatabaseConfiguration : DatabaseConfigurationBase
+public class SqliteDatabaseConfiguration : DatabaseConfiguration
 {
     public SqliteDatabaseConfiguration()
     {

@@ -1,3 +1,4 @@
+using System.Reflection;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using CommandLine;
@@ -81,6 +82,10 @@ builder.Services.AddSwaggerGen(options =>
 
     // Add support for versioning via the URL
     // options.OperationFilter<SwaggerDefaultValues>();
+    
+    // add XML docstrings to Swagger docs
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
 var app = builder.Build();

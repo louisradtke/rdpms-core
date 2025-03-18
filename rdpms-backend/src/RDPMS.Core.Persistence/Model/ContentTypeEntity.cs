@@ -6,14 +6,20 @@ namespace RDPMS.Core.Persistence.Model;
 /// MIME docs
 /// </see>
 /// </summary>
-public record ContentTypeEntity
+public class ContentTypeEntity
 {
+    private string _abbreviation = string.Empty;
+
     public Guid Id { get; init; } = Guid.NewGuid();
 
     /// <summary>
     /// the common file ending this file would have, lowercase, without leading dot (e.g. bag, png, json, ...)
     /// </summary>
-    public string Abbreviation { get; set; } = string.Empty;
+    public string Abbreviation
+    {
+        get => _abbreviation;
+        set => _abbreviation = value.ToLower();
+    }
 
     /// <summary>
     /// The optional display name

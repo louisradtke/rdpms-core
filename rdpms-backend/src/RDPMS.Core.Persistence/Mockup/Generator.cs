@@ -58,7 +58,7 @@ public static class Generator
         ctx.SaveChanges();
     }
 
-    class TestDatabaseConnection : DatabaseConfigurationBase
+    class TestDatabaseConnection : DatabaseConfiguration
     {
         public override string GetConnectionString()
         {

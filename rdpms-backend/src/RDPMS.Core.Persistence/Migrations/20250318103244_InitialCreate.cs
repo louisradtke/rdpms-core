@@ -96,12 +96,13 @@ namespace RDPMS.Core.Persistence.Migrations
                     TerminatedStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
                     OutputDataStoreId = table.Column<Guid>(type: "TEXT", nullable: true),
                     OutputContainerId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    PipelineInstanceId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    PipelineInstanceEntityId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Jobs", x => x.Id);
                     table.UniqueConstraint("AK_Jobs_LocalId", x => x.LocalId);
+                    table.UniqueConstraint("AK_Jobs_State", x => x.State);
                     table.ForeignKey(
                         name: "FK_Jobs_DataContainers_OutputContainerId",
                         column: x => x.OutputContainerId,
@@ -114,8 +115,8 @@ namespace RDPMS.Core.Persistence.Migrations
                         principalTable: "DataStores",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Jobs_PipelineInstances_PipelineInstanceId",
-                        column: x => x.PipelineInstanceId,
+                        name: "FK_Jobs_PipelineInstances_PipelineInstanceEntityId",
+                        column: x => x.PipelineInstanceEntityId,
                         principalTable: "PipelineInstances",
                         principalColumn: "Id");
                 });
@@ -127,16 +128,18 @@ namespace RDPMS.Core.Persistence.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     AncestorDatasetIds = table.Column<string>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    CreateStamp = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedStamp = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DeletedStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    State = table.Column<int>(type: "INTEGER", nullable: false),
                     CreateJobId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    DataContainerId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    DataContainerEntityId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DataSets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DataSets_DataContainers_DataContainerId",
-                        column: x => x.DataContainerId,
+                        name: "FK_DataSets_DataContainers_DataContainerEntityId",
+                        column: x => x.DataContainerEntityId,
                         principalTable: "DataContainers",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -153,23 +156,26 @@ namespace RDPMS.Core.Persistence.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     FileTypeId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CreationStamp = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    BeginStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    Size = table.Column<long>(type: "INTEGER", nullable: false),
+                    Hash = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedStamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     DeletedStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    DataSetId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    DataStoreId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    BeginStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    EndStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    DataSetEntityId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    DataStoreEntityId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DataFiles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DataFiles_DataSets_DataSetId",
-                        column: x => x.DataSetId,
+                        name: "FK_DataFiles_DataSets_DataSetEntityId",
+                        column: x => x.DataSetEntityId,
                         principalTable: "DataSets",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_DataFiles_DataStores_DataStoreId",
-                        column: x => x.DataStoreId,
+                        name: "FK_DataFiles_DataStores_DataStoreEntityId",
+                        column: x => x.DataStoreEntityId,
                         principalTable: "DataStores",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -181,7 +187,7 @@ namespace RDPMS.Core.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "DataSetUsedForJobs",
+                name: "DataSetUsedForJobsEntity",
                 columns: table => new
                 {
                     SourceDatasetsId = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -189,15 +195,15 @@ namespace RDPMS.Core.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DataSetUsedForJobs", x => new { x.SourceDatasetsId, x.SourceForJobsId });
+                    table.PrimaryKey("PK_DataSetUsedForJobsEntity", x => new { x.SourceDatasetsId, x.SourceForJobsId });
                     table.ForeignKey(
-                        name: "FK_DataSetUsedForJobs_DataSets_SourceDatasetsId",
+                        name: "FK_DataSetUsedForJobsEntity_DataSets_SourceDatasetsId",
                         column: x => x.SourceDatasetsId,
                         principalTable: "DataSets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DataSetUsedForJobs_Jobs_SourceForJobsId",
+                        name: "FK_DataSetUsedForJobsEntity_Jobs_SourceForJobsId",
                         column: x => x.SourceForJobsId,
                         principalTable: "Jobs",
                         principalColumn: "Id",
@@ -205,20 +211,20 @@ namespace RDPMS.Core.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MetadataJsonField",
+                name: "MetadataJsonFieldEntity",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Key = table.Column<string>(type: "TEXT", nullable: false),
                     Value = table.Column<string>(type: "TEXT", nullable: false),
-                    DataSetId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    DataSetEntityId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MetadataJsonField", x => x.Id);
+                    table.PrimaryKey("PK_MetadataJsonFieldEntity", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MetadataJsonField_DataSets_DataSetId",
-                        column: x => x.DataSetId,
+                        name: "FK_MetadataJsonFieldEntity_DataSets_DataSetEntityId",
+                        column: x => x.DataSetEntityId,
                         principalTable: "DataSets",
                         principalColumn: "Id");
                 });
@@ -229,39 +235,39 @@ namespace RDPMS.Core.Persistence.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    DataSetId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    DataSetEntityId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tags", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Tags_DataSets_DataSetId",
-                        column: x => x.DataSetId,
+                        name: "FK_Tags_DataSets_DataSetEntityId",
+                        column: x => x.DataSetEntityId,
                         principalTable: "DataSets",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "LogSection",
+                name: "LogSectionEntity",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     SourceName = table.Column<string>(type: "TEXT", nullable: false),
                     LogContent = table.Column<string>(type: "TEXT", nullable: true),
                     StoredFileId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    JobId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    JobEntityEntityId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LogSection", x => x.Id);
+                    table.PrimaryKey("PK_LogSectionEntity", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LogSection_DataFiles_StoredFileId",
+                        name: "FK_LogSectionEntity_DataFiles_StoredFileId",
                         column: x => x.StoredFileId,
                         principalTable: "DataFiles",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_LogSection_Jobs_JobId",
-                        column: x => x.JobId,
+                        name: "FK_LogSectionEntity_Jobs_JobEntityEntityId",
+                        column: x => x.JobEntityEntityId,
                         principalTable: "Jobs",
                         principalColumn: "Id");
                 });
@@ -272,14 +278,14 @@ namespace RDPMS.Core.Persistence.Migrations
                 column: "DefaultDataStoreId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DataFiles_DataSetId",
+                name: "IX_DataFiles_DataSetEntityId",
                 table: "DataFiles",
-                column: "DataSetId");
+                column: "DataSetEntityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DataFiles_DataStoreId",
+                name: "IX_DataFiles_DataStoreEntityId",
                 table: "DataFiles",
-                column: "DataStoreId");
+                column: "DataStoreEntityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DataFiles_FileTypeId",
@@ -292,13 +298,13 @@ namespace RDPMS.Core.Persistence.Migrations
                 column: "CreateJobId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DataSets_DataContainerId",
+                name: "IX_DataSets_DataContainerEntityId",
                 table: "DataSets",
-                column: "DataContainerId");
+                column: "DataContainerEntityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DataSetUsedForJobs_SourceForJobsId",
-                table: "DataSetUsedForJobs",
+                name: "IX_DataSetUsedForJobsEntity_SourceForJobsId",
+                table: "DataSetUsedForJobsEntity",
                 column: "SourceForJobsId");
 
             migrationBuilder.CreateIndex(
@@ -312,29 +318,29 @@ namespace RDPMS.Core.Persistence.Migrations
                 column: "OutputDataStoreId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Jobs_PipelineInstanceId",
+                name: "IX_Jobs_PipelineInstanceEntityId",
                 table: "Jobs",
-                column: "PipelineInstanceId");
+                column: "PipelineInstanceEntityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LogSection_JobId",
-                table: "LogSection",
-                column: "JobId");
+                name: "IX_LogSectionEntity_JobEntityEntityId",
+                table: "LogSectionEntity",
+                column: "JobEntityEntityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LogSection_StoredFileId",
-                table: "LogSection",
+                name: "IX_LogSectionEntity_StoredFileId",
+                table: "LogSectionEntity",
                 column: "StoredFileId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MetadataJsonField_DataSetId",
-                table: "MetadataJsonField",
-                column: "DataSetId");
+                name: "IX_MetadataJsonFieldEntity_DataSetEntityId",
+                table: "MetadataJsonFieldEntity",
+                column: "DataSetEntityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tags_DataSetId",
+                name: "IX_Tags_DataSetEntityId",
                 table: "Tags",
-                column: "DataSetId");
+                column: "DataSetEntityId");
         }
 
         /// <inheritdoc />
@@ -344,13 +350,13 @@ namespace RDPMS.Core.Persistence.Migrations
                 name: "DataSetsUsedForJobs");
 
             migrationBuilder.DropTable(
-                name: "DataSetUsedForJobs");
+                name: "DataSetUsedForJobsEntity");
 
             migrationBuilder.DropTable(
-                name: "LogSection");
+                name: "LogSectionEntity");
 
             migrationBuilder.DropTable(
-                name: "MetadataJsonField");
+                name: "MetadataJsonFieldEntity");
 
             migrationBuilder.DropTable(
                 name: "Tags");

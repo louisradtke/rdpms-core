@@ -2,7 +2,7 @@ using RDPMS.Core.Persistence;
 
 namespace RDPMS.Core.Server.Configuration.Database;
 
-public class PostgresDatabaseConfiguration : DatabaseConfigurationBase
+public class PostgresDatabaseConfiguration : DatabaseConfiguration
 {
     public override string GetConnectionString()
     {

@@ -17,7 +17,7 @@ namespace RDPMS.Core.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
 
-            modelBuilder.Entity("DataSetUsedForJobs", b =>
+            modelBuilder.Entity("DataSetUsedForJobsEntity", b =>
                 {
                     b.Property<Guid>("SourceDatasetsId")
                         .HasColumnType("TEXT");
@@ -29,10 +29,10 @@ namespace RDPMS.Core.Persistence.Migrations
 
                     b.HasIndex("SourceForJobsId");
 
-                    b.ToTable("DataSetUsedForJobs");
+                    b.ToTable("DataSetUsedForJobsEntity");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.ContentType", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.ContentTypeEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -57,7 +57,7 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.ToTable("Types");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataContainer", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataContainerEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -77,7 +77,7 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.ToTable("DataContainers");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataFile", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataFileEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -86,37 +86,47 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<DateTime?>("BeginStamp")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreationStamp")
+                    b.Property<DateTime>("CreatedStamp")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("DataSetId")
+                    b.Property<Guid?>("DataSetEntityId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("DataStoreId")
+                    b.Property<Guid?>("DataStoreEntityId")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("DeletedStamp")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("EndStamp")
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("FileTypeId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Hash")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<long>("Size")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("DataSetId");
+                    b.HasIndex("DataSetEntityId");
 
-                    b.HasIndex("DataStoreId");
+                    b.HasIndex("DataStoreEntityId");
 
                     b.HasIndex("FileTypeId");
 
                     b.ToTable("DataFiles");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataSet", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataSetEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -129,26 +139,32 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<Guid?>("CreateJobId")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreateStamp")
+                    b.Property<DateTime>("CreatedStamp")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("DataContainerId")
+                    b.Property<Guid?>("DataContainerEntityId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DeletedStamp")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("State")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreateJobId");
 
-                    b.HasIndex("DataContainerId");
+                    b.HasIndex("DataContainerEntityId");
 
                     b.ToTable("DataSets");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataSetUsedForJobs", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataSetUsedForJobsEntity", b =>
                 {
                     b.Property<Guid>("JobId")
                         .HasColumnType("TEXT");
@@ -161,7 +177,7 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.ToTable("DataSetsUsedForJobs");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataStore", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataStoreEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -176,7 +192,7 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.ToTable("DataStores");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.Job", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.JobEntityEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -201,7 +217,7 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<Guid?>("OutputDataStoreId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("PipelineInstanceId")
+                    b.Property<Guid?>("PipelineInstanceEntityId")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("StartedStamp")
@@ -217,22 +233,24 @@ namespace RDPMS.Core.Persistence.Migrations
 
                     b.HasAlternateKey("LocalId");
 
+                    b.HasAlternateKey("State");
+
                     b.HasIndex("OutputContainerId");
 
                     b.HasIndex("OutputDataStoreId");
 
-                    b.HasIndex("PipelineInstanceId");
+                    b.HasIndex("PipelineInstanceEntityId");
 
                     b.ToTable("Jobs");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.LogSection", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.LogSectionEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("JobId")
+                    b.Property<Guid?>("JobEntityEntityId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LogContent")
@@ -247,20 +265,20 @@ namespace RDPMS.Core.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("JobId");
+                    b.HasIndex("JobEntityEntityId");
 
                     b.HasIndex("StoredFileId");
 
-                    b.ToTable("LogSection");
+                    b.ToTable("LogSectionEntity");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.MetadataJsonField", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.MetadataJsonFieldEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("DataSetId")
+                    b.Property<Guid?>("DataSetEntityId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Key")
@@ -273,12 +291,12 @@ namespace RDPMS.Core.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DataSetId");
+                    b.HasIndex("DataSetEntityId");
 
-                    b.ToTable("MetadataJsonField");
+                    b.ToTable("MetadataJsonFieldEntity");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.PipelineInstance", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.PipelineInstanceEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -294,13 +312,13 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.ToTable("PipelineInstances");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.Tag", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.TagEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("DataSetId")
+                    b.Property<Guid?>("DataSetEntityId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -309,29 +327,29 @@ namespace RDPMS.Core.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DataSetId");
+                    b.HasIndex("DataSetEntityId");
 
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("DataSetUsedForJobs", b =>
+            modelBuilder.Entity("DataSetUsedForJobsEntity", b =>
                 {
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataSetEntity", null)
                         .WithMany()
                         .HasForeignKey("SourceDatasetsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RDPMS.Core.Persistence.Model.Job", null)
+                    b.HasOne("RDPMS.Core.Persistence.Model.JobEntityEntity", null)
                         .WithMany()
                         .HasForeignKey("SourceForJobsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataContainer", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataContainerEntity", b =>
                 {
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataStore", "DefaultDataStore")
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataStoreEntity", "DefaultDataStore")
                         .WithMany()
                         .HasForeignKey("DefaultDataStoreId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -340,17 +358,17 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Navigation("DefaultDataStore");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataFile", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataFileEntity", b =>
                 {
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataSetEntity", null)
                         .WithMany("Files")
-                        .HasForeignKey("DataSetId");
+                        .HasForeignKey("DataSetEntityId");
 
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataStore", null)
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataStoreEntity", null)
                         .WithMany("DataFiles")
-                        .HasForeignKey("DataStoreId");
+                        .HasForeignKey("DataStoreEntityId");
 
-                    b.HasOne("RDPMS.Core.Persistence.Model.ContentType", "FileType")
+                    b.HasOne("RDPMS.Core.Persistence.Model.ContentTypeEntity", "FileType")
                         .WithMany()
                         .HasForeignKey("FileTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -359,73 +377,73 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Navigation("FileType");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataSet", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataSetEntity", b =>
                 {
-                    b.HasOne("RDPMS.Core.Persistence.Model.Job", "CreateJob")
+                    b.HasOne("RDPMS.Core.Persistence.Model.JobEntityEntity", "CreateJob")
                         .WithMany("OutputDatasets")
                         .HasForeignKey("CreateJobId");
 
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataContainer", null)
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataContainerEntity", null)
                         .WithMany("AssociatedDataSets")
-                        .HasForeignKey("DataContainerId");
+                        .HasForeignKey("DataContainerEntityId");
 
                     b.Navigation("CreateJob");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.Job", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.JobEntityEntity", b =>
                 {
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataContainer", "OutputContainer")
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataContainerEntity", "OutputContainer")
                         .WithMany()
                         .HasForeignKey("OutputContainerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataStore", "OutputDataStore")
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataStoreEntity", "OutputDataStore")
                         .WithMany()
                         .HasForeignKey("OutputDataStoreId");
 
-                    b.HasOne("RDPMS.Core.Persistence.Model.PipelineInstance", null)
+                    b.HasOne("RDPMS.Core.Persistence.Model.PipelineInstanceEntity", null)
                         .WithMany("Jobs")
-                        .HasForeignKey("PipelineInstanceId");
+                        .HasForeignKey("PipelineInstanceEntityId");
 
                     b.Navigation("OutputContainer");
 
                     b.Navigation("OutputDataStore");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.LogSection", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.LogSectionEntity", b =>
                 {
-                    b.HasOne("RDPMS.Core.Persistence.Model.Job", null)
+                    b.HasOne("RDPMS.Core.Persistence.Model.JobEntityEntity", null)
                         .WithMany("Logs")
-                        .HasForeignKey("JobId");
+                        .HasForeignKey("JobEntityEntityId");
 
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataFile", "StoredFile")
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataFileEntity", "StoredFile")
                         .WithMany()
                         .HasForeignKey("StoredFileId");
 
                     b.Navigation("StoredFile");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.MetadataJsonField", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.MetadataJsonFieldEntity", b =>
                 {
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataSetEntity", null)
                         .WithMany("MetadataJsonFields")
-                        .HasForeignKey("DataSetId");
+                        .HasForeignKey("DataSetEntityId");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.Tag", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.TagEntity", b =>
                 {
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataSetEntity", null)
                         .WithMany("AssignedTags")
-                        .HasForeignKey("DataSetId");
+                        .HasForeignKey("DataSetEntityId");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataContainer", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataContainerEntity", b =>
                 {
                     b.Navigation("AssociatedDataSets");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataSet", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataSetEntity", b =>
                 {
                     b.Navigation("AssignedTags");
 
@@ -434,19 +452,19 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Navigation("MetadataJsonFields");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataStore", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataStoreEntity", b =>
                 {
                     b.Navigation("DataFiles");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.Job", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.JobEntityEntity", b =>
                 {
                     b.Navigation("Logs");
 
                     b.Navigation("OutputDatasets");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.PipelineInstance", b =>
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.PipelineInstanceEntity", b =>
                 {
                     b.Navigation("Jobs");
                 });
