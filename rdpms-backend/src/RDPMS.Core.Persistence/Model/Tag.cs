@@ -1,7 +1,7 @@
 ﻿namespace RDPMS.Core.Persistence.Model;
 
-public record TagEntity(string Name)
+public class Tag(string name)
 {
     public Guid Id { get; init; } = Guid.NewGuid();
-    public string Name { get; set; } = Name;
+    public string Name { get; set; } = name;
 }

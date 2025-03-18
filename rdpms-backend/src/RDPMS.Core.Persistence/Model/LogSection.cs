@@ -4,7 +4,7 @@ namespace RDPMS.Core.Persistence.Model;
 // present but only stdout was displayed. The missing information yet often was necessary. The current system is not
 // able to display this information.
 
-public record LogSectionEntity
+public class LogSection
 {
     public Guid Id { get; init; } = Guid.NewGuid();
     
@@ -21,5 +21,5 @@ public record LogSectionEntity
     /// <summary>
     /// The content of the log file, if moved to a store (to keep db small).
     /// </summary>
-    public DataFileEntity? StoredFile { get; set; }
+    public DataFile? StoredFile { get; set; }
 }

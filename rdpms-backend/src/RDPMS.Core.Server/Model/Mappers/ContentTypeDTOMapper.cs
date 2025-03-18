@@ -11,7 +11,7 @@ public static class ContentTypeDTOMapper
     /// </summary>
     /// <param name="domain">The ContentType instance to map.</param>
     /// <returns>A mapped ContentTypeDTO instance.</returns>
-    public static ContentTypeDTO ToDTO(ContentTypeEntity domain)
+    public static ContentTypeDTO ToDTO(ContentType domain)
     {
         if (domain == null)
         {
@@ -33,14 +33,14 @@ public static class ContentTypeDTOMapper
     /// </summary>
     /// <param name="dto">The ContentTypeDTO instance to map.</param>
     /// <returns>A mapped ContentType instance.</returns>
-    public static ContentTypeEntity ToDomain(ContentTypeDTO dto)
+    public static ContentType ToDomain(ContentTypeDTO dto)
     {
         if (dto == null)
         {
             throw new ArgumentNullException(nameof(dto));
         }
 
-        return new ContentTypeEntity()
+        return new ContentType()
         {
             Id = dto.Id ?? Guid.NewGuid(),
             Abbreviation = dto.Abbreviation ?? string.Empty,

@@ -2,12 +2,12 @@
 
 namespace RDPMS.Core.Persistence.Model;
 
-public class DataFileEntity(string name)
+public class DataFile(string name)
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 
     public string Name { get; set; } = name;
-    public required ContentTypeEntity FileType { get; set; }
+    public required ContentType FileType { get; set; }
     
     public long Size { get; set; }
     

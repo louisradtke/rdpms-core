@@ -1,6 +1,6 @@
 namespace RDPMS.Core.Persistence.Model;
 
-public enum JobStateEntity
+public enum JobState
 {
     /// <summary>
     /// Job is created, but not executed

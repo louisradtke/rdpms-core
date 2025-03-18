@@ -1,6 +1,6 @@
 namespace RDPMS.Core.Persistence.Model;
 
-public record MetadataJsonFieldEntity
+public class MetadataJsonField
 {
     public Guid Id { get; init; } = Guid.NewGuid();
     public required string Key { get; init; }

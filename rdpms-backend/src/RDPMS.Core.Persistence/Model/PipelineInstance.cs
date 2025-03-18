@@ -1,6 +1,6 @@
 namespace RDPMS.Core.Persistence.Model;
 
-public record PipelineInstanceEntity
+public class PipelineInstance
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 
@@ -12,5 +12,5 @@ public record PipelineInstanceEntity
     /// <summary>
     /// All job instances associated with this pipeline
     /// </summary>
-    public List<JobEntityEntity> Jobs { get; init; } = [];
+    public List<Job> Jobs { get; init; } = [];
 }

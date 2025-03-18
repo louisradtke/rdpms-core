@@ -14,42 +14,42 @@ public static class Generator
     {
         ctx.Database.EnsureCreated();
         
-        var store = new DataStoreEntity("DefaultStore");
-        var containter = new DataContainerEntity("DefaultContainer")
+        var store = new DataStore("DefaultStore");
+        var containter = new DataContainer("DefaultContainer")
         {
             DefaultDataStore = store
         };
 
-        var type = new ContentTypeEntity()
+        var type = new ContentType()
         {
             Abbreviation = "txt"
         };
 
-        var dataFile = new DataFileEntity("test.txt")
+        var dataFile = new DataFile("test.txt")
         {
             FileType = type,
         };
 
-        var existingDataset = new DataSetEntity("OriginDataset")
+        var existingDataset = new DataSet("OriginDataset")
         {
             AncestorDatasetIds = [],
             CreateJob = null,
             Files = [dataFile]
         };
 
-        var logEntry = new LogSectionEntity()
+        var logEntry = new LogSection()
         {
             LogContent = "Stuff made here."
         };
 
-        var job1 = new JobEntityEntity("BuildDataset")
+        var job1 = new Job("BuildDataset")
         {
             OutputContainer = containter,
             SourceDatasets = [existingDataset],
             Logs = [logEntry]
         };
 
-        var pipeline = new PipelineInstanceEntity()
+        var pipeline = new PipelineInstance()
         {
             Jobs = [job1]
         };

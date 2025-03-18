@@ -4,8 +4,8 @@
 /// A dataset is a collection of data files. The workflow is: a worker creates a dataset, then uploads the associated
 /// files, and finally seals the dataset. Only sealed datasets can be used for further processing.
 /// </summary>
-/// <param name="Name"></param>
-public record DataSetEntity(string Name)
+/// <param name="name"></param>
+public class DataSet(string name)
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 
@@ -19,10 +19,10 @@ public record DataSetEntity(string Name)
     /// <summary>
     /// Non-unique name of a dataset
     /// </summary>
-    public string Name { get; set; } = Name;
+    public string Name { get; set; } = name;
 
-    public List<DataFileEntity> Files { get; set; } = [];
-    public List<TagEntity> AssignedTags { get; set; } = [];
+    public List<DataFile> Files { get; set; } = [];
+    public List<Tag> AssignedTags { get; set; } = [];
     public DateTime CreatedStamp { get; set; } = DateTime.UtcNow;
 
     /// <summary>
@@ -31,20 +31,20 @@ public record DataSetEntity(string Name)
     /// </summary>
     public DateTime? DeletedStamp { get; set; }
 
-    public DataSetStateEntity State { get; set; } = DataSetStateEntity.Uninitialized;
+    public DataSetState State { get; set; } = DataSetState.Uninitialized;
 
     /// <summary>
     /// If data set was created by a job, refer it
     /// </summary>
-    public required JobEntityEntity? CreateJob { get; init; }
+    public required Job? CreateJob { get; init; }
 
     /// <summary>
     /// List of all jobs using this dataset
     /// </summary>
-    public List<JobEntityEntity> SourceForJobs { get; set; } = [];
+    public List<Job> SourceForJobs { get; set; } = [];
 
     /// <summary>
     /// Maps a string/name (unique per set) to a JSON field
     /// </summary>
-    public List<MetadataJsonFieldEntity> MetadataJsonFields { get; set; } = [];
+    public List<MetadataJsonField> MetadataJsonFields { get; set; } = [];
 }

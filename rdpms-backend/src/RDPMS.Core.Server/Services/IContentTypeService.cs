@@ -5,9 +5,9 @@ namespace RDPMS.Core.Server.Services;
 
 public interface IContentTypeService
 {
-    public Task<IEnumerable<ContentTypeEntity>> GetAllAsync();
-    Task<ContentTypeEntity> GetContentTypeByGuidAsync(Guid id);
+    public Task<IEnumerable<ContentType>> GetAllAsync();
+    Task<ContentType> GetContentTypeByGuidAsync(Guid id);
     Task<bool> CheckForIdAsync(Guid id);
-    Task AddAsync(ContentTypeEntity contentType);
-    Task AddRangeAsync(IEnumerable<ContentTypeEntity> contentType);
+    Task AddAsync(ContentType contentType);
+    Task AddRangeAsync(IEnumerable<ContentType> contentType);
 }

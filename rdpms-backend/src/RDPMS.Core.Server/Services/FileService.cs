@@ -14,22 +14,22 @@ public class FileService : IFileService
         _dataFileRepository = dataFileRepository;
     }
 
-    public async Task<IEnumerable<DataFileEntity>> GetFilesAsync()
+    public async Task<IEnumerable<DataFile>> GetFilesAsync()
     {
         return await _dataFileRepository.GetFilesAsync();
     }
 
-    public async Task<DataFileEntity> GetFileAsync(Guid id)
+    public async Task<DataFile> GetFileAsync(Guid id)
     {
         return await _dataFileRepository.GetFileAsync(id);
     }
 
-    public async Task<IEnumerable<DataFileEntity>> GetFilesInStoreAsync(Guid storeId)
+    public async Task<IEnumerable<DataFile>> GetFilesInStoreAsync(Guid storeId)
     {
         return await _dataFileRepository.GetFilesInStoreAsync(storeId);
     }
 
-    public async Task<FileUploadTarget> RequestFileUploadAsync(DataFileEntity file)
+    public async Task<FileUploadTarget> RequestFileUploadAsync(DataFile file)
     {
         var target = await _dataFileRepository.AddFileAsync(file);
         if (target == null) throw new IllegalStateException();

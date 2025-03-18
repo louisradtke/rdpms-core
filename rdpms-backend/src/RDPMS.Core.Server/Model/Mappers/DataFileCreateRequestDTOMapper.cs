@@ -6,7 +6,7 @@ namespace RDPMS.Core.Server.Model.Mappers;
 
 public static class DataFileCreateRequestDTOMapper
 {
-    public static DataFileEntity ToDomain(DataFileCreateRequestDTO dto, ContentTypeEntity fileType)
+    public static DataFile ToDomain(DataFileCreateRequestDTO dto, ContentType fileType)
     {
         if (dto.Name == null || dto.Size == null || dto.CreatedStamp == null || dto.Hash == null)
         {
@@ -19,7 +19,7 @@ public static class DataFileCreateRequestDTOMapper
             throw new ArgumentException("BeginStamp and EndStamp must be both null or both non-null.");
         }
 
-        return new DataFileEntity(name: dto.Name)
+        return new DataFile(name: dto.Name)
         {
             FileType = fileType, // Assuming FileType is passed as a reference (e.g., from a lookup table or service).
             Size = dto.Size.Value,

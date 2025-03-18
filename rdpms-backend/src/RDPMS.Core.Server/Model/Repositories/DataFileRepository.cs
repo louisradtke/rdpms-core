@@ -9,29 +9,29 @@ namespace RDPMS.Core.Server.Model.Repositories;
 
 public class DataFileRepository(RDPMSPersistenceContext ctx)
 {
-    public async Task<IEnumerable<DataFileEntity>> GetFilesAsync()
+    public async Task<IEnumerable<DataFile>> GetFilesAsync()
     {
         // todo: test cast
         return await ctx.DataFiles.ToListAsync();
     }
 
-    public async Task<DataFileEntity> GetFileAsync(Guid id)
+    public async Task<DataFile> GetFileAsync(Guid id)
     {
         var entity = await ctx.DataFiles.FindAsync(id);
         if (entity == null) throw new KeyNotFoundException();
         return entity;
     }
 
-    public async Task<IEnumerable<DataFileEntity>> GetFilesInStoreAsync(Guid storeId)
+    public async Task<IEnumerable<DataFile>> GetFilesInStoreAsync(Guid storeId)
     {
         var storeEntity = await ctx.DataStores.FindAsync(storeId);
-        if (storeEntity == null) return new List<DataFileEntity>();
+        if (storeEntity == null) return new List<DataFile>();
 
         await ctx.Entry(storeEntity).Reference(s => s.DataFiles).LoadAsync();
         return storeEntity.DataFiles;
     }
 
-    public async Task<FileUploadTarget> AddFileAsync(DataFileEntity entity)
+    public async Task<FileUploadTarget> AddFileAsync(DataFile entity)
     {
         ctx.DataFiles.Add(entity);
         await ctx.SaveChangesAsync();

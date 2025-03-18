@@ -7,15 +7,15 @@ namespace RDPMS.Core.Persistence;
 public class RDPMSPersistenceContext(DatabaseConfiguration configuration) : DbContext
 {
     public DatabaseConfiguration Configuration { get; } = configuration;
-    public DbSet<ContentTypeEntity> Types { get; set; }
-    public DbSet<DataFileEntity> DataFiles { get; set; }
-    public DbSet<DataSetEntity> DataSets { get; set; }
-    public DbSet<DataStoreEntity> DataStores { get; set; }
-    public DbSet<DataContainerEntity> DataContainers { get; set; }
-    public DbSet<JobEntityEntity> Jobs { get; set; }
-    public DbSet<PipelineInstanceEntity> PipelineInstances { get; set; }
-    public DbSet<TagEntity> Tags { get; set; }
-    public DbSet<DataSetUsedForJobsEntity> DataSetsUsedForJobs { get; set; }
+    public DbSet<ContentType> Types { get; set; }
+    public DbSet<DataFile> DataFiles { get; set; }
+    public DbSet<DataSet> DataSets { get; set; }
+    public DbSet<DataStore> DataStores { get; set; }
+    public DbSet<DataContainer> DataContainers { get; set; }
+    public DbSet<Job> Jobs { get; set; }
+    public DbSet<PipelineInstance> PipelineInstances { get; set; }
+    public DbSet<Tag> Tags { get; set; }
+    public DbSet<DataSetUsedForJobs> DataSetsUsedForJobs { get; set; }
 
     // EF Core requires a public constructor with no parameters. Tho, the DI framework automatically resolves the
     // constructor with the most resolvable parameters.
@@ -44,32 +44,32 @@ public class RDPMSPersistenceContext(DatabaseConfiguration configuration) : DbCo
         base.OnModelCreating(model);
         
         // ignore computed properties
-        model.Entity<DataFileEntity>()
+        model.Entity<DataFile>()
             .Ignore(e => e.IsTimeSeries);
-        model.Entity<DataFileEntity>()
+        model.Entity<DataFile>()
             .Ignore(e => e.IsDeleted);
 
-        model.Entity<DataSetEntity>()
+        model.Entity<DataSet>()
             .HasOne(e => e.CreateJob);
 
         // set up many-to-many mapping of PipelineInstance
-        model.Entity<DataSetUsedForJobsEntity>()
+        model.Entity<DataSetUsedForJobs>()
             .HasKey(e => new {e.JobId, e.SourceDatasetId});
-        model.Entity<JobEntityEntity>()
+        model.Entity<Job>()
             .HasMany(e => e.SourceDatasets)
             .WithMany(e => e.SourceForJobs)
-            .UsingEntity(nameof(DataSetUsedForJobsEntity));
-        model.Entity<JobEntityEntity>()
+            .UsingEntity(nameof(DataSetUsedForJobs));
+        model.Entity<Job>()
             .HasMany(e => e.OutputDatasets)
             .WithOne(e => e.CreateJob);
 
         // set up fast searching for Job ID and State
-        model.Entity<JobEntityEntity>()
+        model.Entity<Job>()
             .HasAlternateKey(e => e.LocalId);
-        model.Entity<JobEntityEntity>()
+        model.Entity<Job>()
             .HasAlternateKey(e => e.State);
 
-        model.Entity<PipelineInstanceEntity>()
+        model.Entity<PipelineInstance>()
             .HasAlternateKey(e => e.LocalId);
     }
 }

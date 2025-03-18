@@ -7,12 +7,12 @@ namespace RDPMS.Core.Server.Services;
 
 public class ContentTypeService(ContentTypeRepository repo) : IContentTypeService
 {
-    public Task<IEnumerable<ContentTypeEntity>> GetAllAsync()
+    public Task<IEnumerable<ContentType>> GetAllAsync()
     {
         return repo.GetAllAsync();
     }
     
-    public Task<ContentTypeEntity> GetContentTypeByGuidAsync(Guid id)
+    public Task<ContentType> GetContentTypeByGuidAsync(Guid id)
     {
         return repo.GetByIdAsync(id);
     }
@@ -22,12 +22,12 @@ public class ContentTypeService(ContentTypeRepository repo) : IContentTypeServic
         return repo.CheckForIdAsync(id);
     }
 
-    public Task AddAsync(ContentTypeEntity contentType)
+    public Task AddAsync(ContentType contentType)
     {
         return repo.AddAsync(contentType);
     }
 
-    public Task AddRangeAsync(IEnumerable<ContentTypeEntity> contentType)
+    public Task AddRangeAsync(IEnumerable<ContentType> contentType)
     {
         return repo.AddRangeAsync(contentType);
     }
