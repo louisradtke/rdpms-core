@@ -1,6 +1,6 @@
 database_configuration:
   type: sqlite
-  path: 'debug.db'
+  path: '${special:LocalApplicationData}/rdpms-debug.db'
   
 
 

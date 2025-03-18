@@ -4,7 +4,7 @@ public class ContentType
 {
     private string _abbreviation = string.Empty;
 
-    public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid Id { get; init; } = Guid.Empty;
 
     /// <summary>
     /// the common file ending this file would have, lowercase, without leading dot (e.g. bag, png, json, ...)

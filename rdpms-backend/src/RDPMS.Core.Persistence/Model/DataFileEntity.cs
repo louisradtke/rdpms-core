@@ -9,6 +9,10 @@ public record DataFileEntity(string Name)
     public string Name { get; set; } = Name;
     public required ContentTypeEntity FileType { get; set; }
     
+    public long Size { get; set; }
+    
+    public string Hash { get; set; } = string.Empty;
+    
     /// <summary>
     /// Respective stamp in <b>UTC</b>
     /// </summary>

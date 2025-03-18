@@ -12,13 +12,13 @@ public static class DataFileEntityMapper
     /// <returns>A mapped DataFile instance.</returns>
     public static DataFile ToDomain(DataFileEntity entity)
     {
-        if (entity == null) throw new ArgumentNullException(nameof(entity));
-
         return new DataFile
         {
             Id = entity.Id,
             Name = entity.Name,
             FileType = ContentTypeEntityMapper.ToDomain(entity.FileType),
+            Size = entity.Size,
+            Hash = entity.Hash,
             CreatedStamp = entity.CreatedStamp,
             DeletedStamp = entity.DeletedStamp,
             BeginStamp = entity.BeginStamp,
@@ -33,12 +33,12 @@ public static class DataFileEntityMapper
     /// <returns>A mapped DataFileEntity instance.</returns>
     public static DataFileEntity ToEntity(DataFile domain)
     {
-        if (domain == null) throw new ArgumentNullException(nameof(domain));
-
         return new DataFileEntity(domain.Name)
         {
             Id = domain.Id,
             FileType = ContentTypeEntityMapper.ToEntity(domain.FileType),
+            Size = domain.Size,
+            Hash = domain.Hash,
             CreatedStamp = domain.CreatedStamp,
             DeletedStamp = domain.DeletedStamp,
             BeginStamp = domain.BeginStamp,

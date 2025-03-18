@@ -3,10 +3,14 @@ namespace RDPMS.Core.Server.Model.Logic;
 // avoid ambiguity with System.IO.File
 public class DataFile
 {
-    public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid Id { get; init; } = Guid.Empty;
 
-    public string Name { get; set; } = String.Empty;
+    public string Name { get; set; } = string.Empty;
     public required ContentType FileType { get; set; }
+    
+    public long Size { get; set; }
+    
+    public string Hash { get; set; } = string.Empty;
     
     /// <summary>
     /// Respective stamp in <b>UTC</b>

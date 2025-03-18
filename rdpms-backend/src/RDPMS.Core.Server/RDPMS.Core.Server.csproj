@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
-        <Nullable>disable</Nullable>
+        <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
@@ -29,6 +29,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\RDPMS.Core.Infra\RDPMS.Core.Infra.csproj" />
       <ProjectReference Include="..\RDPMS.Core.Persistence\RDPMS.Core.Persistence.csproj" />
     </ItemGroup>
 

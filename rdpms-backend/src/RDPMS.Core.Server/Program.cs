@@ -2,7 +2,10 @@ using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using CommandLine;
 using Microsoft.OpenApi.Models;
+using RDPMS.Core.Persistence;
 using RDPMS.Core.Server.Configuration;
+using RDPMS.Core.Server.Model.Repositories;
+using RDPMS.Core.Server.Services;
 
 // handle config
 CLIOptions cliOptions = null!;
@@ -31,10 +34,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost
     .UseUrls(launchConfig.ListeningUrl);
 
+ArgumentNullException.ThrowIfNull(launchConfig.DatabaseConfiguration);
+
 // Add services to the container.
 builder.Services.AddSingleton(runtimeConfig);
 builder.Services.AddSingleton(launchConfig);
+builder.Services.AddSingleton(launchConfig.DatabaseConfiguration);
 
+builder.Services.AddSingleton<RDPMSPersistenceContext>();
+builder.Services.AddSingleton<DataFileRepository>();
+builder.Services.AddSingleton<ContentTypeRepository>();
+builder.Services.AddSingleton<IFileService, FileService>();
+builder.Services.AddSingleton<IContentTypeService, ContentTypeService>();
+
+// init api and api exploration
 var apiVersioningBuilder = builder.Services.AddApiVersioning(options =>
 {
     options.ReportApiVersions = true;
@@ -73,23 +86,25 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// if (app.Environment.IsDevelopment())
+
+app.UseSwagger();
+// app.UseSwaggerUI();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    // app.UseSwaggerUI();
-    app.UseSwaggerUI(options =>
+    var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+    foreach (var description in provider.ApiVersionDescriptions)
     {
-        var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-        foreach (var description in provider.ApiVersionDescriptions)
-        {
-            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
-                $"API {description.ApiVersion}");
-        }
-    });
-}
+        options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+            $"API {description.ApiVersion}");
+    }
+});
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+// TODO make somehow nicer
+app.Services.GetService<RDPMSPersistenceContext>().Database.EnsureCreated();
 
 app.Run();

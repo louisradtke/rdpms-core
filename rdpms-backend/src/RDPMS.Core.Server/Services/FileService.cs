@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using RDPMS.Core.Infra.Exceptions;
 using RDPMS.Core.Server.Model.Logic;
 using RDPMS.Core.Server.Model.Repositories;
-using RDPMS.Core.Server.Services;
 
-namespace RDPMS.Core.Server.Model.Services;
+namespace RDPMS.Core.Server.Services;
 
 public class FileService : IFileService
 {
@@ -29,5 +26,12 @@ public class FileService : IFileService
     public async Task<IEnumerable<DataFile>> GetFilesInStoreAsync(Guid storeId)
     {
         return await _dataFileRepository.GetFilesInStoreAsync(storeId);
+    }
+
+    public async Task<FileUploadTarget> RequestFileUploadAsync(DataFile file)
+    {
+        var target = await _dataFileRepository.AddFileAsync(file);
+        if (target == null) throw new IllegalStateException();
+        return target;
     }
 }

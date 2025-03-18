@@ -1,3 +1,4 @@
+using RDPMS.Core.Infra.Util;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Server.Configuration.Database;
 using YamlDotNet.Serialization;
@@ -34,6 +35,10 @@ public class LaunchConfiguration
             .Build();
         
         var launchConfig = deserializer.Deserialize<LaunchConfiguration>(yaml);
+        
+        if (launchConfig.DatabaseConfiguration is SqliteDatabaseConfiguration { Path: not null } sqliteCnf)
+            sqliteCnf.Path = SubstituteVariablesHelper.SubstituteVariables(sqliteCnf.Path);
+
         return launchConfig;
     }
 
