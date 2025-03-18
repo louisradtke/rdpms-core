@@ -6,7 +6,7 @@ namespace RDPMS.Core.Persistence.Model;
 /// MIME docs
 /// </see>
 /// </summary>
-public class ContentType
+public class ContentType : IUniqueEntity
 {
     private string _abbreviation = string.Empty;
 

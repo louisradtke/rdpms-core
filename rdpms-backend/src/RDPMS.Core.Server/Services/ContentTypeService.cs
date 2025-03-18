@@ -2,33 +2,14 @@ using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.Logic;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Model.Repositories;
+using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
-public class ContentTypeService(ContentTypeRepository repo) : IContentTypeService
+public class ContentTypeService : GenericCollectionService<ContentType>, IContentTypeService
 {
-    public Task<IEnumerable<ContentType>> GetAllAsync()
+    public ContentTypeService(ContentTypeRepository repo) : base(repo)
     {
-        return repo.GetAllAsync();
-    }
-    
-    public Task<ContentType> GetContentTypeByGuidAsync(Guid id)
-    {
-        return repo.GetByIdAsync(id);
     }
 
-    public Task<bool> CheckForIdAsync(Guid id)
-    {
-        return repo.CheckForIdAsync(id);
-    }
-
-    public Task AddAsync(ContentType contentType)
-    {
-        return repo.AddAsync(contentType);
-    }
-
-    public Task AddRangeAsync(IEnumerable<ContentType> contentType)
-    {
-        return repo.AddRangeAsync(contentType);
-    }
 }

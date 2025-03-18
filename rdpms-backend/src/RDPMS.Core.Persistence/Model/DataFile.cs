@@ -2,7 +2,7 @@
 
 namespace RDPMS.Core.Persistence.Model;
 
-public class DataFile(string name)
+public class DataFile(string name) : IUniqueEntity
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 

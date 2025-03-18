@@ -1,6 +1,6 @@
 ﻿namespace RDPMS.Core.Persistence.Model;
 
-public class DataStore(string name)
+public class DataStore(string name) : IUniqueEntity
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 

@@ -44,7 +44,7 @@ public class ContentTypeController(IContentTypeService typeService) : Controller
         {
             return NotFound("no type with that id");
         }
-        return Ok(await typeService.GetContentTypeByGuidAsync(id));
+        return Ok(await typeService.GetByIdAsync(id));
     }
     
 }

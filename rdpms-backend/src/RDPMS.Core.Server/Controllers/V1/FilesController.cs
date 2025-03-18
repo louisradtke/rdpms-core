@@ -15,7 +15,7 @@ public class FilesController(IFileService fileService, IContentTypeService typeS
     [ProducesResponseType<IEnumerable<DataFileSummaryDTO>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<DataFileSummaryDTO>>> Get()
     {
-        var list = await fileService.GetFilesAsync();
+        var list = await fileService.GetAllAsync();
         return Ok(list);
     }
 
@@ -39,7 +39,7 @@ public class FilesController(IFileService fileService, IContentTypeService typeS
             return BadRequest(new ErrorMessageDTO { Message = "there is no content type for the given id." });
         }
 
-        var type = await typeService.GetContentTypeByGuidAsync(requestDto.ContentTypeId.Value);
+        var type = await typeService.GetByIdAsync(requestDto.ContentTypeId.Value);
         var request = DataFileCreateRequestDTOMapper.ToDomain(requestDto, type);
         var response = await fileService.RequestFileUploadAsync(request);
         var target = DataFileCreateResponseDTOMapper.ToDTO(response);

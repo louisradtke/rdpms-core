@@ -4,8 +4,10 @@ using Asp.Versioning.ApiExplorer;
 using CommandLine;
 using Microsoft.OpenApi.Models;
 using RDPMS.Core.Persistence;
+using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Configuration;
 using RDPMS.Core.Server.Model.Repositories;
+using RDPMS.Core.Server.Model.Repositories.Infra;
 using RDPMS.Core.Server.Services;
 
 // handle config
@@ -45,8 +47,10 @@ builder.Services.AddSingleton(launchConfig.DatabaseConfiguration);
 builder.Services.AddSingleton<RDPMSPersistenceContext>();
 builder.Services.AddSingleton<DataFileRepository>();
 builder.Services.AddSingleton<ContentTypeRepository>();
+builder.Services.AddSingleton<ContainerRepository>();
 builder.Services.AddSingleton<IFileService, FileService>();
 builder.Services.AddSingleton<IContentTypeService, ContentTypeService>();
+builder.Services.AddSingleton<IContainerService, ContainerService>();
 
 // init api and api exploration
 var apiVersioningBuilder = builder.Services.AddApiVersioning(options =>
@@ -110,6 +114,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 // TODO make somehow nicer
-app.Services.GetService<RDPMSPersistenceContext>().Database.EnsureCreated();
+app.Services.GetService<RDPMSPersistenceContext>()!.Database.EnsureCreated();
 
 app.Run();
