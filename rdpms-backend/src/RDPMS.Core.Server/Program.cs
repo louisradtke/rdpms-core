@@ -47,7 +47,7 @@ builder.Services.AddSingleton(launchConfig.DatabaseConfiguration);
 builder.Services.AddSingleton<RDPMSPersistenceContext>();
 builder.Services.AddSingleton<DataFileRepository>();
 builder.Services.AddSingleton<ContentTypeRepository>();
-builder.Services.AddSingleton<ContainerRepository>();
+builder.Services.AddSingleton<DataContainerRepository>();
 builder.Services.AddSingleton<IFileService, FileService>();
 builder.Services.AddSingleton<IContentTypeService, ContentTypeService>();
 builder.Services.AddSingleton<IContainerService, ContainerService>();

@@ -4,9 +4,9 @@ using RDPMS.Core.Server.Model.Repositories.Infra;
 
 namespace RDPMS.Core.Server.Model.Repositories;
 
-public class ContainerRepository : GenericRepository<DataContainer>
+public class DataContainerRepository : GenericRepository<DataContainer>
 {
-    public ContainerRepository(RDPMSPersistenceContext ctx) : base(ctx, ctx.DataContainers)
+    public DataContainerRepository(RDPMSPersistenceContext ctx) : base(ctx, ctx.DataContainers)
     {
     }
 }

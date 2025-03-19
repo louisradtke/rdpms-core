@@ -7,22 +7,25 @@ using RDPMS.Core.Server.Services;
 namespace RDPMS.Core.Server.Controllers.V1;
 
 [ApiController]
-[Route("api/v{version:apiVersion}/files")]
+[Route("api/v{version:apiVersion}/data/files")]
 [ApiVersion("1.0")]
-public class FilesController(IFileService fileService, IContentTypeService typeService) : ControllerBase
+public class FilesController(
+    IFileService fileService,
+    IContentTypeService typeService,
+    FileCreateRequestDTOMapper dfCreateReqMapper) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType<IEnumerable<DataFileSummaryDTO>>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<DataFileSummaryDTO>>> Get()
+    [ProducesResponseType<IEnumerable<FileSummaryDTO>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<FileSummaryDTO>>> Get()
     {
         var list = await fileService.GetAllAsync();
         return Ok(list);
     }
 
     [HttpPost]
-    [ProducesResponseType<DataFileCreateResponseDTO>(StatusCodes.Status201Created)]
+    [ProducesResponseType<FileCreateResponseDTO>(StatusCodes.Status201Created)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> PostNewFile([FromBody] DataFileCreateRequestDTO requestDto)
+    public async Task<ActionResult> PostNewFile([FromBody] FileCreateRequestDTO requestDto)
     {
         if (requestDto.ContentTypeId == null)
         {
@@ -40,9 +43,9 @@ public class FilesController(IFileService fileService, IContentTypeService typeS
         }
 
         var type = await typeService.GetByIdAsync(requestDto.ContentTypeId.Value);
-        var request = DataFileCreateRequestDTOMapper.ToDomain(requestDto, type);
+        var request = dfCreateReqMapper.Import(requestDto, type);
         var response = await fileService.RequestFileUploadAsync(request);
-        var target = DataFileCreateResponseDTOMapper.ToDTO(response);
+        var target = FileCreateResponseDTOMapper.ToDTO(response);
         
         var resourceUri = 
             Url.Action(nameof(Get), null, new {id = target.FileId}, Request.Scheme);

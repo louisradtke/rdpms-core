@@ -6,7 +6,7 @@ namespace RDPMS.Core.Server.Services;
 
 public class ContainerService : GenericCollectionService<DataContainer>, IContainerService
 {
-    public ContainerService(ContainerRepository repo) : base(repo)
+    public ContainerService(DataContainerRepository repo) : base(repo)
     {
     }
 }

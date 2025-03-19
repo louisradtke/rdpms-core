@@ -4,14 +4,15 @@ using RDPMS.Core.Server.Model.Logic;
 
 namespace RDPMS.Core.Server.Model.Mappers;
 
-public static class ContentTypeDTOMapper
+public class ContentTypeDTOMapper : IImportMapper<ContentType, ContentTypeDTO>,
+    IExportMapper<ContentType, ContentTypeDTO>
 {
     /// <summary>
     /// Maps a <see cref="ContentType"/> to a <see cref="ContentTypeDTO"/>.
     /// </summary>
     /// <param name="domain">The ContentType instance to map.</param>
     /// <returns>A mapped ContentTypeDTO instance.</returns>
-    public static ContentTypeDTO ToDTO(ContentType domain)
+    public ContentTypeDTO Export(ContentType domain)
     {
         if (domain == null)
         {
@@ -31,22 +32,24 @@ public static class ContentTypeDTOMapper
     /// <summary>
     /// Maps a <see cref="ContentTypeDTO"/> to a <see cref="ContentType"/>.
     /// </summary>
-    /// <param name="dto">The ContentTypeDTO instance to map.</param>
+    /// <param name="foreign">The ContentTypeDTO instance to map.</param>
     /// <returns>A mapped ContentType instance.</returns>
-    public static ContentType ToDomain(ContentTypeDTO dto)
+    public ContentType Import(ContentTypeDTO foreign)
     {
-        if (dto == null)
+        if (foreign == null)
         {
-            throw new ArgumentNullException(nameof(dto));
+            throw new ArgumentNullException(nameof(foreign));
         }
 
         return new ContentType()
         {
-            Id = dto.Id ?? Guid.NewGuid(),
-            Abbreviation = dto.Abbreviation ?? string.Empty,
-            Name = dto.DisplayName,
-            Description = dto.Description ?? string.Empty,
-            MimeType = dto.MimeType
+            Id = foreign.Id ?? Guid.NewGuid(),
+            Abbreviation = foreign.Abbreviation ?? string.Empty,
+            Name = foreign.DisplayName,
+            Description = foreign.Description ?? string.Empty,
+            MimeType = foreign.MimeType
         };
     }
+
+    public IEnumerable<CheckSet<ContentTypeDTO>> ImportChecks() => [];
 }

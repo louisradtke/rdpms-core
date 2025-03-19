@@ -5,4 +5,5 @@ namespace RDPMS.Core.Server.Services;
 
 public interface IContainerService : IReadonlyGenericCollectionService<DataContainer>
 {
+    Task AddAsync(DataContainer item);
 }

@@ -1,6 +1,6 @@
 namespace RDPMS.Core.Server.Model.DTO.V1;
 
-public class ErrorMessageDTO
+public record ErrorMessageDTO
 {
     /// <summary>
     /// The error message. This must be set. If the "user friendly" <see cref="DisplayMessage"/> is set, this may

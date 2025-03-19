@@ -3,11 +3,11 @@ using RDPMS.Core.Server.Model.Logic;
 
 namespace RDPMS.Core.Server.Model.Mappers;
 
-public static class DataFileCreateResponseDTOMapper
+public static class FileCreateResponseDTOMapper
 {
-    public static DataFileCreateResponseDTO ToDTO(FileUploadTarget domain)
+    public static FileCreateResponseDTO ToDTO(FileUploadTarget domain)
     {
-        return new DataFileCreateResponseDTO
+        return new FileCreateResponseDTO
         {
             UploadUri = domain.Uri.ToString(),
             FileId = domain.FileId

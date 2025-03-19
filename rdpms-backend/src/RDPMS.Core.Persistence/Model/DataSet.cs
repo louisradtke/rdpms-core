@@ -44,7 +44,7 @@ public class DataSet(string name) : IUniqueEntity
     public List<Job> SourceForJobs { get; set; } = [];
 
     /// <summary>
-    /// Maps a string/name (unique per set) to a JSON field
+    /// Maps a string/name (unique per dataset) to a JSON field
     /// </summary>
     public List<MetadataJsonField> MetadataJsonFields { get; set; } = [];
 }

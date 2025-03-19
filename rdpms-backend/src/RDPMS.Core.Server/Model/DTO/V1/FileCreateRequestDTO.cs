@@ -1,6 +1,6 @@
 namespace RDPMS.Core.Server.Model.DTO.V1;
 
-public class DataFileCreateRequestDTO
+public record FileCreateRequestDTO
 {
     public string? Name { get; set; }
     public Guid? ContentTypeId { get; set; }
