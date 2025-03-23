@@ -1,0 +1,560 @@
+openapi: 3.0.1
+info:
+  title: My API v1
+  description: API Version v1
+  version: v1
+paths:
+  /api/v1/data/containers:
+    get:
+      tags:
+        - Containers
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContainerSummaryDTO'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContainerSummaryDTO'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContainerSummaryDTO'
+    post:
+      tags:
+        - Containers
+      summary: Add a single item to the system.
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContainerSummaryDTO'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/ContainerSummaryDTO'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/ContainerSummaryDTO'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /api/v1/data/content-types:
+    get:
+      tags:
+        - ContentTypes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentTypeDTO'
+    post:
+      tags:
+        - ContentTypes
+      summary: Add a single content type to the system.
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentTypeDTO'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/ContentTypeDTO'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/ContentTypeDTO'
+      responses:
+        '200':
+          description: OK
+  /api/v1/data/content-types/batch:
+    post:
+      tags:
+        - ContentTypes
+      summary: Add a batch of content types to the system.
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ContentTypeDTO'
+          text/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ContentTypeDTO'
+          application/*+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ContentTypeDTO'
+      responses:
+        '200':
+          description: OK
+  '/api/v1/data/content-types/{id}':
+    get:
+      tags:
+        - ContentTypes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentTypeDTO'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /api/v1/data/datasets:
+    get:
+      tags:
+        - DataSets
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataSetSummaryDTO'
+    post:
+      tags:
+        - DataSets
+      summary: Add a single item to the system.
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataSetSummaryDTO'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/DataSetSummaryDTO'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/DataSetSummaryDTO'
+      responses:
+        '200':
+          description: OK
+  /api/v1/data/datasets/batch:
+    post:
+      tags:
+        - DataSets
+      summary: Add a batch of item to the system.
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/DataSetSummaryDTO'
+          text/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/DataSetSummaryDTO'
+          application/*+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/DataSetSummaryDTO'
+      responses:
+        '200':
+          description: OK
+  /api/v1/data/files:
+    get:
+      tags:
+        - Files
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileSummaryDTO'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileSummaryDTO'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileSummaryDTO'
+    post:
+      tags:
+        - Files
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileCreateRequestDTO'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/FileCreateRequestDTO'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/FileCreateRequestDTO'
+      responses:
+        '201':
+          description: Created
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/FileCreateResponseDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileCreateResponseDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/FileCreateResponseDTO'
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+  /api/v1/data/stores:
+    get:
+      tags:
+        - Stores
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataStoreSummaryDTO'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataStoreSummaryDTO'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataStoreSummaryDTO'
+    post:
+      tags:
+        - Stores
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataStoreSummaryDTO'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/DataStoreSummaryDTO'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/DataStoreSummaryDTO'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+components:
+  schemas:
+    ContainerSummaryDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        dataFilesCount:
+          type: integer
+          format: int32
+          nullable: true
+        defaultDataStoreId:
+          type: string
+          format: uuid
+          nullable: true
+      additionalProperties: false
+    ContentTypeDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        abbreviation:
+          type: string
+          nullable: true
+        displayName:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        mimeType:
+          type: string
+          nullable: true
+      additionalProperties: false
+    DataSetStateDTO:
+      enum:
+        - 0
+        - 1
+      type: integer
+      description: "Enum indicating whether a dataset was just created or all associated files\r\nwere linked. Remember design decision: datasets shall be immutable."
+      format: int32
+    DataSetSummaryDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Uniquely identifies the dataset. Typically server-generated. Should not be manually set by the client.
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          description: 'Non-unique, mandatory descriptive name of the dataset. Must be provided by the client.'
+          nullable: true
+        assignedTags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagDTO'
+          description: 'List of tags associated with the dataset, used for categorization and filtering purposes.'
+          nullable: true
+        createdStampUTC:
+          type: string
+          description: "UTC timestamp when the dataset was originally created.\r\nMandatory property, should be provided by the client."
+          format: date-time
+          nullable: true
+        deletedStampUTC:
+          type: string
+          description: "UTC timestamp that indicates when the dataset was deleted.\r\nNull if the dataset has not been deleted yet."
+          format: date-time
+          nullable: true
+        beginStampUTC:
+          type: string
+          description: "UTC timestamp that marks the period begin of the dataset.\r\nOnly to be set by server."
+          format: date-time
+          nullable: true
+        endStampUTC:
+          type: string
+          description: "UTC timestamp that marks the period end of the dataset.\r\nOnly to be set by server."
+          format: date-time
+          nullable: true
+        state:
+          $ref: '#/components/schemas/DataSetStateDTO'
+        isTimeSeries:
+          type: boolean
+          description: "Indicates if the dataset represents time-series data.\r\nOnly to be set by server."
+          nullable: true
+        isDeleted:
+          type: boolean
+          description: "Flags whether the dataset has been marked as deleted.\r\nOnly to be set by server."
+          nullable: true
+        metadataFields:
+          type: array
+          items:
+            type: string
+          description: "Fields, for which metadata exists.\r\nOnly to be set by server."
+          nullable: true
+      additionalProperties: false
+      description: "Represents a summary of a dataset, including identifying information, timestamps, state, tags,\r\nand metadata fields."
+    DataStoreSummaryDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        dataFilesCount:
+          type: integer
+          format: int32
+          nullable: true
+      additionalProperties: false
+    ErrorMessageDTO:
+      type: object
+      properties:
+        message:
+          type: string
+          description: "The error message. This must be set. If the \"user friendly\" RDPMS.Core.Server.Model.DTO.V1.ErrorMessageDTO.DisplayMessage is set, this may\r\nbecome technical."
+          nullable: true
+        displayMessage:
+          type: string
+          description: 'A message dedicated to the user. If null, RDPMS.Core.Server.Model.DTO.V1.ErrorMessageDTO.Message is the fallback.'
+          nullable: true
+      additionalProperties: false
+    FileCreateRequestDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        contentTypeId:
+          type: string
+          format: uuid
+          nullable: true
+        associatedDataSetId:
+          type: string
+          format: uuid
+          nullable: true
+        size:
+          type: integer
+          format: int64
+          nullable: true
+        hash:
+          type: string
+          nullable: true
+        createdStamp:
+          type: string
+          format: date-time
+          nullable: true
+        beginStamp:
+          type: string
+          format: date-time
+          nullable: true
+        endStamp:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+    FileCreateResponseDTO:
+      type: object
+      properties:
+        uploadUri:
+          type: string
+          nullable: true
+        fileId:
+          type: string
+          format: uuid
+          nullable: true
+      additionalProperties: false
+    FileSummaryDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        contentType:
+          $ref: '#/components/schemas/ContentTypeDTO'
+        size:
+          type: integer
+          format: int64
+          nullable: true
+        createdStampUTC:
+          type: string
+          format: date-time
+          nullable: true
+        deletedStampUTC:
+          type: string
+          format: date-time
+          nullable: true
+        beginStampUTC:
+          type: string
+          format: date-time
+          nullable: true
+        endStampUTC:
+          type: string
+          format: date-time
+          nullable: true
+        isTimeSeries:
+          type: boolean
+          nullable: true
+        isDeleted:
+          type: boolean
+          nullable: true
+      additionalProperties: false
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        status:
+          type: integer
+          format: int32
+          nullable: true
+        detail:
+          type: string
+          nullable: true
+        instance:
+          type: string
+          nullable: true
+      additionalProperties: { }
+    TagDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          nullable: true
+      additionalProperties: false

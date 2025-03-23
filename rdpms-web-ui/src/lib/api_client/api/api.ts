@@ -1,0 +1,11 @@
+export * from './ContainersApi';
+import { ContainersApi } from './ContainersApi';
+export * from './ContentTypesApi';
+import { ContentTypesApi } from './ContentTypesApi';
+export * from './DataSetsApi';
+import { DataSetsApi } from './DataSetsApi';
+export * from './FilesApi';
+import { FilesApi } from './FilesApi';
+export * from './StoresApi';
+import { StoresApi } from './StoresApi';
+export const APIS = [ContainersApi, ContentTypesApi, DataSetsApi, FilesApi, StoresApi];

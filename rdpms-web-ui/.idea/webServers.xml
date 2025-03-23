@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="1e9a90f4-1699-4027-95de-7382895ce879" name="bun run dev" url="http://localhost:5173">
+        <fileTransfer mountedRoot="$PROJECT_DIR$/build" accessType="MOUNT" port="0" />
+      </webServer>
+    </option>
+  </component>
+</project>
