@@ -11,12 +11,6 @@ export const dataContainers = [
         dataFilesCount: 5,
         defaultDataStoreId: null,
     },
-    // {
-    //     id: null,
-    //     name: null,
-    //     dataFilesCount: null,
-    //     defaultDataStoreId: null,
-    // },
     {
         id: 'abcdef12-4567-48e7-89ab-bcdef9123456',
         name: 'Sample Container 3',

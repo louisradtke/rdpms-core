@@ -20,23 +20,25 @@
 
     <div class="flex flex-col flex-1">
 
-        <main class="flex-1 overflow-y-auto bg-gray-100 p-4">
+        <main class="m-5 flex-1 overflow-y-auto p-4">
 
-            <h1>Here are the details about this container:</h1>
+            <h1 class="text-2xl font-bold my-4">
+                Here are the details about this container:
+            </h1>
 
             {#if container}
-                <table>
+                <table class="table-auto border-collapse border border-gray-300 w-full">
                     <thead>
-                        <tr>
-                            <th>Key</th>
-                            <th>Value</th>
+                        <tr class="bg-gray-100">
+                            <th class="border border-gray-300 px-4 py-2 text-left">Key</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Value</th>
                         </tr>
                     </thead>
                     <tbody>
                         {#each Object.entries(container) as [key, value]}
-                            <tr>
-                                <td>{key}</td>
-                                <td>{value}</td>
+                            <tr class="even:bg-gray-50">
+                                <td class="border border-gray-300 px-4 py-2">{key}</td>
+                                <td class="border border-gray-300 px-4 py-2">{value}</td>
                             </tr>
                         {/each}
                     </tbody>

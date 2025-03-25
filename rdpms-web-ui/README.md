@@ -2,6 +2,12 @@
 
 Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
 
+## Built using:
+
+- [Svelte](https://svelte.dev)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [heroicons](https://heroicons.com/outline)
+
 ## Creating a project
 
 If you're seeing this, you've probably already done this step. Congrats!

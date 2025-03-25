@@ -10,13 +10,13 @@
     };
 </script>
 
-<aside class="w-64 bg-gray-800 text-white p-4 space-y-2">
+<aside class="w-64 bg-gray-100 text-gray-800 border-gray-400 p-4 space-y-2">
     <ul class="space-y-1">
         {#each items.map((v, i) => ({item: v, index: i})) as vi (vi.index)}
             <li>
                 <a
                         href="{constructHref(vi.item.hrefValue)}"
-                        class="block px-3 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-500 focus:ring-opacity-50"
+                        class="block px-3 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-500 focus:ring-opacity-50"
                         title={vi.item.tooltip ?? ''}
                 >
                     {vi.item.label}
