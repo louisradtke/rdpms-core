@@ -1,4 +1,4 @@
-namespace RDPMS.Core.Server;
+namespace RDPMS.Core.Server.Util;
 
 /// <summary>
 /// Contains a check and its implications, if a check fails (evaluates false).

@@ -9,14 +9,17 @@ namespace RDPMS.Core.Server.Controllers.V1;
 [ApiController]
 [Route("api/v{version:apiVersion}/data/containers")]
 [ApiVersion("1.0")]
-public class ContainersController(IContainerService containerService, IStoreService storeService, ContainerSummaryDTOMapper cMapper) : ControllerBase
+public class ContainersController(
+    IContainerService containerService,
+    IStoreService storeService,
+    ContainerSummaryDTOMapper cMapper) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType<IEnumerable<ContainerSummaryDTO>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<ContainerSummaryDTO>>> Get()
     {
         var list = await containerService.GetAllAsync();
-        return Ok(list);
+        return Ok(list.Select(cMapper.Export));
     }
     
     /// <summary>

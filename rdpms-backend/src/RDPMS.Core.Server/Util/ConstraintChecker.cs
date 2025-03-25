@@ -1,4 +1,4 @@
-namespace RDPMS.Core.Server;
+namespace RDPMS.Core.Server.Util;
 
 /// <summary>
 /// Structure that can automatically check an item.
@@ -99,5 +99,6 @@ public class ConstraintChecker<T>
         => AddConditionalCheck(check, message, ErrorSeverity.Error);
     
     public void AddCheckSet(CheckSet<T> checkSet) => Checks.Add(checkSet);
-
+    
+    public void AddCheckSets(IEnumerable<CheckSet<T>> checkSets) => Checks.AddRange(checkSets);
 }

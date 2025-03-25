@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Configuration;
+using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Model.Repositories;
 using RDPMS.Core.Server.Model.Repositories.Infra;
 using RDPMS.Core.Server.Services;
@@ -52,9 +53,18 @@ builder.Services.AddSingleton(launchConfig);
 builder.Services.AddSingleton(launchConfig.DatabaseConfiguration);
 
 builder.Services.AddSingleton<RDPMSPersistenceContext>();
+
+builder.Services.AddSingleton<ContainerSummaryDTOMapper>();
+builder.Services.AddSingleton<StoreSummaryDTOMapper>();
+
+builder.Services.AddSingleton<IGenericRepository<DataSet>, DataSetRepository>();
+builder.Services.AddSingleton<IGenericRepository<DataStore>, DataStoreRepository>();
 builder.Services.AddSingleton<DataFileRepository>();
 builder.Services.AddSingleton<ContentTypeRepository>();
 builder.Services.AddSingleton<DataContainerRepository>();
+
+builder.Services.AddSingleton<IDataSetService, DataSetService>();
+builder.Services.AddSingleton<IStoreService,StoreService>();
 builder.Services.AddSingleton<IFileService, FileService>();
 builder.Services.AddSingleton<IContentTypeService, ContentTypeService>();
 builder.Services.AddSingleton<IContainerService, ContainerService>();
