@@ -34,6 +34,13 @@ launchConfig.CopyToRuntimeConfiguration(runtimeConfig);
 // build the app
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        name: "ConfigCorsPolicy",
+        policy => policy.WithOrigins(launchConfig.AllowedOrigins.ToArray()));
+});
+
 builder.WebHost
     .UseUrls(launchConfig.ListeningUrl);
 
@@ -108,6 +115,8 @@ app.UseSwaggerUI(options =>
             $"API {description.ApiVersion}");
     }
 });
+
+app.UseCors("ConfigCorsPolicy");
 
 app.UseAuthorization();
 

@@ -2,7 +2,8 @@ database_configuration:
   type: sqlite
   path: '${special:LocalApplicationData}/rdpms-debug.db'
   
-
+allowed_origins:
+  - http://localhost:5173
 
 #database_configuration:
 #  type: "postgres"

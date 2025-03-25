@@ -15,6 +15,7 @@ public class LaunchConfiguration
     // ReSharper disable once UnusedMember.Global
     public DatabaseConfiguration? DatabaseConfiguration { get; set; }
     public string ListeningUrl { get; set; } = "http://localhost:5000";
+    public List<string> AllowedOrigins { get; set; } = [];
 
     public static LaunchConfiguration LoadParamsFromYaml(string yamlFilePath)
     {
