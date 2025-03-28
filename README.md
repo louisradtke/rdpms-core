@@ -60,7 +60,9 @@ More information can be found in [our proposal](./docs/radtke-proposal-distribut
    - trigger pipelines by core
    - add core as target for dispatching jobs
 
-What speaks against Snakemake and other DAG-workflow tools: pipelines are demand-triggered instead of being triggered by new content. But maybe this is not necessary, since inputs of a specific form come in, we want to transform them into a standardized format. Still, we won't need the DAG-features, unless we want to aggregate multiple data sets (like multiple traces we want to process using [STARS](https://github.com/tudo-aqua/stars)).
+What speaks against Snakemake and other DAG-workflow tools:
+- pipelines are demand-triggered instead of being triggered by new content. But maybe this is not necessary, since inputs of a specific form come in, we want to transform them into a standardized format. Still, we won't need the DAG-features, unless we want to aggregate multiple data sets (like multiple traces we want to process using [STARS](https://github.com/tudo-aqua/stars)).
+- When using especially Snakemake, we'd have to contain the user input to avoid remote code execution.
 
 ### Phase 5: Build distributed worker system
 
