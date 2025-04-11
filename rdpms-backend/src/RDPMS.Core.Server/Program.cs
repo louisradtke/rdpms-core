@@ -57,10 +57,10 @@ builder.Services.AddSingleton<RDPMSPersistenceContext>();
 builder.Services.AddSingleton<ContainerSummaryDTOMapper>();
 builder.Services.AddSingleton<StoreSummaryDTOMapper>();
 
-builder.Services.AddSingleton<IGenericRepository<DataSet>, DataSetRepository>();
-builder.Services.AddSingleton<IGenericRepository<DataStore>, DataStoreRepository>();
-builder.Services.AddSingleton<DataFileRepository>();
-builder.Services.AddSingleton<ContentTypeRepository>();
+builder.Services.AddSingleton<IDataSetRepository, DataSetRepository>();
+builder.Services.AddSingleton<IDataStoreRepository, DataStoreRepository>();
+builder.Services.AddSingleton<IDataFileRepository, DataFileRepository>();
+builder.Services.AddSingleton<IContentTypeRepository, ContentTypeRepository>();
 builder.Services.AddSingleton<DataContainerRepository>();
 
 builder.Services.AddSingleton<IDataSetService, DataSetService>();

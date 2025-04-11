@@ -4,9 +4,6 @@ using RDPMS.Core.Server.Model.Repositories.Infra;
 
 namespace RDPMS.Core.Server.Model.Repositories;
 
-public class DataStoreRepository : GenericRepository<DataStore>
-{
-    public DataStoreRepository(RDPMSPersistenceContext ctx) : base(ctx, ctx.DataStores)
-    {
-    }
-}
+public class DataStoreRepository(RDPMSPersistenceContext ctx)
+    : GenericRepository<DataStore>(ctx, ctx.DataStores),
+        IDataStoreRepository;
