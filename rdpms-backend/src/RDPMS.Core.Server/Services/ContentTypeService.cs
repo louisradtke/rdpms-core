@@ -8,7 +8,7 @@ namespace RDPMS.Core.Server.Services;
 
 public class ContentTypeService : GenericCollectionService<ContentType>, IContentTypeService
 {
-    public ContentTypeService(ContentTypeRepository repo) : base(repo)
+    public ContentTypeService(IContentTypeRepository repo) : base(repo)
     {
     }
 
