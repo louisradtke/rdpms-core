@@ -1,4 +1,4 @@
-# Research Data and Pipe Management System (RDPMS)
+# Research Data and Pipeline Management System (RDPMS)
 
 RDPMS is a project that follows a twofold approach: (1) it may store and process data that was collected especially in robotics and autonomous driving context and (2) may support sharing and tracking (for legal compliance reasons) of data across multiple instances.
 
@@ -76,7 +76,7 @@ Remarks:
 - "FSD" refers to a project and concepts by a group of Formula Student teams: ETH Zürich, TU Hamburg, KIT, NTNU Trondheim, Uni Bayreuth, and TU Dortmund.
 
 | Enumeration | Requirement Text                                                                                | Priority |
-| ----------- | ----------------------------------------------------------------------------------------------- | -------- |
+|-------------|-------------------------------------------------------------------------------------------------|----------|
 | A           | **General**                                                                                     |          |
 | A.1         | Group multiple data files to a set (1:1, 1:many) [FSD A.1]                                      | HIGH     |
 | A.2         | Search/Filter by existence of topics, content of topics, metadata [FSD 1.2]                     | MOD      |
@@ -144,3 +144,12 @@ Remarks:
 | I           | **Deployment**                                                                                  |          |
 | I.1         | System should run on cloud services [FSD I.2.I]                                                 | LOW      |
 | I.2         | System should run on private cloud environments [FSD I.2.II]                                    | HIGH     |
+
+
+## Important Commands for Devs
+
+add new migration:
+
+```bash
+dotnet ef migrations add -p RDPMS.Core.Persistence/RDPMS.Core.Persistence.csproj $INTEGRATION_NAME
+```
