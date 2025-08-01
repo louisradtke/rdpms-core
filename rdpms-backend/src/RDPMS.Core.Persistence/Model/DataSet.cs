@@ -23,6 +23,7 @@ public class DataSet(string name) : IUniqueEntity
 
     public List<DataFile> Files { get; set; } = [];
     public List<Tag> AssignedTags { get; set; } = [];
+    public List<Label> AssignedLabels { get; set; } = [];
     public DateTime CreatedStamp { get; set; } = DateTime.UtcNow;
 
     /// <summary>

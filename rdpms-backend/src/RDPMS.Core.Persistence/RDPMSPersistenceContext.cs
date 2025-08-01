@@ -15,7 +15,9 @@ public class RDPMSPersistenceContext(DatabaseConfiguration configuration) : DbCo
     public DbSet<Job> Jobs { get; set; }
     public DbSet<PipelineInstance> PipelineInstances { get; set; }
     public DbSet<Tag> Tags { get; set; }
-    public DbSet<DataSetUsedForJobs> DataSetsUsedForJobs { get; set; }
+    public DbSet<DataSetUsedForJobsRelation> DataSetsUsedForJobs { get; set; }
+    public DbSet<Project> Projects { get; set; }
+    public DbSet<LabelSharingPolicy> LabelSharingPolicies { get; set; }
 
     // EF Core requires a public constructor with no parameters. Tho, the DI framework automatically resolves the
     // constructor with the most resolvable parameters.
@@ -52,24 +54,41 @@ public class RDPMSPersistenceContext(DatabaseConfiguration configuration) : DbCo
         model.Entity<DataSet>()
             .HasOne(e => e.CreateJob);
 
-        // set up many-to-many mapping of PipelineInstance
-        model.Entity<DataSetUsedForJobs>()
+        // set up (dual) many-to-many mapping of PipelineInstance, because DataSet holds SourceForJobs and CreateJob
+        model.Entity<DataSetUsedForJobsRelation>()
             .HasKey(e => new {e.JobId, e.SourceDatasetId});
         model.Entity<Job>()
             .HasMany(e => e.SourceDatasets)
             .WithMany(e => e.SourceForJobs)
-            .UsingEntity(nameof(DataSetUsedForJobs));
+            .UsingEntity(nameof(DataSetUsedForJobsRelation));
         model.Entity<Job>()
             .HasMany(e => e.OutputDatasets)
             .WithOne(e => e.CreateJob);
+        
+        // set up many-to-many mapping of Label and DataSet
+        model.Entity<LabelsAssignedToDataSetsRelation>()
+            .HasKey(e => new {e.LabelId, e.DataSetId});
+        model.Entity<DataSet>()
+            .HasMany(e => e.AssignedLabels)
+            .WithMany(e => e.AssignedToDataSets)
+            .UsingEntity<LabelsAssignedToDataSetsRelation>();
+        
+        // set up many-to-many mapping of Label and Project
+        model.Entity<Project>()
+            .HasMany<Label>(e => e.Labels)
+            .WithOne(e => e.ParentProject);
+        model.Entity<Project>()
+            .HasMany<LabelSharingPolicy>(e => e.SharedLabels);
+        model.Entity<Project>()
+            .HasMany<ContentType>(e => e.AllFileTypes);
 
         // set up fast searching for Job ID and State
         model.Entity<Job>()
-            .HasAlternateKey(e => e.LocalId);
+            .HasIndex(e => e.LocalId);
         model.Entity<Job>()
-            .HasAlternateKey(e => e.State);
+            .HasIndex(e => e.State);
 
         model.Entity<PipelineInstance>()
-            .HasAlternateKey(e => e.LocalId);
+            .HasIndex(e => e.LocalId);
     }
 }
