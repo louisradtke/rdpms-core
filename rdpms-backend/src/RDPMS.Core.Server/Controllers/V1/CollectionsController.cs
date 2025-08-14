@@ -7,18 +7,19 @@ using RDPMS.Core.Server.Services;
 namespace RDPMS.Core.Server.Controllers.V1;
 
 [ApiController]
-[Route("api/v{version:apiVersion}/data/containers")]
+[Route("api/v{version:apiVersion}/data/collections")]
 [ApiVersion("1.0")]
-public class ContainersController(
-    IContainerService containerService,
+public class CollectionsController(
+    IDataCollectionEntityService dataCollectionEntityService,
     IStoreService storeService,
-    ContainerSummaryDTOMapper cMapper) : ControllerBase
+    IProjectService projectService,
+    DataCollectionSummaryDTOMapper cMapper) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType<IEnumerable<ContainerSummaryDTO>>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<ContainerSummaryDTO>>> Get()
+    [ProducesResponseType<IEnumerable<CollectionSummaryDTO>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<CollectionSummaryDTO>>> Get()
     {
-        var list = await containerService.GetAllAsync();
+        var list = await dataCollectionEntityService.GetAllAsync();
         return Ok(list.Select(cMapper.Export));
     }
     
@@ -30,7 +31,7 @@ public class ContainersController(
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> Post([FromBody] ContainerSummaryDTO dto)
+    public async Task<ActionResult> Post([FromBody] CollectionSummaryDTO dto)
     {
         if (dto.Id != null)
         {
@@ -45,7 +46,8 @@ public class ContainersController(
             return BadRequest("Could not look up id for default data store. Id does not exist.");
 
         var store = await storeService.GetByIdAsync(dto.DefaultDataStoreId.Value);
-        await containerService.AddAsync(cMapper.Import(dto, store));
+        var project = await projectService.GetGlobalProjectAsync();
+        await dataCollectionEntityService.AddAsync(cMapper.Import(dto, store, project));
         return Ok();
     }
 }

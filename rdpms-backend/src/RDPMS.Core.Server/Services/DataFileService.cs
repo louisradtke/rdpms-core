@@ -7,7 +7,7 @@ using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
-public class FileService(IDataFileRepository repo) : ReadonlyGenericCollectionService<DataFile>(repo), IFileService
+public class DataFileService(IDataFileRepository repo) : ReadonlyGenericCollectionService<DataFile>(repo), IFileService
 {
     public Task<IEnumerable<DataFile>> GetFilesInStoreAsync(Guid storeId)
     {

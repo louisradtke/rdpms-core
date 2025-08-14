@@ -6,10 +6,5 @@ using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
-public class ContentTypeService : GenericCollectionService<ContentType>, IContentTypeService
-{
-    public ContentTypeService(IContentTypeRepository repo) : base(repo)
-    {
-    }
-
-}
+public class ContentTypeService(IContentTypeRepository repo)
+    : GenericCollectionService<ContentType>(repo), IContentTypeService;

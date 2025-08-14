@@ -6,59 +6,61 @@ using RDPMS.Core.Server.Util;
 
 namespace RDPMS.Core.Server.Model.Mappers;
 
-public class ContainerSummaryDTOMapper
-    : IExportMapper<DataContainer, ContainerSummaryDTO>,
-        IImportMapper<DataContainer, ContainerSummaryDTO, DataStore>
+public class DataCollectionSummaryDTOMapper
+    : IExportMapper<DataCollectionEntity, CollectionSummaryDTO>,
+        IImportMapper<DataCollectionEntity, CollectionSummaryDTO, DataStore, Project>
 {
-    private readonly List<CheckSet<ContainerSummaryDTO>> _importChecks;
+    private readonly List<CheckSet<CollectionSummaryDTO>> _importChecks;
 
-    public ContainerSummaryDTOMapper()
+    public DataCollectionSummaryDTOMapper()
     {
-        _importChecks = new List<CheckSet<ContainerSummaryDTO>>();
+        _importChecks = new List<CheckSet<CollectionSummaryDTO>>();
 
         // Adding required checks for import operation
-        _importChecks.Add(CheckSet<ContainerSummaryDTO>.CreateErr(
+        _importChecks.Add(CheckSet<CollectionSummaryDTO>.CreateErr(
             dto => dto.Id != null, _ => "Id may not be set. It will be set by the server."));
-        _importChecks.Add(CheckSet<ContainerSummaryDTO>.CreateErr(
+        _importChecks.Add(CheckSet<CollectionSummaryDTO>.CreateErr(
             dto => !string.IsNullOrWhiteSpace(dto.Name), _ => "Name is required."));
-        _importChecks.Add(CheckSet<ContainerSummaryDTO>.CreateErr(
+        _importChecks.Add(CheckSet<CollectionSummaryDTO>.CreateErr(
             dto => dto.DefaultDataStoreId != null, 
-            _ => "DefaultDataStoreId is required for this container."));
-        _importChecks.Add(CheckSet<ContainerSummaryDTO>.CreateWarn(
-            dto => dto.DataFilesCount == null || dto.DataFilesCount >= 0,
+            _ => "DefaultDataStoreId is required for this collection."));
+        _importChecks.Add(CheckSet<CollectionSummaryDTO>.CreateWarn(
+            dto => dto.DataFilesCount is null or >= 0,
             _ => "DataFilesCount should be a valid number or will be ignored by the server."));
     }
 
-    public DataContainer Import(ContainerSummaryDTO foreign, DataStore defaultStore)
+    public DataCollectionEntity Import(CollectionSummaryDTO foreign, DataStore defaultStore, Project parentProject)
     {
         foreach (var checkSet in _importChecks)
         {
             if (checkSet.Severity <= ErrorSeverity.Error || !checkSet.CheckFunc(foreign))
                 continue;
 
-            throw new ArgumentException(checkSet.MessageFunc(foreign));
+            throw new IllegalArgumentException(checkSet.MessageFunc(foreign));
         }
 
-        var container = new DataContainer(foreign.Name ?? throw new IllegalStateException("Name is required."))
+        var collection = new DataCollectionEntity(
+            foreign.Name ?? throw new IllegalStateException("Name is required."))
         {
             Id = Guid.NewGuid(),
-            AssociatedDataSets = new List<DataSet>(),
-            DefaultDataStore = defaultStore
+            ContainedDatasets = new List<DataSet>(),
+            DefaultDataStore = defaultStore,
+            ParentProject = parentProject,
         };
 
-        return container;
+        return collection;
     }
 
-    public ContainerSummaryDTO Export(DataContainer domain)
+    public CollectionSummaryDTO Export(DataCollectionEntity domain)
     {
-        return new ContainerSummaryDTO
+        return new CollectionSummaryDTO
         {
             Id = domain.Id,
             Name = domain.Name,
-            DataFilesCount = domain.AssociatedDataSets?.Count ?? 0,
+            DataFilesCount = domain.ContainedDatasets?.Count ?? 0,
             DefaultDataStoreId = domain.DefaultDataStore.Id
         };
     }
 
-    public IEnumerable<CheckSet<ContainerSummaryDTO>> ImportChecks() => _importChecks;
+    public IEnumerable<CheckSet<CollectionSummaryDTO>> ImportChecks() => _importChecks;
 }

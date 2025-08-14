@@ -31,7 +31,7 @@ public static class SubstituteVariablesHelper
             var replacement = match.Groups["scope"].Value switch
             {
                 "special" => GetSpecialFolder(match.Groups["variable_name"].Value),
-                _ => throw new UnknownArgumentException($"scope unknown: {match.Groups["scope"].Value}")
+                _ => throw new IllegalArgumentException($"scope unknown: {match.Groups["scope"].Value}")
             };
             value = value.Replace(match.Value, replacement);
         }

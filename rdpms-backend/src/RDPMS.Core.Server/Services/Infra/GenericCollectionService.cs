@@ -8,13 +8,15 @@ public class GenericCollectionService<T>(IGenericRepository<T> repo)
     : ReadonlyGenericCollectionService<T>(repo), IGenericCollectionService<T>
     where T : class, IUniqueEntity
 {
+    private readonly IGenericRepository<T> _repository = repo;
+
     public Task AddAsync(T item)
     {
-        return repo.AddAsync(item);
+        return _repository.AddAsync(item);
     }
     
     public Task AddRangeAsync(IEnumerable<T> items)
     {
-        return repo.AddRangeAsync(items);
+        return _repository.AddRangeAsync(items);
     }
 }

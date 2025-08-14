@@ -11,7 +11,7 @@ public class RDPMSPersistenceContext(DatabaseConfiguration configuration) : DbCo
     public DbSet<DataFile> DataFiles { get; set; }
     public DbSet<DataSet> DataSets { get; set; }
     public DbSet<DataStore> DataStores { get; set; }
-    public DbSet<DataContainer> DataContainers { get; set; }
+    public DbSet<DataCollectionEntity> DataCollections { get; set; }
     public DbSet<Job> Jobs { get; set; }
     public DbSet<PipelineInstance> PipelineInstances { get; set; }
     public DbSet<Tag> Tags { get; set; }

@@ -39,5 +39,5 @@ public class Job(string name)
     /// <summary>
     /// With which container to associate the file 
     /// </summary>
-    public required DataContainer OutputContainer { get; init; }
+    public required DataCollectionEntity OutputCollectionEntity { get; init; }
 }

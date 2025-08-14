@@ -47,27 +47,29 @@ builder.WebHost
 
 ArgumentNullException.ThrowIfNull(launchConfig.DatabaseConfiguration);
 
-// Add services to the container.
+// Add services to the collection.
 builder.Services.AddSingleton(runtimeConfig);
 builder.Services.AddSingleton(launchConfig);
 builder.Services.AddSingleton(launchConfig.DatabaseConfiguration);
 
 builder.Services.AddSingleton<RDPMSPersistenceContext>();
 
-builder.Services.AddSingleton<ContainerSummaryDTOMapper>();
+builder.Services.AddSingleton<DataCollectionSummaryDTOMapper>();
 builder.Services.AddSingleton<StoreSummaryDTOMapper>();
 
 builder.Services.AddSingleton<IDataSetRepository, DataSetRepository>();
 builder.Services.AddSingleton<IDataStoreRepository, DataStoreRepository>();
 builder.Services.AddSingleton<IDataFileRepository, DataFileRepository>();
 builder.Services.AddSingleton<IContentTypeRepository, ContentTypeRepository>();
-builder.Services.AddSingleton<DataContainerRepository>();
+builder.Services.AddSingleton<IDataCollectionRepository, DataCollectionRepository>();
+builder.Services.AddSingleton<IProjectRepository, ProjectRepository>();
 
 builder.Services.AddSingleton<IDataSetService, DataSetService>();
 builder.Services.AddSingleton<IStoreService,StoreService>();
-builder.Services.AddSingleton<IFileService, FileService>();
+builder.Services.AddSingleton<IFileService, DataFileService>();
 builder.Services.AddSingleton<IContentTypeService, ContentTypeService>();
-builder.Services.AddSingleton<IContainerService, ContainerService>();
+builder.Services.AddSingleton<IDataCollectionEntityService, DataCollectionEntityService>();
+builder.Services.AddSingleton<IProjectService, ProjectService>();
 
 // init api and api exploration
 var apiVersioningBuilder = builder.Services.AddApiVersioning(options =>
@@ -95,9 +97,9 @@ builder.Services.AddSwaggerGen(options =>
     {
         options.SwaggerDoc(description, new OpenApiInfo
         {
-            Title = $"My API {description}",
+            Title = $"RDPMS API {description}",
             Version = description,
-            Description = $"API Version {description}"
+            Description = $"RDPMS API {description}"
         });
     }
 
@@ -122,7 +124,7 @@ app.UseSwaggerUI(options =>
     foreach (var description in provider.ApiVersionDescriptions)
     {
         options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
-            $"API {description.ApiVersion}");
+            $"API v{description.ApiVersion}");
     }
 });
 

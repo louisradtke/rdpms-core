@@ -146,7 +146,15 @@ Remarks:
 | I.2         | System should run on private cloud environments [FSD I.2.II]                                    | HIGH     |
 
 
-## Important Commands for Devs
+## Developer Section
+
+### Ambiguity of the Term Collection
+
+tl;dr: The entity-type `DataCollectionEntity` and `System.Collections.CollectionBase` collide, so everytime an ambiguity might arise, we write `...CollectionEntity` (emphasizing **Entity**).
+
+In the repository-world, the term collection is used for an entity containing multiple data sets. On the other hand, .NET features `System.Collections.CollectionBase`. The conflict is intensified by .NET's naming conventions about inheritance. If we want to create a list-like class that stores multiple instances of the `Something` class, we let it inherit from `CollectionBase` and name it `SomethingCollection`. So `DataCollection` and every other use of the Collection term suggest an inheritance from `CollectionBase`. So we name the repository-/entity-related _collection_ ```...CollectionEntity`, wherever an Ambiguity might arise.
+
+### Important commands
 
 add new migration:
 
