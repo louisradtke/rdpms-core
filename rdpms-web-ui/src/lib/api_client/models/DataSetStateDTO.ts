@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * My API v1
- * API Version v1
+ * RDPMS API v1
+ * RDPMS API v1
  *
  * The version of the OpenAPI document: v1
  * 

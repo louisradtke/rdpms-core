@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-export * from './ContainersApi';
+export * from './CollectionsApi';
 export * from './ContentTypesApi';
 export * from './DataSetsApi';
 export * from './FilesApi';

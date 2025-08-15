@@ -1,6 +1,4 @@
 <script lang="ts">
-    import {onMount} from 'svelte';
-
     // Manage the state for the burger menu
     let showMenu = false;
 
@@ -25,7 +23,7 @@
 
             <!-- Center: Links (hidden on small screens) -->
             <div class="hidden md:flex items-center space-x-4 flex-grow mx-5">
-                {#each links as link}
+                {#each links as link (link.name)}
                     <a
                             href={link.href}
                             class="text-gray-800 hover:text-gray-600 transition duration-150"
@@ -72,7 +70,7 @@
                 >
                     Home
                 </a>
-                {#each links as link}
+                {#each links as link (link.name)}
                     <a
                             href={link.href}
                             class="block text-gray-800 hover:text-gray-600 transition duration-150"

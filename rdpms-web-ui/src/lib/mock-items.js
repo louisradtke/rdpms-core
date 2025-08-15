@@ -1,4 +1,4 @@
-export const dataContainers = [
+export const collections = [
     {
         id: 'c6dfea8e-025c-4cfe-989b-123456789abc',
         name: 'Container 1',

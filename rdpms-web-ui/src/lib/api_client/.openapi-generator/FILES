@@ -1,12 +1,11 @@
-.openapi-generator-ignore
-apis/ContainersApi.ts
+apis/CollectionsApi.ts
 apis/ContentTypesApi.ts
 apis/DataSetsApi.ts
 apis/FilesApi.ts
 apis/StoresApi.ts
 apis/index.ts
 index.ts
-models/ContainerSummaryDTO.ts
+models/CollectionSummaryDTO.ts
 models/ContentTypeDTO.ts
 models/DataSetStateDTO.ts
 models/DataSetSummaryDTO.ts

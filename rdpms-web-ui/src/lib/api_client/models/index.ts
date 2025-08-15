@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-export * from './ContainerSummaryDTO';
+export * from './CollectionSummaryDTO';
 export * from './ContentTypeDTO';
 export * from './DataSetStateDTO';
 export * from './DataSetSummaryDTO';

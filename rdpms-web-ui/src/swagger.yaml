@@ -1,13 +1,13 @@
 openapi: 3.0.1
 info:
-  title: My API v1
-  description: API Version v1
+  title: RDPMS API v1
+  description: RDPMS API v1
   version: v1
 paths:
-  /api/v1/data/containers:
+  /api/v1/data/collections:
     get:
       tags:
-        - Containers
+        - Collections
       responses:
         '200':
           description: OK
@@ -16,33 +16,33 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ContainerSummaryDTO'
+                  $ref: '#/components/schemas/CollectionSummaryDTO'
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ContainerSummaryDTO'
+                  $ref: '#/components/schemas/CollectionSummaryDTO'
             text/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ContainerSummaryDTO'
+                  $ref: '#/components/schemas/CollectionSummaryDTO'
     post:
       tags:
-        - Containers
+        - Collections
       summary: Add a single item to the system.
       requestBody:
         description: ''
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ContainerSummaryDTO'
+              $ref: '#/components/schemas/CollectionSummaryDTO'
           text/json:
             schema:
-              $ref: '#/components/schemas/ContainerSummaryDTO'
+              $ref: '#/components/schemas/CollectionSummaryDTO'
           application/*+json:
             schema:
-              $ref: '#/components/schemas/ContainerSummaryDTO'
+              $ref: '#/components/schemas/CollectionSummaryDTO'
       responses:
         '200':
           description: OK
@@ -314,7 +314,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetails'
 components:
   schemas:
-    ContainerSummaryDTO:
+    CollectionSummaryDTO:
       type: object
       properties:
         id:

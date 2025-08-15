@@ -1,21 +1,21 @@
 <script lang="ts">
     import Sidebar from "$lib/layout/Sidebar.svelte";
-    import {dataContainers} from "$lib/mock-items";
+    import {collections} from "$lib/mock-items";
     import { page } from '$app/state';
 
     let containerId = page.params.container_id ?? '';
-    let container = dataContainers.find(it => it.id === containerId);
+    let container = collections.find(it => it.id === containerId);
 </script>
 
 <div class="flex h-full">
 
     <Sidebar
-        items={dataContainers.map(it => ({
+        items={collections.map(it => ({
             name: it.name ?? 'none',
             hrefValue: it.id ?? 'none',
             label: `data container with ID ${it.id}`
         }))}
-        baseUrl="/data-containers/*"
+        baseUrl="/collections/*"
     />
 
     <div class="flex flex-col flex-1">
@@ -35,7 +35,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {#each Object.entries(container) as [key, value]}
+                        {#each Object.entries(container) as [key, value] (key)}
                             <tr class="even:bg-gray-50">
                                 <td class="border border-gray-300 px-4 py-2">{key}</td>
                                 <td class="border border-gray-300 px-4 py-2">{value}</td>

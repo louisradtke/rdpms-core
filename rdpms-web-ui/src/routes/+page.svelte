@@ -7,8 +7,8 @@
 
     <ul>
         <li>
-            <a href="/data-containers">Data Containers</a><br/>
-            <p class="text-tiny text-gray-400">Data Containers are basically a list of data sets.</p>
+            <a href="/collections">Collections</a><br/>
+            <p class="text-tiny text-gray-400">Collections are basically a list of data sets.</p>
         </li>
         <li>
             <a href="/data-stores">Data Stores</a><br/>

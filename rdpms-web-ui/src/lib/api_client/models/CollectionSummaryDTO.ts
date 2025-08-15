@@ -16,41 +16,47 @@ import { mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface DataStoreSummaryDTO
+ * @interface CollectionSummaryDTO
  */
-export interface DataStoreSummaryDTO {
+export interface CollectionSummaryDTO {
     /**
      * 
      * @type {string}
-     * @memberof DataStoreSummaryDTO
+     * @memberof CollectionSummaryDTO
      */
     id?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof DataStoreSummaryDTO
+     * @memberof CollectionSummaryDTO
      */
     name?: string | null;
     /**
      * 
      * @type {number}
-     * @memberof DataStoreSummaryDTO
+     * @memberof CollectionSummaryDTO
      */
     dataFilesCount?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof CollectionSummaryDTO
+     */
+    defaultDataStoreId?: string | null;
 }
 
 /**
- * Check if a given object implements the DataStoreSummaryDTO interface.
+ * Check if a given object implements the CollectionSummaryDTO interface.
  */
-export function instanceOfDataStoreSummaryDTO(value: object): value is DataStoreSummaryDTO {
+export function instanceOfCollectionSummaryDTO(value: object): value is CollectionSummaryDTO {
     return true;
 }
 
-export function DataStoreSummaryDTOFromJSON(json: any): DataStoreSummaryDTO {
-    return DataStoreSummaryDTOFromJSONTyped(json, false);
+export function CollectionSummaryDTOFromJSON(json: any): CollectionSummaryDTO {
+    return CollectionSummaryDTOFromJSONTyped(json, false);
 }
 
-export function DataStoreSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): DataStoreSummaryDTO {
+export function CollectionSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): CollectionSummaryDTO {
     if (json == null) {
         return json;
     }
@@ -59,10 +65,11 @@ export function DataStoreSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator:
         'id': json['id'] == null ? undefined : json['id'],
         'name': json['name'] == null ? undefined : json['name'],
         'dataFilesCount': json['dataFilesCount'] == null ? undefined : json['dataFilesCount'],
+        'defaultDataStoreId': json['defaultDataStoreId'] == null ? undefined : json['defaultDataStoreId'],
     };
 }
 
-export function DataStoreSummaryDTOToJSON(value?: DataStoreSummaryDTO | null): any {
+export function CollectionSummaryDTOToJSON(value?: CollectionSummaryDTO | null): any {
     if (value == null) {
         return value;
     }
@@ -71,6 +78,7 @@ export function DataStoreSummaryDTOToJSON(value?: DataStoreSummaryDTO | null): a
         'id': value['id'],
         'name': value['name'],
         'dataFilesCount': value['dataFilesCount'],
+        'defaultDataStoreId': value['defaultDataStoreId'],
     };
 }
 
