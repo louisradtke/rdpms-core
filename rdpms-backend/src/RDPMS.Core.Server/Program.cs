@@ -54,7 +54,12 @@ builder.Services.AddSingleton(launchConfig.DatabaseConfiguration);
 
 builder.Services.AddSingleton<RDPMSPersistenceContext>();
 
+builder.Services.AddSingleton<ContentTypeDTOMapper>();
 builder.Services.AddSingleton<DataCollectionSummaryDTOMapper>();
+builder.Services.AddSingleton<DataSetSummaryDTOMapper>();
+builder.Services.AddSingleton<FileCreateRequestDTOMapper>();
+builder.Services.AddSingleton<FileCreateResponseDTOMapper>();
+builder.Services.AddSingleton<FileSummaryDTOMapper>();
 builder.Services.AddSingleton<StoreSummaryDTOMapper>();
 
 builder.Services.AddSingleton<IDataSetRepository, DataSetRepository>();

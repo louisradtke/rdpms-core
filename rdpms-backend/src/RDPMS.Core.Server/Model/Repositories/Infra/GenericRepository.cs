@@ -3,25 +3,52 @@ using RDPMS.Core.Persistence;
 
 namespace RDPMS.Core.Server.Model.Repositories.Infra;
 
-public abstract class GenericRepository<T>(RDPMSPersistenceContext ctx, DbSet<T> dbSet) : IGenericRepository<T>
+public abstract class GenericRepository<T>(
+    RDPMSPersistenceContext ctx,
+    DbSet<T> dbSet,
+    IIncludeConfiguration<T>? includeConfiguration) : IGenericRepository<T>
     where T : class, IUniqueEntity
 {
     
     protected readonly RDPMSPersistenceContext Context = ctx;
     protected readonly DbSet<T> DbSet = dbSet;
 
-    protected GenericRepository(RDPMSPersistenceContext ctx) : this(ctx, ctx.Set<T>())
+    protected GenericRepository(RDPMSPersistenceContext ctx) : this(ctx, ctx.Set<T>(), null)
+    {
+    }
+
+    protected GenericRepository(RDPMSPersistenceContext ctx, IIncludeConfiguration<T> configuration)
+        : this(ctx, ctx.Set<T>(), configuration)
+    {
+    }
+
+    protected GenericRepository(RDPMSPersistenceContext ctx, Func<IQueryable<T>, IQueryable<T>> includeFunc)
+        : this(ctx, ctx.Set<T>(), GenericLambdaIncludeConfiguration<T>.Create(includeFunc))
     {
     }
 
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await DbSet.ToListAsync();
+        var query = DbSet.AsQueryable();
+        
+        if (includeConfiguration != null)
+        {
+            query = includeConfiguration.ConfigureIncludes(query);
+        }
+
+        return await query.ToListAsync();
     }
 
     public async Task<T> GetByIdAsync(Guid id)
     {
-        var entity = await DbSet.FindAsync(id);
+        var query = DbSet.AsQueryable();
+        
+        if (includeConfiguration != null)
+        {
+            query = includeConfiguration.ConfigureIncludes(query);
+        }
+        
+        var entity = await query.FirstOrDefaultAsync(e => e.Id == id);
         if (entity == null) throw new KeyNotFoundException();
         return entity;
     }

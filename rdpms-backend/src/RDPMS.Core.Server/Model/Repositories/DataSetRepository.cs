@@ -5,5 +5,5 @@ using RDPMS.Core.Server.Model.Repositories.Infra;
 namespace RDPMS.Core.Server.Model.Repositories;
 
 public class DataSetRepository(RDPMSPersistenceContext ctx)
-    : GenericRepository<DataSet>(ctx, ctx.DataSets),
+    : GenericRepository<DataSet>(ctx),
         IDataSetRepository;

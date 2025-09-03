@@ -3,7 +3,7 @@ using RDPMS.Core.Server.Model.Logic;
 
 namespace RDPMS.Core.Server.Model.Mappers;
 
-public static class FileCreateResponseDTOMapper
+public class FileCreateResponseDTOMapper
 {
     public static FileCreateResponseDTO ToDTO(FileUploadTarget domain)
     {
