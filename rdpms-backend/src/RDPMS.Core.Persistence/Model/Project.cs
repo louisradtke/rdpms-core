@@ -17,5 +17,5 @@ public class Project(string name) : IUniqueEntity
     /// <summary>
     /// When creating a new dataset or adding files, this is where to put it by default
     /// </summary>
-    public required DataStore DefaultDataStore { get; set; }
+    public DataStore? DefaultDataStore { get; set; }
 }
