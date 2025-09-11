@@ -1,12 +1,19 @@
 ﻿services:
-  aqua.rdpms.core.main:
-    image: aqua.rdpms.core.main
+  rdpms-core-server:
     build:
       context: .
-      dockerfile: RDPMS.Core.Main/Dockerfile
+      dockerfile: src/RDPMS.Core.Server/Dockerfile
+      target: final
+    ports:
+      - "5000:5000"
+    entrypoint: ["dotnet", "RDPMS.Core.Server.dll", "-u", "http:/0.0.0.0:5000", "--init-db=dev"]
+    profiles: ["dev"]
 
-  aqua.rdpms.core.data:
-    image: aqua.rdpms.core.data
-    build:
-      context: .
-      dockerfile: RDPMS.Core.Data/Dockerfile
+  static-server:
+    image: "python:3"
+    entrypoint: ["python", "-m", "http.server", "5001", "-d" , "/app/static"]
+    volumes:
+      - "./develop/static:/app/static:ro"
+    ports:
+      - "5001:5001"
+    profiles: ["dev", "dev-nosrv"]
