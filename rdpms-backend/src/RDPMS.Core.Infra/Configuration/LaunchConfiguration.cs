@@ -1,10 +1,9 @@
+using RDPMS.Core.Infra.Configuration.Database;
 using RDPMS.Core.Infra.Util;
-using RDPMS.Core.Persistence;
-using RDPMS.Core.Server.Configuration.Database;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace RDPMS.Core.Server.Configuration;
+namespace RDPMS.Core.Infra.Configuration;
 
 /// <summary>
 /// Settings for the application that won't change during runtime
@@ -12,10 +11,31 @@ namespace RDPMS.Core.Server.Configuration;
 // ReSharper disable once ClassNeverInstantiated.Global
 public class LaunchConfiguration
 {
+    /// <summary>
+    /// Access definitions for the main database.
+    /// </summary>
     // ReSharper disable once UnusedMember.Global
     public DatabaseConfiguration? DatabaseConfiguration { get; set; }
+    
+    /// <summary>
+    /// Whether to init the database on application startup. This is not recommended for production.
+    /// </summary>
+    public DatabaseInitMode InitDatabase { get; set; } = DatabaseInitMode.None;
+    
+    /// <summary>
+    /// Where to open the API endpoint.
+    /// </summary>
     public string ListeningUrl { get; set; } = "http://localhost:5000";
+    
+    /// <summary>
+    /// Origins which are allowed to access the API. Important for CORS.
+    /// </summary>
     public List<string> AllowedOrigins { get; set; } = [];
+    
+    /// <summary>
+    /// Whether the app is running in debug mode.
+    /// </summary>
+    public bool Debug { get; set; }
 
     public static LaunchConfiguration LoadParamsFromYaml(string yamlFilePath)
     {
@@ -46,5 +66,12 @@ public class LaunchConfiguration
     public void CopyToRuntimeConfiguration(RuntimeConfiguration runtimeConfiguration)
     {
         // nothing to do, yet
+    }
+    
+    public enum DatabaseInitMode
+    {
+        None,
+        Production,
+        Development
     }
 }

@@ -2,6 +2,10 @@
 
 namespace RDPMS.Core.Persistence.Model;
 
+/// <summary>
+/// Entity identifying a file, independent of its storage location.
+/// </summary>
+/// <param name="name"></param>
 public class DataFile(string name) : IUniqueEntity
 {
     public Guid Id { get; init; } = Guid.NewGuid();
@@ -9,9 +13,15 @@ public class DataFile(string name) : IUniqueEntity
     public string Name { get; set; } = name;
     public required ContentType FileType { get; set; }
     
-    public long Size { get; set; }
-    
-    public string Hash { get; set; } = string.Empty;
+    /// <summary>
+    /// Size of the uncompressed file in bytes.
+    /// </summary>
+    public long SizeBytes { get; set; }
+
+    /// <summary>
+    /// SHA256-hash of the uncompressed file.
+    /// </summary>
+    public string SHA256Hash { get; set; } = string.Empty;
     
     /// <summary>
     /// Respective stamp in <b>UTC</b>
@@ -45,4 +55,9 @@ public class DataFile(string name) : IUniqueEntity
     /// Read-only property indicating, whether this file was deleted. true if <see cref="DeletedStamp"/> != null
     /// </summary>
     public bool IsDeleted => DeletedStamp != null;
+
+    /// <summary>
+    /// References to the storage location(s) of this file.
+    /// </summary>
+    public List<FileStorageReference> Locations { get; set; } = new();
 }

@@ -18,19 +18,4 @@ public class StoresController(IStoreService storeService, StoreSummaryDTOMapper 
         var list = await storeService.GetAllAsync();
         return Ok(list);
     }
-    
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> Post([FromBody] DataStoreSummaryDTO dto)
-    {
-        if (dto.Id != null)
-        {
-            return BadRequest("Id is not allowed to be set.");
-        }
-        
-        await storeService.AddAsync(storeMapper.Import(dto));
-        return Ok();
-    }
-
 }

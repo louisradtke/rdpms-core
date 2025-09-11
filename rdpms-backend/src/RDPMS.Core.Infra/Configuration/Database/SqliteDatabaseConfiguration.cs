@@ -1,6 +1,4 @@
-using RDPMS.Core.Persistence;
-
-namespace RDPMS.Core.Server.Configuration.Database;
+namespace RDPMS.Core.Infra.Configuration.Database;
 
 public class SqliteDatabaseConfiguration : DatabaseConfiguration
 {
@@ -18,6 +16,9 @@ public class SqliteDatabaseConfiguration : DatabaseConfiguration
     {
         return $"Data Source={Path}";
     }
+
+    public override string GetConnectionDescription() =>
+        $"SQLite file at '{Path}'";
 
     public override DatabaseProvider Provider => DatabaseProvider.Sqlite;
 }

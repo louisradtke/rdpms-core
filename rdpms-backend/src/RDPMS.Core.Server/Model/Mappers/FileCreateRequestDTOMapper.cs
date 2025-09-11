@@ -23,8 +23,8 @@ public class FileCreateRequestDTOMapper : IImportMapper<DataFile, FileCreateRequ
         return new DataFile(name: foreign.Name)
         {
             FileType = arg,
-            Size = foreign.Size.Value,
-            Hash = foreign.Hash,
+            SizeBytes = foreign.Size.Value,
+            SHA256Hash = foreign.Hash,
             CreatedStamp = foreign.CreatedStamp.Value,
             BeginStamp = foreign.BeginStamp,
             EndStamp = foreign.EndStamp

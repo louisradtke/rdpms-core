@@ -10,7 +10,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "commandLineArgs": "-u http://localhost:5000"
+      "commandLineArgs": "-u http://localhost:5000 --init-db=dev"
     }
   }
 }

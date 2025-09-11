@@ -1,4 +1,4 @@
-namespace RDPMS.Core.Persistence;
+namespace RDPMS.Core.Infra.Configuration.Database;
 
 public enum DatabaseProvider
 {

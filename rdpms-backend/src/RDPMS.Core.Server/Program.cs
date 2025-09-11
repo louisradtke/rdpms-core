@@ -2,9 +2,10 @@ using System.Reflection;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using CommandLine;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using RDPMS.Core.Infra.Configuration;
 using RDPMS.Core.Persistence;
-using RDPMS.Core.Server.Configuration;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Model.Repositories;
 using RDPMS.Core.Server.Services;
@@ -27,7 +28,16 @@ internal class Program
                 }
                 Environment.Exit(1);
             })
-            .WithParsed(opts => cliOptions = opts);
+            .WithParsed(opts =>
+            {
+                if (!CLIOptions.Validate(opts, out string err))
+                {
+                    Console.Error.WriteLine(err);
+                    Environment.Exit(1);
+                }
+
+                cliOptions = opts;
+            });
 
         var launchConfig =
             LaunchConfiguration.LoadParamsFromYaml(cliOptions.ConfigurationFilePath ?? "debug.yaml");
@@ -48,6 +58,7 @@ internal class Program
 
         builder.WebHost
             .UseUrls(launchConfig.ListeningUrl);
+        Console.WriteLine($"Listening on {launchConfig.ListeningUrl}");
 
         ArgumentNullException.ThrowIfNull(launchConfig.DatabaseConfiguration);
 
@@ -143,10 +154,14 @@ internal class Program
 
         app.MapControllers();
 
-        // create and seed database
-        // TODO: esp. seeding should not happen during normal application startup
-        app.Services.GetService<RDPMSPersistenceContext>()!.Database.EnsureCreated();
-        app.Services.GetService<RDPMSPersistenceContext>()!.SaveChanges();
+        if (launchConfig.InitDatabase is not LaunchConfiguration.DatabaseInitMode.None)
+        {
+            // create and seed database
+            // TODO: esp. seeding should not happen during normal application startup
+            // app.Services.GetService<RDPMSPersistenceContext>()!.Database.EnsureCreated();
+            app.Services.GetService<RDPMSPersistenceContext>()!.Database.Migrate();
+            app.Services.GetService<RDPMSPersistenceContext>()!.SaveChanges();
+        }
 
         app.Run();
     }

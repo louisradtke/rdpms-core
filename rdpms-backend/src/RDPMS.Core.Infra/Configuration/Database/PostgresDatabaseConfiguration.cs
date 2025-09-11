@@ -1,13 +1,12 @@
-using RDPMS.Core.Persistence;
-
-namespace RDPMS.Core.Server.Configuration.Database;
+namespace RDPMS.Core.Infra.Configuration.Database;
 
 public class PostgresDatabaseConfiguration : DatabaseConfiguration
 {
-    public override string GetConnectionString()
-    {
-        return $"Host={Host};Port={Port};Database={Database};Username={User};Password={Password}";
-    }
+    public override string GetConnectionString() =>
+        $"Host={Host};Port={Port};Database={Database};Username={User};Password={Password}";
+
+    public override string GetConnectionDescription() =>
+        $"Postgres Server at {Host}:{Port}, Database: {Database}";
 
     public override DatabaseProvider Provider => DatabaseProvider.Postgres;
     

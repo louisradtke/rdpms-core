@@ -28,7 +28,15 @@ namespace RDPMS.Core.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    StorageType = table.Column<int>(type: "INTEGER", nullable: false),
+                    EndpointUrl = table.Column<string>(type: "TEXT", nullable: true),
+                    KeyPrefix = table.Column<string>(type: "TEXT", nullable: true),
+                    Bucket = table.Column<string>(type: "TEXT", nullable: true),
+                    AccessKeyReference = table.Column<string>(type: "TEXT", nullable: true),
+                    SecretKeyReference = table.Column<string>(type: "TEXT", nullable: true),
+                    UsePathStyle = table.Column<bool>(type: "INTEGER", nullable: true),
+                    Region = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -54,7 +62,7 @@ namespace RDPMS.Core.Persistence.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
-                    DefaultDataStoreId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    DefaultDataStoreId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -63,8 +71,7 @@ namespace RDPMS.Core.Persistence.Migrations
                         name: "FK_Projects_DataStores_DefaultDataStoreId",
                         column: x => x.DefaultDataStoreId,
                         principalTable: "DataStores",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -74,7 +81,7 @@ namespace RDPMS.Core.Persistence.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     ParentProjectId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    DefaultDataStoreId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    DefaultDataStoreId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -83,8 +90,7 @@ namespace RDPMS.Core.Persistence.Migrations
                         name: "FK_DataCollections_DataStores_DefaultDataStoreId",
                         column: x => x.DefaultDataStoreId,
                         principalTable: "DataStores",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_DataCollections_Projects_ParentProjectId",
                         column: x => x.ParentProjectId,
@@ -231,8 +237,8 @@ namespace RDPMS.Core.Persistence.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     FileTypeId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Size = table.Column<long>(type: "INTEGER", nullable: false),
-                    Hash = table.Column<string>(type: "TEXT", nullable: false),
+                    SizeBytes = table.Column<long>(type: "INTEGER", nullable: false),
+                    SHA256Hash = table.Column<string>(type: "TEXT", nullable: false),
                     CreatedStamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     DeletedStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
                     BeginStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
@@ -347,6 +353,32 @@ namespace RDPMS.Core.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FileStorageReferences",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Algorithm = table.Column<int>(type: "INTEGER", nullable: false),
+                    SizeBytes = table.Column<long>(type: "INTEGER", nullable: false),
+                    SHA256Hash = table.Column<string>(type: "TEXT", nullable: false),
+                    StorageType = table.Column<int>(type: "INTEGER", nullable: false),
+                    DataFileId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    Bucket = table.Column<string>(type: "TEXT", nullable: true),
+                    ObjectKey = table.Column<string>(type: "TEXT", nullable: true),
+                    ObjectVersionId = table.Column<string>(type: "TEXT", nullable: true),
+                    ETag = table.Column<string>(type: "TEXT", nullable: true),
+                    URL = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FileStorageReferences", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FileStorageReferences_DataFiles_DataFileId",
+                        column: x => x.DataFileId,
+                        principalTable: "DataFiles",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "LogSection",
                 columns: table => new
                 {
@@ -410,6 +442,11 @@ namespace RDPMS.Core.Persistence.Migrations
                 name: "IX_DataSetUsedForJobsRelation_SourceForJobsId",
                 table: "DataSetUsedForJobsRelation",
                 column: "SourceForJobsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FileStorageReferences_DataFileId",
+                table: "FileStorageReferences",
+                column: "DataFileId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Jobs_LocalId",
@@ -500,6 +537,9 @@ namespace RDPMS.Core.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "DataSetUsedForJobsRelation");
+
+            migrationBuilder.DropTable(
+                name: "FileStorageReferences");
 
             migrationBuilder.DropTable(
                 name: "LabelsAssignedToDataSetsRelation");

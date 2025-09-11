@@ -15,7 +15,7 @@ public class FileSummaryDTOMapper(ContentTypeDTOMapper ctMapper)
             Id = domain.Id,
             Name = domain.Name,
             ContentType = contentTypeDTO,
-            Size = domain.Size,
+            Size = domain.SizeBytes,
             CreatedStampUTC = domain.CreatedStamp,
             DeletedStampUTC = domain.DeletedStamp,
             BeginStampUTC = domain.BeginStamp,
