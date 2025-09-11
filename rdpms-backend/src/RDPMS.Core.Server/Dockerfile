@@ -5,15 +5,13 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["RDPMS.Core.Server/RDPMS.Core.Server.csproj", "RDPMS.Core.Server/"]
+COPY ["src/", "./"]
 RUN dotnet restore "RDPMS.Core.Server/RDPMS.Core.Server.csproj"
-COPY . .
-WORKDIR "/src/RDPMS.Core.Server"
-RUN dotnet build "RDPMS.Core.Server.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "RDPMS.Core.Server/RDPMS.Core.Server.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "RDPMS.Core.Server.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "RDPMS.Core.Server/RDPMS.Core.Server.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

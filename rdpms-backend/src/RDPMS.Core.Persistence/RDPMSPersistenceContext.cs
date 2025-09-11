@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using RDPMS.Core.Infra;
 using RDPMS.Core.Infra.Configuration;
 using RDPMS.Core.Infra.Configuration.Database;
@@ -49,6 +50,10 @@ public class RDPMSPersistenceContext : DbContext
     {
         Console.WriteLine($"Using {DbConfiguration.GetConnectionDescription()}");
         Console.WriteLine($"Database init mode: {_dbInitMode}");
+        
+        var stack = new System.Diagnostics.StackTrace();
+        Console.WriteLine($"PID={Environment.ProcessId}, TID={Environment.CurrentManagedThreadId}, Call stack:\n{stack}");
+        Console.WriteLine("----------------------------------------");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -65,8 +70,17 @@ public class RDPMSPersistenceContext : DbContext
                 throw new ArgumentOutOfRangeException();
         }
 
+        // change behavior from fail-fast to log warning
+        // see https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-9.0/breaking-changes#new-behavior
+        if (_dbInitMode == LaunchConfiguration.DatabaseInitMode.Development)
+        {
+            optionsBuilder = optionsBuilder.ConfigureWarnings(b =>
+                b.Log(RelationalEventId.PendingModelChangesWarning));
+        }
+
         optionsBuilder
             .UseSeeding(SeedData);
+            // .UseAsyncSeeding((ctx, b, t) => Task.Run(() => SeedData(ctx, b), t));
     }
 
     protected override void OnModelCreating(ModelBuilder model)

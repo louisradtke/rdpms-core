@@ -6,14 +6,29 @@
       target: final
     ports:
       - "5000:5000"
-    entrypoint: ["dotnet", "RDPMS.Core.Server.dll", "-u", "http:/0.0.0.0:5000", "--init-db=dev"]
+    volumes:
+      - "./develop/confs/dev-postgres.yaml:/app/debug.yaml:ro"
+    entrypoint: ["dotnet", "RDPMS.Core.Server.dll", "-u", "http://0.0.0.0:5000", "--init-db=dev"]
     profiles: ["dev"]
 
   static-server:
-    image: "python:3"
-    entrypoint: ["python", "-m", "http.server", "5001", "-d" , "/app/static"]
+    image: "nginx"
     volumes:
-      - "./develop/static:/app/static:ro"
+      - "./develop/static:/usr/share/nginx/html:ro"
     ports:
-      - "5001:5001"
+      - "5001:80"
     profiles: ["dev", "dev-nosrv"]
+
+  db:
+    image: "postgres:17"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "mysecretpassword"
+      POSTGRES_DB: "rdpms"
+    volumes:
+      - "postgres-data:/var/lib/postgresql/data"
+    shm_size: 128mb  # because docker-website tells so
+    profiles: ["dev"]
+
+volumes:
+  postgres-data:

@@ -12,9 +12,10 @@ using RDPMS.Core.Server.Services;
 
 namespace RDPMS.Core.Server;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 internal class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         // handle config
         CLIOptions cliOptions = null!;
@@ -30,7 +31,7 @@ internal class Program
             })
             .WithParsed(opts =>
             {
-                if (!CLIOptions.Validate(opts, out string err))
+                if (!CLIOptions.Validate(opts, out var err))
                 {
                     Console.Error.WriteLine(err);
                     Environment.Exit(1);
@@ -158,11 +159,12 @@ internal class Program
         {
             // create and seed database
             // TODO: esp. seeding should not happen during normal application startup
-            // app.Services.GetService<RDPMSPersistenceContext>()!.Database.EnsureCreated();
-            app.Services.GetService<RDPMSPersistenceContext>()!.Database.Migrate();
-            app.Services.GetService<RDPMSPersistenceContext>()!.SaveChanges();
+            var ctx = app.Services.GetService<RDPMSPersistenceContext>()!;
+            await ctx.Database.EnsureCreatedAsync();
+            await ctx.Database.MigrateAsync();
+            await ctx.SaveChangesAsync();
         }
 
-        app.Run();
+        await app.RunAsync();
     }
 }
