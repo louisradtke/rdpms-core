@@ -4,9 +4,6 @@ namespace RDPMS.Core.Infra.Configuration;
 
 public class CLIOptions
 {
-    [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages.")]
-    public bool Verbose { get; set; }
-    
     [Option('u', "url", Required = false, HelpText = "Set URL this application is listening on.")]
     public string? ListeningUrl { get; set; }
     
@@ -20,6 +17,7 @@ public class CLIOptions
     {
         launchConfiguration.ListeningUrl =
             string.IsNullOrEmpty(ListeningUrl) ? launchConfiguration.ListeningUrl : ListeningUrl;
+
         if (InitDatabase is "prod" or "production")
             launchConfiguration.InitDatabase = LaunchConfiguration.DatabaseInitMode.Production;
         else if (InitDatabase is "dev" or "development")

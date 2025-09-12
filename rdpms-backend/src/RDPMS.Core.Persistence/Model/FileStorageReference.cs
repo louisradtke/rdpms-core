@@ -37,10 +37,16 @@ public abstract class FileStorageReference : IUniqueEntity
 /// </summary>
 public class S3FileStorageReference : FileStorageReference
 {
-    public string Bucket { get; set; } = string.Empty;
+    /// <summary>
+    /// Represents a location to a file, available via S3.
+    /// </summary>
+    public S3FileStorageReference()
+    {
+        StorageType = StorageType.S3;
+    }
+
+    public required S3DataStore Store { get; set; }
     public string ObjectKey { get; set; } = string.Empty;
-    public string? ObjectVersionId { get; set; }
-    public string? ETag { get; set; }
 }
 
 /// <summary>
@@ -48,5 +54,13 @@ public class S3FileStorageReference : FileStorageReference
 /// </summary>
 public class StaticFileStorageReference : FileStorageReference
 {
+    /// <summary>
+    /// Represents a location to a file, available without authentication.
+    /// </summary>
+    public StaticFileStorageReference()
+    {
+        StorageType = StorageType.Static;
+    }
+    
     public string URL { get; set; } = string.Empty;
 }

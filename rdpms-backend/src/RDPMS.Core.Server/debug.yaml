@@ -1,7 +1,12 @@
 database_configuration:
   type: sqlite
-  path: '${special:LocalApplicationData}/rdpms-debug.db'
-  
+  path: '${special:LocalApplicationData}/rdpms/debug.db'
+
+logging:
+  log_file_level: trace
+  log_file_dir: '${special:LocalApplicationData}/logs/'
+  console_log_level: info
+
 allowed_origins:
   - http://localhost:5173
 

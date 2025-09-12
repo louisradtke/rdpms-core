@@ -14,8 +14,8 @@ public class DataSet(string name) : IUniqueEntity
     /// not directly referring other data sets. If this is empty, and there is no <see cref="CreateJob"/>, then this
     /// data set contains raw data, that has not been processed by the system.
     /// </summary>
-    public required List<Guid> AncestorDatasetIds { get; set; }
-    
+    public List<Guid> AncestorDatasetIds { get; set; } = [];
+
     /// <summary>
     /// Non-unique name of a dataset
     /// </summary>
@@ -37,7 +37,7 @@ public class DataSet(string name) : IUniqueEntity
     /// <summary>
     /// If data set was created by a job, refer it
     /// </summary>
-    public required Job? CreateJob { get; init; }
+    public Job? CreateJob { get; init; }
 
     /// <summary>
     /// List of all jobs using this dataset

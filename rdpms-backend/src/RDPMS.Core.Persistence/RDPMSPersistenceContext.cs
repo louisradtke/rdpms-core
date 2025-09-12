@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 using RDPMS.Core.Infra;
 using RDPMS.Core.Infra.Configuration;
 using RDPMS.Core.Infra.Configuration.Database;
@@ -13,6 +14,7 @@ public class RDPMSPersistenceContext : DbContext
 {
     public DatabaseConfiguration DbConfiguration { get; }
     private readonly LaunchConfiguration.DatabaseInitMode _dbInitMode;
+    private readonly ILogger<RDPMSPersistenceContext>? _logger;
 
     public DbSet<ContentType> Types { get; set; }
     public DbSet<DataFile> DataFiles { get; set; }
@@ -35,25 +37,37 @@ public class RDPMSPersistenceContext : DbContext
         DbConfiguration = new SqliteInTempDatabaseConfiguration();
         _dbInitMode = LaunchConfiguration.DatabaseInitMode.None;
 
-        WriteInfo();
+        LogInit();
     }
 
-    public RDPMSPersistenceContext(DatabaseConfiguration dbConfiguration, LaunchConfiguration launchConfiguration)
+    public RDPMSPersistenceContext(
+        ILogger<RDPMSPersistenceContext> logger,
+        DatabaseConfiguration dbConfiguration,
+        LaunchConfiguration launchConfiguration)
     {
+        _logger = logger;
         DbConfiguration = dbConfiguration;
         _dbInitMode = launchConfiguration.InitDatabase;
         
-        WriteInfo();
+        LogInit();
     }
 
-    private void WriteInfo()
+    private void LogInit()
     {
-        Console.WriteLine($"Using {DbConfiguration.GetConnectionDescription()}");
-        Console.WriteLine($"Database init mode: {_dbInitMode}");
+        var logD = new Action<string>(Console.WriteLine);
+        if (_logger is not null)
+            logD = s => _logger.LogDebug(s);
+
+        var logT = new Action<string>(Console.WriteLine);
+        if (_logger is not null)
+            logT = s => _logger.LogTrace(s);
+
+        logD($"Using {DbConfiguration.GetConnectionDescription()}");
+        logD($"Database init mode: {_dbInitMode}");
         
         var stack = new System.Diagnostics.StackTrace();
-        Console.WriteLine($"PID={Environment.ProcessId}, TID={Environment.CurrentManagedThreadId}, Call stack:\n{stack}");
-        Console.WriteLine("----------------------------------------");
+        logT($"PID={Environment.ProcessId}, TID={Environment.CurrentManagedThreadId}, Call stack:\n{stack}\n" +
+             $"----------------------------------------");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -135,6 +149,12 @@ public class RDPMSPersistenceContext : DbContext
             .HasMany<LabelSharingPolicy>(e => e.SharedLabels);
         model.Entity<Project>()
             .HasMany<ContentType>(e => e.AllFileTypes);
+        model.Entity<Project>()
+            .HasData(new Project("_global")
+            {
+                Id = RDPMSConstants.GlobalProjectId,
+                Description = "The instances global mockup project."
+            });
 
         // set up fast searching for Job ID and State
         model.Entity<Job>()
@@ -148,40 +168,33 @@ public class RDPMSPersistenceContext : DbContext
     
     private void SeedData(DbContext context, bool _)
     {
-        // create global project
-        if (context.Set<Project>().Find(RDPMSConstants.GlobalProjectId) is null)
-        {
-            context.Set<Project>().Add(new Project("_global")
-            {
-                Id = RDPMSConstants.GlobalProjectId,
-                Description = "The instances global mockup project."
-            });
-        }
-
-        if (_dbInitMode == LaunchConfiguration.DatabaseInitMode.Development)
-        {
-            if (context.Set<DataStore>().Find(RDPMSConstants.DummyS3StoreId) is not DataStore store)
-            {
-                context.Set<DataStore>().Add(new S3DataStore("dummy-s3-store")
-                {
-                    Id = RDPMSConstants.DummyS3StoreId,
-                    Bucket = "dummy-bucket",
-                    EndpointUrl = "http://localhost:9000",
-                    KeyPrefix = "data/",
-                    AccessKeyReference = "direct://dummy-access-key",
-                    SecretKeyReference = "direct://dummy-secret-key"
-                });
-            }
-            else if (store is not S3DataStore)
-                throw new IllegalArgumentException("Dummy S3 store is not of type S3DataStore");
-        }
-
-        foreach (var contentType in DefaultValues.Types)
+        foreach (var contentType in DefaultValues.DefaultTypes)
         {
             if (context.Set<ContentType>().Find(contentType.Id) is null)
             {
                 context.Set<ContentType>().Add(contentType);
             }
         }
+
+        if (_dbInitMode != LaunchConfiguration.DatabaseInitMode.Development) return;
+
+        if (context.Set<DataStore>().Find(RDPMSConstants.DummyS3StoreId) is not { } store)
+        {
+            context.Set<DataStore>().Add(DefaultValues.DummyS3Store);
+        }
+        else if (store is not S3DataStore)
+            throw new IllegalArgumentException("Dummy S3 store is not of type S3DataStore");
+
+        SaveChanges();
+        
+        if (context.Set<DataCollectionEntity>().Find(RDPMSConstants.DummyDataCollectionId) is null)
+        {
+            var parent = 
+                context.Set<Project>().Find(RDPMSConstants.GlobalProjectId) ??
+                    throw new IllegalStateException("The global project should exist, but doesn't.");
+            context.Set<DataCollectionEntity>().Add(DefaultValues.GetDummyDataCollection(context));
+        }
+        
+        SaveChanges();
     }
 }

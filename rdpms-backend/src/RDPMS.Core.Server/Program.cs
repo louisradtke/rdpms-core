@@ -3,7 +3,10 @@ using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using CommandLine;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.OpenApi.Models;
+using NLog;
+using NLog.Extensions.Logging;
 using RDPMS.Core.Infra.Configuration;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Server.Model.Mappers;
@@ -15,7 +18,7 @@ namespace RDPMS.Core.Server;
 // ReSharper disable once ClassNeverInstantiated.Global
 internal class Program
 {
-    public static async Task Main(string[] args)
+    public static void Main(string[] args)
     {
         // handle config
         CLIOptions cliOptions = null!;
@@ -47,8 +50,35 @@ internal class Program
         var runtimeConfig = new RuntimeConfiguration();
         launchConfig.CopyToRuntimeConfiguration(runtimeConfig);
 
+        string? logFile = null;
+        if (launchConfig.Logging.LogFileDir is not null)
+        {
+            logFile = Path.Join(launchConfig.Logging.LogFileDir,
+                DateTime.Now.ToString("yyyyMMdd-HHmmss") + "-rdpms-server.log");
+        }
+
+        // init logging
+        NLog.LogManager.Setup().LoadConfiguration(builder =>
+        {
+            builder.ForLogger()
+                .FilterMinLevel(launchConfig.Logging.ConsoleLogLevel)
+                .WriteToConsole();
+            if (logFile is not null)
+            {
+                builder.ForLogger()
+                    .FilterMinLevel(launchConfig.Logging.LogFileLevel)
+                    .WriteToFile(logFile);
+                Console.WriteLine($"Logging to {logFile}");
+            }
+        });
+        
+        
+
         // build the app
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Logging.ClearProviders();
+        builder.Logging.AddNLog();
 
         builder.Services.AddCors(options =>
         {
@@ -155,16 +185,25 @@ internal class Program
 
         app.MapControllers();
 
-        if (launchConfig.InitDatabase is not LaunchConfiguration.DatabaseInitMode.None)
+        var logger = app.Services.GetService<ILogger<Program>>()!;
+        try
         {
-            // create and seed database
-            // TODO: esp. seeding should not happen during normal application startup
-            var ctx = app.Services.GetService<RDPMSPersistenceContext>()!;
-            await ctx.Database.EnsureCreatedAsync();
-            await ctx.Database.MigrateAsync();
-            await ctx.SaveChangesAsync();
-        }
+            if (launchConfig.InitDatabase is not LaunchConfiguration.DatabaseInitMode.None)
+            {
+                // create and seed database
+                // TODO: esp. seeding should not happen during normal application startup
+                var ctx = app.Services.GetService<RDPMSPersistenceContext>()!;
+                ctx.Database.EnsureCreated();
+                ctx.Database.Migrate();
+                ctx.SaveChanges();
+            }
 
-        await app.RunAsync();
+            app.Run();
+        }
+        catch (Exception e)
+        {
+            logger.LogCritical(e, $"Unhandled exception. {e.Message}");
+        }
+        
     }
 }

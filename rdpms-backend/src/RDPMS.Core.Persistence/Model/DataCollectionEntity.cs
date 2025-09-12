@@ -9,7 +9,7 @@ public class DataCollectionEntity(string name) : IUniqueEntity
     
     public string Name { get; set; } = name;
 
-    public Project? ParentProject { get; init; }
+    public Project? ParentProject { get; set; }
     
     /// <summary>
     /// List of all data sets this collection holds

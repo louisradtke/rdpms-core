@@ -1,3 +1,4 @@
+using NLog;
 using RDPMS.Core.Infra.Configuration.Database;
 using RDPMS.Core.Infra.Util;
 using YamlDotNet.Serialization;
@@ -56,13 +57,21 @@ public class LaunchConfiguration
             .Build();
         
         var launchConfig = deserializer.Deserialize<LaunchConfiguration>(yaml);
-        
+
+        if (launchConfig.Logging.LogFileDir is not null)
+        {
+            launchConfig.Logging.LogFileDir =
+                SubstituteVariablesHelper.SubstituteVariables(launchConfig.Logging.LogFileDir);
+        }
+
         if (launchConfig.DatabaseConfiguration is SqliteDatabaseConfiguration { Path: not null } sqliteCnf)
             sqliteCnf.Path = SubstituteVariablesHelper.SubstituteVariables(sqliteCnf.Path);
 
         return launchConfig;
     }
-
+    
+    public LoggingConfigGroup Logging { get; set; } = new();
+    
     public void CopyToRuntimeConfiguration(RuntimeConfiguration runtimeConfiguration)
     {
         // nothing to do, yet
@@ -73,5 +82,12 @@ public class LaunchConfiguration
         None,
         Production,
         Development
+    }
+
+    public class LoggingConfigGroup
+    {
+        public LogLevel ConsoleLogLevel { get; set; } = LogLevel.Info;
+        public LogLevel LogFileLevel { get; set; } = LogLevel.Info;
+        public string? LogFileDir { get; set; }
     }
 }
