@@ -25,7 +25,7 @@ public class DataCollectionSummaryDTOMapper
             dto => dto.DefaultDataStoreId != null, 
             _ => "DefaultDataStoreId is required for this collection."));
         _importChecks.Add(CheckSet<CollectionSummaryDTO>.CreateWarn(
-            dto => dto.DataFilesCount is null or >= 0,
+            dto => dto.DataSetCount is null or >= 0,
             _ => "DataFilesCount should be a valid number or will be ignored by the server."));
     }
 
@@ -57,7 +57,7 @@ public class DataCollectionSummaryDTOMapper
         {
             Id = domain.Id,
             Name = domain.Name,
-            DataFilesCount = domain.ContainedDatasets?.Count ?? 0,
+            DataSetCount = domain.ContainedDatasets?.Count ?? 0,
             DefaultDataStoreId = domain.DefaultDataStore.Id
         };
     }

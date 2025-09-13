@@ -6,4 +6,10 @@ namespace RDPMS.Core.Server.Services;
 
 public class DataSetService(
     IDataSetRepository repo) : GenericCollectionService<DataSet>(repo),
-    IDataSetService;
+    IDataSetService
+{
+    public Task<IEnumerable<DataSet>> GetByCollectionAsync(Guid collectionId)
+    {
+        return repo.GetByCollectionIdAsync(collectionId);
+    }
+}

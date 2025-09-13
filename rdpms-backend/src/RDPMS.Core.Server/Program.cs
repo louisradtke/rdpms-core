@@ -20,7 +20,7 @@ namespace RDPMS.Core.Server;
 // ReSharper disable once ClassNeverInstantiated.Global
 internal class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         // handle config
         CLIOptions cliOptions = null!;
@@ -65,9 +65,17 @@ internal class Program
 
         builder.Services.AddCors(options =>
         {
+            // cors policy for every route
             options.AddPolicy(
                 name: "ConfigCorsPolicy",
                 policy => policy.WithOrigins(launchConfig.AllowedOrigins.ToArray()));
+
+            // cors policy for file requests, manually set in controllers
+            options.AddPolicy("ExternalCorsPolicy", policy =>
+                policy
+                    .AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod());
         });
 
         builder.WebHost
@@ -176,18 +184,17 @@ internal class Program
                 // create and seed database
                 // TODO: esp. seeding should not happen during normal application startup
                 var ctx = app.Services.GetService<RDPMSPersistenceContext>()!;
-                ctx.Database.EnsureCreated();
-                ctx.Database.Migrate();
-                ctx.SaveChanges();
+                await ctx.Database.EnsureCreatedAsync();
+                await ctx.Database.MigrateAsync();
+                await ctx.SaveChangesAsync();
             }
 
-            app.Run();
+            await app.RunAsync();
         }
         catch (Exception e)
         {
             logger.LogCritical(e, "Unhandled exception. {EMessage}", e.Message);
         }
-        
     }
 
     private static void ConfigureLogging(LaunchConfiguration launchConfig, ISetupLoadConfigurationBuilder builder)

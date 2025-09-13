@@ -93,8 +93,8 @@ public class RDPMSPersistenceContext : DbContext
         }
 
         optionsBuilder
-            .UseSeeding(SeedData);
-            // .UseAsyncSeeding((ctx, b, t) => Task.Run(() => SeedData(ctx, b), t));
+            .UseSeeding(SeedData)
+            .UseAsyncSeeding(SeedDataAsync);
     }
 
     protected override void OnModelCreating(ModelBuilder model)
@@ -165,7 +165,39 @@ public class RDPMSPersistenceContext : DbContext
         model.Entity<PipelineInstance>()
             .HasIndex(e => e.LocalId);
     }
-    
+
+    private async Task SeedDataAsync(DbContext context, bool _, CancellationToken token)
+    {
+        foreach (var contentType in DefaultValues.DefaultTypes)
+        {
+            if (await context.Set<ContentType>().FindAsync(contentType.Id, token) is null)
+            {
+                await context.Set<ContentType>().AddAsync(contentType, token);
+            }
+        }
+
+        if (_dbInitMode != LaunchConfiguration.DatabaseInitMode.Development) return;
+
+        if (await context.Set<DataStore>()
+                .FindAsync(RDPMSConstants.DummyS3StoreId, token) is not { } store)
+        {
+            await context.Set<DataStore>().AddAsync(DefaultValues.DummyS3Store, token);
+        }
+        else if (store is not S3DataStore)
+            throw new IllegalArgumentException("Dummy S3 store is not of type S3DataStore");
+
+        await SaveChangesAsync(token);
+        
+        if (await context.Set<DataCollectionEntity>()
+                .FindAsync(RDPMSConstants.DummyDataCollectionId, token) is null)
+        {
+            await context.Set<DataCollectionEntity>()
+                .AddAsync(await DefaultValues.GetDummyDataCollectionAsync(context, token), token);
+        }
+        
+        await SaveChangesAsync(token);
+    }
+
     private void SeedData(DbContext context, bool _)
     {
         foreach (var contentType in DefaultValues.DefaultTypes)

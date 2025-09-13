@@ -4,4 +4,7 @@ using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
-public interface IDataSetService : IGenericCollectionService<DataSet>;
+public interface IDataSetService : IGenericCollectionService<DataSet>
+{
+    Task<IEnumerable<DataSet>> GetByCollectionAsync(Guid collectionId);
+}

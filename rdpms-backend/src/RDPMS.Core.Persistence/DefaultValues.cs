@@ -128,12 +128,34 @@ public static class DefaultValues
         };
     }
 
+    public static async Task<DataCollectionEntity> GetDummyDataCollectionAsync(DbContext ctx, CancellationToken token)
+    {
+        var typeSet = ctx.Set<ContentType>();
+        var imageType = await typeSet
+            .FirstAsync(t => t.Id == Guid.Parse("0c52cf95-4d5c-4e04-89f7-6b9572b7d952"), token);
+        var mcapType = await typeSet
+            .FirstAsync(t => t.Id == Guid.Parse("2b31bbd9-0049-45c0-a9a4-b4893fa1085c"), token);
+        var project = await ctx.Set<Project>()
+            .FindAsync(RDPMSConstants.GlobalProjectId, token);
+        var s3Store = await ctx.Set<DataStore>()
+            .FindAsync(RDPMSConstants.DummyS3StoreId, token) as S3DataStore;
+        
+        return BuildDataCollectionEntity(s3Store, project, mcapType, imageType);
+    }
     public static DataCollectionEntity GetDummyDataCollection(DbContext ctx)
     {
         var typeSet = ctx.Set<ContentType>();
+        var imageType = typeSet.First(t => t.Id == Guid.Parse("0c52cf95-4d5c-4e04-89f7-6b9572b7d952"));
+        var mcapType = typeSet.First(t => t.Id == Guid.Parse("2b31bbd9-0049-45c0-a9a4-b4893fa1085c"));
         var project = ctx.Set<Project>().Find(RDPMSConstants.GlobalProjectId);
         var s3Store = ctx.Set<DataStore>().Find(RDPMSConstants.DummyS3StoreId) as S3DataStore;
         
+        return BuildDataCollectionEntity(s3Store, project, mcapType, imageType);
+    }
+
+    private static DataCollectionEntity BuildDataCollectionEntity(S3DataStore? s3Store, Project? project,
+        ContentType mcapType, ContentType imageType)
+    {
         return new DataCollectionEntity("dummy-collection")
         {
             Id = RDPMSConstants.DummyDataCollectionId,
@@ -148,8 +170,7 @@ public static class DefaultValues
                         new("demo_2025-09-11_22-57-38.mcap")
                         {
                             Id = Guid.Parse("40a447f0-0012-46e9-b882-3ab9a30ae187"),
-                            FileType = typeSet.First(t =>
-                                t.Id == Guid.Parse("2b31bbd9-0049-45c0-a9a4-b4893fa1085c")),
+                            FileType = mcapType,
                             SizeBytes = 6403,
                             SHA256Hash = "5608713a5fd3b40926ef5143b6f9b116683adc05c6612d32ad8646245b669c0b",
                             CreatedStamp = DateTime.Parse("2025-09-11T22:57:38.000+02:00"),
@@ -170,8 +191,7 @@ public static class DefaultValues
                         new("image.png")
                         {
                             Id = Guid.Parse("bf2256e3-697a-4ad0-863a-f5f11b24dc10"),
-                            FileType = typeSet.First(t =>
-                                t.Id == Guid.Parse("0c52cf95-4d5c-4e04-89f7-6b9572b7d952")),
+                            FileType = imageType,
                             SizeBytes = 51247,
                             SHA256Hash = "226e877255d61660811f1da3e461e6521660015bb708b64eb6771b27cd37a40d",
                             CreatedStamp = DateTime.Parse("2025-09-11T23:11:00.000+02:00"),

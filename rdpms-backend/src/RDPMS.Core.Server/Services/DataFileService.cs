@@ -18,4 +18,22 @@ public class DataFileService(IDataFileRepository repo) : ReadonlyGenericCollecti
     {
         return Task.FromResult(new FileUploadTarget(new Uri("https://todo.com")));
     }
+
+    public async Task<Uri> GetFileDownloadUriAsync(Guid id)
+    {
+        var file = await GetByIdAsync(id);
+        var location = file.Locations
+            .FirstOrDefault(lRef => lRef.StorageType == StorageType.S3);
+        location ??= file.Locations.FirstOrDefault();
+
+        switch (location)
+        {
+            case S3FileStorageReference:
+                throw new NotImplementedException("S3 is yet not implemented!");
+            case StaticFileStorageReference staticLocation:
+                return new Uri(staticLocation.URL);
+            default:
+                throw new IllegalStateException("Invalid file location type");
+        }
+    }
 }

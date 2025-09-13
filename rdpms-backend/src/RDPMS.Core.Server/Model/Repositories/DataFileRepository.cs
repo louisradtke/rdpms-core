@@ -10,7 +10,9 @@ using KeyNotFoundException = RDPMS.Core.Infra.Exceptions.KeyNotFoundException;
 namespace RDPMS.Core.Server.Model.Repositories;
 
 public class DataFileRepository(RDPMSPersistenceContext ctx)
-    : GenericRepository<DataFile>(ctx),
+    : GenericRepository<DataFile>(ctx, files => files
+            .Include(f => f.Locations)
+            .Include(f => f.FileType)),
     IDataFileRepository
 {
     public async Task<IEnumerable<DataFile>> GetFilesInStoreAsync(Guid storeId)

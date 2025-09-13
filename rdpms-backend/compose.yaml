@@ -15,6 +15,7 @@
     image: "nginx"
     volumes:
       - "./develop/static:/usr/share/nginx/html:ro"
+      - "./develop/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"
     ports:
       - "5001:80"
     profiles: ["dev", "dev-nosrv"]
