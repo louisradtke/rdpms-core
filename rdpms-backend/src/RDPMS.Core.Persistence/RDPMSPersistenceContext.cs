@@ -189,9 +189,6 @@ public class RDPMSPersistenceContext : DbContext
         
         if (context.Set<DataCollectionEntity>().Find(RDPMSConstants.DummyDataCollectionId) is null)
         {
-            var parent = 
-                context.Set<Project>().Find(RDPMSConstants.GlobalProjectId) ??
-                    throw new IllegalStateException("The global project should exist, but doesn't.");
             context.Set<DataCollectionEntity>().Add(DefaultValues.GetDummyDataCollection(context));
         }
         

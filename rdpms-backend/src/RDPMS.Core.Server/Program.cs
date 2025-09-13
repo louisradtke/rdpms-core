@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using CommandLine;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.OpenApi.Models;
 using NLog;
+using NLog.Config;
 using NLog.Extensions.Logging;
 using RDPMS.Core.Infra.Configuration;
 using RDPMS.Core.Persistence;
@@ -50,30 +52,11 @@ internal class Program
         var runtimeConfig = new RuntimeConfiguration();
         launchConfig.CopyToRuntimeConfiguration(runtimeConfig);
 
-        string? logFile = null;
-        if (launchConfig.Logging.LogFileDir is not null)
-        {
-            logFile = Path.Join(launchConfig.Logging.LogFileDir,
-                DateTime.Now.ToString("yyyyMMdd-HHmmss") + "-rdpms-server.log");
-        }
 
         // init logging
-        NLog.LogManager.Setup().LoadConfiguration(builder =>
-        {
-            builder.ForLogger()
-                .FilterMinLevel(launchConfig.Logging.ConsoleLogLevel)
-                .WriteToConsole();
-            if (logFile is not null)
-            {
-                builder.ForLogger()
-                    .FilterMinLevel(launchConfig.Logging.LogFileLevel)
-                    .WriteToFile(logFile);
-                Console.WriteLine($"Logging to {logFile}");
-            }
-        });
-        
-        
+        NLog.LogManager.Setup().LoadConfiguration(builder => ConfigureLogging(launchConfig, builder));
 
+        
         // build the app
         var builder = WebApplication.CreateBuilder(args);
 
@@ -93,7 +76,8 @@ internal class Program
 
         ArgumentNullException.ThrowIfNull(launchConfig.DatabaseConfiguration);
 
-        // Add services to the collection.
+
+        // add services to the collection.
         builder.Services.AddSingleton(runtimeConfig);
         builder.Services.AddSingleton(launchConfig);
         builder.Services.AddSingleton(launchConfig.DatabaseConfiguration);
@@ -121,6 +105,7 @@ internal class Program
         builder.Services.AddSingleton<IContentTypeService, ContentTypeService>();
         builder.Services.AddSingleton<IDataCollectionEntityService, DataCollectionEntityService>();
         builder.Services.AddSingleton<IProjectService, ProjectService>();
+
 
         // init api and api exploration
         var apiVersioningBuilder = builder.Services.AddApiVersioning(options =>
@@ -162,13 +147,12 @@ internal class Program
             options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
         });
 
+        
+        // instantiate and launch app
         var app = builder.Build();
 
-        // Configure the HTTP request pipeline.
-        // if (app.Environment.IsDevelopment())
-
+        // init swagger
         app.UseSwagger();
-        // app.UseSwaggerUI();
         app.UseSwaggerUI(options =>
         {
             var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
@@ -180,11 +164,10 @@ internal class Program
         });
 
         app.UseCors("ConfigCorsPolicy");
-
         app.UseAuthorization();
-
         app.MapControllers();
 
+        // init db connection, run seeding, and launch app
         var logger = app.Services.GetService<ILogger<Program>>()!;
         try
         {
@@ -202,8 +185,36 @@ internal class Program
         }
         catch (Exception e)
         {
-            logger.LogCritical(e, $"Unhandled exception. {e.Message}");
+            logger.LogCritical(e, "Unhandled exception. {EMessage}", e.Message);
         }
         
+    }
+
+    private static void ConfigureLogging(LaunchConfiguration launchConfig, ISetupLoadConfigurationBuilder builder)
+    {
+        string? logFile = null;
+        if (launchConfig.Logging.LogFileDir is not null)
+        {
+            logFile = Path.Join(launchConfig.Logging.LogFileDir,
+                DateTime.Now.ToString("yyyyMMdd-HHmmss") + "-rdpms-server.log");
+        }
+
+        var re = new Regex(@"Microsoft\.AspNetCore.*",
+            RegexOptions.Compiled |
+            RegexOptions.IgnoreCase |
+            RegexOptions.CultureInvariant);
+        builder.ForLogger()
+            .FilterMinLevel(launchConfig.Logging.ConsoleLogLevel)
+            .FilterDynamicLog(e => !re.IsMatch(e.LoggerName))
+            .WriteToConsole();
+        if (logFile is null)
+        {
+            Console.WriteLine($"Logging to file is disabled");
+            return;
+        }
+        builder.ForLogger()
+            .FilterMinLevel(launchConfig.Logging.LogFileLevel)
+            .WriteToFile(logFile);
+        Console.WriteLine($"Logging to {logFile}");
     }
 }
