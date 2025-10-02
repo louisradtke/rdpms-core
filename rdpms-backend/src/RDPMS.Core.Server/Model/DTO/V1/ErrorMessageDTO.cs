@@ -9,7 +9,7 @@ public record ErrorMessageDTO
     public string? Message { get; set; }
     
     /// <summary>
-    /// A message dedicated to the user. If null, <see cref="Message"/> is the fallback.
+    /// A message dedicated to the user. If null, use <see cref="Message"/> as fallback.
     /// </summary>
     public string? DisplayMessage { get; set; }
 }

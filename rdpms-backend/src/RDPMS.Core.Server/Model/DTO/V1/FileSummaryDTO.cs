@@ -4,6 +4,7 @@ public record FileSummaryDTO
 {
     public Guid? Id { get; set; }
     public string? Name { get; set; }
+    public string? DownloadURI { get; set; }
     public ContentTypeDTO? ContentType { get; set; }
     public long? Size { get; set; }
     public DateTime? CreatedStampUTC { get; set; }

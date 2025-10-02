@@ -15,6 +15,7 @@ public class FilesController(
     IContentTypeService typeService,
     FileSummaryDTOMapper fileMapper,
     FileCreateRequestDTOMapper dfCreateReqMapper,
+    LinkGenerator linkGenerator,
     ILogger<FilesController> logger) : ControllerBase
 {
     /// <summary>
@@ -25,7 +26,13 @@ public class FilesController(
     [ProducesResponseType<IEnumerable<FileSummaryDTO>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<FileSummaryDTO>>> Get()
     {
-        var list = await fileService.GetAllAsync();
+        var list = (await fileService.GetAllAsync()).Select(fileMapper.Export).ToList();
+        foreach (var file in list)
+        {
+            file.DownloadURI = linkGenerator.GetUriByAction(
+                HttpContext, nameof(GetContent), null,
+                new {id = file.Id});
+        }
         return Ok(list);
     }
 
@@ -60,7 +67,7 @@ public class FilesController(
         var target = FileCreateResponseDTOMapper.ToDTO(response);
         
         var resourceUri = 
-            Url.Action(nameof(FilesController.Get), null, new {id = target.FileId}, Request.Scheme);
+            Url.Action(nameof(Get), null, new {id = target.FileId}, Request.Scheme);
 
         return Created(resourceUri, target);
     }
@@ -83,26 +90,25 @@ public class FilesController(
         catch (InvalidOperationException e)
         {
             logger.LogDebug("Failed to retrieve datasets for collection {CollectionId}, {EMessage}", id, e);
-            return NotFound($"File {id} was not found.");
+            return NotFound(new ErrorMessageDTO { Message = $"File {id} was not found."});
         }
     }
 
     /// <summary>
-    /// Request a download of a file.
-    /// On success, either a redirect or a file download (the raw bytes) will be returned.
+    /// Request redirect to a file.
+    /// On success, a redirect will be returned.
     /// </summary>
     /// <param name="id">Id of the file to download.</param>
-    /// <returns>On success, either a redirect or a file download (the raw bytes) will be returned.</returns>
-    [HttpGet("{id:guid}/raw")]
-    [ProducesResponseType<FileContentResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<FileContentResult>(StatusCodes.Status302Found)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [EnableCors("ExternalCorsPolicy")]
-    public async Task<ActionResult> GetRaw(Guid id)
+    /// <returns>On success, a redirect will be returned.</returns>
+    [HttpGet("{id:guid}/content")]
+    [ProducesResponseType(StatusCodes.Status302Found)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
+    [EnableCors("ExternalCorsPolicy")] // needed for redirect
+    public async Task<ActionResult> GetContent(Guid id)
     {
         try
         {
-            var uri = await fileService.GetFileDownloadUriAsync(id);
+            var uri = await fileService.GetFileDownloadUriAsync(id, HttpContext);
 
             return Redirect(uri.ToString());
 
@@ -113,8 +119,23 @@ public class FilesController(
         catch (InvalidOperationException e)
         {
             logger.LogDebug("Failed to retrieve file {FileId}, {EMessage}", id, e);
-            return NotFound($"File {id} was not found.");
+            return NotFound(new ErrorMessageDTO { Message = $"File {id} was not found."});
         }
+    }
+    
+    /// <summary>
+    /// Request a download of a file.
+    /// On success, either a redirect or a file download (the raw bytes) will be returned.
+    /// </summary>
+    /// <param name="id">Id of the file to download.</param>
+    /// <returns>On success, either a redirect or a file download (the raw bytes) will be returned.</returns>
+    [HttpGet("{id:guid}/blob")]
+    [ProducesResponseType<FileContentResult>(StatusCodes.Status200OK, "application/octet-stream")]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status501NotImplemented)]
+    public async Task<ActionResult> GetBlob(Guid id)
+    {
+        return StatusCode(501, "Not Implemented");
     }
 
 }

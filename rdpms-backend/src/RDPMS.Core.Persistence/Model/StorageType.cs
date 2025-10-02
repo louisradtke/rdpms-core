@@ -10,5 +10,10 @@ public enum StorageType
     /// <summary>
     /// File is accessible via a URL, somewhere on the internet.
     /// </summary>
-    Static = 1
+    Static = 1,
+
+    // /// <summary>
+    // /// File is served by the application.
+    // /// </summary>
+    // Internal = 2
 }

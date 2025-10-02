@@ -14,6 +14,7 @@ public interface IFileService : IReadonlyGenericCollectionService<DataFile>
     /// Let the service decide, which <see cref="FileStorageReference"/> to use.
     /// </summary>
     /// <param name="id">Id of the file to download.</param>
+    /// <param name="context">The HttpContext of the current request.</param>
     /// <returns></returns>
-    Task<Uri> GetFileDownloadUriAsync(Guid id);
+    Task<Uri> GetFileDownloadUriAsync(Guid id, HttpContext context);
 }
