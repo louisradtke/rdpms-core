@@ -133,6 +133,8 @@ public static class DefaultValues
         var typeSet = ctx.Set<ContentType>();
         var imageType = await typeSet
             .FirstAsync(t => t.Id == Guid.Parse("0c52cf95-4d5c-4e04-89f7-6b9572b7d952"), token);
+        var pdfType = await typeSet
+            .FirstAsync(t => t.Id == Guid.Parse("3ae8c8ef-5cc4-45f8-81c6-6c603b1f4580"), token);
         var mcapType = await typeSet
             .FirstAsync(t => t.Id == Guid.Parse("2b31bbd9-0049-45c0-a9a4-b4893fa1085c"), token);
         var project = await ctx.Set<Project>()
@@ -140,21 +142,22 @@ public static class DefaultValues
         var s3Store = await ctx.Set<DataStore>()
             .FindAsync(RDPMSConstants.DummyS3StoreId, token) as S3DataStore;
         
-        return BuildDataCollectionEntity(s3Store, project, mcapType, imageType);
+        return BuildDataCollectionEntity(s3Store, project, mcapType, imageType, pdfType);
     }
     public static DataCollectionEntity GetDummyDataCollection(DbContext ctx)
     {
         var typeSet = ctx.Set<ContentType>();
         var imageType = typeSet.First(t => t.Id == Guid.Parse("0c52cf95-4d5c-4e04-89f7-6b9572b7d952"));
+        var pdfType = typeSet.First(t => t.Id == Guid.Parse("3ae8c8ef-5cc4-45f8-81c6-6c603b1f4580"));
         var mcapType = typeSet.First(t => t.Id == Guid.Parse("2b31bbd9-0049-45c0-a9a4-b4893fa1085c"));
         var project = ctx.Set<Project>().Find(RDPMSConstants.GlobalProjectId);
         var s3Store = ctx.Set<DataStore>().Find(RDPMSConstants.DummyS3StoreId) as S3DataStore;
         
-        return BuildDataCollectionEntity(s3Store, project, mcapType, imageType);
+        return BuildDataCollectionEntity(s3Store, project, mcapType, imageType, pdfType);
     }
 
     private static DataCollectionEntity BuildDataCollectionEntity(S3DataStore? s3Store, Project? project,
-        ContentType mcapType, ContentType imageType)
+        ContentType mcapType, ContentType imageType, ContentType pdfType)
     {
         return new DataCollectionEntity("dummy-collection")
         {
@@ -204,6 +207,25 @@ public static class DefaultValues
                                     SizeBytes = 51247,
                                     SHA256Hash = "226e877255d61660811f1da3e461e6521660015bb708b64eb6771b27cd37a40d",
                                     URL = "http://localhost:5001/dummy-recording-01/image.png"
+                                }
+                            ]
+                        },
+                        new("imu_tedaldi_calib.pdf")
+                        {
+                            Id = Guid.Parse("34f3d1a7-4b28-4493-accf-fa1b77003922"),
+                            FileType = pdfType,
+                            SizeBytes = 117949,
+                            SHA256Hash = "2f77a8eee70538ae36c88f8b5eed63db4fbebac241eb7d872635858b8b2106f3",
+                            CreatedStamp = DateTime.Parse("2025-09-11T23:11:00.000+02:00"),
+                            Locations =
+                            [
+                                new StaticFileStorageReference()
+                                {
+                                    Id = Guid.Parse("a94b40b3-ef3f-495d-8f44-9aed5045b6c3"),
+                                    Algorithm = CompressionAlgorithm.Plain,
+                                    SizeBytes = 117949,
+                                    SHA256Hash = "2f77a8eee70538ae36c88f8b5eed63db4fbebac241eb7d872635858b8b2106f3",
+                                    URL = "http://localhost:5001/dummy-recording-01/imu_tedaldi_calib.pdf"
                                 }
                             ]
                         }

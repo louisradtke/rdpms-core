@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using NLog;
 using NLog.Config;
 using NLog.Extensions.Logging;
+using RDPMS.Core.Infra;
 using RDPMS.Core.Infra.Configuration;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Server.Model.Mappers;
@@ -20,34 +21,17 @@ namespace RDPMS.Core.Server;
 // ReSharper disable once ClassNeverInstantiated.Global
 internal class Program
 {
-    public static async Task Main(string[] args)
+    private static async Task RunServer(ServerCLIOptions serverCLIOptions)
     {
-        // handle config
-        CLIOptions cliOptions = null!;
-        CommandLine.Parser.Default.ParseArguments<CLIOptions>(args)
-            .WithNotParsed(errs =>
-            {
-                Console.Error.WriteLine("Failed to parse command line arguments");
-                foreach (var err in errs)
-                {
-                    Console.Error.WriteLine(err.ToString());
-                }
-                Environment.Exit(1);
-            })
-            .WithParsed(opts =>
-            {
-                if (!CLIOptions.Validate(opts, out var err))
-                {
-                    Console.Error.WriteLine(err);
-                    Environment.Exit(1);
-                }
-
-                cliOptions = opts;
-            });
+        if (!serverCLIOptions.Validate(out var err))
+        {
+            await Console.Error.WriteLineAsync(err);
+            Environment.Exit(1);
+        }
 
         var launchConfig =
-            LaunchConfiguration.LoadParamsFromYaml(cliOptions.ConfigurationFilePath ?? "debug.yaml");
-        cliOptions.CopyToLaunchConfiguration(launchConfig);
+            LaunchConfiguration.LoadParamsFromYaml(serverCLIOptions.ConfigurationFilePath ?? "debug.yaml");
+        serverCLIOptions.CopyToLaunchConfiguration(launchConfig);
 
         var runtimeConfig = new RuntimeConfiguration();
         launchConfig.CopyToRuntimeConfiguration(runtimeConfig);
@@ -58,7 +42,7 @@ internal class Program
 
         
         // build the app
-        var builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder();
 
         builder.Logging.ClearProviders();
         builder.Logging.AddNLog();
@@ -182,7 +166,6 @@ internal class Program
             if (launchConfig.InitDatabase is not LaunchConfiguration.DatabaseInitMode.None)
             {
                 // create and seed database
-                // TODO: esp. seeding should not happen during normal application startup
                 var ctx = app.Services.GetService<RDPMSPersistenceContext>()!;
                 await ctx.Database.EnsureCreatedAsync();
                 await ctx.Database.MigrateAsync();
@@ -195,6 +178,77 @@ internal class Program
         {
             logger.LogCritical(e, "Unhandled exception. {EMessage}", e.Message);
         }
+    }
+
+    private static async Task RunSeeding(SeedingCLIOptions seedingCLIOptions)
+    {
+        if (!seedingCLIOptions.Validate(out var err))
+        {
+            await Console.Error.WriteLineAsync(err);
+            Environment.Exit(1);
+        }
+
+        var launchConfig =
+            LaunchConfiguration.LoadParamsFromYaml(seedingCLIOptions.ConfigurationFilePath ?? "debug.yaml");
+        seedingCLIOptions.CopyToLaunchConfiguration(launchConfig);
+
+        var runtimeConfig = new RuntimeConfiguration();
+        launchConfig.CopyToRuntimeConfiguration(runtimeConfig);
+
+        // init logging
+        NLog.LogManager.Setup().LoadConfiguration(builder => ConfigureLogging(launchConfig, builder));
+        var loggerFactory = new NLogLoggerFactory();
+        var programLogger = loggerFactory.CreateLogger<Program>();
+        var contextLogger = loggerFactory.CreateLogger<RDPMSPersistenceContext>();
+
+        // init db connection, run seeding, and launch app
+        try
+        {
+            if (launchConfig.InitDatabase is not LaunchConfiguration.DatabaseInitMode.None)
+            {
+                // create and seed database
+                // TODO: esp. seeding should not happen during normal application startup
+                var ctx = new RDPMSPersistenceContext(contextLogger, launchConfig.DatabaseConfiguration, launchConfig);
+
+                programLogger.LogInformation("Initializing database ...");
+                await ctx.Database.EnsureCreatedAsync();
+
+                // let's see what happens if we try to migrate the database :)
+                // await ctx.Database.MigrateAsync();
+                // await ctx.SaveChangesAsync();
+
+                var globalProject = await ctx.Projects.FindAsync(RDPMSConstants.GlobalProjectId);
+                if (globalProject is null)
+                {
+                    programLogger.LogError($"Probing for global project failed. Exiting.");
+                    Environment.Exit(1);
+                }
+                programLogger.LogInformation("Database initialized.");
+            }
+        }
+        catch (Exception e)
+        {
+            programLogger.LogCritical(e, "Unhandled exception. {EMessage}", e.Message);
+        }
+    }
+
+    public static async Task Main(string[] args)
+    {
+        Task? appTask = null;
+        CommandLine.Parser.Default.ParseArguments<SeedingCLIOptions, ServerCLIOptions>(args)
+            .WithParsed<SeedingCLIOptions>(opts => appTask = RunSeeding(opts))
+            .WithParsed<ServerCLIOptions>(opts => appTask = RunServer(opts))
+            .WithNotParsed(errs =>
+            {
+                Console.Error.WriteLine("Failed to parse command line arguments");
+                foreach (var err in errs)
+                {
+                    Console.Error.WriteLine(err.ToString());
+                }
+                Environment.Exit(1);
+            });
+
+        await (appTask ?? Task.CompletedTask);
     }
 
     private static void ConfigureLogging(LaunchConfiguration launchConfig, ISetupLoadConfigurationBuilder builder)
