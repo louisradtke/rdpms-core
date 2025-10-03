@@ -36,7 +36,7 @@ export interface CollectionSummaryDTO {
      * @type {number}
      * @memberof CollectionSummaryDTO
      */
-    dataFilesCount?: number | null;
+    dataSetCount?: number | null;
     /**
      * 
      * @type {string}
@@ -64,7 +64,7 @@ export function CollectionSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator
         
         'id': json['id'] == null ? undefined : json['id'],
         'name': json['name'] == null ? undefined : json['name'],
-        'dataFilesCount': json['dataFilesCount'] == null ? undefined : json['dataFilesCount'],
+        'dataSetCount': json['dataSetCount'] == null ? undefined : json['dataSetCount'],
         'defaultDataStoreId': json['defaultDataStoreId'] == null ? undefined : json['defaultDataStoreId'],
     };
 }
@@ -77,7 +77,7 @@ export function CollectionSummaryDTOToJSON(value?: CollectionSummaryDTO | null):
         
         'id': value['id'],
         'name': value['name'],
-        'dataFilesCount': value['dataFilesCount'],
+        'dataSetCount': value['dataSetCount'],
         'defaultDataStoreId': value['defaultDataStoreId'],
     };
 }

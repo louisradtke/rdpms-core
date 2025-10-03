@@ -19,6 +19,7 @@ import type {
   FileCreateRequestDTO,
   FileCreateResponseDTO,
   FileSummaryDTO,
+  ProblemDetails,
 } from '../models/index';
 import {
     ErrorMessageDTOFromJSON,
@@ -29,7 +30,21 @@ import {
     FileCreateResponseDTOToJSON,
     FileSummaryDTOFromJSON,
     FileSummaryDTOToJSON,
+    ProblemDetailsFromJSON,
+    ProblemDetailsToJSON,
 } from '../models/index';
+
+export interface ApiV1DataFilesIdBlobGetRequest {
+    id: string;
+}
+
+export interface ApiV1DataFilesIdContentGetRequest {
+    id: string;
+}
+
+export interface ApiV1DataFilesIdGetRequest {
+    id: string;
+}
 
 export interface ApiV1DataFilesPostRequest {
     fileCreateRequestDTO?: FileCreateRequestDTO;
@@ -41,6 +56,7 @@ export interface ApiV1DataFilesPostRequest {
 export class FilesApi extends runtime.BaseAPI {
 
     /**
+     * Get summaries of all files.
      */
     async apiV1DataFilesGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<FileSummaryDTO>>> {
         const queryParameters: any = {};
@@ -58,6 +74,7 @@ export class FilesApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get summaries of all files.
      */
     async apiV1DataFilesGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<FileSummaryDTO>> {
         const response = await this.apiV1DataFilesGetRaw(initOverrides);
@@ -65,6 +82,105 @@ export class FilesApi extends runtime.BaseAPI {
     }
 
     /**
+     * Request a download of a file. Not all files are available for download. On success, the raw bytes will be returned.
+     */
+    async apiV1DataFilesIdBlobGetRaw(requestParameters: ApiV1DataFilesIdBlobGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataFilesIdBlobGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/v1/data/files/{id}/blob`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.BlobApiResponse(response);
+    }
+
+    /**
+     * Request a download of a file. Not all files are available for download. On success, the raw bytes will be returned.
+     */
+    async apiV1DataFilesIdBlobGet(requestParameters: ApiV1DataFilesIdBlobGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
+        const response = await this.apiV1DataFilesIdBlobGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Request redirect to a file. On success, a 302 referring to the final download URL will be returned.
+     */
+    async apiV1DataFilesIdContentGetRaw(requestParameters: ApiV1DataFilesIdContentGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataFilesIdContentGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/v1/data/files/{id}/content`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Request redirect to a file. On success, a 302 referring to the final download URL will be returned.
+     */
+    async apiV1DataFilesIdContentGet(requestParameters: ApiV1DataFilesIdContentGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.apiV1DataFilesIdContentGetRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Get summary of a single file.
+     */
+    async apiV1DataFilesIdGetRaw(requestParameters: ApiV1DataFilesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FileSummaryDTO>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataFilesIdGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/v1/data/files/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FileSummaryDTOFromJSON(jsonValue));
+    }
+
+    /**
+     * Get summary of a single file.
+     */
+    async apiV1DataFilesIdGet(requestParameters: ApiV1DataFilesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileSummaryDTO> {
+        const response = await this.apiV1DataFilesIdGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Request an upload for a new file.
      */
     async apiV1DataFilesPostRaw(requestParameters: ApiV1DataFilesPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FileCreateResponseDTO>> {
         const queryParameters: any = {};
@@ -85,6 +201,7 @@ export class FilesApi extends runtime.BaseAPI {
     }
 
     /**
+     * Request an upload for a new file.
      */
     async apiV1DataFilesPost(requestParameters: ApiV1DataFilesPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileCreateResponseDTO> {
         const response = await this.apiV1DataFilesPostRaw(requestParameters, initOverrides);

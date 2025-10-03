@@ -25,6 +25,10 @@ import {
     ProblemDetailsToJSON,
 } from '../models/index';
 
+export interface ApiV1DataCollectionsIdGetRequest {
+    id: string;
+}
+
 export interface ApiV1DataCollectionsPostRequest {
     collectionSummaryDTO?: CollectionSummaryDTO;
 }
@@ -35,6 +39,7 @@ export interface ApiV1DataCollectionsPostRequest {
 export class CollectionsApi extends runtime.BaseAPI {
 
     /**
+     * Get all colletions.
      */
     async apiV1DataCollectionsGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<CollectionSummaryDTO>>> {
         const queryParameters: any = {};
@@ -52,9 +57,43 @@ export class CollectionsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get all colletions.
      */
     async apiV1DataCollectionsGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<CollectionSummaryDTO>> {
         const response = await this.apiV1DataCollectionsGetRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Get a single collection by id.
+     */
+    async apiV1DataCollectionsIdGetRaw(requestParameters: ApiV1DataCollectionsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CollectionSummaryDTO>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataCollectionsIdGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/v1/data/collections/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CollectionSummaryDTOFromJSON(jsonValue));
+    }
+
+    /**
+     * Get a single collection by id.
+     */
+    async apiV1DataCollectionsIdGet(requestParameters: ApiV1DataCollectionsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CollectionSummaryDTO> {
+        const response = await this.apiV1DataCollectionsIdGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -7,6 +7,7 @@ apis/index.ts
 index.ts
 models/CollectionSummaryDTO.ts
 models/ContentTypeDTO.ts
+models/DataSetDetailedDTO.ts
 models/DataSetStateDTO.ts
 models/DataSetSummaryDTO.ts
 models/DataStoreSummaryDTO.ts

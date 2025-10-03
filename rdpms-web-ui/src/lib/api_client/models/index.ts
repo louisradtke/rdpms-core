@@ -2,6 +2,7 @@
 /* eslint-disable */
 export * from './CollectionSummaryDTO';
 export * from './ContentTypeDTO';
+export * from './DataSetDetailedDTO';
 export * from './DataSetStateDTO';
 export * from './DataSetSummaryDTO';
 export * from './DataStoreSummaryDTO';

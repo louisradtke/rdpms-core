@@ -15,15 +15,29 @@
 
 import * as runtime from '../runtime';
 import type {
+  DataSetDetailedDTO,
   DataSetSummaryDTO,
+  ProblemDetails,
 } from '../models/index';
 import {
+    DataSetDetailedDTOFromJSON,
+    DataSetDetailedDTOToJSON,
     DataSetSummaryDTOFromJSON,
     DataSetSummaryDTOToJSON,
+    ProblemDetailsFromJSON,
+    ProblemDetailsToJSON,
 } from '../models/index';
 
 export interface ApiV1DataDatasetsBatchPostRequest {
     dataSetSummaryDTO?: Array<DataSetSummaryDTO>;
+}
+
+export interface ApiV1DataDatasetsGetRequest {
+    collectionId?: string;
+}
+
+export interface ApiV1DataDatasetsIdGetRequest {
+    id: string;
 }
 
 export interface ApiV1DataDatasetsPostRequest {
@@ -65,8 +79,12 @@ export class DataSetsApi extends runtime.BaseAPI {
 
     /**
      */
-    async apiV1DataDatasetsGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<DataSetSummaryDTO>>> {
+    async apiV1DataDatasetsGetRaw(requestParameters: ApiV1DataDatasetsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<DataSetSummaryDTO>>> {
         const queryParameters: any = {};
+
+        if (requestParameters['collectionId'] != null) {
+            queryParameters['collectionId'] = requestParameters['collectionId'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -82,8 +100,39 @@ export class DataSetsApi extends runtime.BaseAPI {
 
     /**
      */
-    async apiV1DataDatasetsGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<DataSetSummaryDTO>> {
-        const response = await this.apiV1DataDatasetsGetRaw(initOverrides);
+    async apiV1DataDatasetsGet(requestParameters: ApiV1DataDatasetsGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<DataSetSummaryDTO>> {
+        const response = await this.apiV1DataDatasetsGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async apiV1DataDatasetsIdGetRaw(requestParameters: ApiV1DataDatasetsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DataSetDetailedDTO>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataDatasetsIdGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/v1/data/datasets/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DataSetDetailedDTOFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async apiV1DataDatasetsIdGet(requestParameters: ApiV1DataDatasetsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DataSetDetailedDTO> {
+        const response = await this.apiV1DataDatasetsIdGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

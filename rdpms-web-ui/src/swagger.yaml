@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.4
 info:
   title: RDPMS API v1
   description: RDPMS API v1
@@ -8,6 +8,7 @@ paths:
     get:
       tags:
         - Collections
+      summary: Get all colletions.
       responses:
         '200':
           description: OK
@@ -48,6 +49,43 @@ paths:
           description: OK
         '400':
           description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  '/api/v1/data/collections/{id}':
+    get:
+      tags:
+        - Collections
+      summary: Get a single collection by id.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/CollectionSummaryDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionSummaryDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/CollectionSummaryDTO'
+        '404':
+          description: Not Found
           content:
             text/plain:
               schema:
@@ -144,6 +182,12 @@ paths:
     get:
       tags:
         - DataSets
+      parameters:
+        - name: collectionId
+          in: query
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: OK
@@ -172,6 +216,30 @@ paths:
       responses:
         '200':
           description: OK
+  '/api/v1/data/datasets/{id}':
+    get:
+      tags:
+        - DataSets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSetDetailedDTO'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
   /api/v1/data/datasets/batch:
     post:
       tags:
@@ -202,6 +270,7 @@ paths:
     get:
       tags:
         - Files
+      summary: Get summaries of all files.
       responses:
         '200':
           description: OK
@@ -224,7 +293,9 @@ paths:
     post:
       tags:
         - Files
+      summary: Request an upload for a new file.
       requestBody:
+        description: ''
         content:
           application/json:
             schema:
@@ -260,10 +331,122 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
+  '/api/v1/data/files/{id}':
+    get:
+      tags:
+        - Files
+      summary: Get summary of a single file.
+      parameters:
+        - name: id
+          in: path
+          description: Id of the file.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/FileSummaryDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileSummaryDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/FileSummaryDTO'
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  '/api/v1/data/files/{id}/content':
+    get:
+      tags:
+        - Files
+      summary: "Request redirect to a file.\nOn success, a 302 referring to the final download URL will be returned."
+      parameters:
+        - name: id
+          in: path
+          description: Id of the file to download.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '302':
+          description: Found
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+  '/api/v1/data/files/{id}/blob':
+    get:
+      tags:
+        - Files
+      summary: "Request a download of a file. Not all files are available for download.\nOn success, the raw bytes will be returned."
+      parameters:
+        - name: id
+          in: path
+          description: Id of the file to download.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+        '501':
+          description: Not Implemented
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
   /api/v1/data/stores:
     get:
       tags:
         - Stores
+      summary: Get all data stores.
       responses:
         '200':
           description: OK
@@ -283,35 +466,32 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DataStoreSummaryDTO'
-    post:
+  '/api/v1/data/stores/{id}':
+    get:
       tags:
         - Stores
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DataStoreSummaryDTO'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/DataStoreSummaryDTO'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/DataStoreSummaryDTO'
+      summary: Get a single data store by id.
+      parameters:
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: OK
-        '400':
-          description: Bad Request
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/ProblemDetails'
+                $ref: '#/components/schemas/DataStoreSummaryDTO'
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemDetails'
+                $ref: '#/components/schemas/DataStoreSummaryDTO'
             text/json:
               schema:
-                $ref: '#/components/schemas/ProblemDetails'
+                $ref: '#/components/schemas/DataStoreSummaryDTO'
 components:
   schemas:
     CollectionSummaryDTO:
@@ -324,7 +504,7 @@ components:
         name:
           type: string
           nullable: true
-        dataFilesCount:
+        dataSetCount:
           type: integer
           format: int32
           nullable: true
@@ -353,12 +533,77 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    DataSetDetailedDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Uniquely identifies the dataset. Typically server-generated. Should not be manually set by the client.
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          description: 'Non-unique, mandatory descriptive name of the dataset. Must be provided by the client.'
+          nullable: true
+        assignedTags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagDTO'
+          description: 'List of tags associated with the dataset, used for categorization and filtering purposes.'
+          nullable: true
+        createdStampUTC:
+          type: string
+          description: "UTC timestamp when the dataset was originally created.\nMandatory property, should be provided by the client."
+          format: date-time
+          nullable: true
+        deletedStampUTC:
+          type: string
+          description: "UTC timestamp that indicates when the dataset was deleted.\nNull if the dataset has not been deleted yet."
+          format: date-time
+          nullable: true
+        beginStampUTC:
+          type: string
+          description: "UTC timestamp that marks the period begin of the dataset.\nOnly to be set by server."
+          format: date-time
+          nullable: true
+        endStampUTC:
+          type: string
+          description: "UTC timestamp that marks the period end of the dataset.\nOnly to be set by server."
+          format: date-time
+          nullable: true
+        state:
+          $ref: '#/components/schemas/DataSetStateDTO'
+        isTimeSeries:
+          type: boolean
+          description: "Indicates if the dataset represents time-series data.\nOnly to be set by server."
+          nullable: true
+        isDeleted:
+          type: boolean
+          description: "Flags whether the dataset has been marked as deleted.\nOnly to be set by server."
+          nullable: true
+        metadataFields:
+          type: array
+          items:
+            type: string
+          description: "Fields, for which metadata exists.\nOnly to be set by server."
+          nullable: true
+        fileCount:
+          type: integer
+          description: Amount of files in the dataset.
+          format: int32
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileSummaryDTO'
+          nullable: true
+      additionalProperties: false
+      description: "Represents a summary of a dataset, including identifying information, timestamps, state, tags,\nand metadata fields."
     DataSetStateDTO:
       enum:
         - 0
         - 1
       type: integer
-      description: "Enum indicating whether a dataset was just created or all associated files\r\nwere linked. Remember design decision: datasets shall be immutable."
+      description: "Enum indicating whether a dataset was just created or all associated files\nwere linked. Remember design decision: datasets shall be immutable."
       format: int32
     DataSetSummaryDTO:
       type: object
@@ -380,42 +625,46 @@ components:
           nullable: true
         createdStampUTC:
           type: string
-          description: "UTC timestamp when the dataset was originally created.\r\nMandatory property, should be provided by the client."
+          description: "UTC timestamp when the dataset was originally created.\nMandatory property, should be provided by the client."
           format: date-time
           nullable: true
         deletedStampUTC:
           type: string
-          description: "UTC timestamp that indicates when the dataset was deleted.\r\nNull if the dataset has not been deleted yet."
+          description: "UTC timestamp that indicates when the dataset was deleted.\nNull if the dataset has not been deleted yet."
           format: date-time
           nullable: true
         beginStampUTC:
           type: string
-          description: "UTC timestamp that marks the period begin of the dataset.\r\nOnly to be set by server."
+          description: "UTC timestamp that marks the period begin of the dataset.\nOnly to be set by server."
           format: date-time
           nullable: true
         endStampUTC:
           type: string
-          description: "UTC timestamp that marks the period end of the dataset.\r\nOnly to be set by server."
+          description: "UTC timestamp that marks the period end of the dataset.\nOnly to be set by server."
           format: date-time
           nullable: true
         state:
           $ref: '#/components/schemas/DataSetStateDTO'
         isTimeSeries:
           type: boolean
-          description: "Indicates if the dataset represents time-series data.\r\nOnly to be set by server."
+          description: "Indicates if the dataset represents time-series data.\nOnly to be set by server."
           nullable: true
         isDeleted:
           type: boolean
-          description: "Flags whether the dataset has been marked as deleted.\r\nOnly to be set by server."
+          description: "Flags whether the dataset has been marked as deleted.\nOnly to be set by server."
           nullable: true
         metadataFields:
           type: array
           items:
             type: string
-          description: "Fields, for which metadata exists.\r\nOnly to be set by server."
+          description: "Fields, for which metadata exists.\nOnly to be set by server."
           nullable: true
+        fileCount:
+          type: integer
+          description: Amount of files in the dataset.
+          format: int32
       additionalProperties: false
-      description: "Represents a summary of a dataset, including identifying information, timestamps, state, tags,\r\nand metadata fields."
+      description: "Represents a summary of a dataset, including identifying information, timestamps, state, tags,\nand metadata fields."
     DataStoreSummaryDTO:
       type: object
       properties:
@@ -436,11 +685,11 @@ components:
       properties:
         message:
           type: string
-          description: "The error message. This must be set. If the \"user friendly\" RDPMS.Core.Server.Model.DTO.V1.ErrorMessageDTO.DisplayMessage is set, this may\r\nbecome technical."
+          description: "The error message. This must be set. If the \"user friendly\" RDPMS.Core.Server.Model.DTO.V1.ErrorMessageDTO.DisplayMessage is set, this may\nbecome technical."
           nullable: true
         displayMessage:
           type: string
-          description: 'A message dedicated to the user. If null, RDPMS.Core.Server.Model.DTO.V1.ErrorMessageDTO.Message is the fallback.'
+          description: 'A message dedicated to the user. If null, use RDPMS.Core.Server.Model.DTO.V1.ErrorMessageDTO.Message as fallback.'
           nullable: true
       additionalProperties: false
     FileCreateRequestDTO:
@@ -496,6 +745,9 @@ components:
           format: uuid
           nullable: true
         name:
+          type: string
+          nullable: true
+        downloadURI:
           type: string
           nullable: true
         contentType:

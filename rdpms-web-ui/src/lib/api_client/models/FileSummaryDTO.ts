@@ -40,6 +40,12 @@ export interface FileSummaryDTO {
     name?: string | null;
     /**
      * 
+     * @type {string}
+     * @memberof FileSummaryDTO
+     */
+    downloadURI?: string | null;
+    /**
+     * 
      * @type {ContentTypeDTO}
      * @memberof FileSummaryDTO
      */
@@ -107,6 +113,7 @@ export function FileSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
         
         'id': json['id'] == null ? undefined : json['id'],
         'name': json['name'] == null ? undefined : json['name'],
+        'downloadURI': json['downloadURI'] == null ? undefined : json['downloadURI'],
         'contentType': json['contentType'] == null ? undefined : ContentTypeDTOFromJSON(json['contentType']),
         'size': json['size'] == null ? undefined : json['size'],
         'createdStampUTC': json['createdStampUTC'] == null ? undefined : (new Date(json['createdStampUTC'])),
@@ -126,6 +133,7 @@ export function FileSummaryDTOToJSON(value?: FileSummaryDTO | null): any {
         
         'id': value['id'],
         'name': value['name'],
+        'downloadURI': value['downloadURI'],
         'contentType': ContentTypeDTOToJSON(value['contentType']),
         'size': value['size'],
         'createdStampUTC': value['createdStampUTC'] == null ? undefined : ((value['createdStampUTC'] as any).toISOString()),

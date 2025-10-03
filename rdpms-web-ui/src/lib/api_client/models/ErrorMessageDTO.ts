@@ -27,7 +27,7 @@ export interface ErrorMessageDTO {
      */
     message?: string | null;
     /**
-     * A message dedicated to the user. If null, RDPMS.Core.Server.Model.DTO.V1.ErrorMessageDTO.Message is the fallback.
+     * A message dedicated to the user. If null, use RDPMS.Core.Server.Model.DTO.V1.ErrorMessageDTO.Message as fallback.
      * @type {string}
      * @memberof ErrorMessageDTO
      */

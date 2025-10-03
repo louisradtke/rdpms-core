@@ -13,6 +13,12 @@
  */
 
 import { mapValues } from '../runtime';
+import type { FileSummaryDTO } from './FileSummaryDTO';
+import {
+    FileSummaryDTOFromJSON,
+    FileSummaryDTOFromJSONTyped,
+    FileSummaryDTOToJSON,
+} from './FileSummaryDTO';
 import type { DataSetStateDTO } from './DataSetStateDTO';
 import {
     DataSetStateDTOFromJSON,
@@ -30,102 +36,108 @@ import {
  * Represents a summary of a dataset, including identifying information, timestamps, state, tags,
  * and metadata fields.
  * @export
- * @interface DataSetSummaryDTO
+ * @interface DataSetDetailedDTO
  */
-export interface DataSetSummaryDTO {
+export interface DataSetDetailedDTO {
     /**
      * Uniquely identifies the dataset. Typically server-generated. Should not be manually set by the client.
      * @type {string}
-     * @memberof DataSetSummaryDTO
+     * @memberof DataSetDetailedDTO
      */
     id?: string | null;
     /**
      * Non-unique, mandatory descriptive name of the dataset. Must be provided by the client.
      * @type {string}
-     * @memberof DataSetSummaryDTO
+     * @memberof DataSetDetailedDTO
      */
     name?: string | null;
     /**
      * List of tags associated with the dataset, used for categorization and filtering purposes.
      * @type {Array<TagDTO>}
-     * @memberof DataSetSummaryDTO
+     * @memberof DataSetDetailedDTO
      */
     assignedTags?: Array<TagDTO> | null;
     /**
      * UTC timestamp when the dataset was originally created.
      * Mandatory property, should be provided by the client.
      * @type {Date}
-     * @memberof DataSetSummaryDTO
+     * @memberof DataSetDetailedDTO
      */
     createdStampUTC?: Date | null;
     /**
      * UTC timestamp that indicates when the dataset was deleted.
      * Null if the dataset has not been deleted yet.
      * @type {Date}
-     * @memberof DataSetSummaryDTO
+     * @memberof DataSetDetailedDTO
      */
     deletedStampUTC?: Date | null;
     /**
      * UTC timestamp that marks the period begin of the dataset.
      * Only to be set by server.
      * @type {Date}
-     * @memberof DataSetSummaryDTO
+     * @memberof DataSetDetailedDTO
      */
     beginStampUTC?: Date | null;
     /**
      * UTC timestamp that marks the period end of the dataset.
      * Only to be set by server.
      * @type {Date}
-     * @memberof DataSetSummaryDTO
+     * @memberof DataSetDetailedDTO
      */
     endStampUTC?: Date | null;
     /**
      * 
      * @type {DataSetStateDTO}
-     * @memberof DataSetSummaryDTO
+     * @memberof DataSetDetailedDTO
      */
     state?: DataSetStateDTO;
     /**
      * Indicates if the dataset represents time-series data.
      * Only to be set by server.
      * @type {boolean}
-     * @memberof DataSetSummaryDTO
+     * @memberof DataSetDetailedDTO
      */
     isTimeSeries?: boolean | null;
     /**
      * Flags whether the dataset has been marked as deleted.
      * Only to be set by server.
      * @type {boolean}
-     * @memberof DataSetSummaryDTO
+     * @memberof DataSetDetailedDTO
      */
     isDeleted?: boolean | null;
     /**
      * Fields, for which metadata exists.
      * Only to be set by server.
      * @type {Array<string>}
-     * @memberof DataSetSummaryDTO
+     * @memberof DataSetDetailedDTO
      */
     metadataFields?: Array<string> | null;
     /**
      * Amount of files in the dataset.
      * @type {number}
-     * @memberof DataSetSummaryDTO
+     * @memberof DataSetDetailedDTO
      */
     fileCount?: number;
+    /**
+     * 
+     * @type {Array<FileSummaryDTO>}
+     * @memberof DataSetDetailedDTO
+     */
+    files?: Array<FileSummaryDTO> | null;
 }
 
 /**
- * Check if a given object implements the DataSetSummaryDTO interface.
+ * Check if a given object implements the DataSetDetailedDTO interface.
  */
-export function instanceOfDataSetSummaryDTO(value: object): value is DataSetSummaryDTO {
+export function instanceOfDataSetDetailedDTO(value: object): value is DataSetDetailedDTO {
     return true;
 }
 
-export function DataSetSummaryDTOFromJSON(json: any): DataSetSummaryDTO {
-    return DataSetSummaryDTOFromJSONTyped(json, false);
+export function DataSetDetailedDTOFromJSON(json: any): DataSetDetailedDTO {
+    return DataSetDetailedDTOFromJSONTyped(json, false);
 }
 
-export function DataSetSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): DataSetSummaryDTO {
+export function DataSetDetailedDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): DataSetDetailedDTO {
     if (json == null) {
         return json;
     }
@@ -143,10 +155,11 @@ export function DataSetSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: b
         'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
         'metadataFields': json['metadataFields'] == null ? undefined : json['metadataFields'],
         'fileCount': json['fileCount'] == null ? undefined : json['fileCount'],
+        'files': json['files'] == null ? undefined : ((json['files'] as Array<any>).map(FileSummaryDTOFromJSON)),
     };
 }
 
-export function DataSetSummaryDTOToJSON(value?: DataSetSummaryDTO | null): any {
+export function DataSetDetailedDTOToJSON(value?: DataSetDetailedDTO | null): any {
     if (value == null) {
         return value;
     }
@@ -164,6 +177,7 @@ export function DataSetSummaryDTOToJSON(value?: DataSetSummaryDTO | null): any {
         'isDeleted': value['isDeleted'],
         'metadataFields': value['metadataFields'],
         'fileCount': value['fileCount'],
+        'files': value['files'] == null ? undefined : ((value['files'] as Array<any>).map(FileSummaryDTOToJSON)),
     };
 }
 

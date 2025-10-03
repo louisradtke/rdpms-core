@@ -16,17 +16,14 @@
 import * as runtime from '../runtime';
 import type {
   DataStoreSummaryDTO,
-  ProblemDetails,
 } from '../models/index';
 import {
     DataStoreSummaryDTOFromJSON,
     DataStoreSummaryDTOToJSON,
-    ProblemDetailsFromJSON,
-    ProblemDetailsToJSON,
 } from '../models/index';
 
-export interface ApiV1DataStoresPostRequest {
-    dataStoreSummaryDTO?: DataStoreSummaryDTO;
+export interface ApiV1DataStoresIdGetRequest {
+    id: string;
 }
 
 /**
@@ -35,6 +32,7 @@ export interface ApiV1DataStoresPostRequest {
 export class StoresApi extends runtime.BaseAPI {
 
     /**
+     * Get all data stores.
      */
     async apiV1DataStoresGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<DataStoreSummaryDTO>>> {
         const queryParameters: any = {};
@@ -52,6 +50,7 @@ export class StoresApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get all data stores.
      */
     async apiV1DataStoresGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<DataStoreSummaryDTO>> {
         const response = await this.apiV1DataStoresGetRaw(initOverrides);
@@ -59,29 +58,36 @@ export class StoresApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get a single data store by id.
      */
-    async apiV1DataStoresPostRaw(requestParameters: ApiV1DataStoresPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async apiV1DataStoresIdGetRaw(requestParameters: ApiV1DataStoresIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DataStoreSummaryDTO>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataStoresIdGet().'
+            );
+        }
+
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
 
-        headerParameters['Content-Type'] = 'application/json';
-
         const response = await this.request({
-            path: `/api/v1/data/stores`,
-            method: 'POST',
+            path: `/api/v1/data/stores/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'GET',
             headers: headerParameters,
             query: queryParameters,
-            body: DataStoreSummaryDTOToJSON(requestParameters['dataStoreSummaryDTO']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => DataStoreSummaryDTOFromJSON(jsonValue));
     }
 
     /**
+     * Get a single data store by id.
      */
-    async apiV1DataStoresPost(requestParameters: ApiV1DataStoresPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.apiV1DataStoresPostRaw(requestParameters, initOverrides);
+    async apiV1DataStoresIdGet(requestParameters: ApiV1DataStoresIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DataStoreSummaryDTO> {
+        const response = await this.apiV1DataStoresIdGetRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
 }
