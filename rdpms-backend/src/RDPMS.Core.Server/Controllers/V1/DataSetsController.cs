@@ -7,7 +7,7 @@ using RDPMS.Core.Server.Services;
 namespace RDPMS.Core.Server.Controllers.V1;
 
 [ApiController]
-[Route("api/v{version:apiVersion}/data")]
+[Route("api/v{version:apiVersion}/data/datasets")]
 [ApiVersion("1.0")]
 [Produces("application/json")]
 public class DataSetsController(
@@ -16,7 +16,7 @@ public class DataSetsController(
     ILogger<DataSetsController> logger)
     : ControllerBase
 {
-    [HttpGet("datasets")]
+    [HttpGet]
     [ProducesResponseType<IEnumerable<DataSetSummaryDTO>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<DataSetSummaryDTO>>> Get()
     {
@@ -38,7 +38,7 @@ public class DataSetsController(
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [HttpPost("datasets")]
+    [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult> Post([FromBody] DataSetSummaryDTO dto)
     {
@@ -56,7 +56,7 @@ public class DataSetsController(
     /// </summary>
     /// <param name="dtos"></param>
     /// <returns></returns>
-    [HttpPost("datasets/batch")]
+    [HttpPost("batch")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [RequestSizeLimit(10_000_000)]
     public async Task<ActionResult> PostBatch([FromBody] IEnumerable<DataSetSummaryDTO> dtos)

@@ -7,7 +7,7 @@ using RDPMS.Core.Server.Services;
 namespace RDPMS.Core.Server.Controllers.V1;
 
 [ApiController]
-[Route("api/v{version:apiVersion}/data")]
+[Route("api/v{version:apiVersion}/data/collections")]
 [ApiVersion("1.0")]
 public class CollectionsController(
     IDataCollectionEntityService dataCollectionEntityService,
@@ -20,7 +20,7 @@ public class CollectionsController(
     /// Get all colletions.
     /// </summary>
     /// <returns></returns>
-    [HttpGet("collections")]
+    [HttpGet]
     [ProducesResponseType<IEnumerable<CollectionSummaryDTO>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<CollectionSummaryDTO>>> Get()
     {
@@ -31,7 +31,7 @@ public class CollectionsController(
     /// <summary>
     /// Get a single collection by id.
     /// </summary>
-    [HttpGet("collections/{id:guid}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType<CollectionSummaryDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CollectionSummaryDTO>> GetById([FromRoute] Guid id)
@@ -54,7 +54,7 @@ public class CollectionsController(
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [HttpPost("collections")]
+    [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> Post([FromBody] CollectionSummaryDTO dto)
