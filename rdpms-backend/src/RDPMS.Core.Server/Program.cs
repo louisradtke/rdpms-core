@@ -76,6 +76,10 @@ internal class Program
 
         builder.Services.AddSingleton<RDPMSPersistenceContext>();
 
+        var assembliesToScan = new[] { typeof(Program).Assembly };
+
+        // file mapper interface, for now
+        builder.Services.AddAttributedServices(assembliesToScan);
         builder.Services.AddSingleton<ContentTypeDTOMapper>();
         builder.Services.AddSingleton<DataCollectionSummaryDTOMapper>();
         builder.Services.AddSingleton<DataSetSummaryDTOMapper>();

@@ -12,6 +12,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+        <HintPath>..\..\..\..\..\..\.nuget\packages\microsoft.extensions.dependencyinjection.abstractions\9.0.7\lib\net9.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+      </Reference>
       <Reference Include="NLog">
         <HintPath>..\..\..\..\..\..\.nuget\packages\nlog\6.0.4\lib\netstandard2.1\NLog.dll</HintPath>
       </Reference>
