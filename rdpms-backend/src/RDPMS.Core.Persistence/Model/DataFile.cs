@@ -59,5 +59,5 @@ public class DataFile(string name) : IUniqueEntity
     /// <summary>
     /// References to the storage location(s) of this file.
     /// </summary>
-    public List<FileStorageReference> Locations { get; set; } = new();
+    public List<FileStorageReference> Locations { get; set; } = [];
 }
