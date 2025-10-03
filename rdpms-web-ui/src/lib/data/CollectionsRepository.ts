@@ -1,5 +1,9 @@
-// TypeScript
-import { CollectionsApi, type CollectionSummaryDTO, Configuration } from '$lib/api_client';
+import {
+    type ApiV1DataCollectionsIdGetRequest,
+    CollectionsApi,
+    type CollectionSummaryDTO,
+    Configuration
+} from '$lib/api_client';
 
 export class CollectionsRepository {
     private readonly ready: Promise<void>;
@@ -7,13 +11,15 @@ export class CollectionsRepository {
 
     constructor(configPromise: Promise<Configuration>) {
         // Kick off async init immediately, but keep constructor synchronous
-        this.ready = configPromise.then((conf) => {
-            this.api = new CollectionsApi(conf);
-        }).catch((err) => {
-            // Prevent unhandled rejections and surface errors later in ensureReady
-            console.error('Failed to initialize CollectionsApi:', err);
-            throw err;
-        });
+        this.ready = configPromise
+            .then((conf) => {
+                this.api = new CollectionsApi(conf);
+            }).
+            catch((err) => {
+                // Prevent unhandled rejections and surface errors later in ensureReady
+                console.error('Failed to initialize CollectionsApi:', err);
+                throw err;
+            });
     }
 
     private async ensureReady(): Promise<CollectionsApi> {
@@ -28,6 +34,11 @@ export class CollectionsRepository {
     public async getCollections(): Promise<CollectionSummaryDTO[]> {
         const api = await this.ensureReady();
         return api.apiV1DataCollectionsGet();
+    }
+
+    public async getCollectionById(id: string): Promise<CollectionSummaryDTO> {
+        const api = await this.ensureReady()
+        return api.apiV1DataCollectionsIdGet({ id });
     }
 
     public async createCollection(dto: Partial<CollectionSummaryDTO>): Promise<void> {
