@@ -4,7 +4,7 @@ database_configuration:
 
 logging:
   log_file_level: trace
-  log_file_dir: '${special:LocalApplicationData}/logs/'
+  log_file_dir: '${special:LocalApplicationData}/rdpms/logs/'
   console_log_level: info
 
 allowed_origins:
