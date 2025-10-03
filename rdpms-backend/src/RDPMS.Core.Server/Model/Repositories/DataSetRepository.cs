@@ -5,20 +5,20 @@ using RDPMS.Core.Server.Model.Repositories.Infra;
 
 namespace RDPMS.Core.Server.Model.Repositories;
 
-public class DataSetRepository : GenericRepository<DataSet>,
-        IDataSetRepository
+public class DataSetRepository(RDPMSPersistenceContext ctx) : GenericRepository<DataSet>(ctx,
+        files => files
+            .Include(ds => ds.Files)
+            .ThenInclude(f => f.FileType)),
+    IDataSetRepository
 {
-    private readonly DbSet<DataCollectionEntity> _collectionsDbSet;
-
-    public DataSetRepository(RDPMSPersistenceContext ctx) : base(ctx)
-    {
-        _collectionsDbSet = ctx.DataCollections;
-    }
+    private readonly DbSet<DataCollectionEntity> _collectionsDbSet = ctx.DataCollections;
 
     public async Task<IEnumerable<DataSet>> GetByCollectionIdAsync(Guid collectionId)
     {
         var collection = await _collectionsDbSet
             .Include(c => c.ContainedDatasets)
+            .ThenInclude(d => d.Files)
+            .ThenInclude(f => f.FileType)
             .SingleAsync(e => e.Id == collectionId);
         return collection.ContainedDatasets;
     }

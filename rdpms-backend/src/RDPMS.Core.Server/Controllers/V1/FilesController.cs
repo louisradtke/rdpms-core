@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using RDPMS.Core.Infra.Exceptions;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Services;
@@ -29,9 +30,9 @@ public class FilesController(
         var list = (await fileService.GetAllAsync()).Select(fileMapper.Export).ToList();
         foreach (var file in list)
         {
-            file.DownloadURI = linkGenerator.GetUriByAction(
-                HttpContext, nameof(GetContent), null,
-                new {id = file.Id});
+            if (file.Id == null) throw new IllegalStateException("File has null id");
+
+            file.DownloadURI = fileService.GetContentApiUri(file.Id.Value, HttpContext);
         }
         return Ok(list);
     }
@@ -96,7 +97,7 @@ public class FilesController(
 
     /// <summary>
     /// Request redirect to a file.
-    /// On success, a redirect will be returned.
+    /// On success, a 302 referring to the final download URL will be returned.
     /// </summary>
     /// <param name="id">Id of the file to download.</param>
     /// <returns>On success, a redirect will be returned.</returns>
@@ -124,11 +125,11 @@ public class FilesController(
     }
     
     /// <summary>
-    /// Request a download of a file.
-    /// On success, either a redirect or a file download (the raw bytes) will be returned.
+    /// Request a download of a file. Not all files are available for download.
+    /// On success, the raw bytes will be returned.
     /// </summary>
     /// <param name="id">Id of the file to download.</param>
-    /// <returns>On success, either a redirect or a file download (the raw bytes) will be returned.</returns>
+    /// <returns>On success, the raw bytes will be returned.</returns>
     [HttpGet("{id:guid}/blob")]
     [ProducesResponseType<FileContentResult>(StatusCodes.Status200OK, "application/octet-stream")]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]

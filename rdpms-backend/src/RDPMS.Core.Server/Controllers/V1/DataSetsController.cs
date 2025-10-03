@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Services;
@@ -12,25 +13,45 @@ namespace RDPMS.Core.Server.Controllers.V1;
 [Produces("application/json")]
 public class DataSetsController(
     IDataSetService dataSetService,
-    DataSetSummaryDTOMapper dataSetMapper,
+    IFileService fileService,
+    DataSetSummaryDTOMapper dataSetSummaryMapper,
+    DataSetDetailedDTOMapper dataSetDetailedMapper,
+    LinkGenerator linkGenerator,
     ILogger<DataSetsController> logger)
     : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType<IEnumerable<DataSetSummaryDTO>>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<DataSetSummaryDTO>>> Get()
+    public async Task<ActionResult<IEnumerable<DataSetSummaryDTO>>> Get([FromQuery] Guid? collectionId = null)
     {
-        var list = await dataSetService.GetAllAsync();
-        return Ok(list.Select(dataSetMapper.Export));
+        IEnumerable<DataSet> datasets;
+        try
+        {
+            if (collectionId != null) datasets = await dataSetService.GetByCollectionAsync(collectionId.Value);
+            else datasets = await dataSetService.GetAllAsync();
+        }
+        catch (InvalidOperationException e)
+        {
+            logger.LogDebug("Failed to retrieve datasets for collection {CollectionId}, {EMessage}", collectionId, e);
+            return NotFound($"Collection {collectionId} was not found.");
+        }
+
+        var dtos = datasets.Select(dataSetSummaryMapper.Export);
+        return Ok(dtos);
     }
 
-    [HttpGet("datasets/{id:guid}")]
-    [ProducesResponseType<DataSetSummaryDTO>(StatusCodes.Status200OK)]
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType<DataSetDetailedDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<DataSetSummaryDTO>> GetById([FromRoute] Guid id)
+    public async Task<ActionResult<DataSetDetailedDTO>> GetById([FromRoute] Guid id)
     {
-        var item = await dataSetService.GetByIdAsync(id);
-        return Ok(dataSetMapper.Export(item));
+        var domainItem = await dataSetService.GetByIdAsync(id);
+        var dto = dataSetDetailedMapper.Export(domainItem);
+        foreach (var file in dto.Files)
+        {
+            file.DownloadURI = fileService.GetContentApiUri(file.Id!.Value, HttpContext);
+        }
+        return Ok(dto);
     }
 
     /// <summary>
@@ -47,7 +68,7 @@ public class DataSetsController(
             return BadRequest("Id is not allowed to be set.");
         }
 
-        await dataSetService.AddAsync(dataSetMapper.Import(dto));
+        await dataSetService.AddAsync(dataSetSummaryMapper.Import(dto));
         return Ok();
     }
 
@@ -67,30 +88,7 @@ public class DataSetsController(
             return BadRequest("Id is not allowed to be set.");
         }
 
-        await dataSetService.AddRangeAsync(dtosList.Select(dataSetMapper.Import));
+        await dataSetService.AddRangeAsync(dtosList.Select(dataSetSummaryMapper.Import));
         return Ok();
     }
-
-    /// <summary>
-    /// Get data sets in a collection
-    /// </summary>
-    /// <param name="collectionId"></param>
-    /// <returns></returns>
-    [HttpGet("collections/{collectionId:guid}/datasets")]
-    [ProducesResponseType<IEnumerable<DataSetSummaryDTO>>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<IEnumerable<FileSummaryDTO>>> GetByCollectionId(Guid collectionId)
-    {
-        try
-        {
-            var datasets = await dataSetService.GetByCollectionAsync(collectionId);
-            return Ok(datasets.Select(dataSetMapper.Export));
-        }
-        catch (InvalidOperationException e)
-        {
-            logger.LogDebug("Failed to retrieve datasets for collection {CollectionId}, {EMessage}", collectionId, e);
-            return NotFound($"Collection {collectionId} was not found.");
-        }
-    }
-
 }

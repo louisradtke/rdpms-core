@@ -43,4 +43,12 @@ public class DataFileService(
                 throw new IllegalStateException("Invalid file location type");
         }
     }
+
+    public string GetContentApiUri(Guid id, HttpContext context)
+    {
+        var uri = linkGenerator.GetUriByAction(
+            context, nameof(FilesController.GetContent), "Files",
+            new { id });
+        return uri ?? throw new IllegalStateException("Invalid file location type");
+    }
 }

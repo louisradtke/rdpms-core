@@ -17,4 +17,12 @@ public interface IFileService : IReadonlyGenericCollectionService<DataFile>
     /// <param name="context">The HttpContext of the current request.</param>
     /// <returns></returns>
     Task<Uri> GetFileDownloadUriAsync(Guid id, HttpContext context);
+
+    /// <summary>
+    /// Get the link, from which the API directs to the actual file (yielded by <see cref="GetFileDownloadUriAsync"/>.
+    /// </summary>
+    /// <param name="id">Id of the DataFile</param>
+    /// <param name="context">HttpContext</param>
+    /// <returns>The rooted URI</returns>
+    string GetContentApiUri(Guid id, HttpContext context);
 }

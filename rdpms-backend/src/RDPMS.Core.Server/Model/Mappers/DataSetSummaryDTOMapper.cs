@@ -79,7 +79,8 @@ public class DataSetSummaryDTOMapper
             State = (DataSetStateDTO)domain.State,
             IsTimeSeries = domain.Files.Any(file => file.BeginStamp.HasValue),
             IsDeleted = domain.DeletedStamp.HasValue,
-            MetadataFields = domain.MetadataJsonFields.Select(f => f.Key).ToList()
+            MetadataFields = domain.MetadataJsonFields.Select(f => f.Key).ToList(),
+            FileCount = domain.Files.Count
         };
     }
 }

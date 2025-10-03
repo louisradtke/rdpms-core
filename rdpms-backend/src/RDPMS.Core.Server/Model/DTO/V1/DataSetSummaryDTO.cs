@@ -68,4 +68,9 @@ public record DataSetSummaryDTO
     /// Only to be set by server.
     /// </summary>
     public List<string>? MetadataFields { get; set; }
+    
+    /// <summary>
+    /// Amount of files in the dataset.
+    /// </summary>
+    public int FileCount { get; set; }
 }
