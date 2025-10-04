@@ -166,11 +166,14 @@ public static class DefaultValues
             ParentProject = project,
             ContainedDatasets =
             [
-                new("dummy-recording-01")
+                new DataSet("dummy-recording-01")
                 {
+                    Id = Guid.Parse("fae41903-b023-427e-93cf-1a7f9d6437e8"),
+                    CreatedStamp = DateTime.Parse("2025-09-11T22:57:38.000+02:00"),
+                    State = DataSetState.Sealed,
                     Files =
                     [
-                        new("demo_2025-09-11_22-57-38.mcap")
+                        new DataFile("demo_2025-09-11_22-57-38.mcap")
                         {
                             Id = Guid.Parse("40a447f0-0012-46e9-b882-3ab9a30ae187"),
                             FileType = mcapType,
@@ -191,7 +194,7 @@ public static class DefaultValues
                                 }
                             ]
                         },
-                        new("image.png")
+                        new DataFile("image.png")
                         {
                             Id = Guid.Parse("bf2256e3-697a-4ad0-863a-f5f11b24dc10"),
                             FileType = imageType,
@@ -210,7 +213,7 @@ public static class DefaultValues
                                 }
                             ]
                         },
-                        new("imu_tedaldi_calib.pdf")
+                        new DataFile("imu_tedaldi_calib.pdf")
                         {
                             Id = Guid.Parse("34f3d1a7-4b28-4493-accf-fa1b77003922"),
                             FileType = pdfType,
@@ -230,6 +233,13 @@ public static class DefaultValues
                             ]
                         }
                     ]
+                },
+                new DataSet("dummy-recording-02")
+                {
+                    Id = Guid.Parse("3b5a0c9b-d1da-42ae-92ac-4dc700224cda"),
+                    CreatedStamp = DateTime.Parse("2025-10-04T13:52:00.000+02:00"),
+                    State = DataSetState.Sealed,
+                    Files = []
                 }
             ]
         };
