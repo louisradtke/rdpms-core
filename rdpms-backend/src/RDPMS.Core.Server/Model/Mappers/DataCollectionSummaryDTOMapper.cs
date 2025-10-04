@@ -58,7 +58,7 @@ public class DataCollectionSummaryDTOMapper
             Id = domain.Id,
             Name = domain.Name,
             DataSetCount = domain.ContainedDatasets?.Count ?? 0,
-            DefaultDataStoreId = domain.DefaultDataStore.Id
+            DefaultDataStoreId = domain.DefaultDataStore?.Id
         };
     }
 
