@@ -17,10 +17,15 @@ public class DataFileRepository(RDPMSPersistenceContext ctx)
 {
     public async Task<IEnumerable<DataFile>> GetFilesInStoreAsync(Guid storeId)
     {
-        var storeEntity = await Context.DataStores.FindAsync(storeId);
+        var storeEntity = await Context.DataStores
+            .AsNoTracking()
+            .Include(s => s.DataFiles)
+            .ThenInclude(f => f.Locations)
+            .Include(s => s.DataFiles)
+            .ThenInclude(f => f.FileType)
+            .FirstOrDefaultAsync(s => s.Id == storeId);
         if (storeEntity == null) throw new KeyNotFoundException($"store with id {storeId} not found");
 
-        await Context.Entry(storeEntity).Reference(s => s.DataFiles).LoadAsync();
         return storeEntity.DataFiles;
     }
 }

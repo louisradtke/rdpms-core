@@ -8,7 +8,10 @@ namespace RDPMS.Core.Server.Model.Repositories;
 public class DataSetRepository(RDPMSPersistenceContext ctx) : GenericRepository<DataSet>(ctx,
         files => files
             .Include(ds => ds.Files)
-            .ThenInclude(f => f.FileType)),
+            .ThenInclude(f => f.FileType)
+            .Include(ds => ds.Files)
+            .ThenInclude(f => f.Locations)
+        ),
     IDataSetRepository
 {
     private readonly DbSet<DataCollectionEntity> _collectionsDbSet = ctx.DataCollections;
@@ -19,6 +22,9 @@ public class DataSetRepository(RDPMSPersistenceContext ctx) : GenericRepository<
             .Include(c => c.ContainedDatasets)
             .ThenInclude(d => d.Files)
             .ThenInclude(f => f.FileType)
+            .Include(c => c.ContainedDatasets)
+            .ThenInclude(d => d.Files)
+            .ThenInclude(f => f.Locations)
             .SingleAsync(e => e.Id == collectionId);
         return collection.ContainedDatasets;
     }

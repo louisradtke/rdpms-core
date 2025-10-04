@@ -10,6 +10,7 @@ using NLog;
 using NLog.Config;
 using NLog.Extensions.Logging;
 using RDPMS.Core.Infra;
+using RDPMS.Core.Infra.AppInitialization;
 using RDPMS.Core.Infra.Configuration;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Server.Model.Mappers;
@@ -74,7 +75,7 @@ internal class Program
         builder.Services.AddSingleton(launchConfig);
         builder.Services.AddSingleton(launchConfig.DatabaseConfiguration);
 
-        builder.Services.AddSingleton<RDPMSPersistenceContext>();
+        builder.Services.AddScoped<RDPMSPersistenceContext>();
 
         var assembliesToScan = new[] { typeof(Program).Assembly };
 
@@ -88,19 +89,19 @@ internal class Program
         builder.Services.AddSingleton<FileSummaryDTOMapper>();
         builder.Services.AddSingleton<StoreSummaryDTOMapper>();
 
-        builder.Services.AddSingleton<IDataSetRepository, DataSetRepository>();
-        builder.Services.AddSingleton<IDataStoreRepository, DataStoreRepository>();
-        builder.Services.AddSingleton<IDataFileRepository, DataFileRepository>();
-        builder.Services.AddSingleton<IContentTypeRepository, ContentTypeRepository>();
-        builder.Services.AddSingleton<IDataCollectionRepository, DataCollectionRepository>();
-        builder.Services.AddSingleton<IProjectRepository, ProjectRepository>();
+        builder.Services.AddScoped<IDataSetRepository, DataSetRepository>();
+        builder.Services.AddScoped<IDataStoreRepository, DataStoreRepository>();
+        builder.Services.AddScoped<IDataFileRepository, DataFileRepository>();
+        builder.Services.AddScoped<IContentTypeRepository, ContentTypeRepository>();
+        builder.Services.AddScoped<IDataCollectionRepository, DataCollectionRepository>();
+        builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 
-        builder.Services.AddSingleton<IDataSetService, DataSetService>();
-        builder.Services.AddSingleton<IStoreService,StoreService>();
-        builder.Services.AddSingleton<IFileService, DataFileService>();
-        builder.Services.AddSingleton<IContentTypeService, ContentTypeService>();
-        builder.Services.AddSingleton<IDataCollectionEntityService, DataCollectionEntityService>();
-        builder.Services.AddSingleton<IProjectService, ProjectService>();
+        builder.Services.AddScoped<IDataSetService, DataSetService>();
+        builder.Services.AddScoped<IStoreService,StoreService>();
+        builder.Services.AddScoped<IFileService, DataFileService>();
+        builder.Services.AddScoped<IContentTypeService, ContentTypeService>();
+        builder.Services.AddScoped<IDataCollectionEntityService, DataCollectionEntityService>();
+        builder.Services.AddScoped<IProjectService, ProjectService>();
 
 
         // init api and api exploration

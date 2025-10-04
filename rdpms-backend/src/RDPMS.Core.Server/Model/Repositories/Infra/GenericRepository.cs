@@ -36,7 +36,9 @@ public abstract class GenericRepository<T>(
             query = includeConfiguration.ConfigureIncludes(query);
         }
 
-        return await query.ToListAsync();
+        return await query
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public async Task<T> GetByIdAsync(Guid id)
@@ -48,7 +50,9 @@ public abstract class GenericRepository<T>(
             query = includeConfiguration.ConfigureIncludes(query);
         }
         
-        var entity = await query.FirstOrDefaultAsync(e => e.Id == id);
+        var entity = await query
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id == id);
         if (entity == null) throw new KeyNotFoundException();
         return entity;
     }
@@ -56,7 +60,10 @@ public abstract class GenericRepository<T>(
     public async Task<bool> CheckForIdAsync(Guid id)
     {
         // todo: this is dirty, idk
-        var any = (await DbSet.ToListAsync()).Any(t => t.Id == id);
+        var list = await DbSet
+            .AsNoTracking()
+            .ToListAsync();
+        var any = list.Any(t => t.Id == id);
         return any;
     }
 

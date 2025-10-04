@@ -6,8 +6,8 @@ using RDPMS.Core.Server.Util;
 
 namespace RDPMS.Core.Server.Model.Mappers;
 
-[AutoRegister]
-public class DataSetDetailedDTOMapper(IExportMapper<DataFile, FileSummaryDTO> fileMapper)
+[AutoRegister(registerFlags: RegisterFlags.ShallowInterfaces | RegisterFlags.Self)]
+public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper)
     : IExportMapper<DataSet, DataSetDetailedDTO>
 {
     public DataSetDetailedDTO Export(DataSet domain)

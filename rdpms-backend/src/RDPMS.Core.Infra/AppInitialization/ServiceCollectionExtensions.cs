@@ -1,9 +1,21 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using RDPMS.Core.Infra.AppInitialization;
 
+namespace RDPMS.Core.Infra.AppInitialization;
+
+/// <summary>
+/// Extension methods for <see cref="IServiceCollection"/> to register classes marked
+/// with <see cref="AutoRegisterAttribute"/>.
+/// </summary>
 public static class ServiceCollectionAutoRegistrar
 {
+    /// <summary>
+    /// Registers all classes marked with <see cref="AutoRegisterAttribute"/> in the given assemblies.
+    /// </summary>
+    /// <param name="services">The service collection to register the services at.</param>
+    /// <param name="assemblies">e.g. array of dependencies. Use e.g.
+    /// <code>new[] { typeof(Program).Assembly };</code></param>
+    /// <returns>A reference to this instance after the operation has completed.</returns>
     public static IServiceCollection AddAttributedServices(
         this IServiceCollection services,
         IEnumerable<Assembly> assemblies)
@@ -19,15 +31,19 @@ public static class ServiceCollectionAutoRegistrar
         {
             var lifetime = attr!.Lifetime;
 
-            if (attr.RegisterAs == RegisterAs.SelfOnly)
+            if ((attr.RegisterFlags | RegisterFlags.Self) > 0)
             {
+                // register as self
                 Add(services, implType, implType, lifetime);
-                continue;
             }
-
-            var interfaces = attr.RegisterAs == RegisterAs.SpecificInterfaces
-                ? attr.SpecificInterfaces ?? []
-                : GetDirectInterfaces(implType);
+            
+            var interfaces = new List<Type>();
+            if ((attr.RegisterFlags | RegisterFlags.ShallowInterfaces) > 0)
+            {
+                interfaces.AddRange(GetDirectInterfaces(implType));
+            }
+            
+            interfaces.AddRange(attr.SpecificInterfaces ?? []);
 
             foreach (var serviceType in interfaces)
             {
@@ -35,11 +51,11 @@ public static class ServiceCollectionAutoRegistrar
 
                 if (serviceType is { IsGenericType: true, ContainsGenericParameters: true })
                 {
-                    // Open generic service interface: register as open generic if impl is open
-                    if (implType.IsGenericTypeDefinition && attr.IncludeOpenGenerics)
-                    {
-                        AddOpenGeneric(services, serviceType.GetGenericTypeDefinition(), implType, lifetime);
-                    }
+                    // // Open generic service interface: register as open generic if impl is open
+                    // if (implType.IsGenericTypeDefinition && attr.IncludeOpenGenerics)
+                    // {
+                    //     AddOpenGeneric(services, serviceType.GetGenericTypeDefinition(), implType, lifetime);
+                    // }
                     continue;
                 }
 
