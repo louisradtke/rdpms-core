@@ -19,16 +19,18 @@
     })));
     let summaryReq = collectionsRepo.getCollectionById(collectionId);
     let datasetsReq = datasetsRepo.listByCollection(collectionId);
+
+    let title = 'RDPMS';
+    summaryReq.then(summary => {
+        let slug = summary.name ?? summary.id ?? 'none';
+        if (slug) {
+            title = `${slug} - RDPMS`;
+        }
+    })
 </script>
 
 <svelte:head>
-    <!--{#await summaryReq}-->
-    <!--    &lt;!&ndash; &ndash;&gt;-->
-    <!--{:then summary}-->
-    <!--    <title>{summary.name ?? summary.id ?? 'none'} - RDPMS</title>-->
-    <!--{:catch error}-->
-        <title>RDPMS</title>
-    <!--{/await}-->
+        <title>{title}</title>
 </svelte:head>
 
 <div class="flex h-full">
