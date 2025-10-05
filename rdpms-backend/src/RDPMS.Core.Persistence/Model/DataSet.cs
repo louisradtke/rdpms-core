@@ -5,7 +5,7 @@
 /// files, and finally seals the dataset. Only sealed datasets can be used for further processing.
 /// </summary>
 /// <param name="name"></param>
-public class DataSet(string name) : IUniqueEntity
+public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithNullableParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 
@@ -20,6 +20,12 @@ public class DataSet(string name) : IUniqueEntity
     /// Non-unique name of a dataset
     /// </summary>
     public string Name { get; set; } = name;
+    
+    /// <summary>
+    /// Id of the parent <see cref="DataCollectionEntity"/>. Nullability is a convenience feature, every dataset should
+    /// have a parent collection.
+    /// </summary>
+    public Guid? ParentId { get; set; }
 
     public List<DataFile> Files { get; set; } = [];
     public List<Tag> AssignedTags { get; set; } = [];

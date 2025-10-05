@@ -137,12 +137,11 @@ public static class DefaultValues
             .FirstAsync(t => t.Id == Guid.Parse("3ae8c8ef-5cc4-45f8-81c6-6c603b1f4580"), token);
         var mcapType = await typeSet
             .FirstAsync(t => t.Id == Guid.Parse("2b31bbd9-0049-45c0-a9a4-b4893fa1085c"), token);
-        var project = await ctx.Set<Project>()
-            .FindAsync(RDPMSConstants.GlobalProjectId, token);
         var s3Store = await ctx.Set<DataStore>()
             .FindAsync(RDPMSConstants.DummyS3StoreId, token) as S3DataStore;
+        var projectId = RDPMSConstants.GlobalProjectId;
         
-        return BuildDataCollectionEntity(s3Store, project, mcapType, imageType, pdfType);
+        return BuildDataCollectionEntity(s3Store, projectId, mcapType, imageType, pdfType);
     }
     public static DataCollectionEntity GetDummyDataCollection(DbContext ctx)
     {
@@ -150,20 +149,20 @@ public static class DefaultValues
         var imageType = typeSet.First(t => t.Id == Guid.Parse("0c52cf95-4d5c-4e04-89f7-6b9572b7d952"));
         var pdfType = typeSet.First(t => t.Id == Guid.Parse("3ae8c8ef-5cc4-45f8-81c6-6c603b1f4580"));
         var mcapType = typeSet.First(t => t.Id == Guid.Parse("2b31bbd9-0049-45c0-a9a4-b4893fa1085c"));
-        var project = ctx.Set<Project>().Find(RDPMSConstants.GlobalProjectId);
         var s3Store = ctx.Set<DataStore>().Find(RDPMSConstants.DummyS3StoreId) as S3DataStore;
-        
-        return BuildDataCollectionEntity(s3Store, project, mcapType, imageType, pdfType);
+        var projectId = RDPMSConstants.GlobalProjectId;
+
+        return BuildDataCollectionEntity(s3Store, projectId, mcapType, imageType, pdfType);
     }
 
-    private static DataCollectionEntity BuildDataCollectionEntity(S3DataStore? s3Store, Project? project,
+    private static DataCollectionEntity BuildDataCollectionEntity(S3DataStore? s3Store, Guid projectId,
         ContentType mcapType, ContentType imageType, ContentType pdfType)
     {
         return new DataCollectionEntity("dummy-collection")
         {
             Id = RDPMSConstants.DummyDataCollectionId,
             DefaultDataStore = s3Store,
-            ParentProject = project,
+            ParentId = projectId,
             ContainedDatasets =
             [
                 new DataSet("dummy-recording-01")

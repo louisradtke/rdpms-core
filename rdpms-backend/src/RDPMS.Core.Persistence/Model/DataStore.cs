@@ -4,7 +4,7 @@
 /// Class representing a managed data store, where the system can CRUD files.
 /// </summary>
 /// <param name="name">Display name of the store</param>
-public abstract class DataStore(string name) : IUniqueEntity
+public abstract class DataStore(string name) : IUniqueEntity, IUniqueEntityWithNullableParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 
@@ -13,6 +13,12 @@ public abstract class DataStore(string name) : IUniqueEntity
     /// </summary>
     public string Name { get; set; } = name;
 
+    /// <summary>
+    /// Id of the parent <see cref="Project"/>. Nullability is a convenience feature, every store should have a parent
+    /// project.
+    /// </summary>
+    public Guid? ParentId { get; set; }
+    
     /// <summary>
     /// List of all files stored on this instance
     /// </summary>
@@ -24,7 +30,6 @@ public abstract class DataStore(string name) : IUniqueEntity
 /// <summary>
 /// Represents a single storage bucket on some S3 instance.
 /// </summary>
-/// <param name="name"></param>
 public class S3DataStore : DataStore
 {
     public S3DataStore(string name) : base(name)

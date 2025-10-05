@@ -19,6 +19,7 @@ public class DataSetRepository(RDPMSPersistenceContext ctx) : GenericRepository<
     public async Task<IEnumerable<DataSet>> GetByCollectionIdAsync(Guid collectionId)
     {
         var collection = await _collectionsDbSet
+            .AsNoTracking()
             .Include(c => c.ContainedDatasets)
             .ThenInclude(d => d.Files)
             .ThenInclude(f => f.FileType)

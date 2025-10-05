@@ -25,6 +25,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\RDPMS.Core.Persistence\RDPMS.Core.Persistence.csproj" />
+      <ProjectReference Include="..\..\src\RDPMS.Core.Server\RDPMS.Core.Server.csproj" />
     </ItemGroup>
 
 </Project>

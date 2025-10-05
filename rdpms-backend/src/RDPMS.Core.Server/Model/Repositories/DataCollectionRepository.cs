@@ -11,4 +11,10 @@ public class DataCollectionRepository : GenericRepository<DataCollectionEntity>,
         : base(ctx, q => q.Include(e => e.DefaultDataStore))
     {
     }
+
+
+    public async Task<IEnumerable<DataCollectionEntity>> GetAllInProject(Guid projectId)
+    {
+        return await DbSet.Where(c => c.ParentId == projectId).ToListAsync();
+    }
 }

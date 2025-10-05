@@ -1,3 +1,4 @@
+using RDPMS.Core.Infra.AppInitialization;
 using RDPMS.Core.Infra.Exceptions;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
@@ -6,6 +7,7 @@ using RDPMS.Core.Server.Util;
 
 namespace RDPMS.Core.Server.Model.Mappers;
 
+[AutoRegister]
 public class DataCollectionSummaryDTOMapper
     : IExportMapper<DataCollectionEntity, CollectionSummaryDTO>,
         IImportMapper<DataCollectionEntity, CollectionSummaryDTO, DataStore, Project>
@@ -45,7 +47,7 @@ public class DataCollectionSummaryDTOMapper
             Id = Guid.NewGuid(),
             ContainedDatasets = new List<DataSet>(),
             DefaultDataStore = defaultStore,
-            ParentProject = parentProject,
+            ParentId = parentProject.Id,
         };
 
         return collection;

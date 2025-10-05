@@ -12,22 +12,27 @@ namespace RDPMS.Core.Persistence;
 
 public class RDPMSPersistenceContext : DbContext
 {
-    public DatabaseConfiguration DbConfiguration { get; }
+    private DatabaseConfiguration DbConfiguration { get; }
     private readonly LaunchConfiguration.DatabaseInitMode _dbInitMode;
     private readonly ILogger<RDPMSPersistenceContext>? _logger;
 
-    public DbSet<ContentType> Types { get; set; }
-    public DbSet<DataFile> DataFiles { get; set; }
-    public DbSet<FileStorageReference> FileStorageReferences { get; set; }
-    public DbSet<DataSet> DataSets { get; set; }
-    public DbSet<DataStore> DataStores { get; set; }
-    public DbSet<DataCollectionEntity> DataCollections { get; set; }
-    public DbSet<Job> Jobs { get; set; }
-    public DbSet<PipelineInstance> PipelineInstances { get; set; }
-    public DbSet<Tag> Tags { get; set; }
-    public DbSet<DataSetUsedForJobsRelation> DataSetsUsedForJobs { get; set; }
-    public DbSet<Project> Projects { get; set; }
-    public DbSet<LabelSharingPolicy> LabelSharingPolicies { get; set; }
+    // ReSharper disable UnusedMember.Global
+    // ReSharper disable UnusedAutoPropertyAccessor.Local
+    public DbSet<ContentType> Types { get; private set; }
+    public DbSet<DataFile> DataFiles { get; private set; }
+    public DbSet<FileStorageReference> FileStorageReferences { get; private set; }
+    public DbSet<DataSet> DataSets { get; private set; }
+    public DbSet<DataStore> DataStores { get; private set; }
+    public DbSet<DataCollectionEntity> DataCollections { get; private set; }
+    public DbSet<Job> Jobs { get; private set; }
+    public DbSet<PipelineInstance> PipelineInstances { get; private set; }
+    public DbSet<Tag> Tags { get; private set; }
+    public DbSet<DataSetUsedForJobsRelation> DataSetsUsedForJobs { get; private set; }
+    public DbSet<Project> Projects { get; private set; }
+    public DbSet<LabelSharingPolicy> LabelSharingPolicies { get; private set; }
+    public DbSet<Slug> Slugs { get; private set; }
+    // ReSharper restore UnusedMember.Global
+    // ReSharper restore UnusedAutoPropertyAccessor.Local
 
     // EF Core requires a public constructor with no parameters. Tho, the DI framework automatically resolves the
     // constructor with the most resolvable parameters.
@@ -155,6 +160,14 @@ public class RDPMSPersistenceContext : DbContext
                 Id = RDPMSConstants.GlobalProjectId,
                 Description = "The instances global mockup project."
             });
+        model.Entity<Project>()
+            .HasMany<DataCollectionEntity>(p => p.DataCollections)
+            .WithOne()
+            .HasForeignKey(c => c.ParentId);
+        model.Entity<Project>()
+            .HasMany<DataStore>(p => p.DataStores)
+            .WithOne()
+            .HasForeignKey(s => s.ParentId);
 
         // set up fast searching for Job ID and State
         model.Entity<Job>()

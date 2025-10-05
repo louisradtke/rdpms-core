@@ -95,6 +95,7 @@ internal class Program
         builder.Services.AddScoped<IContentTypeRepository, ContentTypeRepository>();
         builder.Services.AddScoped<IDataCollectionRepository, DataCollectionRepository>();
         builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+        builder.Services.AddScoped<ISlugRepository, SlugRepository>();
 
         builder.Services.AddScoped<IDataSetService, DataSetService>();
         builder.Services.AddScoped<IStoreService,StoreService>();
@@ -102,6 +103,7 @@ internal class Program
         builder.Services.AddScoped<IContentTypeService, ContentTypeService>();
         builder.Services.AddScoped<IDataCollectionEntityService, DataCollectionEntityService>();
         builder.Services.AddScoped<IProjectService, ProjectService>();
+        builder.Services.AddScoped<ISlugService, SlugService>();
 
 
         // init api and api exploration

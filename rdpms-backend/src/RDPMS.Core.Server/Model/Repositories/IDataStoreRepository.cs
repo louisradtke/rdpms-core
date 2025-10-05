@@ -3,4 +3,7 @@ using RDPMS.Core.Server.Model.Repositories.Infra;
 
 namespace RDPMS.Core.Server.Model.Repositories;
 
-public interface IDataStoreRepository : IGenericRepository<DataStore>;
+public interface IDataStoreRepository : IGenericRepository<DataStore>
+{
+    Task<IEnumerable<DataStore>> GetAllInProject(Guid projectId);
+}

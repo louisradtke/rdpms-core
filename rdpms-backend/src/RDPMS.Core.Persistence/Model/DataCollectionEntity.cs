@@ -3,13 +3,17 @@ namespace RDPMS.Core.Persistence.Model;
 /// <summary>
 /// Since data sets are not bound to their storage, they can be virtually put into a collection.
 /// </summary>
-public class DataCollectionEntity(string name) : IUniqueEntity
+public class DataCollectionEntity(string name) : IUniqueEntity, IUniqueEntityWithNullableParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
     
     public string Name { get; set; } = name;
 
-    public Project? ParentProject { get; set; }
+    /// <summary>
+    /// Id of the parent <see cref="Project"/>. Nullability is a convenience feature, every collection should have a
+    /// parent project.
+    /// </summary>
+    public Guid? ParentId { get; set; }
     
     /// <summary>
     /// List of all data sets this collection holds
