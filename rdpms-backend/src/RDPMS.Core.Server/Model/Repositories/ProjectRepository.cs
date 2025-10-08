@@ -9,4 +9,11 @@ public class ProjectRepository(RDPMSPersistenceContext ctx)
     : GenericRepository<Project>(ctx, q => q
         .Include(p => p.DataCollections)
         .Include(p => p.DataStores)
-    ), IProjectRepository;
+    ), IProjectRepository
+{
+    public async Task UpdateAsync(Project entity)
+    {
+        DbSet.Update(entity);
+        await ctx.SaveChangesAsync();
+    }
+}

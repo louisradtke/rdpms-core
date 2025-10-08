@@ -17,4 +17,18 @@ public class DataCollectionRepository : GenericRepository<DataCollectionEntity>,
     {
         return await DbSet.Where(c => c.ParentId == projectId).ToListAsync();
     }
+
+    public async Task<IEnumerable<int>> GetDatasetCounts(IEnumerable<Guid> collectionIds)
+    {
+        var collectionIdsList = collectionIds.ToList();
+    
+        var counts = await DbSet
+            .AsNoTracking()
+            .Where(c => collectionIdsList.Contains(c.Id))
+            .Select(c => new { c.Id, Count = c.ContainedDatasets.Count })
+            .ToDictionaryAsync(x => x.Id, x => x.Count);
+    
+        // Return counts in the same order as the input collectionIds
+        return collectionIdsList.Select(id => counts.GetValueOrDefault(id, 0));
+    }
 }

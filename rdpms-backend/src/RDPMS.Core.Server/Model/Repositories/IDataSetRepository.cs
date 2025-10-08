@@ -13,4 +13,11 @@ public interface IDataSetRepository : IGenericRepository<DataSet>
     /// <exception cref="InvalidOperationException">Thrown if the collection ID does not exist or if there is an issue
     /// during the retrieval process.</exception>
     Task<IEnumerable<DataSet>> GetByCollectionIdAsync(Guid collectionId);
+    
+    /// <summary>
+    /// Updates only the fields of the entity, nothing regarding external references.
+    /// </summary>
+    /// <param name="entity">The entity to copy the values from</param>
+    /// <returns></returns>
+    Task UpdateFieldsAsync(DataSet entity);
 }

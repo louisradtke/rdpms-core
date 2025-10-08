@@ -3,4 +3,7 @@ using RDPMS.Core.Server.Model.Repositories.Infra;
 
 namespace RDPMS.Core.Server.Model.Repositories;
 
-public interface IProjectRepository : IGenericRepository<Project>;
+public interface IProjectRepository : IGenericRepository<Project>
+{
+    public Task UpdateAsync(Project entity);
+}

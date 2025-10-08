@@ -51,9 +51,10 @@ internal class Program
         builder.Services.AddCors(options =>
         {
             // cors policy for every route
-            options.AddPolicy(
-                name: "ConfigCorsPolicy",
-                policy => policy.WithOrigins(launchConfig.AllowedOrigins.ToArray()));
+            options.AddPolicy(name: "DefaultCorsPolicy", policy => policy
+                .WithOrigins(launchConfig.AllowedOrigins.ToArray() )
+                .AllowAnyHeader()
+                .AllowAnyMethod());
 
             // cors policy for file requests, manually set in controllers
             options.AddPolicy("ExternalCorsPolicy", policy =>
@@ -162,7 +163,7 @@ internal class Program
             }
         });
 
-        app.UseCors("ConfigCorsPolicy");
+        app.UseCors("DefaultCorsPolicy");
         app.UseAuthorization();
         app.MapControllers();
 

@@ -30,6 +30,12 @@ export interface CollectionSummaryDTO {
      * @type {string}
      * @memberof CollectionSummaryDTO
      */
+    slug?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof CollectionSummaryDTO
+     */
     name?: string | null;
     /**
      * 
@@ -63,6 +69,7 @@ export function CollectionSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
+        'slug': json['slug'] == null ? undefined : json['slug'],
         'name': json['name'] == null ? undefined : json['name'],
         'dataSetCount': json['dataSetCount'] == null ? undefined : json['dataSetCount'],
         'defaultDataStoreId': json['defaultDataStoreId'] == null ? undefined : json['defaultDataStoreId'],
@@ -76,6 +83,7 @@ export function CollectionSummaryDTOToJSON(value?: CollectionSummaryDTO | null):
     return {
         
         'id': value['id'],
+        'slug': value['slug'],
         'name': value['name'],
         'dataSetCount': value['dataSetCount'],
         'defaultDataStoreId': value['defaultDataStoreId'],

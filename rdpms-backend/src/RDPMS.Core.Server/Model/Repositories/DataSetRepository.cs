@@ -29,4 +29,10 @@ public class DataSetRepository(RDPMSPersistenceContext ctx) : GenericRepository<
             .SingleAsync(e => e.Id == collectionId);
         return collection.ContainedDatasets;
     }
+    
+    public async Task UpdateFieldsAsync(DataSet entity)
+    {
+        ctx.DataSets.Update(entity);
+        await ctx.SaveChangesAsync();
+    }
 }

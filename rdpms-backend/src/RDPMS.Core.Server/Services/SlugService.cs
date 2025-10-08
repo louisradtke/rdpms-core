@@ -70,6 +70,7 @@ public class SlugService(
             };
             
             await slugRepository.AddAsync(slug);
+            await slugRepository.SetDeprecatedButAsync(finalSlug, entity.Id);
             return finalSlug;
         }
         
@@ -135,6 +136,33 @@ public class SlugService(
             
         }
         return slugs;
+    }
+
+    public async Task<Dictionary<Guid, IEnumerable<Slug>>> GetSlugsForEntitiesAsync<TEntity>(IEnumerable<Guid> entityIds)
+        where TEntity : class, IUniqueEntity
+    {
+        var entityIdsList = entityIds.ToList();
+        var slugType = SlugUtil.MapTypeToSlug<TEntity>();
+    
+        var allSlugs = await slugRepository.GetSlugsForEntities(entityIdsList, slugType);
+    
+        var slugsByEntity = allSlugs
+            .GroupBy(s => s.EntityId)
+            .ToDictionary(g => g.Key, g => g.AsEnumerable());
+    
+        // Validate all slugs have correct type
+        if (slugsByEntity.Values.SelectMany(s => s).Any(s => s.Type != slugType))
+        {
+            throw new InvalidOperationException($"Some entities have slugs of wrong type, expected type {slugType}");
+        }
+    
+        // Ensure all entity IDs have an entry (even if empty)
+        foreach (var entityId in entityIdsList.Where(id => !slugsByEntity.ContainsKey(id)))
+        {
+            slugsByEntity[entityId] = Enumerable.Empty<Slug>();
+        }
+    
+        return slugsByEntity;
     }
 
     private static string GenerateRandomString(int? suffixLength)

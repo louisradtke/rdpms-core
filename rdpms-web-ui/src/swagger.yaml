@@ -442,6 +442,103 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
+  /api/v1/projects:
+    get:
+      tags:
+        - Projects
+      summary: Get all projects.
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectSummaryDTO'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectSummaryDTO'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectSummaryDTO'
+  '/api/v1/projects/{id}':
+    get:
+      tags:
+        - Projects
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProjectSummaryDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSummaryDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSummaryDTO'
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+    put:
+      tags:
+        - Projects
+      summary: Id field on the body is ignored.
+      parameters:
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectSummaryDTO'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/ProjectSummaryDTO'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/ProjectSummaryDTO'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
   /api/v1/data/stores:
     get:
       tags:
@@ -500,6 +597,9 @@ components:
         id:
           type: string
           format: uuid
+          nullable: true
+        slug:
+          type: string
           nullable: true
         name:
           type: string
@@ -679,6 +779,9 @@ components:
           type: integer
           format: int32
           nullable: true
+        storageType:
+          type: string
+          nullable: true
       additionalProperties: false
     ErrorMessageDTO:
       type: object
@@ -799,6 +902,35 @@ components:
           type: string
           nullable: true
       additionalProperties: { }
+    ProjectSummaryDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The id of this project.
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          description: The name of this project.
+          nullable: true
+        slug:
+          type: string
+          description: The slug of this project.
+          nullable: true
+        collections:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionSummaryDTO'
+          description: All collections assigned to this project.
+          nullable: true
+        dataStores:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataStoreSummaryDTO'
+          description: All data stores assigned to this project.
+          nullable: true
+      additionalProperties: false
     TagDTO:
       type: object
       properties:

@@ -2,6 +2,7 @@ apis/CollectionsApi.ts
 apis/ContentTypesApi.ts
 apis/DataSetsApi.ts
 apis/FilesApi.ts
+apis/ProjectsApi.ts
 apis/StoresApi.ts
 apis/index.ts
 index.ts
@@ -16,6 +17,7 @@ models/FileCreateRequestDTO.ts
 models/FileCreateResponseDTO.ts
 models/FileSummaryDTO.ts
 models/ProblemDetails.ts
+models/ProjectSummaryDTO.ts
 models/TagDTO.ts
 models/index.ts
 runtime.ts

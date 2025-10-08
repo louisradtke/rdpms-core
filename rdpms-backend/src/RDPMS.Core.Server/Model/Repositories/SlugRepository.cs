@@ -71,4 +71,23 @@ public class SlugRepository(RDPMSPersistenceContext ctx) : GenericRepository<Slu
             .Where(s => s.EntityId == entityId)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<Slug>> GetSlugsForEntities(IEnumerable<Guid> entityIds, SlugType slugType)
+    {
+        var entityIdsList = entityIds.ToList();
+        return await DbSet
+            .AsNoTracking()
+            .Where(s => entityIdsList.Contains(s.EntityId) && s.Type == slugType)
+            .ToListAsync();
+    }
+
+    public async Task SetDeprecatedButAsync(string slug, Guid entityId)
+    {
+        await _slugs
+            .Where(s => s.Value != slug &&
+                        s.EntityId == entityId &&
+                        s.State != SlugState.Deprecated)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(e => e.State, SlugState.Deprecated));
+    }
 }

@@ -32,4 +32,13 @@ public interface ISlugService
     /// <returns></returns>
     Task<IEnumerable<Slug>> GetSlugsForEntityAsync<TEntity>(Guid entityId)
         where TEntity : class, IUniqueEntity;
+
+    /// <summary>
+    /// Get all slugs for a list (enumerable actually) of given entities.
+    /// </summary>
+    /// <param name="entityIds">The ids to query the slugs for</param>
+    /// <typeparam name="TEntity">Type of the entity.</typeparam>
+    /// <returns>Dict, mapping each entity to an enumerable of its slugs.</returns>
+    Task<Dictionary<Guid, IEnumerable<Slug>>> GetSlugsForEntitiesAsync<TEntity>(IEnumerable<Guid> entityIds)
+        where TEntity : class, IUniqueEntity;
 }

@@ -48,4 +48,19 @@ public interface ISlugRepository : IGenericRepository<Slug>
     /// <param name="entityId">Id of the entity.</param>
     /// <returns>List of all slugs representing the entity.</returns>
     Task<IEnumerable<Slug>> GetSlugsForEntity(Guid entityId);
+
+    /// <summary>
+    /// Get all the slugs for the set of entities.
+    /// </summary>
+    /// <param name="entityIds">Enum of all slugs</param>
+    /// <param name="slugType">Type of the slugs.</param>
+    /// <returns>Unordered enumerable of slugs.</returns>
+    Task<IEnumerable<Slug>> GetSlugsForEntities(IEnumerable<Guid> entityIds, SlugType slugType);
+    
+    /// <summary>
+    /// Set all slugs but the given one to deprecated.
+    /// </summary>
+    /// <param name="slug">Slug to keep.</param>
+    /// <param name="entityId">Id of the entity to scope.</param>
+    Task SetDeprecatedButAsync(string slug, Guid entityId);
 }

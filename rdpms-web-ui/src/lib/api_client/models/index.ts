@@ -11,4 +11,5 @@ export * from './FileCreateRequestDTO';
 export * from './FileCreateResponseDTO';
 export * from './FileSummaryDTO';
 export * from './ProblemDetails';
+export * from './ProjectSummaryDTO';
 export * from './TagDTO';

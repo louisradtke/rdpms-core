@@ -1,27 +1,26 @@
 import {
-    CollectionsApi,
-    type CollectionSummaryDTO,
-    Configuration
+    Configuration,
+    ProjectsApi,
+    type ProjectSummaryDTO,
 } from '$lib/api_client';
 
-export class CollectionsRepository {
+export class ProjectsRepository {
     private readonly ready: Promise<void>;
-    private api: CollectionsApi | null = null;
+    private api: ProjectsApi | null = null;
 
     constructor(configPromise: Promise<Configuration>) {
         // Kick off async init immediately, but keep constructor synchronous
         this.ready = configPromise
             .then((conf) => {
-                this.api = new CollectionsApi(conf);
-            }).
-            catch((err) => {
+                this.api = new ProjectsApi(conf);
+            }).catch((err) => {
                 // Prevent unhandled rejections and surface errors later in ensureReady
                 console.error('Failed to initialize CollectionsApi:', err);
                 throw err;
             });
     }
 
-    private async ensureReady(): Promise<CollectionsApi> {
+    private async ensureReady(): Promise<ProjectsApi> {
         if (this.api) return this.api;
         await this.ready; // wait for config -> api creation
         if (!this.api) {
@@ -30,18 +29,18 @@ export class CollectionsRepository {
         return this.api;
     }
 
-    public async getCollections(): Promise<CollectionSummaryDTO[]> {
+    public async getProjects(): Promise<ProjectSummaryDTO[]> {
         const api = await this.ensureReady();
-        return api.apiV1DataCollectionsGet();
+        return api.apiV1ProjectsGet();
     }
 
-    public async getCollectionById(id: string): Promise<CollectionSummaryDTO> {
-        const api = await this.ensureReady()
-        return api.apiV1DataCollectionsIdGet({ id });
+    public async getProjectById(id: string): Promise<ProjectSummaryDTO> {
+        const api = await this.ensureReady();
+        return api.apiV1ProjectsIdGet({ id });
     }
 
-    public async createCollection(dto: Partial<CollectionSummaryDTO>): Promise<void> {
+    public async updateProject(id: string, dto: Partial<ProjectSummaryDTO>): Promise<void> {
         const api = await this.ensureReady();
-        return api.apiV1DataCollectionsPost({ collectionSummaryDTO: dto as CollectionSummaryDTO });
+        return api.apiV1ProjectsIdPut({ id, projectSummaryDTO: dto as ProjectSummaryDTO });
     }
 }

@@ -12,4 +12,19 @@ public class DataSetService(
     {
         return repo.GetByCollectionIdAsync(collectionId);
     }
+
+    public async Task UpdateFieldsAsync(Guid id, DataSet updates)
+    {
+        var existing = await repo.GetByIdAsync(id);
+        if (existing == null) throw new KeyNotFoundException($"DataSet {id} not found");
+        
+        // Apply business rules for what can be updated
+        existing.Name = updates.Name;
+        existing.State = updates.State;
+        // Don't update server-managed fields
+        
+        // Handle tags if provided
+        
+        await repo.UpdateFieldsAsync(existing);
+    }
 }

@@ -12,4 +12,14 @@ public class ProjectService(IProjectRepository projectRepo)
     {
         return projectRepo.GetByIdAsync(RDPMSConstants.GlobalProjectId);
     }
+
+    public async Task UpdateNameAsync(Guid id, string name)
+    {
+        var existing = await projectRepo.GetByIdAsync(id);
+        if (existing == null) throw new KeyNotFoundException($"DataSet {id} not found");
+
+        existing.Name = name;
+        
+        await projectRepo.UpdateAsync(existing);
+    }
 }

@@ -6,6 +6,7 @@
 
     import { page } from '$app/state';
     import {DataSetsRepository} from "$lib/data/DataSetsRepository";
+    import LoadingCircle from "$lib/layout/LoadingCircle.svelte";
 
     let collectionId: string = page.params.collection_id ?? '';
     if (!collectionId) throw new Error('Collection ID is required');
@@ -49,7 +50,7 @@
             </h2>
 
             {#await summaryReq}
-                <p>Loading...</p>
+                <LoadingCircle/>
             {:then summary}
                 <table class="table-auto border-collapse border border-gray-300 w-full">
                     <thead>
@@ -76,7 +77,7 @@
             </h2>
 
             {#await datasetsReq}
-                <p>Loading...</p>
+                <LoadingCircle/>
             {:then datasets}
                 <table class="table-auto border-collapse border border-gray-300 w-full">
                     <thead>

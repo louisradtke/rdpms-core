@@ -37,6 +37,12 @@ export interface DataStoreSummaryDTO {
      * @memberof DataStoreSummaryDTO
      */
     dataFilesCount?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof DataStoreSummaryDTO
+     */
+    storageType?: string | null;
 }
 
 /**
@@ -59,6 +65,7 @@ export function DataStoreSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator:
         'id': json['id'] == null ? undefined : json['id'],
         'name': json['name'] == null ? undefined : json['name'],
         'dataFilesCount': json['dataFilesCount'] == null ? undefined : json['dataFilesCount'],
+        'storageType': json['storageType'] == null ? undefined : json['storageType'],
     };
 }
 
@@ -71,6 +78,7 @@ export function DataStoreSummaryDTOToJSON(value?: DataStoreSummaryDTO | null): a
         'id': value['id'],
         'name': value['name'],
         'dataFilesCount': value['dataFilesCount'],
+        'storageType': value['storageType'],
     };
 }
 
