@@ -6,7 +6,9 @@ using RDPMS.Core.Server.Services.Infra;
 namespace RDPMS.Core.Server.Services;
 
 public class DataCollectionEntityService(DbContext dbContext)
-    : GenericCollectionService<DataCollectionEntity>(dbContext), IDataCollectionEntityService
+    : GenericCollectionService<DataCollectionEntity>(dbContext, q => q
+        .Include(c => c.ContainedDatasets)
+    ), IDataCollectionEntityService
 {
     public Task<Dictionary<Guid, int>> GetDatasetCounts(IEnumerable<Guid> collectionIds)
     {

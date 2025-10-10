@@ -1,4 +1,5 @@
 import {
+    type ApiV1DataCollectionsGetRequest,
     CollectionsApi,
     type CollectionSummaryDTO,
     Configuration
@@ -30,9 +31,9 @@ export class CollectionsRepository {
         return this.api;
     }
 
-    public async getCollections(): Promise<CollectionSummaryDTO[]> {
+    public async getCollections(requestParameters?: ApiV1DataCollectionsGetRequest): Promise<CollectionSummaryDTO[]> {
         const api = await this.ensureReady();
-        return api.apiV1DataCollectionsGet();
+        return api.apiV1DataCollectionsGet(requestParameters);
     }
 
     public async getCollectionById(id: string): Promise<CollectionSummaryDTO> {

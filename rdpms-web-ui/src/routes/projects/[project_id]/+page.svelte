@@ -1,25 +1,39 @@
 <script lang="ts">
+    import { page } from '$app/state';
     import {getOrFetchConfig, toApiConfig} from "$lib/util/config-helper";
     import {ProjectsRepository} from "$lib/data/ProjectsRepo";
     import LoadingCircle from "$lib/layout/LoadingCircle.svelte";
-
-    import { page } from '$app/state';
     import CodeCopyField from "$lib/layout/CodeCopyField.svelte";
+    import {isGuid} from "$lib/util/url-helper";
+    import EntityHeader from "$lib/layout/EntityHeader.svelte";
+
 
     let projectId: string = page.params.project_id ?? '';
     if (!projectId) throw new Error('Collection ID is required');
+    const projectIdIsGuid = isGuid(projectId);
 
     let projectsRepo = new ProjectsRepository(getOrFetchConfig().then(toApiConfig));
     // decide by GUID format
-    const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(projectId);
 
-    let projectPromise = isGuid
+    let projectPromise = projectIdIsGuid
         ? projectsRepo.getProjectById(projectId)
         : projectsRepo.getProjects({ slug: projectId }).then((list) => {
             if (!list?.length) throw new Error('Project not found');
             return list[0];
         });
+
+    let title = 'RDPMS';
+    projectPromise.then(project => {
+        let slug = project.name ?? project.id ?? 'none';
+        if (slug) {
+            title = `${slug} - RDPMS`;
+        }
+    });
 </script>
+
+<svelte:head>
+    <title>{title}</title>
+</svelte:head>
 
 <main class="container mx-auto">
 {#await projectPromise}
@@ -27,18 +41,7 @@
         <LoadingCircle/>
     </div>
 {:then project}
-    <p class="text-xs text-gray-600 mt-1">PROJECT</p>
-    <h1 class="text-2xl font-bold">{project.name}</h1>
-    <div class="flex gap-4">
-        <CodeCopyField text={project.slug ?? ""}/>
-        <CodeCopyField text={project.id ?? ""}/>
-    </div>
-
-    {#if project.description}
-        <div>
-            <p>{project.description}</p>
-        </div>
-    {/if}
+    <EntityHeader type="PROJECT" entity={project} />
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <!-- Left: Collections -->
@@ -55,7 +58,8 @@
                     <li class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
                         <div class="flex items-start justify-between gap-3">
                             <div>
-                                <a href="/collections/{collection.slug ?? collection.id}" class="hover:no-underline">
+                                <a href="/projects/{projectId}/collections/{collection.slug ?? collection.id}"
+                                   class="hover:no-underline">
                                     <h3 class="font-medium">{collection.name}</h3>
                                 </a>
                                 {#if collection.description}
