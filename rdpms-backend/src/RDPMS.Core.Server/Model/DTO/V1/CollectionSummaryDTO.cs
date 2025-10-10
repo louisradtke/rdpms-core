@@ -7,4 +7,5 @@ public record CollectionSummaryDTO
     public string? Name { get; set; }
     public int? DataSetCount { get; set; } = 0;
     public Guid? DefaultDataStoreId { get; set; }
+    public Guid? ProjectId { get; set; }
 }

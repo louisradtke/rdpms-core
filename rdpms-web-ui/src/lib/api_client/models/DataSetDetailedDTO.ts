@@ -125,6 +125,12 @@ export interface DataSetDetailedDTO {
      */
     fileCount?: number;
     /**
+     * Id of the collection this dataset belongs to.
+     * @type {string}
+     * @memberof DataSetDetailedDTO
+     */
+    collectionId?: string | null;
+    /**
      * 
      * @type {Array<FileSummaryDTO>}
      * @memberof DataSetDetailedDTO
@@ -162,6 +168,7 @@ export function DataSetDetailedDTOFromJSONTyped(json: any, ignoreDiscriminator: 
         'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
         'metadataFields': json['metadataFields'] == null ? undefined : json['metadataFields'],
         'fileCount': json['fileCount'] == null ? undefined : json['fileCount'],
+        'collectionId': json['collectionId'] == null ? undefined : json['collectionId'],
         'files': json['files'] == null ? undefined : ((json['files'] as Array<any>).map(FileSummaryDTOFromJSON)),
     };
 }
@@ -185,6 +192,7 @@ export function DataSetDetailedDTOToJSON(value?: DataSetDetailedDTO | null): any
         'isDeleted': value['isDeleted'],
         'metadataFields': value['metadataFields'],
         'fileCount': value['fileCount'],
+        'collectionId': value['collectionId'],
         'files': value['files'] == null ? undefined : ((value['files'] as Array<any>).map(FileSummaryDTOToJSON)),
     };
 }

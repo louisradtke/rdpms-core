@@ -52,7 +52,7 @@ public class DataCollectionSummaryDTOMapper
             Slug = dto.Slug,
             ContainedDatasets = new List<DataSet>(),
             DefaultDataStore = defaultStore,
-            ParentId = parentProject.Id,
+            ParentId = parentProject.Id
         };
 
         return collection;
@@ -66,7 +66,8 @@ public class DataCollectionSummaryDTOMapper
             Name = domain.Name,
             Slug = domain.Slug,
             DataSetCount = domain.ContainedDatasets?.Count ?? 0,
-            DefaultDataStoreId = domain.DefaultDataStore?.Id
+            DefaultDataStoreId = domain.DefaultDataStore?.Id,
+            ProjectId = domain.ParentId
         };
     }
 

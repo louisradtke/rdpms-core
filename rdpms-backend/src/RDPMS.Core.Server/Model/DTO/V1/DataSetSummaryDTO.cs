@@ -78,4 +78,9 @@ public record DataSetSummaryDTO
     /// Amount of files in the dataset.
     /// </summary>
     public int FileCount { get; set; }
+
+    /// <summary>
+    /// Id of the collection this dataset belongs to.
+    /// </summary>
+    public Guid? CollectionId { get; set; }
 }

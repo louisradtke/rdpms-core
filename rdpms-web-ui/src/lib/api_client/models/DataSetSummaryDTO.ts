@@ -118,6 +118,12 @@ export interface DataSetSummaryDTO {
      * @memberof DataSetSummaryDTO
      */
     fileCount?: number;
+    /**
+     * Id of the collection this dataset belongs to.
+     * @type {string}
+     * @memberof DataSetSummaryDTO
+     */
+    collectionId?: string | null;
 }
 
 /**
@@ -150,6 +156,7 @@ export function DataSetSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: b
         'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
         'metadataFields': json['metadataFields'] == null ? undefined : json['metadataFields'],
         'fileCount': json['fileCount'] == null ? undefined : json['fileCount'],
+        'collectionId': json['collectionId'] == null ? undefined : json['collectionId'],
     };
 }
 
@@ -172,6 +179,7 @@ export function DataSetSummaryDTOToJSON(value?: DataSetSummaryDTO | null): any {
         'isDeleted': value['isDeleted'],
         'metadataFields': value['metadataFields'],
         'fileCount': value['fileCount'],
+        'collectionId': value['collectionId'],
     };
 }
 

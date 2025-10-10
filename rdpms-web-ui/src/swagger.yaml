@@ -501,6 +501,10 @@ components:
           type: string
           format: uuid
           nullable: true
+        projectId:
+          type: string
+          format: uuid
+          nullable: true
       additionalProperties: false
     ContentTypeDTO:
       type: object
@@ -584,6 +588,11 @@ components:
           type: integer
           description: Amount of files in the dataset.
           format: int32
+        collectionId:
+          type: string
+          description: Id of the collection this dataset belongs to.
+          format: uuid
+          nullable: true
         files:
           type: array
           items:
@@ -660,6 +669,11 @@ components:
           type: integer
           description: Amount of files in the dataset.
           format: int32
+        collectionId:
+          type: string
+          description: Id of the collection this dataset belongs to.
+          format: uuid
+          nullable: true
       additionalProperties: false
       description: "Represents a summary of a dataset, including identifying information, timestamps, state, tags,\nand metadata fields."
     DataStoreSummaryDTO:
@@ -684,6 +698,10 @@ components:
           nullable: true
         propertiesJson:
           type: string
+          nullable: true
+        projectId:
+          type: string
+          format: uuid
           nullable: true
       additionalProperties: false
     ErrorMessageDTO:

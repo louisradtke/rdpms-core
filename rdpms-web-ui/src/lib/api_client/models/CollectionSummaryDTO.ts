@@ -49,6 +49,12 @@ export interface CollectionSummaryDTO {
      * @memberof CollectionSummaryDTO
      */
     defaultDataStoreId?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof CollectionSummaryDTO
+     */
+    projectId?: string | null;
 }
 
 /**
@@ -73,6 +79,7 @@ export function CollectionSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator
         'name': json['name'] == null ? undefined : json['name'],
         'dataSetCount': json['dataSetCount'] == null ? undefined : json['dataSetCount'],
         'defaultDataStoreId': json['defaultDataStoreId'] == null ? undefined : json['defaultDataStoreId'],
+        'projectId': json['projectId'] == null ? undefined : json['projectId'],
     };
 }
 
@@ -87,6 +94,7 @@ export function CollectionSummaryDTOToJSON(value?: CollectionSummaryDTO | null):
         'name': value['name'],
         'dataSetCount': value['dataSetCount'],
         'defaultDataStoreId': value['defaultDataStoreId'],
+        'projectId': value['projectId'],
     };
 }
 

@@ -8,4 +8,5 @@ public record DataStoreSummaryDTO
     public int? FilesCount { get; set; }
     public string? StorageType { get; set; }
     public string? PropertiesJson { get; set; }
+    public Guid? ProjectId { get; set; }
 }

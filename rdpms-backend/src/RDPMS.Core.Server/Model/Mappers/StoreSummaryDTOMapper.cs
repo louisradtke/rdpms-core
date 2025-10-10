@@ -17,9 +17,8 @@ public class StoreSummaryDTOMapper
             Slug = domain.Slug,
             Name = domain.Name,
             StorageType = domain.StorageType.ToString().ToLower(),
-            PropertiesJson = domain.GetPublicInfoContentJson()
+            PropertiesJson = domain.GetPublicInfoContentJson(),
+            ProjectId = domain.ParentId
         };
     }
-
-    public IEnumerable<CheckSet<DataStoreSummaryDTO>> ImportChecks() => [];
 }

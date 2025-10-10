@@ -55,6 +55,12 @@ export interface DataStoreSummaryDTO {
      * @memberof DataStoreSummaryDTO
      */
     propertiesJson?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof DataStoreSummaryDTO
+     */
+    projectId?: string | null;
 }
 
 /**
@@ -80,6 +86,7 @@ export function DataStoreSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator:
         'filesCount': json['filesCount'] == null ? undefined : json['filesCount'],
         'storageType': json['storageType'] == null ? undefined : json['storageType'],
         'propertiesJson': json['propertiesJson'] == null ? undefined : json['propertiesJson'],
+        'projectId': json['projectId'] == null ? undefined : json['projectId'],
     };
 }
 
@@ -95,6 +102,7 @@ export function DataStoreSummaryDTOToJSON(value?: DataStoreSummaryDTO | null): a
         'filesCount': value['filesCount'],
         'storageType': value['storageType'],
         'propertiesJson': value['propertiesJson'],
+        'projectId': value['projectId'],
     };
 }
 
