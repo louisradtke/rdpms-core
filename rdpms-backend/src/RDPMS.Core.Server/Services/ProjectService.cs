@@ -10,6 +10,7 @@ namespace RDPMS.Core.Server.Services;
 public class ProjectService(DbContext context)
     : GenericCollectionService<Project>(context, q => q
         .Include(p => p.DataCollections)
+        .ThenInclude(c => c.ContainedDatasets)
         .Include(p => p.DataStores)
     ), IProjectService
 {
