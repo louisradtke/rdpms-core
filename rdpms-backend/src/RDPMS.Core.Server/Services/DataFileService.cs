@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using RDPMS.Core.Infra.Exceptions;
+using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Controllers.V1;
 using RDPMS.Core.Server.Model.Logic;
@@ -8,14 +10,17 @@ using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
-public class DataFileService(
-    IDataFileRepository repo,
-    LinkGenerator linkGenerator
-    ) : ReadonlyGenericCollectionService<DataFile>(repo), IFileService
+public class DataFileService(DbContext dbContext, LinkGenerator linkGenerator)
+    : ReadonlyGenericCollectionService<DataFile>(dbContext), IFileService
 {
-    public Task<IEnumerable<DataFile>> GetFilesInStoreAsync(Guid storeId)
+    public async Task<IEnumerable<DataFile>> GetFilesInStoreAsync(Guid storeId)
     {
-        return repo.GetFilesInStoreAsync(storeId);
+        var store = await Context.Set<DataStore>()
+            .Include(s => s.DataFiles)
+            .ThenInclude(f => f.Locations)
+            .SingleAsync(s => s.Id == storeId);
+
+        return store.DataFiles;
     }
 
     public Task<FileUploadTarget> RequestFileUploadAsync(DataFile file)

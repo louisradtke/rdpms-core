@@ -5,7 +5,7 @@ using RDPMS.Core.Server.Model.Repositories.Infra;
 
 namespace RDPMS.Core.Server.Model.Repositories;
 
-public class DataSetRepository(RDPMSPersistenceContext ctx) : GenericRepository<DataSet>(ctx,
+public class DataSetRepository(DbContext ctx) : GenericRepository<DataSet>(ctx,
         files => files
             .Include(ds => ds.Files)
             .ThenInclude(f => f.FileType)
@@ -14,11 +14,9 @@ public class DataSetRepository(RDPMSPersistenceContext ctx) : GenericRepository<
         ),
     IDataSetRepository
 {
-    private readonly DbSet<DataCollectionEntity> _collectionsDbSet = ctx.DataCollections;
-
     public async Task<IEnumerable<DataSet>> GetByCollectionIdAsync(Guid collectionId)
     {
-        var collection = await _collectionsDbSet
+        var collection = await Context.Set<DataCollectionEntity>()
             .AsNoTracking()
             .Include(c => c.ContainedDatasets)
             .ThenInclude(d => d.Files)
@@ -32,7 +30,7 @@ public class DataSetRepository(RDPMSPersistenceContext ctx) : GenericRepository<
     
     public async Task UpdateFieldsAsync(DataSet entity)
     {
-        ctx.DataSets.Update(entity);
+        Context.Set<DataSet>().Update(entity);
         await ctx.SaveChangesAsync();
     }
 }

@@ -5,7 +5,7 @@ using RDPMS.Core.Server.Model.Repositories.Infra;
 
 namespace RDPMS.Core.Server.Model.Repositories;
 
-public class SlugRepository(RDPMSPersistenceContext ctx) : GenericRepository<Slug>(ctx), ISlugRepository
+public class SlugRepository(DbContext ctx) : GenericRepository<Slug>(ctx), ISlugRepository
 {
     private readonly DbSet<Project> _projects = ctx.Set<Project>();
     private readonly DbSet<Slug> _slugs = ctx.Set<Slug>();

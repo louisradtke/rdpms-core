@@ -5,7 +5,7 @@ using RDPMS.Core.Server.Model.Repositories.Infra;
 
 namespace RDPMS.Core.Server.Model.Repositories;
 
-public class DataStoreRepository(RDPMSPersistenceContext ctx)
+public class DataStoreRepository(DbContext ctx)
     : GenericRepository<DataStore>(ctx), IDataStoreRepository
 {
     public async Task<IEnumerable<DataStore>> GetAllInProject(Guid projectId)

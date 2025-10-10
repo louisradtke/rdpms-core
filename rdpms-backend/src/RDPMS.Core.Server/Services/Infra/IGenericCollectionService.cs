@@ -7,4 +7,5 @@ public interface IGenericCollectionService<T> : IReadonlyGenericCollectionServic
 {
     Task AddAsync(T item);
     Task AddRangeAsync(IEnumerable<T> items);
+    public Task UpdateAsync(T item);
 }

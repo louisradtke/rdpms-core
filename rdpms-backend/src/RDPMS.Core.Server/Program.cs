@@ -76,12 +76,10 @@ internal class Program
         builder.Services.AddSingleton(launchConfig);
         builder.Services.AddSingleton(launchConfig.DatabaseConfiguration);
 
-        builder.Services.AddScoped<RDPMSPersistenceContext>();
-
-        var assembliesToScan = new[] { typeof(Program).Assembly };
+        builder.Services.AddScoped<DbContext, RDPMSPersistenceContext>();
 
         // file mapper interface, for now
-        builder.Services.AddAttributedServices(assembliesToScan);
+        builder.Services.AddAttributedServices([typeof(Program).Assembly]);
         builder.Services.AddSingleton<ContentTypeDTOMapper>();
         builder.Services.AddSingleton<DataCollectionSummaryDTOMapper>();
         builder.Services.AddSingleton<DataSetSummaryDTOMapper>();
@@ -174,7 +172,7 @@ internal class Program
             if (launchConfig.InitDatabase is not LaunchConfiguration.DatabaseInitMode.None)
             {
                 // create and seed database
-                var ctx = app.Services.GetService<RDPMSPersistenceContext>()!;
+                var ctx = app.Services.GetService<DbContext>()!;
                 await ctx.Database.EnsureCreatedAsync();
                 await ctx.Database.MigrateAsync();
                 await ctx.SaveChangesAsync();
@@ -214,6 +212,12 @@ internal class Program
         {
             if (launchConfig.InitDatabase is not LaunchConfiguration.DatabaseInitMode.None)
             {
+                if (launchConfig.DatabaseConfiguration is null)
+                {
+                    programLogger.LogError("Database configuration is missing. Exiting.");
+                    Environment.Exit(1);
+                }
+
                 // create and seed database
                 // TODO: esp. seeding should not happen during normal application startup
                 var ctx = new RDPMSPersistenceContext(contextLogger, launchConfig.DatabaseConfiguration, launchConfig);
@@ -228,7 +232,7 @@ internal class Program
                 var globalProject = await ctx.Projects.FindAsync(RDPMSConstants.GlobalProjectId);
                 if (globalProject is null)
                 {
-                    programLogger.LogError($"Probing for global project failed. Exiting.");
+                    programLogger.LogError("Probing for global project failed. Exiting.");
                     Environment.Exit(1);
                 }
                 programLogger.LogInformation("Database initialized.");

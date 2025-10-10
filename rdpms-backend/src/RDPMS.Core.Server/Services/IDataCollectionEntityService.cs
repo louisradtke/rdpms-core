@@ -9,6 +9,6 @@ public interface IDataCollectionEntityService : IGenericCollectionService<DataCo
     /// Get the number of datasets in a collection.
     /// </summary>
     /// <param name="collectionIds">Enumerable of ids</param>
-    /// <returns>The count for each id.</returns>
-    Task<IEnumerable<int>> GetDatasetCounts(IEnumerable<Guid> collectionIds);
+    /// <returns>A dictionary mapping counts to Ids.</returns>
+    Task<Dictionary<Guid, int>> GetDatasetCounts(IEnumerable<Guid> collectionIds);
 }

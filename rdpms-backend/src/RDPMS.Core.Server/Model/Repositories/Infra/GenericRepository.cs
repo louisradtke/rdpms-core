@@ -4,25 +4,25 @@ using RDPMS.Core.Persistence;
 namespace RDPMS.Core.Server.Model.Repositories.Infra;
 
 public abstract class GenericRepository<T>(
-    RDPMSPersistenceContext ctx,
+    DbContext ctx,
     DbSet<T> dbSet,
     IIncludeConfiguration<T>? includeConfiguration) : IGenericRepository<T>
     where T : class, IUniqueEntity
 {
     
-    protected readonly RDPMSPersistenceContext Context = ctx;
+    protected readonly DbContext Context = ctx;
     protected readonly DbSet<T> DbSet = dbSet;
 
-    protected GenericRepository(RDPMSPersistenceContext ctx) : this(ctx, ctx.Set<T>(), null)
+    protected GenericRepository(DbContext ctx) : this(ctx, ctx.Set<T>(), null)
     {
     }
 
-    protected GenericRepository(RDPMSPersistenceContext ctx, IIncludeConfiguration<T> configuration)
+    protected GenericRepository(DbContext ctx, IIncludeConfiguration<T> configuration)
         : this(ctx, ctx.Set<T>(), configuration)
     {
     }
 
-    protected GenericRepository(RDPMSPersistenceContext ctx, Func<IQueryable<T>, IQueryable<T>> includeFunc)
+    protected GenericRepository(DbContext ctx, Func<IQueryable<T>, IQueryable<T>> includeFunc)
         : this(ctx, ctx.Set<T>(), GenericLambdaIncludeConfiguration<T>.Create(includeFunc))
     {
     }

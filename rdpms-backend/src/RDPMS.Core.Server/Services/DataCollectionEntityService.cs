@@ -1,14 +1,20 @@
+using Microsoft.EntityFrameworkCore;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.Repositories;
 using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
-public class DataCollectionEntityService(IDataCollectionRepository repo)
-    : GenericCollectionService<DataCollectionEntity>(repo), IDataCollectionEntityService
+public class DataCollectionEntityService(DbContext dbContext)
+    : GenericCollectionService<DataCollectionEntity>(dbContext), IDataCollectionEntityService
 {
-    public Task<IEnumerable<int>> GetDatasetCounts(IEnumerable<Guid> collectionIds)
+    public Task<Dictionary<Guid, int>> GetDatasetCounts(IEnumerable<Guid> collectionIds)
     {
-        return repo.GetDatasetCounts(collectionIds);
+        var collectionIdsList = collectionIds.ToList();
+    
+        return Context.Set<DataCollectionEntity>()
+            .Where(c => collectionIdsList.Contains(c.Id))
+            .Select(c => new { c.Id, Count = c.ContainedDatasets.Count })
+            .ToDictionaryAsync(x => x.Id, x => x.Count);
     }
 }

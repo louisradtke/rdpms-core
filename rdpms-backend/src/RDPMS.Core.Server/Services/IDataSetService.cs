@@ -7,5 +7,4 @@ namespace RDPMS.Core.Server.Services;
 public interface IDataSetService : IGenericCollectionService<DataSet>
 {
     Task<IEnumerable<DataSet>> GetByCollectionAsync(Guid collectionId);
-    Task UpdateFieldsAsync(Guid id, DataSet updates);
 }

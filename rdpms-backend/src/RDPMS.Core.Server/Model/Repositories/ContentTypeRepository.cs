@@ -7,6 +7,6 @@ using RDPMS.Core.Server.Model.Repositories.Infra;
 
 namespace RDPMS.Core.Server.Model.Repositories;
 
-public class ContentTypeRepository(RDPMSPersistenceContext ctx)
+public class ContentTypeRepository(DbContext ctx)
     : GenericRepository<ContentType>(ctx),
         IContentTypeRepository;

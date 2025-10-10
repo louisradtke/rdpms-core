@@ -5,7 +5,7 @@ using RDPMS.Core.Server.Model.Repositories.Infra;
 
 namespace RDPMS.Core.Server.Model.Repositories;
 
-public class ProjectRepository(RDPMSPersistenceContext ctx)
+public class ProjectRepository(DbContext ctx)
     : GenericRepository<Project>(ctx, q => q
         .Include(p => p.DataCollections)
         .Include(p => p.DataStores)
@@ -14,6 +14,6 @@ public class ProjectRepository(RDPMSPersistenceContext ctx)
     public async Task UpdateAsync(Project entity)
     {
         DbSet.Update(entity);
-        await ctx.SaveChangesAsync();
+        await Context.SaveChangesAsync();
     }
 }

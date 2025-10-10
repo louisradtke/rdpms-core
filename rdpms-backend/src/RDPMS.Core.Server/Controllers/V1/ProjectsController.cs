@@ -64,9 +64,9 @@ public class ProjectsController(
                 .DataCollections.Select(c => c.Id));
         var dto = peMapper.Export(project);
         dto.Slug = slug?.Value;
-        foreach (var (cDto, count) in dto.Collections?.Zip(collectionCounts) ?? [])
+        foreach (var cDto in dto.Collections ?? [])
         {
-            cDto.DataSetCount = count;
+            cDto.DataSetCount = collectionCounts.GetValueOrDefault(cDto.Id!.Value, 0);
             cDto.Slug = collectionSlugs[cDto.Id!.Value].SingleOrDefault(s => s.State == SlugState.Active)?.Value;
         }
         return Ok(dto);

@@ -1,25 +1,31 @@
+using Microsoft.EntityFrameworkCore;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Server.Model.Repositories;
 using RDPMS.Core.Server.Model.Repositories.Infra;
 
 namespace RDPMS.Core.Server.Services.Infra;
 
-public abstract class ReadonlyGenericCollectionService<T>(IGenericRepository<T> repo)
+public abstract class ReadonlyGenericCollectionService<T>(DbContext context)
     : IReadonlyGenericCollectionService<T>
     where T : class, IUniqueEntity
 {
-    public Task<IEnumerable<T>> GetAllAsync()
+    protected DbContext Context { get; } = context;
+
+    public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return repo.GetAllAsync();
+        return await Context.Set<T>()
+            .ToListAsync();
     }
 
-    public Task<T> GetByIdAsync(Guid id)
+    public async Task<T> GetByIdAsync(Guid id)
     {
-        return repo.GetByIdAsync(id);
+        return await Context.Set<T>()
+            .SingleAsync(e => e.Id == id);
     }
 
-    public Task<bool> CheckForIdAsync(Guid id)
+    public async Task<bool> CheckForIdAsync(Guid id)
     {
-        return repo.CheckForIdAsync(id);
+        return await Context.Set<T>()
+            .AnyAsync(e => e.Id == id);
     }
 }
