@@ -25,13 +25,13 @@ public class SlugRepository(RDPMSPersistenceContext ctx) : GenericRepository<Slu
     }
 
     public async Task<bool> IsSlugTakenGivenParent<TChild>(TChild child, string slug, Guid parentId)
-        where TChild : class, IUniqueEntityWithNullableParent
+        where TChild : class, IUniqueEntityWithParent
     {
         return await IsSlugTakenGivenParent<TChild>(slug, parentId);
     }
 
     public async Task<bool> IsSlugTakenGivenParent<TChild>(string slug, Guid parentId)
-        where TChild : class, IUniqueEntityWithNullableParent
+        where TChild : class, IUniqueEntityWithParent
     {
         if (!await _slugs.AnyAsync(s => s.Value == slug))
         {

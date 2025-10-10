@@ -1,6 +1,6 @@
 namespace RDPMS.Core.Persistence;
 
-public interface IUniqueEntityWithNullableParent : IUniqueEntity
+public interface IUniqueEntityWithParent : IUniqueEntity
 {
     public Guid? ParentId { get; }
 }

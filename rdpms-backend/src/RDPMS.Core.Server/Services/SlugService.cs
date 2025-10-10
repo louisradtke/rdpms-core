@@ -51,7 +51,7 @@ public class SlugService(
                 continue;
             }
 
-            if (entity is IUniqueEntityWithNullableParent child)
+            if (entity is IUniqueEntityWithParent child)
             {
                 if (child.ParentId is null)
                 {
@@ -89,7 +89,7 @@ public class SlugService(
     }
 
     public async Task<TEntity?> ResolveEntityWithParentBySlugAsync<TEntity>(string slug, Guid parentId)
-        where TEntity : class, IUniqueEntityWithNullableParent
+        where TEntity : class, IUniqueEntityWithParent
     {
         var slugType = SlugUtil.MapTypeToSlug<TEntity>();
         var slugs = (await slugRepository.GetMatchingSlugs(slug, slugType)).ToList();

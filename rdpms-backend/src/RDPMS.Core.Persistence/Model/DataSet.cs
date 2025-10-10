@@ -5,7 +5,7 @@
 /// files, and finally seals the dataset. Only sealed datasets can be used for further processing.
 /// </summary>
 /// <param name="name"></param>
-public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithNullableParent
+public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 

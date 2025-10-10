@@ -4,7 +4,7 @@
 /// Class representing a managed data store, where the system can CRUD files.
 /// </summary>
 /// <param name="name">Display name of the store</param>
-public abstract class DataStore(string name) : IUniqueEntity, IUniqueEntityWithNullableParent
+public abstract class DataStore(string name) : IUniqueEntity, IUniqueEntityWithParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 

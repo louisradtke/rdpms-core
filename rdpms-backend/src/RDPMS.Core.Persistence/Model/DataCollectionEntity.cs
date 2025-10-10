@@ -3,7 +3,7 @@ namespace RDPMS.Core.Persistence.Model;
 /// <summary>
 /// Since data sets are not bound to their storage, they can be virtually put into a collection.
 /// </summary>
-public class DataCollectionEntity(string name) : IUniqueEntity, IUniqueEntityWithNullableParent
+public class DataCollectionEntity(string name) : IUniqueEntity, IUniqueEntityWithParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
     

@@ -22,7 +22,7 @@ public interface ISlugService
     /// <param name="parentId"></param>
     /// <returns>The entities instance, if it could be resolved. null Otherwise.</returns>
     Task<TEntity?> ResolveEntityWithParentBySlugAsync<TEntity>(string slug, Guid parentId)
-        where TEntity : class, IUniqueEntityWithNullableParent;
+        where TEntity : class, IUniqueEntityWithParent;
     
     /// <summary>
     /// Get all slugs for a given entity.

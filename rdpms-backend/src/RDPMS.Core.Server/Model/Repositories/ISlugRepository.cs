@@ -22,7 +22,7 @@ public interface ISlugRepository : IGenericRepository<Slug>
     /// <typeparam name="TChild">Type of the entity to check for.</typeparam>
     /// <returns>True, if the slug is already taken. False otherwise.</returns>
     Task<bool> IsSlugTakenGivenParent<TChild>(TChild child, string slug, Guid parentId)
-        where TChild : class, IUniqueEntityWithNullableParent;
+        where TChild : class, IUniqueEntityWithParent;
 
     /// <summary>
     /// Checks, if a slug is taken in the scope of a given parent.
@@ -32,7 +32,7 @@ public interface ISlugRepository : IGenericRepository<Slug>
     /// <typeparam name="TChild">Type of the entity to check .</typeparam>
     /// <returns>True, if the slug is already taken. False otherwise.</returns>
     Task<bool> IsSlugTakenGivenParent<TChild>(string slug, Guid parentId)
-        where TChild : class, IUniqueEntityWithNullableParent;
+        where TChild : class, IUniqueEntityWithParent;
 
     /// <summary>
     /// Get all slugs entities that match the given slug and type.
