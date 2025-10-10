@@ -5,9 +5,10 @@
 /// files, and finally seals the dataset. Only sealed datasets can be used for further processing.
 /// </summary>
 /// <param name="name"></param>
-public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithParent
+public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
+    public string? Slug { get; set; }
 
     /// <summary>
     /// List of all data sets influencing this data set. Those may also be data sets from other instances, why this is

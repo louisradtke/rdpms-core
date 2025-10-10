@@ -8,14 +8,16 @@ public record ProjectSummaryDTO()
     public Guid? Id { get; set; }
     
     /// <summary>
+    /// The slug of this project.
+    /// </summary>
+    public string? Slug { get; set; }
+    
+    /// <summary>
     /// The name of this project.
     /// </summary>
     public string? Name { get; set; }
     
-    /// <summary>
-    /// The slug of this project.
-    /// </summary>
-    public string? Slug { get; set; }
+    public string? Description { get; set; }
 
     /// <summary>
     /// All collections assigned to this project.

@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
@@ -8,6 +9,8 @@ using RDPMS.Core.Server.Services;
 namespace RDPMS.Core.Server.Controllers.V1;
 
 [ApiController]
+[Produces("application/json")]
+[Consumes("application/json")]
 [Route("api/v{version:apiVersion}/projects")]
 [ApiVersion("1.0")]
 public class ProjectsController(
@@ -20,42 +23,32 @@ public class ProjectsController(
     /// <summary>
     /// Get all projects.
     /// </summary>
-    /// <returns></returns>
     [HttpGet]
     [ProducesResponseType<IEnumerable<ProjectSummaryDTO>>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<ProjectSummaryDTO>>> GetAll()
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<IEnumerable<ProjectSummaryDTO>>> GetAll([FromQuery] string? slug = null)
     {
-        var domainProjects = await projectService.GetAllAsync();
-        var list = domainProjects.Select(peMapper.Export).ToList();
-        foreach (var project in list)
+        if (slug is not null && !SlugUtil.IsValidSlug(slug))
         {
-            var slugsForEntity = await slugService.GetSlugsForEntityAsync<Project>(project.Id!.Value);
-            project.Slug = slugsForEntity.FirstOrDefault(s => s.State == SlugState.Active)?.Value;
+            BadRequest(new ErrorMessageDTO { Message = "Slug is not valid." });
         }
-        return Ok(list);
+
+        var domainProjects = await projectService.GetAllAsync();
+        var query = domainProjects
+            .AsQueryable();
+        if (slug is not null)
+        {
+            query = query.Where(p => p.Slug == slug);
+        }
+        return Ok(query.AsEnumerable().Select(peMapper.Export));
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType<ProjectSummaryDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> GetSingle(string id)
+    public async Task<ActionResult> GetSingle(Guid id)
     {
-        Project? project;
-        if (!Guid.TryParse(id, out var guid))
-        {
-            project = await slugService.ResolveProjectBySlugAsync(id);
-            if (project == null)
-            {
-                return NotFound(new ErrorMessageDTO { Message = $"No project with slug {id} was found." });
-            }
-        }
-        else
-        {
-            project = await projectService.GetByIdAsync(guid);
-        }
-
-        var slug = (await slugService.GetSlugsForEntityAsync<Project>(project.Id))
-            .SingleOrDefault(s => s.State == SlugState.Active);
+        var project = await projectService.GetByIdAsync(id);
 
         var collectionCounts = await collectionsService.GetDatasetCounts(
             project.DataCollections.Select(c => c.Id));
@@ -63,7 +56,6 @@ public class ProjectsController(
             .GetSlugsForEntitiesAsync<DataCollectionEntity>(project
                 .DataCollections.Select(c => c.Id));
         var dto = peMapper.Export(project);
-        dto.Slug = slug?.Value;
         foreach (var cDto in dto.Collections ?? [])
         {
             cDto.DataSetCount = collectionCounts.GetValueOrDefault(cDto.Id!.Value, 0);
@@ -78,48 +70,19 @@ public class ProjectsController(
     /// <param name="id"></param>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [HttpPut("{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> Put([FromRoute] string id, [FromBody] ProjectSummaryDTO dto)
+    public async Task<ActionResult> Put([FromRoute] Guid id, [FromBody] ProjectSummaryDTO dto)
     {
-        Project? project;
-        if (Guid.TryParse(id, out var guid))
+        if (string.IsNullOrWhiteSpace(dto.Name))
         {
-            project = await projectService.GetByIdAsync(guid);
-        }
-        else
-        {
-            project = await slugService.ResolveProjectBySlugAsync(id);
-            if (project == null)
-            {
-                return NotFound(new ErrorMessageDTO { Message = $"No project with slug {id} was found." });
-            }
-
-            guid = project.Id;
-        }
-
-        if (dto.Id is not null && dto.Id != guid)
-            return BadRequest("Id in body must match route or be null.");
-
-        if (string.IsNullOrWhiteSpace(dto.Name)) 
             return BadRequest("Name is required.");
+        }
 
         try
         {
-            await projectService.UpdateNameAsync(guid, dto.Name);
-
-            if (dto.Slug is null)
-            {
-                return NoContent();
-            }
-
-            var slugs = await slugService.GetSlugsForEntityAsync<Project>(guid);
-            var currentSlug = slugs.SingleOrDefault(s => s.State == SlugState.Active);
-            if (currentSlug?.Value != dto.Slug)
-            {
-                await slugService.RegisterSlugAsync(project, dto.Slug);
-            }
+            await projectService.UpdateNameAndSlugAsync(id, dto.Name, dto.Slug);
             return NoContent();
         }
         catch (KeyNotFoundException)

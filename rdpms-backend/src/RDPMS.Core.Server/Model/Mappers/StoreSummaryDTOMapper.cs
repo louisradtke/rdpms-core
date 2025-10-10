@@ -14,9 +14,10 @@ public class StoreSummaryDTOMapper
         return new DataStoreSummaryDTO
         {
             Id = domain.Id ,
+            Slug = domain.Slug,
             Name = domain.Name,
-            DataFilesCount = domain.DataFiles?.Count,
-            StorageType = domain.StorageType.ToString().ToLower()
+            StorageType = domain.StorageType.ToString().ToLower(),
+            PropertiesJson = domain.GetPublicInfoContentJson()
         };
     }
 

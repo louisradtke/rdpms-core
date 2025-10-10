@@ -39,17 +39,23 @@ export interface ProjectSummaryDTO {
      */
     id?: string | null;
     /**
+     * The slug of this project.
+     * @type {string}
+     * @memberof ProjectSummaryDTO
+     */
+    slug?: string | null;
+    /**
      * The name of this project.
      * @type {string}
      * @memberof ProjectSummaryDTO
      */
     name?: string | null;
     /**
-     * The slug of this project.
+     * 
      * @type {string}
      * @memberof ProjectSummaryDTO
      */
-    slug?: string | null;
+    description?: string | null;
     /**
      * All collections assigned to this project.
      * @type {Array<CollectionSummaryDTO>}
@@ -82,8 +88,9 @@ export function ProjectSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: b
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
-        'name': json['name'] == null ? undefined : json['name'],
         'slug': json['slug'] == null ? undefined : json['slug'],
+        'name': json['name'] == null ? undefined : json['name'],
+        'description': json['description'] == null ? undefined : json['description'],
         'collections': json['collections'] == null ? undefined : ((json['collections'] as Array<any>).map(CollectionSummaryDTOFromJSON)),
         'dataStores': json['dataStores'] == null ? undefined : ((json['dataStores'] as Array<any>).map(DataStoreSummaryDTOFromJSON)),
     };
@@ -96,8 +103,9 @@ export function ProjectSummaryDTOToJSON(value?: ProjectSummaryDTO | null): any {
     return {
         
         'id': value['id'],
-        'name': value['name'],
         'slug': value['slug'],
+        'name': value['name'],
+        'description': value['description'],
         'collections': value['collections'] == null ? undefined : ((value['collections'] as Array<any>).map(CollectionSummaryDTOToJSON)),
         'dataStores': value['dataStores'] == null ? undefined : ((value['dataStores'] as Array<any>).map(DataStoreSummaryDTOToJSON)),
     };

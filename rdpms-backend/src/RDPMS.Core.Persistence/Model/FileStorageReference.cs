@@ -9,7 +9,7 @@ public abstract class FileStorageReference : IUniqueEntity
     /// <summary>
     /// Unique identifier of the storage reference.
     /// </summary>
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     
     /// <summary>
     /// The compression algorithm used to compress the file.
@@ -30,6 +30,9 @@ public abstract class FileStorageReference : IUniqueEntity
     /// The resource type (S3, Static, ...).
     /// </summary>
     public StorageType StorageType { get; set; }
+
+    public Guid? StoreFid { get; set; }
+    public Guid? FileFid { get; set; }
 }
 
 /// <summary>
@@ -45,7 +48,6 @@ public class S3FileStorageReference : FileStorageReference
         StorageType = StorageType.S3;
     }
 
-    public required S3DataStore Store { get; set; }
     public string ObjectKey { get; set; } = string.Empty;
 }
 

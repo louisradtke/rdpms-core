@@ -30,19 +30,31 @@ export interface DataStoreSummaryDTO {
      * @type {string}
      * @memberof DataStoreSummaryDTO
      */
+    slug?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof DataStoreSummaryDTO
+     */
     name?: string | null;
     /**
      * 
      * @type {number}
      * @memberof DataStoreSummaryDTO
      */
-    dataFilesCount?: number | null;
+    filesCount?: number | null;
     /**
      * 
      * @type {string}
      * @memberof DataStoreSummaryDTO
      */
     storageType?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof DataStoreSummaryDTO
+     */
+    propertiesJson?: string | null;
 }
 
 /**
@@ -63,9 +75,11 @@ export function DataStoreSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator:
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
+        'slug': json['slug'] == null ? undefined : json['slug'],
         'name': json['name'] == null ? undefined : json['name'],
-        'dataFilesCount': json['dataFilesCount'] == null ? undefined : json['dataFilesCount'],
+        'filesCount': json['filesCount'] == null ? undefined : json['filesCount'],
         'storageType': json['storageType'] == null ? undefined : json['storageType'],
+        'propertiesJson': json['propertiesJson'] == null ? undefined : json['propertiesJson'],
     };
 }
 
@@ -76,9 +90,11 @@ export function DataStoreSummaryDTOToJSON(value?: DataStoreSummaryDTO | null): a
     return {
         
         'id': value['id'],
+        'slug': value['slug'],
         'name': value['name'],
-        'dataFilesCount': value['dataFilesCount'],
+        'filesCount': value['filesCount'],
         'storageType': value['storageType'],
+        'propertiesJson': value['propertiesJson'],
     };
 }
 

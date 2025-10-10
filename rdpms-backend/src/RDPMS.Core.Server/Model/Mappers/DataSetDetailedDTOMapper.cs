@@ -17,6 +17,7 @@ public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper)
         return new DataSetDetailedDTO
         {
             Id = domain.Id,
+            Slug = domain.Slug,
             Name = domain.Name,
             AssignedTags = domain.AssignedTags.Select(tag => new TagDTO
             {

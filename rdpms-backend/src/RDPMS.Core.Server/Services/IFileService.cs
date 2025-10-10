@@ -6,7 +6,6 @@ namespace RDPMS.Core.Server.Services;
 
 public interface IFileService : IReadonlyGenericCollectionService<DataFile>
 {
-    Task<IEnumerable<DataFile>> GetFilesInStoreAsync(Guid storeId);
     Task<FileUploadTarget> RequestFileUploadAsync(DataFile file);
 
     /// <summary>
@@ -25,4 +24,22 @@ public interface IFileService : IReadonlyGenericCollectionService<DataFile>
     /// <param name="context">HttpContext</param>
     /// <returns>The rooted URI</returns>
     string GetContentApiUri(Guid id, HttpContext context);
+
+    /// <summary>
+    /// Get a <see cref="FileStorageReference"/> by its Id.
+    /// </summary>
+    /// <param name="id">Id to query for.</param>
+    /// <returns>Instance of the file.</returns>
+    /// <exception cref="InvalidOperationException">If no <see cref="FileStorageReference"/> with
+    /// the given Id exists.</exception>
+    public Task<FileStorageReference> GetStorageReferenceByIdAsync(Guid id);
+
+    /// <summary>
+    /// Get all <see cref="FileStorageReference"/> instances, optionally filtered by storeId and type.
+    /// </summary>
+    /// <param name="storeId">The id of the store to query for.</param>
+    /// <param name="type">The type to query for</param>
+    /// <returns>Enumerable of all matching instances</returns>
+    public Task<IEnumerable<FileStorageReference>> GetStorageReferencesAsync(
+        Guid? storeId = null, StorageType? type = null);
 }

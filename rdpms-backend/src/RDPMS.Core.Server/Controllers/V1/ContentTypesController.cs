@@ -7,9 +7,10 @@ using RDPMS.Core.Server.Services;
 namespace RDPMS.Core.Server.Controllers.V1;
 
 [ApiController]
+[Produces("application/json")]
+[Consumes("application/json")]
 [Route("api/v{version:apiVersion}/data/content-types")]
 [ApiVersion("1.0")]
-[Produces("application/json")]
 public class ContentTypesController(IContentTypeService typeService, ContentTypeDTOMapper ctMapper) : ControllerBase
 {
     [HttpGet]

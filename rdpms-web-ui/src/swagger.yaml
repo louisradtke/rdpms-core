@@ -8,22 +8,22 @@ paths:
     get:
       tags:
         - Collections
-      summary: Get all colletions.
+      summary: Get all collections.
+      parameters:
+        - name: projectId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: slug
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: OK
           content:
-            text/plain:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CollectionSummaryDTO'
             application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CollectionSummaryDTO'
-            text/json:
               schema:
                 type: array
                 items:
@@ -38,25 +38,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CollectionSummaryDTO'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/CollectionSummaryDTO'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/CollectionSummaryDTO'
       responses:
         '200':
           description: OK
         '400':
           description: Bad Request
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
             application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-            text/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
   '/api/v1/data/collections/{id}':
@@ -75,25 +63,13 @@ paths:
         '200':
           description: OK
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/CollectionSummaryDTO'
             application/json:
-              schema:
-                $ref: '#/components/schemas/CollectionSummaryDTO'
-            text/json:
               schema:
                 $ref: '#/components/schemas/CollectionSummaryDTO'
         '404':
           description: Not Found
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
             application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-            text/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
   /api/v1/data/content-types:
@@ -119,12 +95,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ContentTypeDTO'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/ContentTypeDTO'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/ContentTypeDTO'
       responses:
         '200':
           description: OK
@@ -137,16 +107,6 @@ paths:
         description: ''
         content:
           application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/ContentTypeDTO'
-          text/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/ContentTypeDTO'
-          application/*+json:
             schema:
               type: array
               items:
@@ -207,12 +167,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/DataSetSummaryDTO'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/DataSetSummaryDTO'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/DataSetSummaryDTO'
       responses:
         '200':
           description: OK
@@ -253,16 +207,6 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/DataSetSummaryDTO'
-          text/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/DataSetSummaryDTO'
-          application/*+json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/DataSetSummaryDTO'
       responses:
         '200':
           description: OK
@@ -275,17 +219,7 @@ paths:
         '200':
           description: OK
           content:
-            text/plain:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/FileSummaryDTO'
             application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/FileSummaryDTO'
-            text/json:
               schema:
                 type: array
                 items:
@@ -300,35 +234,17 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/FileCreateRequestDTO'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/FileCreateRequestDTO'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/FileCreateRequestDTO'
       responses:
         '201':
           description: Created
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/FileCreateResponseDTO'
             application/json:
-              schema:
-                $ref: '#/components/schemas/FileCreateResponseDTO'
-            text/json:
               schema:
                 $ref: '#/components/schemas/FileCreateResponseDTO'
         '400':
           description: Bad Request
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ErrorMessageDTO'
             application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessageDTO'
-            text/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
   '/api/v1/data/files/{id}':
@@ -348,25 +264,13 @@ paths:
         '200':
           description: OK
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/FileSummaryDTO'
             application/json:
-              schema:
-                $ref: '#/components/schemas/FileSummaryDTO'
-            text/json:
               schema:
                 $ref: '#/components/schemas/FileSummaryDTO'
         '404':
           description: Not Found
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
             application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-            text/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
   '/api/v1/data/files/{id}/content':
@@ -388,13 +292,7 @@ paths:
         '404':
           description: Not Found
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ErrorMessageDTO'
             application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessageDTO'
-            text/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
   '/api/v1/data/files/{id}/blob':
@@ -414,58 +312,74 @@ paths:
         '200':
           description: OK
           content:
-            application/octet-stream:
+            application/json:
               schema:
                 type: string
                 format: binary
-        '404':
-          description: Not Found
+        '400':
+          description: Bad Request
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ErrorMessageDTO'
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
-            text/json:
+        '404':
+          description: Not Found
+          content:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
         '501':
           description: Not Implemented
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ErrorMessageDTO'
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
-            text/json:
+  /api/v1/data/file-refs:
+    get:
+      tags:
+        - Files
+      parameters:
+        - name: storeGuid
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: type
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
               schema:
-                $ref: '#/components/schemas/ErrorMessageDTO'
+                $ref: '#/components/schemas/FileSummaryDTO'
   /api/v1/projects:
     get:
       tags:
         - Projects
       summary: Get all projects.
+      parameters:
+        - name: slug
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: OK
           content:
-            text/plain:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ProjectSummaryDTO'
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/ProjectSummaryDTO'
-            text/json:
+        '400':
+          description: Bad Request
+          content:
+            application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ProjectSummaryDTO'
+                $ref: '#/components/schemas/ErrorMessageDTO'
   '/api/v1/projects/{id}':
     get:
       tags:
@@ -476,29 +390,18 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         '200':
           description: OK
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ProjectSummaryDTO'
             application/json:
-              schema:
-                $ref: '#/components/schemas/ProjectSummaryDTO'
-            text/json:
               schema:
                 $ref: '#/components/schemas/ProjectSummaryDTO'
         '404':
           description: Not Found
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ErrorMessageDTO'
             application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessageDTO'
-            text/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
     put:
@@ -512,31 +415,20 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       requestBody:
         description: ''
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ProjectSummaryDTO'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/ProjectSummaryDTO'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/ProjectSummaryDTO'
       responses:
-        '200':
-          description: OK
+        '204':
+          description: No Content
         '400':
           description: Bad Request
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ErrorMessageDTO'
             application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessageDTO'
-            text/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
   /api/v1/data/stores:
@@ -544,25 +436,28 @@ paths:
       tags:
         - Stores
       summary: Get all data stores.
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: OK
           content:
-            text/plain:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DataStoreSummaryDTO'
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/DataStoreSummaryDTO'
-            text/json:
+        '400':
+          description: Bad Request
+          content:
+            application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DataStoreSummaryDTO'
+                  $ref: '#/components/schemas/ErrorMessageDTO'
   '/api/v1/data/stores/{id}':
     get:
       tags:
@@ -580,13 +475,7 @@ paths:
         '200':
           description: OK
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/DataStoreSummaryDTO'
             application/json:
-              schema:
-                $ref: '#/components/schemas/DataStoreSummaryDTO'
-            text/json:
               schema:
                 $ref: '#/components/schemas/DataStoreSummaryDTO'
 components:
@@ -640,6 +529,10 @@ components:
           type: string
           description: Uniquely identifies the dataset. Typically server-generated. Should not be manually set by the client.
           format: uuid
+          nullable: true
+        slug:
+          type: string
+          description: 'An optional, human-readable identifier for the dataset.'
           nullable: true
         name:
           type: string
@@ -713,6 +606,10 @@ components:
           description: Uniquely identifies the dataset. Typically server-generated. Should not be manually set by the client.
           format: uuid
           nullable: true
+        slug:
+          type: string
+          description: 'An optional, human-readable identifier for the dataset.'
+          nullable: true
         name:
           type: string
           description: 'Non-unique, mandatory descriptive name of the dataset. Must be provided by the client.'
@@ -772,14 +669,20 @@ components:
           type: string
           format: uuid
           nullable: true
+        slug:
+          type: string
+          nullable: true
         name:
           type: string
           nullable: true
-        dataFilesCount:
+        filesCount:
           type: integer
           format: int32
           nullable: true
         storageType:
+          type: string
+          nullable: true
+        propertiesJson:
           type: string
           nullable: true
       additionalProperties: false
@@ -910,13 +813,16 @@ components:
           description: The id of this project.
           format: uuid
           nullable: true
+        slug:
+          type: string
+          description: The slug of this project.
+          nullable: true
         name:
           type: string
           description: The name of this project.
           nullable: true
-        slug:
+        description:
           type: string
-          description: The slug of this project.
           nullable: true
         collections:
           type: array

@@ -5,10 +5,23 @@ using RDPMS.Core.Server.Model.Repositories.Infra;
 
 namespace RDPMS.Core.Server.Services.Infra;
 
-public class GenericCollectionService<T>(DbContext context)
-    : ReadonlyGenericCollectionService<T>(context), IGenericCollectionService<T>
+public class GenericCollectionService<T> : ReadonlyGenericCollectionService<T>, IGenericCollectionService<T>
     where T : class, IUniqueEntity
 {
+    protected GenericCollectionService(DbContext context) : base(context)
+    {
+    }
+
+    protected GenericCollectionService(DbContext context, IIncludeConfiguration<T> configuration)
+        : base(context, configuration)
+    {
+    }
+
+    protected GenericCollectionService(DbContext context, Func<IQueryable<T>, IQueryable<T>> includeFunc)
+        : base(context, GenericLambdaIncludeConfiguration<T>.Create(includeFunc))
+    {
+    }
+
     public async Task AddAsync(T item)
     {
         await Context.Set<T>()

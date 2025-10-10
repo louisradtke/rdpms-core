@@ -8,19 +8,23 @@ using RDPMS.Core.Server.Services.Infra;
 namespace RDPMS.Core.Server.Services;
 
 public class ProjectService(DbContext context)
-    : GenericCollectionService<Project>(context), IProjectService
+    : GenericCollectionService<Project>(context, q => q
+        .Include(p => p.DataCollections)
+        .Include(p => p.DataStores)
+    ), IProjectService
 {
     public Task<Project> GetGlobalProjectAsync()
     {
         return GetByIdAsync(RDPMSConstants.GlobalProjectId);
     }
 
-    public async Task UpdateNameAsync(Guid id, string name)
+    public async Task UpdateNameAndSlugAsync(Guid id, string name, string? slug)
     {
         var existing = await GetByIdAsync(id);
         if (existing == null) throw new KeyNotFoundException($"DataSet {id} not found");
 
         existing.Name = name;
+        existing.Slug = slug;
         
         await UpdateAsync(existing);
     }

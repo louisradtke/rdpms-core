@@ -1,5 +1,6 @@
 using RDPMS.Core.Infra.AppInitialization;
 using RDPMS.Core.Infra.Exceptions;
+using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Repositories;
@@ -29,22 +30,26 @@ public class DataCollectionSummaryDTOMapper
         _importChecks.Add(CheckSet<CollectionSummaryDTO>.CreateWarn(
             dto => dto.DataSetCount is null or >= 0,
             _ => "DataFilesCount should be a valid number or will be ignored by the server."));
+        _importChecks.Add(CheckSet<CollectionSummaryDTO>.CreateErr(
+            dto => dto.Slug is null || SlugUtil.IsValidSlug(dto.Slug),
+            _ => "Slug is not valid."));
     }
 
-    public DataCollectionEntity Import(CollectionSummaryDTO foreign, DataStore defaultStore, Project parentProject)
+    public DataCollectionEntity Import(CollectionSummaryDTO dto, DataStore defaultStore, Project parentProject)
     {
         foreach (var checkSet in _importChecks)
         {
-            if (checkSet.Severity <= ErrorSeverity.Error || !checkSet.CheckFunc(foreign))
+            if (checkSet.Severity <= ErrorSeverity.Error || !checkSet.CheckFunc(dto))
                 continue;
 
-            throw new IllegalArgumentException(checkSet.MessageFunc(foreign));
+            throw new IllegalArgumentException(checkSet.MessageFunc(dto));
         }
 
         var collection = new DataCollectionEntity(
-            foreign.Name ?? throw new IllegalStateException("Name is required."))
+            dto.Name ?? throw new IllegalStateException("Name is required."))
         {
             Id = Guid.NewGuid(),
+            Slug = dto.Slug,
             ContainedDatasets = new List<DataSet>(),
             DefaultDataStore = defaultStore,
             ParentId = parentProject.Id,
@@ -59,6 +64,7 @@ public class DataCollectionSummaryDTOMapper
         {
             Id = domain.Id,
             Name = domain.Name,
+            Slug = domain.Slug,
             DataSetCount = domain.ContainedDatasets?.Count ?? 0,
             DefaultDataStoreId = domain.DefaultDataStore?.Id
         };

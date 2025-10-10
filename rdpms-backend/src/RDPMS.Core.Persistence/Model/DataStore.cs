@@ -1,12 +1,16 @@
-﻿namespace RDPMS.Core.Persistence.Model;
+﻿using Newtonsoft.Json;
+
+namespace RDPMS.Core.Persistence.Model;
 
 /// <summary>
 /// Class representing a managed data store, where the system can CRUD files.
 /// </summary>
 /// <param name="name">Display name of the store</param>
-public abstract class DataStore(string name) : IUniqueEntity, IUniqueEntityWithParent
+public abstract class DataStore(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
+
+    public string? Slug { get; set; }
 
     /// <summary>
     /// Name of the data store
@@ -19,12 +23,12 @@ public abstract class DataStore(string name) : IUniqueEntity, IUniqueEntityWithP
     /// </summary>
     public Guid? ParentId { get; set; }
     
-    /// <summary>
-    /// List of all files stored on this instance
-    /// </summary>
-    public List<DataFile> DataFiles { get; set; } = [];
-    
+
+    public string? Description { get; set; }
+
     public StorageType StorageType { get; set; } = StorageType.S3;
+
+    public abstract string GetPublicInfoContentJson();
 }
 
 /// <summary>
@@ -64,4 +68,14 @@ public class S3DataStore : DataStore
 
     public bool UsePathStyle { get; set; } = true;            // MinIO commonly uses path-style
     public string? Region { get; set; }                        // optional for MinIO; required for S3
+
+    public override string GetPublicInfoContentJson()
+    {
+        return JsonConvert.SerializeObject(new Dictionary<string, object>()
+        {
+            { "endpointUrl", EndpointUrl },
+            { "keyPrefix", KeyPrefix },
+            { "bucket", Bucket }
+        });
+    }
 }

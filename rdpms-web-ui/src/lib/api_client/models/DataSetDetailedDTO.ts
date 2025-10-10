@@ -46,6 +46,12 @@ export interface DataSetDetailedDTO {
      */
     id?: string | null;
     /**
+     * An optional, human-readable identifier for the dataset.
+     * @type {string}
+     * @memberof DataSetDetailedDTO
+     */
+    slug?: string | null;
+    /**
      * Non-unique, mandatory descriptive name of the dataset. Must be provided by the client.
      * @type {string}
      * @memberof DataSetDetailedDTO
@@ -144,6 +150,7 @@ export function DataSetDetailedDTOFromJSONTyped(json: any, ignoreDiscriminator: 
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
+        'slug': json['slug'] == null ? undefined : json['slug'],
         'name': json['name'] == null ? undefined : json['name'],
         'assignedTags': json['assignedTags'] == null ? undefined : ((json['assignedTags'] as Array<any>).map(TagDTOFromJSON)),
         'createdStampUTC': json['createdStampUTC'] == null ? undefined : (new Date(json['createdStampUTC'])),
@@ -166,6 +173,7 @@ export function DataSetDetailedDTOToJSON(value?: DataSetDetailedDTO | null): any
     return {
         
         'id': value['id'],
+        'slug': value['slug'],
         'name': value['name'],
         'assignedTags': value['assignedTags'] == null ? undefined : ((value['assignedTags'] as Array<any>).map(TagDTOToJSON)),
         'createdStampUTC': value['createdStampUTC'] == null ? undefined : ((value['createdStampUTC'] as any).toISOString()),

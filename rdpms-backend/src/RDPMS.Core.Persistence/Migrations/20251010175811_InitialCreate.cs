@@ -55,7 +55,9 @@ namespace RDPMS.Core.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Slug = table.Column<string>(type: "TEXT", nullable: true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
                     ParentId = table.Column<Guid>(type: "TEXT", nullable: true),
                     DefaultDataStoreId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
@@ -77,8 +79,7 @@ namespace RDPMS.Core.Persistence.Migrations
                     DeletedStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
                     BeginStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
                     EndStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    DataSetId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    DataStoreId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    DataSetId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -90,6 +91,7 @@ namespace RDPMS.Core.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Slug = table.Column<string>(type: "TEXT", nullable: true),
                     AncestorDatasetIds = table.Column<string>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     ParentId = table.Column<Guid>(type: "TEXT", nullable: true),
@@ -169,8 +171,10 @@ namespace RDPMS.Core.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Slug = table.Column<string>(type: "TEXT", nullable: true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     ParentId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
                     StorageType = table.Column<int>(type: "INTEGER", nullable: false),
                     EndpointUrl = table.Column<string>(type: "TEXT", nullable: true),
                     KeyPrefix = table.Column<string>(type: "TEXT", nullable: true),
@@ -194,8 +198,8 @@ namespace RDPMS.Core.Persistence.Migrations
                     SizeBytes = table.Column<long>(type: "INTEGER", nullable: false),
                     SHA256Hash = table.Column<string>(type: "TEXT", nullable: false),
                     StorageType = table.Column<int>(type: "INTEGER", nullable: false),
-                    DataFileId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    StoreId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    StoreFid = table.Column<Guid>(type: "TEXT", nullable: true),
+                    FileFid = table.Column<Guid>(type: "TEXT", nullable: true),
                     ObjectKey = table.Column<string>(type: "TEXT", nullable: true),
                     URL = table.Column<string>(type: "TEXT", nullable: true)
                 },
@@ -203,16 +207,15 @@ namespace RDPMS.Core.Persistence.Migrations
                 {
                     table.PrimaryKey("PK_FileStorageReferences", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_FileStorageReferences_DataFiles_DataFileId",
-                        column: x => x.DataFileId,
+                        name: "FK_FileStorageReferences_DataFiles_FileFid",
+                        column: x => x.FileFid,
                         principalTable: "DataFiles",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_FileStorageReferences_DataStores_StoreId",
-                        column: x => x.StoreId,
+                        name: "FK_FileStorageReferences_DataStores_StoreFid",
+                        column: x => x.StoreFid,
                         principalTable: "DataStores",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -259,6 +262,8 @@ namespace RDPMS.Core.Persistence.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
+                    Slug = table.Column<string>(type: "TEXT", nullable: true),
+                    InheritFileTypes = table.Column<bool>(type: "INTEGER", nullable: false),
                     DefaultDataStoreId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -389,8 +394,8 @@ namespace RDPMS.Core.Persistence.Migrations
 
             migrationBuilder.InsertData(
                 table: "Projects",
-                columns: new[] { "Id", "DefaultDataStoreId", "Description", "Name" },
-                values: new object[] { new Guid("11f819a0-6857-4a9f-8a77-caf1a845776e"), null, "The instances global mockup project.", "_global" });
+                columns: new[] { "Id", "DefaultDataStoreId", "Description", "InheritFileTypes", "Name", "Slug" },
+                values: new object[] { new Guid("11f819a0-6857-4a9f-8a77-caf1a845776e"), null, "The instances global mockup project.", true, "_global", "_global" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_DataCollections_DefaultDataStoreId",
@@ -406,11 +411,6 @@ namespace RDPMS.Core.Persistence.Migrations
                 name: "IX_DataFiles_DataSetId",
                 table: "DataFiles",
                 column: "DataSetId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DataFiles_DataStoreId",
-                table: "DataFiles",
-                column: "DataStoreId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DataFiles_FileTypeId",
@@ -438,14 +438,14 @@ namespace RDPMS.Core.Persistence.Migrations
                 column: "ParentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FileStorageReferences_DataFileId",
+                name: "IX_FileStorageReferences_FileFid",
                 table: "FileStorageReferences",
-                column: "DataFileId");
+                column: "FileFid");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FileStorageReferences_StoreId",
+                name: "IX_FileStorageReferences_StoreFid",
                 table: "FileStorageReferences",
-                column: "StoreId");
+                column: "StoreFid");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Jobs_LocalId",
@@ -546,13 +546,6 @@ namespace RDPMS.Core.Persistence.Migrations
                 table: "DataFiles",
                 column: "DataSetId",
                 principalTable: "DataSets",
-                principalColumn: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_DataFiles_DataStores_DataStoreId",
-                table: "DataFiles",
-                column: "DataStoreId",
-                principalTable: "DataStores",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(

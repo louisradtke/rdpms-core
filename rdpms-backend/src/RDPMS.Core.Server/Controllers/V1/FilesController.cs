@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using RDPMS.Core.Infra.Exceptions;
+using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Services;
@@ -9,12 +10,15 @@ using RDPMS.Core.Server.Services;
 namespace RDPMS.Core.Server.Controllers.V1;
 
 [ApiController]
-[Route("api/v{version:apiVersion}/data/files")]
+[Produces("application/json")]
+[Consumes("application/json")]
+[Route("api/v{version:apiVersion}/data")]
 [ApiVersion("1.0")]
 public class FilesController(
     IFileService fileService,
     IContentTypeService typeService,
     FileSummaryDTOMapper fileMapper,
+    IExportMapper<FileStorageReference, FileStorageReferenceSummaryDTO> referenceMapper,
     FileCreateRequestDTOMapper dfCreateReqMapper,
     LinkGenerator linkGenerator,
     ILogger<FilesController> logger) : ControllerBase
@@ -23,7 +27,7 @@ public class FilesController(
     /// Get summaries of all files.
     /// </summary>
     /// <returns></returns>
-    [HttpGet]
+    [HttpGet("files")]
     [ProducesResponseType<IEnumerable<FileSummaryDTO>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<FileSummaryDTO>>> Get()
     {
@@ -42,7 +46,7 @@ public class FilesController(
     /// </summary>
     /// <param name="requestDto"></param>
     /// <returns></returns>
-    [HttpPost]
+    [HttpPost("files")]
     [ProducesResponseType<FileCreateResponseDTO>(StatusCodes.Status201Created)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> PostNewFile([FromBody] FileCreateRequestDTO requestDto)
@@ -78,7 +82,7 @@ public class FilesController(
     /// </summary>
     /// <param name="id">Id of the file.</param>
     /// <returns></returns>
-    [HttpGet("{id:guid}")]
+    [HttpGet("files/{id:guid}")]
     [ProducesResponseType<FileSummaryDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<FileSummaryDTO>> Get(Guid id)
@@ -101,7 +105,7 @@ public class FilesController(
     /// </summary>
     /// <param name="id">Id of the file to download.</param>
     /// <returns>On success, a redirect will be returned.</returns>
-    [HttpGet("{id:guid}/content")]
+    [HttpGet("files/{id:guid}/content")]
     [ProducesResponseType(StatusCodes.Status302Found)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
     [EnableCors("ExternalCorsPolicy")] // needed for redirect
@@ -130,13 +134,32 @@ public class FilesController(
     /// </summary>
     /// <param name="id">Id of the file to download.</param>
     /// <returns>On success, the raw bytes will be returned.</returns>
-    [HttpGet("{id:guid}/blob")]
+    [HttpGet("files/{id:guid}/blob")]
     [ProducesResponseType<FileContentResult>(StatusCodes.Status200OK, "application/octet-stream")]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status501NotImplemented)]
-    public async Task<ActionResult> GetBlob(Guid id)
+    public Task<ActionResult> GetBlob(Guid id)
     {
-        return StatusCode(501, "Not Implemented");
+        return Task.FromResult<ActionResult>(StatusCode(501, "Not Implemented"));
     }
 
+    
+    [HttpGet("file-refs")]
+    [ProducesResponseType<FileSummaryDTO>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetReferences([FromQuery] Guid? storeGuid, [FromQuery] string? type)
+    {
+        StorageType? storageType = null;
+        if (type is not null)
+        {
+            if (!Enum.TryParse<StorageType>(type, out var result))
+            {
+                return BadRequest(new ErrorMessageDTO() { Message = $"Unknown storage type: '{type}'" });
+            }
+            storageType = result;
+        }
+
+        var refs = await fileService.GetStorageReferencesAsync(storeGuid, storageType);
+        return Ok(refs.Select(referenceMapper.Export));
+    }
 }

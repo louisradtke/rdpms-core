@@ -25,6 +25,10 @@ import {
     ProjectSummaryDTOToJSON,
 } from '../models/index';
 
+export interface ApiV1ProjectsGetRequest {
+    slug?: string;
+}
+
 export interface ApiV1ProjectsIdGetRequest {
     id: string;
 }
@@ -42,8 +46,12 @@ export class ProjectsApi extends runtime.BaseAPI {
     /**
      * Get all projects.
      */
-    async apiV1ProjectsGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ProjectSummaryDTO>>> {
+    async apiV1ProjectsGetRaw(requestParameters: ApiV1ProjectsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ProjectSummaryDTO>>> {
         const queryParameters: any = {};
+
+        if (requestParameters['slug'] != null) {
+            queryParameters['slug'] = requestParameters['slug'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -60,8 +68,8 @@ export class ProjectsApi extends runtime.BaseAPI {
     /**
      * Get all projects.
      */
-    async apiV1ProjectsGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ProjectSummaryDTO>> {
-        const response = await this.apiV1ProjectsGetRaw(initOverrides);
+    async apiV1ProjectsGet(requestParameters: ApiV1ProjectsGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ProjectSummaryDTO>> {
+        const response = await this.apiV1ProjectsGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

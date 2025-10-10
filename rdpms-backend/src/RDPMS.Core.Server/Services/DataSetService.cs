@@ -7,7 +7,12 @@ using RDPMS.Core.Server.Services.Infra;
 namespace RDPMS.Core.Server.Services;
 
 public class DataSetService(DbContext context)
-    : GenericCollectionService<DataSet>(context), IDataSetService
+    : GenericCollectionService<DataSet>(context, files => files
+            .Include(ds => ds.Files)
+            .ThenInclude(f => f.FileType)
+            .Include(ds => ds.Files)
+            .ThenInclude(f => f.Locations)
+        ), IDataSetService
 {
     public async Task<IEnumerable<DataSet>> GetByCollectionAsync(Guid collectionId)
     {

@@ -1,4 +1,5 @@
 import {
+    type ApiV1ProjectsGetRequest,
     Configuration,
     ProjectsApi,
     type ProjectSummaryDTO,
@@ -29,9 +30,9 @@ export class ProjectsRepository {
         return this.api;
     }
 
-    public async getProjects(): Promise<ProjectSummaryDTO[]> {
+    public async getProjects(requestParameters?: ApiV1ProjectsGetRequest): Promise<ProjectSummaryDTO[]> {
         const api = await this.ensureReady();
-        return api.apiV1ProjectsGet();
+        return api.apiV1ProjectsGet(requestParameters);
     }
 
     public async getProjectById(id: string): Promise<ProjectSummaryDTO> {

@@ -40,6 +40,12 @@ export interface DataSetSummaryDTO {
      */
     id?: string | null;
     /**
+     * An optional, human-readable identifier for the dataset.
+     * @type {string}
+     * @memberof DataSetSummaryDTO
+     */
+    slug?: string | null;
+    /**
      * Non-unique, mandatory descriptive name of the dataset. Must be provided by the client.
      * @type {string}
      * @memberof DataSetSummaryDTO
@@ -132,6 +138,7 @@ export function DataSetSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: b
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
+        'slug': json['slug'] == null ? undefined : json['slug'],
         'name': json['name'] == null ? undefined : json['name'],
         'assignedTags': json['assignedTags'] == null ? undefined : ((json['assignedTags'] as Array<any>).map(TagDTOFromJSON)),
         'createdStampUTC': json['createdStampUTC'] == null ? undefined : (new Date(json['createdStampUTC'])),
@@ -153,6 +160,7 @@ export function DataSetSummaryDTOToJSON(value?: DataSetSummaryDTO | null): any {
     return {
         
         'id': value['id'],
+        'slug': value['slug'],
         'name': value['name'],
         'assignedTags': value['assignedTags'] == null ? undefined : ((value['assignedTags'] as Array<any>).map(TagDTOToJSON)),
         'createdStampUTC': value['createdStampUTC'] == null ? undefined : ((value['createdStampUTC'] as any).toISOString()),

@@ -71,11 +71,17 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<Guid?>("DefaultDataStoreId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("ParentId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Slug")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -102,9 +108,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<Guid?>("DataSetId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("DataStoreId")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime?>("DeletedStamp")
                         .HasColumnType("TEXT");
 
@@ -128,8 +131,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DataSetId");
-
-                    b.HasIndex("DataStoreId");
 
                     b.HasIndex("FileTypeId");
 
@@ -165,6 +166,9 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<Guid?>("ParentId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Slug")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("State")
                         .HasColumnType("INTEGER");
 
@@ -196,11 +200,17 @@ namespace RDPMS.Core.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("ParentId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Slug")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("StorageType")
@@ -226,7 +236,7 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<int>("Algorithm")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("DataFileId")
+                    b.Property<Guid?>("FileFid")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SHA256Hash")
@@ -239,9 +249,14 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<int>("StorageType")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid?>("StoreFid")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("DataFileId");
+                    b.HasIndex("FileFid");
+
+                    b.HasIndex("StoreFid");
 
                     b.ToTable("FileStorageReferences");
 
@@ -445,8 +460,14 @@ namespace RDPMS.Core.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("InheritFileTypes")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Slug")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -460,7 +481,9 @@ namespace RDPMS.Core.Persistence.Migrations
                         {
                             Id = new Guid("11f819a0-6857-4a9f-8a77-caf1a845776e"),
                             Description = "The instances global mockup project.",
-                            Name = "_global"
+                            InheritFileTypes = true,
+                            Name = "_global",
+                            Slug = "_global"
                         });
                 });
 
@@ -547,11 +570,6 @@ namespace RDPMS.Core.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("StoreId")
-                        .HasColumnType("TEXT");
-
-                    b.HasIndex("StoreId");
-
                     b.HasDiscriminator().HasValue(0);
                 });
 
@@ -584,7 +602,7 @@ namespace RDPMS.Core.Persistence.Migrations
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.ContentType", b =>
                 {
                     b.HasOne("RDPMS.Core.Persistence.Model.Project", null)
-                        .WithMany("AllFileTypes")
+                        .WithMany("FileTypes")
                         .HasForeignKey("ProjectId");
                 });
 
@@ -606,10 +624,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
                         .WithMany("Files")
                         .HasForeignKey("DataSetId");
-
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataStore", null)
-                        .WithMany("DataFiles")
-                        .HasForeignKey("DataStoreId");
 
                     b.HasOne("RDPMS.Core.Persistence.Model.ContentType", "FileType")
                         .WithMany()
@@ -644,7 +658,11 @@ namespace RDPMS.Core.Persistence.Migrations
                 {
                     b.HasOne("RDPMS.Core.Persistence.Model.DataFile", null)
                         .WithMany("Locations")
-                        .HasForeignKey("DataFileId");
+                        .HasForeignKey("FileFid");
+
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataStore", null)
+                        .WithMany()
+                        .HasForeignKey("StoreFid");
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.Job", b =>
@@ -749,17 +767,6 @@ namespace RDPMS.Core.Persistence.Migrations
                         .HasForeignKey("DataSetId");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.S3FileStorageReference", b =>
-                {
-                    b.HasOne("RDPMS.Core.Persistence.Model.S3DataStore", "Store")
-                        .WithMany()
-                        .HasForeignKey("StoreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Store");
-                });
-
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataCollectionEntity", b =>
                 {
                     b.Navigation("ContainedDatasets");
@@ -779,11 +786,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Navigation("MetadataJsonFields");
                 });
 
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataStore", b =>
-                {
-                    b.Navigation("DataFiles");
-                });
-
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.Job", b =>
                 {
                     b.Navigation("Logs");
@@ -798,11 +800,11 @@ namespace RDPMS.Core.Persistence.Migrations
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.Project", b =>
                 {
-                    b.Navigation("AllFileTypes");
-
                     b.Navigation("DataCollections");
 
                     b.Navigation("DataStores");
+
+                    b.Navigation("FileTypes");
 
                     b.Navigation("Labels");
 

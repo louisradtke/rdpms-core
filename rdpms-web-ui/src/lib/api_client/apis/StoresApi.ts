@@ -16,11 +16,18 @@
 import * as runtime from '../runtime';
 import type {
   DataStoreSummaryDTO,
+  ErrorMessageDTO,
 } from '../models/index';
 import {
     DataStoreSummaryDTOFromJSON,
     DataStoreSummaryDTOToJSON,
+    ErrorMessageDTOFromJSON,
+    ErrorMessageDTOToJSON,
 } from '../models/index';
+
+export interface ApiV1DataStoresGetRequest {
+    type?: string;
+}
 
 export interface ApiV1DataStoresIdGetRequest {
     id: string;
@@ -34,8 +41,12 @@ export class StoresApi extends runtime.BaseAPI {
     /**
      * Get all data stores.
      */
-    async apiV1DataStoresGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<DataStoreSummaryDTO>>> {
+    async apiV1DataStoresGetRaw(requestParameters: ApiV1DataStoresGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<DataStoreSummaryDTO>>> {
         const queryParameters: any = {};
+
+        if (requestParameters['type'] != null) {
+            queryParameters['type'] = requestParameters['type'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -52,8 +63,8 @@ export class StoresApi extends runtime.BaseAPI {
     /**
      * Get all data stores.
      */
-    async apiV1DataStoresGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<DataStoreSummaryDTO>> {
-        const response = await this.apiV1DataStoresGetRaw(initOverrides);
+    async apiV1DataStoresGet(requestParameters: ApiV1DataStoresGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<DataStoreSummaryDTO>> {
+        const response = await this.apiV1DataStoresGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

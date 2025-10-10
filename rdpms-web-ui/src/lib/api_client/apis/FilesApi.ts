@@ -34,6 +34,11 @@ import {
     ProblemDetailsToJSON,
 } from '../models/index';
 
+export interface ApiV1DataFileRefsGetRequest {
+    storeGuid?: string;
+    type?: string;
+}
+
 export interface ApiV1DataFilesIdBlobGetRequest {
     id: string;
 }
@@ -54,6 +59,38 @@ export interface ApiV1DataFilesPostRequest {
  * 
  */
 export class FilesApi extends runtime.BaseAPI {
+
+    /**
+     */
+    async apiV1DataFileRefsGetRaw(requestParameters: ApiV1DataFileRefsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FileSummaryDTO>> {
+        const queryParameters: any = {};
+
+        if (requestParameters['storeGuid'] != null) {
+            queryParameters['storeGuid'] = requestParameters['storeGuid'];
+        }
+
+        if (requestParameters['type'] != null) {
+            queryParameters['type'] = requestParameters['type'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/v1/data/file-refs`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FileSummaryDTOFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async apiV1DataFileRefsGet(requestParameters: ApiV1DataFileRefsGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileSummaryDTO> {
+        const response = await this.apiV1DataFileRefsGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Get summaries of all files.

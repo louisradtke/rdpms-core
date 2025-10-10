@@ -1,10 +1,28 @@
+using System.Text.RegularExpressions;
 using RDPMS.Core.Persistence.Model;
 
 namespace RDPMS.Core.Persistence;
 
 public static class SlugUtil
 {
-    public static bool IsQualifiedForSlug(Type type)
+    /// <summary>
+    /// DO NOT USE THIS FOR VALIDATION. <see cref="IsValidSlug"/> is the single source of truth for that."/>
+    /// </summary>
+    public static Regex SlugRegex { get; } = new(@"^[A-Za-z0-9\.\+\-_]{1,64}$", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Checks if the slug is valid.
+    /// </summary>
+    /// <param name="slug"></param>
+    /// <returns></returns>
+    public static bool IsValidSlug(string? slug)
+    {
+        // if (Guid.TryParse(slug, out _)) return false;
+        return !string.IsNullOrWhiteSpace(slug) &&
+               SlugRegex.IsMatch(slug);
+    }
+
+    public static bool TypeIsQualifiedForSlug(Type type)
     {
         return type == typeof(Project) ||
                type == typeof(DataCollectionEntity) ||

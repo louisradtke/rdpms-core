@@ -90,7 +90,6 @@ internal class Program
 
         builder.Services.AddScoped<IDataSetRepository, DataSetRepository>();
         builder.Services.AddScoped<IDataStoreRepository, DataStoreRepository>();
-        builder.Services.AddScoped<IDataFileRepository, DataFileRepository>();
         builder.Services.AddScoped<IContentTypeRepository, ContentTypeRepository>();
         builder.Services.AddScoped<IDataCollectionRepository, DataCollectionRepository>();
         builder.Services.AddScoped<IProjectRepository, ProjectRepository>();

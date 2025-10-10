@@ -10,7 +10,15 @@
     if (!projectId) throw new Error('Collection ID is required');
 
     let projectsRepo = new ProjectsRepository(getOrFetchConfig().then(toApiConfig));
-    let projectPromise = projectsRepo.getProjectById(projectId);
+    // decide by GUID format
+    const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(projectId);
+
+    let projectPromise = isGuid
+        ? projectsRepo.getProjectById(projectId)
+        : projectsRepo.getProjects({ slug: projectId }).then((list) => {
+            if (!list?.length) throw new Error('Project not found');
+            return list[0];
+        });
 </script>
 
 <main class="container mx-auto">
@@ -19,16 +27,22 @@
         <LoadingCircle/>
     </div>
 {:then project}
-    <p class="text-xs text-gray-600">PROJECT</p>
+    <p class="text-xs text-gray-600 mt-1">PROJECT</p>
     <h1 class="text-2xl font-bold">{project.name}</h1>
     <div class="flex gap-4">
         <CodeCopyField text={project.slug ?? ""}/>
         <CodeCopyField text={project.id ?? ""}/>
     </div>
 
+    {#if project.description}
+        <div>
+            <p>{project.description}</p>
+        </div>
+    {/if}
+
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <!-- Left: Collections -->
-        <section class="lg:col-span-2">
+        <section class="mt-2 lg:col-span-2">
             <div class="mb-3 flex items-center justify-between">
                 <h2 class="text-lg font-semibold">Collections</h2>
                 <button class="rounded-md bg-gray-900 px-3 py-1.5 text-sm text-white hover:bg-black/90">

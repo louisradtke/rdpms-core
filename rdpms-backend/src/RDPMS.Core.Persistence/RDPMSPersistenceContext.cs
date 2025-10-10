@@ -108,7 +108,9 @@ public class RDPMSPersistenceContext : DbContext
 
         // set up data file
         model.Entity<DataFile>()
-            .HasMany<FileStorageReference>(e => e.Locations);
+            .HasMany<FileStorageReference>(e => e.Locations)
+            .WithOne()
+            .HasForeignKey(r => r.FileFid);
         model.Entity<DataFile>()
             .Ignore(e => e.IsTimeSeries) // computed
             .Ignore(e => e.IsDeleted);
@@ -139,6 +141,10 @@ public class RDPMSPersistenceContext : DbContext
         model.Entity<DataStore>()
             .HasDiscriminator(e => e.StorageType)
             .HasValue<S3DataStore>(StorageType.S3); // static is skipped intentionally
+        model.Entity<DataStore>()
+            .HasMany<FileStorageReference>()
+            .WithOne()
+            .HasForeignKey(r => r.StoreFid);
 
         // set up file storage hierarchy
         model.Entity<FileStorageReference>()
@@ -153,11 +159,12 @@ public class RDPMSPersistenceContext : DbContext
         model.Entity<Project>()
             .HasMany<LabelSharingPolicy>(e => e.SharedLabels);
         model.Entity<Project>()
-            .HasMany<ContentType>(e => e.AllFileTypes);
+            .HasMany<ContentType>(e => e.FileTypes);
         model.Entity<Project>()
             .HasData(new Project("_global")
             {
                 Id = RDPMSConstants.GlobalProjectId,
+                Slug = "_global",
                 Description = "The instances global mockup project."
             });
         model.Entity<Project>()

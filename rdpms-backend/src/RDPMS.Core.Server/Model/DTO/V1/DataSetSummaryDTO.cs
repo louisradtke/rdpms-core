@@ -12,6 +12,11 @@ public record DataSetSummaryDTO
     public Guid? Id { get; set; }
 
     /// <summary>
+    /// An optional, human-readable identifier for the dataset.
+    /// </summary>
+    public string? Slug { get; set; }
+
+    /// <summary>
     /// Non-unique, mandatory descriptive name of the dataset. Must be provided by the client.
     /// </summary>
     public string? Name { get; set; }

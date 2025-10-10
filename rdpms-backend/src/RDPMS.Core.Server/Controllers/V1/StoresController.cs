@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Services;
@@ -7,6 +8,8 @@ using RDPMS.Core.Server.Services;
 namespace RDPMS.Core.Server.Controllers.V1;
 
 [ApiController]
+[Produces("application/json")]
+[Consumes("application/json")]
 [Route("api/v{version:apiVersion}/data/stores")]
 [ApiVersion("1.0")]
 public class StoresController(IStoreService storeService, StoreSummaryDTOMapper storeMapper) : ControllerBase
@@ -17,10 +20,21 @@ public class StoresController(IStoreService storeService, StoreSummaryDTOMapper 
     /// <returns></returns>
     [HttpGet]
     [ProducesResponseType<IEnumerable<DataStoreSummaryDTO>>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<DataStoreSummaryDTO>>> Get()
+    [ProducesResponseType<IEnumerable<ErrorMessageDTO>>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<IEnumerable<DataStoreSummaryDTO>>> Get([FromQuery] string? type)
     {
-        var list = await storeService.GetAllAsync();
-        return Ok(list);
+        var query = (await storeService.GetAllAsync())
+            .AsQueryable();
+        if (type is not null)
+        {
+            if (!Enum.TryParse<StorageType>(type, out var result))
+            {
+                return BadRequest(new ErrorMessageDTO { Message = $"Unknown storage type: '{type}'" });
+            }
+            query = query.Where(s => s.StorageType == result);
+        }
+        
+        return Ok(query.AsEnumerable().Select(storeMapper.Export));
     }
     
     /// <summary>
@@ -28,7 +42,7 @@ public class StoresController(IStoreService storeService, StoreSummaryDTOMapper 
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType<DataStoreSummaryDTO>(StatusCodes.Status200OK)]
     public async Task<ActionResult<DataStoreSummaryDTO>> GetById(Guid id)
     {

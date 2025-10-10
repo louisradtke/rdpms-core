@@ -25,6 +25,11 @@ import {
     ProblemDetailsToJSON,
 } from '../models/index';
 
+export interface ApiV1DataCollectionsGetRequest {
+    projectId?: string;
+    slug?: string;
+}
+
 export interface ApiV1DataCollectionsIdGetRequest {
     id: string;
 }
@@ -39,10 +44,18 @@ export interface ApiV1DataCollectionsPostRequest {
 export class CollectionsApi extends runtime.BaseAPI {
 
     /**
-     * Get all colletions.
+     * Get all collections.
      */
-    async apiV1DataCollectionsGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<CollectionSummaryDTO>>> {
+    async apiV1DataCollectionsGetRaw(requestParameters: ApiV1DataCollectionsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<CollectionSummaryDTO>>> {
         const queryParameters: any = {};
+
+        if (requestParameters['projectId'] != null) {
+            queryParameters['projectId'] = requestParameters['projectId'];
+        }
+
+        if (requestParameters['slug'] != null) {
+            queryParameters['slug'] = requestParameters['slug'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -57,10 +70,10 @@ export class CollectionsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get all colletions.
+     * Get all collections.
      */
-    async apiV1DataCollectionsGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<CollectionSummaryDTO>> {
-        const response = await this.apiV1DataCollectionsGetRaw(initOverrides);
+    async apiV1DataCollectionsGet(requestParameters: ApiV1DataCollectionsGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<CollectionSummaryDTO>> {
+        const response = await this.apiV1DataCollectionsGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

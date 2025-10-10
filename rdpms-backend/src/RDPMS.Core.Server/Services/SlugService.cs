@@ -15,18 +15,17 @@ public class SlugService(
 {
     private static readonly Random Random = new();
     private static readonly char[] AlphanumericChars = "abcdefghijklmnopqrstuvwxyz0123456789".ToCharArray();
-    public static readonly Regex SlugRegex = new(@"^[a-zA-Z0-9\+\.\-_]+$", RegexOptions.Compiled);
     public static readonly int InitSuffixLength = 4;
 
     public async Task<string> RegisterSlugAsync<TEntity>(TEntity entity, string requestedSlug)
         where TEntity : class, IUniqueEntity
     {
-        if (!SlugUtil.IsQualifiedForSlug(typeof(TEntity)))
+        if (!SlugUtil.TypeIsQualifiedForSlug(typeof(TEntity)))
         {
             throw new ArgumentException("Type is not qualified for slugs");
         }
 
-        if (!SlugRegex.IsMatch(requestedSlug))
+        if (!SlugUtil.IsValidSlug(requestedSlug))
         {
             throw new ArgumentException("Slug is not valid. " +
                                         "It may only contain alphanumeric characters, +, -, ., or _");
