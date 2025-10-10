@@ -39,6 +39,12 @@ export interface CollectionSummaryDTO {
     name?: string | null;
     /**
      * 
+     * @type {string}
+     * @memberof CollectionSummaryDTO
+     */
+    description?: string | null;
+    /**
+     * 
      * @type {number}
      * @memberof CollectionSummaryDTO
      */
@@ -77,6 +83,7 @@ export function CollectionSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator
         'id': json['id'] == null ? undefined : json['id'],
         'slug': json['slug'] == null ? undefined : json['slug'],
         'name': json['name'] == null ? undefined : json['name'],
+        'description': json['description'] == null ? undefined : json['description'],
         'dataSetCount': json['dataSetCount'] == null ? undefined : json['dataSetCount'],
         'defaultDataStoreId': json['defaultDataStoreId'] == null ? undefined : json['defaultDataStoreId'],
         'projectId': json['projectId'] == null ? undefined : json['projectId'],
@@ -92,6 +99,7 @@ export function CollectionSummaryDTOToJSON(value?: CollectionSummaryDTO | null):
         'id': value['id'],
         'slug': value['slug'],
         'name': value['name'],
+        'description': value['description'],
         'dataSetCount': value['dataSetCount'],
         'defaultDataStoreId': value['defaultDataStoreId'],
         'projectId': value['projectId'],

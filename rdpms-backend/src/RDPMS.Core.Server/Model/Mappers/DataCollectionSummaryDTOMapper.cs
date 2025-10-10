@@ -50,6 +50,8 @@ public class DataCollectionSummaryDTOMapper
         {
             Id = Guid.NewGuid(),
             Slug = dto.Slug,
+            Name = dto.Name,
+            Description = dto.Description,
             ContainedDatasets = new List<DataSet>(),
             DefaultDataStore = defaultStore,
             ParentId = parentProject.Id
@@ -63,8 +65,9 @@ public class DataCollectionSummaryDTOMapper
         return new CollectionSummaryDTO
         {
             Id = domain.Id,
-            Name = domain.Name,
             Slug = domain.Slug,
+            Name = domain.Name,
+            Description = domain.Description,
             DataSetCount = domain.ContainedDatasets?.Count ?? 0,
             DefaultDataStoreId = domain.DefaultDataStore?.Id,
             ProjectId = domain.ParentId

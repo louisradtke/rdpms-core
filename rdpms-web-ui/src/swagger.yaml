@@ -493,6 +493,9 @@ components:
         name:
           type: string
           nullable: true
+        description:
+          type: string
+          nullable: true
         dataSetCount:
           type: integer
           format: int32

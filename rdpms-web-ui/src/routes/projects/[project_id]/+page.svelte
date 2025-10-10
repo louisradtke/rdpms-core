@@ -23,7 +23,7 @@
 
 <main class="container mx-auto">
 {#await projectPromise}
-    <div class="flex justify-center">
+    <div class="mt-3 flex justify-center">
         <LoadingCircle/>
     </div>
 {:then project}
@@ -45,7 +45,7 @@
         <section class="mt-2 lg:col-span-2">
             <div class="mb-3 flex items-center justify-between">
                 <h2 class="text-lg font-semibold">Collections</h2>
-                <button class="rounded-md bg-gray-900 px-3 py-1.5 text-sm text-white hover:bg-black/90">
+                <button class="rounded-md bg-gray-800 px-3 py-1.5 text-sm text-white hover:bg-black/90">
                     New collection
                 </button>
             </div>
@@ -58,18 +58,19 @@
                                 <a href="/collections/{collection.slug ?? collection.id}" class="hover:no-underline">
                                     <h3 class="font-medium">{collection.name}</h3>
                                 </a>
-                                <p class="mt-1 text-sm text-gray-600 line-clamp-2">Short description of what's
-                                    inside.</p>
+                                {#if collection.description}
+                                    <p class="mt-1 text-sm text-gray-600 line-clamp-2">{collection.description}</p>
+                                {/if}
                             </div>
                             <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
                                 {collection.dataSetCount + " dataset" + (collection.dataSetCount === 1 ? "" : "s")}
                             </span>
                         </div>
-                        <div class="mt-4 flex flex-wrap gap-2">
-                            <a href="#" class="rounded-md border border-gray-300 px-2.5 py-1 text-sm hover:bg-gray-50">Open</a>
-                            <button class="rounded-md border border-gray-300 px-2.5 py-1 text-sm hover:bg-gray-50">Preview</button>
-                            <button class="rounded-md border border-gray-300 px-2.5 py-1 text-sm hover:bg-gray-50">Run workflow</button>
-                        </div>
+<!--                        <div class="mt-4 flex flex-wrap gap-2">-->
+<!--                            <a href="#" class="rounded-md border border-gray-300 px-2.5 py-1 text-sm hover:bg-gray-50">Open</a>-->
+<!--                            <button class="rounded-md border border-gray-300 px-2.5 py-1 text-sm hover:bg-gray-50">Preview</button>-->
+<!--                            <button class="rounded-md border border-gray-300 px-2.5 py-1 text-sm hover:bg-gray-50">Run workflow</button>-->
+<!--                        </div>-->
                     </li>
                 {:else}
                     <p class="text-sm text-gray-600">
