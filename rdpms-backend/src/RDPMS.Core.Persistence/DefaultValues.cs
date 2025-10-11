@@ -122,10 +122,10 @@ public static class DefaultValues
             Id = RDPMSConstants.DummyS3StoreId,
             Slug = "dummy-s3-store",
             Bucket = "dummy-bucket",
-            EndpointUrl = "http://localhost:9000",
+            EndpointUrl = "localhost:5002",
             KeyPrefix = "data/",
-            AccessKeyReference = "direct://dummy-access-key",
-            SecretKeyReference = "direct://dummy-secret-key"
+            AccessKeyReference = "direct://admin",
+            SecretKeyReference = "direct://thisisasecret"
         };
     }
 

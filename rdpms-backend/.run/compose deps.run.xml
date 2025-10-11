@@ -1,10 +1,11 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="compose static-server" type="docker-deploy" factoryName="docker-compose.yml" server-name="Podman Machine">
+  <configuration default="false" name="compose deps" type="docker-deploy" factoryName="docker-compose.yml" server-name="Podman Machine">
     <deployment type="docker-compose.yml">
       <settings>
         <option name="services">
           <list>
             <option value="static-server" />
+            <option value="minio" />
           </list>
         </option>
         <option name="sourceFilePath" value="compose.yaml" />
