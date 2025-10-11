@@ -53,7 +53,11 @@
     }
 </script>
 
-<main class="container mx-auto">
+<svelte:head>
+    <title>Projects - RDPMS</title>
+</svelte:head>
+
+<main class="container mx-auto px-2">
     <h1 class="text-2xl font-bold my-4">Projects</h1>
 
     <section class="table-section">

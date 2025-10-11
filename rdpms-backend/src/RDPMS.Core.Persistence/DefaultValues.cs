@@ -117,9 +117,10 @@ public static class DefaultValues
             }
         ];
 
-        DummyS3Store = new S3DataStore("dummy-s3-store")
+        DummyS3Store = new S3DataStore("Dummy S3 Store")
         {
             Id = RDPMSConstants.DummyS3StoreId,
+            Slug = "dummy-s3-store",
             Bucket = "dummy-bucket",
             EndpointUrl = "http://localhost:9000",
             KeyPrefix = "data/",
@@ -158,9 +159,11 @@ public static class DefaultValues
     private static DataCollectionEntity BuildDataCollectionEntity(S3DataStore? s3Store, Guid projectId,
         ContentType mcapType, ContentType imageType, ContentType pdfType)
     {
-        return new DataCollectionEntity("dummy-collection")
+        return new DataCollectionEntity("Dummy Collection")
         {
             Id = RDPMSConstants.DummyDataCollectionId,
+            Slug = "dummy-collection",
+            Description = "This is a dummy for a data collection",
             DefaultDataStore = s3Store,
             ParentId = projectId,
             ContainedDatasets =
@@ -168,6 +171,7 @@ public static class DefaultValues
                 new DataSet("dummy-recording-01")
                 {
                     Id = Guid.Parse("fae41903-b023-427e-93cf-1a7f9d6437e8"),
+                    Slug = "dummy-recording-01",
                     CreatedStamp = DateTime.Parse("2025-09-11T22:57:38.000+02:00"),
                     State = DataSetState.Sealed,
                     Files =
@@ -236,6 +240,7 @@ public static class DefaultValues
                 new DataSet("dummy-recording-02")
                 {
                     Id = Guid.Parse("3b5a0c9b-d1da-42ae-92ac-4dc700224cda"),
+                    Slug = "dummy-recording-02",
                     CreatedStamp = DateTime.Parse("2025-10-04T13:52:00.000+02:00"),
                     State = DataSetState.Sealed,
                     Files = []

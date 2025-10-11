@@ -27,6 +27,7 @@ import {
 
 export interface ApiV1DataCollectionsGetRequest {
     projectId?: string;
+    projectSlug?: string;
     slug?: string;
 }
 
@@ -51,6 +52,10 @@ export class CollectionsApi extends runtime.BaseAPI {
 
         if (requestParameters['projectId'] != null) {
             queryParameters['projectId'] = requestParameters['projectId'];
+        }
+
+        if (requestParameters['projectSlug'] != null) {
+            queryParameters['projectSlug'] = requestParameters['projectSlug'];
         }
 
         if (requestParameters['slug'] != null) {

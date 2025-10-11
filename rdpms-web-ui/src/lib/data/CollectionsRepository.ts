@@ -2,8 +2,9 @@ import {
     type ApiV1DataCollectionsGetRequest,
     CollectionsApi,
     type CollectionSummaryDTO,
-    Configuration
+    Configuration, type ProjectSummaryDTO
 } from '$lib/api_client';
+import {isGuid} from "$lib/util/url-helper";
 
 export class CollectionsRepository {
     private readonly ready: Promise<void>;
@@ -39,6 +40,30 @@ export class CollectionsRepository {
     public async getCollectionById(id: string): Promise<CollectionSummaryDTO> {
         const api = await this.ensureReady()
         return api.apiV1DataCollectionsIdGet({ id });
+    }
+
+    /**
+     * Returns a collection by its ID or slug.
+     * @param idOrSlug The collection ID or slug.
+     * @param projectIdOrSlug
+     * @returns The collection.
+     */
+    public async getCollectionByIdOrSlug(idOrSlug: string, projectIdOrSlug: string | undefined)
+        : Promise<CollectionSummaryDTO> {
+        if (isGuid(idOrSlug)) {
+            return this.getCollectionById(idOrSlug)
+        }
+
+        const args: ApiV1DataCollectionsGetRequest = { slug: idOrSlug };
+        if (projectIdOrSlug) {
+            if (isGuid(idOrSlug)) args.projectId = projectIdOrSlug;
+            else args.projectSlug = projectIdOrSlug;
+        }
+
+        return this.getCollections(args).then((list) => {
+            if (!list?.length) throw new Error('Collection not found');
+            return list[0];
+        });
     }
 
     public async createCollection(dto: Partial<CollectionSummaryDTO>): Promise<void> {

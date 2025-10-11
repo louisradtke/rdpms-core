@@ -20,6 +20,6 @@
 
 {#if entity.description}
     <div>
-        <p>{entity.description}</p>
+        <p class="mt-2 text-sm text-gray-600">{entity.description}</p>
     </div>
 {/if}

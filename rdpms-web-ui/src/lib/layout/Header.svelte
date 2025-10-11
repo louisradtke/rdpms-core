@@ -2,11 +2,8 @@
     // Manage the state for the burger menu
     let showMenu = false;
 
-    // Example links
     const links = [
         {name: 'Projects', href: '/projects'},
-        {name: 'Pipelines', href: '/pipelines'},
-        {name: 'Entity View', href: '/entities'},
         {name: 'Admin', href: '/admin'},
     ];
 </script>
@@ -64,12 +61,6 @@
     {#if showMenu}
         <div class="md:hidden bg-white border-t border-gray-200 px-4 py-2">
             <div class="space-y-2">
-                <a
-                        href="/"
-                        class="block text-gray-800 hover:text-gray-600 transition duration-150"
-                >
-                    Home
-                </a>
                 {#each links as link (link.name)}
                     <a
                             href={link.href}

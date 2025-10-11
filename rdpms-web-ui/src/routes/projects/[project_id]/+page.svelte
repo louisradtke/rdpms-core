@@ -3,24 +3,16 @@
     import {getOrFetchConfig, toApiConfig} from "$lib/util/config-helper";
     import {ProjectsRepository} from "$lib/data/ProjectsRepo";
     import LoadingCircle from "$lib/layout/LoadingCircle.svelte";
-    import CodeCopyField from "$lib/layout/CodeCopyField.svelte";
     import {isGuid} from "$lib/util/url-helper";
     import EntityHeader from "$lib/layout/EntityHeader.svelte";
 
 
     let projectId: string = page.params.project_id ?? '';
     if (!projectId) throw new Error('Collection ID is required');
-    const projectIdIsGuid = isGuid(projectId);
 
     let projectsRepo = new ProjectsRepository(getOrFetchConfig().then(toApiConfig));
-    // decide by GUID format
 
-    let projectPromise = projectIdIsGuid
-        ? projectsRepo.getProjectById(projectId)
-        : projectsRepo.getProjects({ slug: projectId }).then((list) => {
-            if (!list?.length) throw new Error('Project not found');
-            return list[0];
-        });
+    let projectPromise = projectsRepo.getProjectByIdOrSlug(projectId);
 
     let title = 'RDPMS';
     projectPromise.then(project => {
@@ -35,7 +27,7 @@
     <title>{title}</title>
 </svelte:head>
 
-<main class="container mx-auto">
+<main class="container mx-auto px-2">
 {#await projectPromise}
     <div class="mt-3 flex justify-center">
         <LoadingCircle/>
@@ -58,7 +50,7 @@
                     <li class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
                         <div class="flex items-start justify-between gap-3">
                             <div>
-                                <a href="/projects/{projectId}/collections/{collection.slug ?? collection.id}"
+                                <a href="/projects/{projectId}/c/{collection.slug ?? collection.id}"
                                    class="hover:no-underline">
                                     <h3 class="font-medium">{collection.name}</h3>
                                 </a>

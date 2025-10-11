@@ -36,7 +36,7 @@
         {#each collections as container (container.id)}
             <tr class="even:bg-gray-50">
                 <td class="border border-gray-300 px-4 py-2">
-                    <a href="/collections/{container.id}">{container.id}</a>
+                    <a href="/c/{container.id}">{container.id}</a>
                 </td>
                 {#each tableAccessors.slice(1).map(dct => dct.accessor(container)) as entry (entry)}
                     <td class="border border-gray-300 px-4 py-2">{entry}</td>

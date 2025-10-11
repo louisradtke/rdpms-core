@@ -12,11 +12,18 @@ paths:
       parameters:
         - name: projectId
           in: query
+          description: Used to filter for collections with this parent project
           schema:
             type: string
             format: uuid
+        - name: projectSlug
+          in: query
+          description: Used to filter for collections with this parent project
+          schema:
+            type: string
         - name: slug
           in: query
+          description: Used to filter for collections with this slug
           schema:
             type: string
       responses:

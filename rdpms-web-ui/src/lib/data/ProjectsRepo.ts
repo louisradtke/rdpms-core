@@ -4,6 +4,7 @@ import {
     ProjectsApi,
     type ProjectSummaryDTO,
 } from '$lib/api_client';
+import {isGuid} from "$lib/util/url-helper";
 
 export class ProjectsRepository {
     private readonly ready: Promise<void>;
@@ -40,6 +41,17 @@ export class ProjectsRepository {
         return api.apiV1ProjectsIdGet({ id });
     }
 
+    public async getProjectByIdOrSlug(idOrSlug: string): Promise<ProjectSummaryDTO> {
+        if (isGuid(idOrSlug)) {
+            return this.getProjectById(idOrSlug)
+        }
+
+        return this.getProjects({ slug: idOrSlug }).then((list) => {
+            if (!list?.length) throw new Error('Project not found');
+            return list[0];
+        });
+    }
+    
     public async updateProject(id: string, dto: Partial<ProjectSummaryDTO>): Promise<void> {
         const api = await this.ensureReady();
         return api.apiV1ProjectsIdPut({ id, projectSummaryDTO: dto as ProjectSummaryDTO });

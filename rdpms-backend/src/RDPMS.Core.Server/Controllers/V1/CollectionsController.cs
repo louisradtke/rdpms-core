@@ -21,11 +21,15 @@ public class CollectionsController(
     /// <summary>
     /// Get all collections.
     /// </summary>
+    /// <param name="projectId">Used to filter for collections with this parent project</param>
+    /// <param name="projectSlug">Used to filter for collections with this parent project</param>
+    /// <param name="slug">Used to filter for collections with this slug</param>   
     /// <returns></returns>
     [HttpGet]
     [ProducesResponseType<IEnumerable<CollectionSummaryDTO>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<CollectionSummaryDTO>>> Get(
         [FromQuery] Guid? projectId = null,
+        [FromQuery] string? projectSlug = null,
         [FromQuery] string? slug = null)
     {
         var list = await dataCollectionEntityService.GetAllAsync();
@@ -34,7 +38,14 @@ public class CollectionsController(
         {
             query = query.Where(c => c.ParentId == projectId);
         }
+        if (projectSlug != null)
+        {
+            var project = (await projectService.GetAllAsync()).SingleOrDefault(p => p.Slug == projectSlug);
 
+            if (project == null) return Ok(Array.Empty<CollectionSummaryDTO>());
+            
+            query = query.Where(c => c.ParentId == project.Id);
+        }
         if (slug != null)
         {
             query = query.Where(c => c.Slug == slug);

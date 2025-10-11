@@ -17,11 +17,11 @@
     let datasetsRepo = new DataSetsRepository(getOrFetchConfig().then(toApiConfig));
     let allCollections = collectionsRepo.getCollections().then(cl => cl.map(c => ({
         label: c.name ?? c.id ?? 'none',
-        hrefValue: c.id ?? 'none',
+        hrefValue: c.slug ?? c.id ?? 'none',
         tooltip: `data container with ID ${c.id}`
     })));
-    let collectionReq = collectionsRepo.getCollectionById(collectionId);
-    let datasetsReq = datasetsRepo.listByCollection(collectionId);
+    let collectionReq = collectionsRepo.getCollectionByIdOrSlug(collectionId, projectId);
+    let datasetsReq = collectionReq.then(c => datasetsRepo.listByCollection(c.id ?? ''));
 
     let title = 'RDPMS';
     collectionReq.then(summary => {
@@ -40,7 +40,7 @@
 
     <Sidebar
         itemsPromise={allCollections}
-        baseUrl="/projects/{projectId}/collections/*"
+        baseUrl="/projects/{projectId}/c/*"
     />
 
     <div class="flex flex-col flex-1">
@@ -84,7 +84,7 @@
                         {#each datasets as dataset (dataset.id)}
                             <tr>
                                 <td class="text-left">
-                                    <a href="/projects/{projectId}/collections/{collectionId}/{dataset.slug ?? dataset.id}"
+                                    <a href="/projects/{projectId}/c/{collectionId}/{dataset.slug ?? dataset.id}"
                                        class="text-blue-500 hover:underline">
                                         {dataset.name}
                                     </a>
