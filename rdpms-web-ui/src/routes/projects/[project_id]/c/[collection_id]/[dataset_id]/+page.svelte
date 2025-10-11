@@ -62,11 +62,11 @@
                 <LoadingCircle/>
             {:then dsDetail}
                 <EntityHeader type="DATASET" entity={dsDetail} />
-                <div class="my-4"></div>
+                <div class="my-6"></div>
 
                 {#if dsDetail.files}
-                    <div class="space-y-6">
-                        {#each dsDetail.files as file}
+                    <div class="space-y-4">
+                        {#each dsDetail.files as file (file.id)}
                             <FileDisplay
                                 title={file.name ?? file.id ?? 'none'}
                                 fileSlug={"file" + file.id}
