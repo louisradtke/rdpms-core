@@ -53,8 +53,9 @@ public record DataSetSummaryDTO
     /// <summary>
     /// Indicates, whether the dataset (and its files) are immutable.
     /// Only to be set by server.
+    /// Lifecycle is: Uninitialized -> [Sealed ->] Deleted
     /// </summary>
-    public DataSetStateDTO? State { get; set; }
+    public string? State { get; set; }
 
     /// <summary>
     /// Indicates if the dataset represents time-series data.

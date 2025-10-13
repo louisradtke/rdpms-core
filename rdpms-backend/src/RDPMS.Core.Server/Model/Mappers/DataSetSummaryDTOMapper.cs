@@ -51,9 +51,7 @@ public class DataSetSummaryDTOMapper
             AssignedTags = tags,
             CreatedStamp = foreign.CreatedStampUTC ?? throw new IllegalStateException("CreatedStampUTC is required."),
             DeletedStamp = foreign.DeletedStampUTC,
-            State = foreign.State.HasValue
-                ? (DataSetState)foreign.State.Value
-                : DataSetState.Uninitialized,
+            State = DataSetState.Uninitialized, // server determines state, no one else can
             CreateJob = null, // Since DTO provides no information here
             Files = new List<DataFile>(), // Initializing empty as no information from DTO
             SourceForJobs = new List<Job>(), // Again, initialize empty
@@ -82,7 +80,7 @@ public class DataSetSummaryDTOMapper
             DeletedStampUTC = domain.DeletedStamp,
             BeginStampUTC = domain.Files.OrderBy(f => f.CreatedStamp).FirstOrDefault()?.CreatedStamp,
             EndStampUTC = domain.Files.OrderByDescending(f => f.CreatedStamp).FirstOrDefault()?.CreatedStamp,
-            State = (DataSetStateDTO)domain.State,
+            State = domain.State.ToString(),
             IsTimeSeries = domain.Files.Any(file => file.BeginStamp.HasValue),
             IsDeleted = domain.DeletedStamp.HasValue,
             MetadataFields = domain.MetadataJsonFields.Select(f => f.Key).ToList(),
