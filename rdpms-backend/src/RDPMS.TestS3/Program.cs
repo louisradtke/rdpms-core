@@ -3,8 +3,8 @@ using Minio.DataModel.Args;
 using RDPMS.Core.Persistence;
 
 var storeConfig = DefaultValues.DummyS3Store;
-var accessKey = string.Join("", storeConfig.AccessKeyReference?.Skip("direct://".Length) ?? []);
-var secretKey = string.Join("", storeConfig.SecretKeyReference?.Skip("direct://".Length) ?? []);
+var accessKey = storeConfig.AccessKeyReference?.Replace("direct://", "");
+var secretKey = storeConfig.SecretKeyReference?.Replace("direct://", "");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +14,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IMinioClient>(_ => new MinioClient()
-    .WithEndpoint(storeConfig.EndpointUrl)
+    .WithEndpoint(storeConfig.EndpointAddress)
     .WithCredentials(accessKey, secretKey)
     .Build());
 

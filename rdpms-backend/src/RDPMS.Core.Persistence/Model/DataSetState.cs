@@ -7,5 +7,6 @@ namespace RDPMS.Core.Persistence.Model;
 public enum DataSetState
 {
     Uninitialized = 0,
-    Sealed = 1
+    Sealed = 1,
+    Deleted = 2,
 }
