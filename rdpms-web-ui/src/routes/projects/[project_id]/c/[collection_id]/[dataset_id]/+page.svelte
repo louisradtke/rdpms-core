@@ -12,7 +12,7 @@
 
     let collectionId: string = page.params.collection_id ?? '';
     let projectId: string = page.params.project_id ?? '';
-    $: dataSetId = page.params.dataset_id ?? '';
+    let dataSetId = page.params.dataset_id ?? '';
     if (!collectionId) throw new Error('Collection ID is required');
 
     let collectionsRepo = new CollectionsRepository(getOrFetchConfig().then(toApiConfig));
