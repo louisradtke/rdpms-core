@@ -4,10 +4,8 @@ using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
-public interface IFileService : IReadonlyGenericCollectionService<DataFile>
+public interface IFileService : IGenericCollectionService<DataFile>
 {
-    Task<FileUploadTarget> RequestFileUploadAsync(DataFile file);
-
     /// <summary>
     /// Get a link that the client can download the file from.
     /// Let the service decide, which <see cref="FileStorageReference"/> to use.

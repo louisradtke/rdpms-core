@@ -11,7 +11,8 @@ public class FileCreateRequestDTOMapper : IImportMapper<DataFile, FileCreateRequ
 {
     public DataFile Import(FileCreateRequestDTO foreign, ContentType arg)
     {
-        if (foreign.Name == null || foreign.Size == null || foreign.CreatedStamp == null || foreign.Hash == null)
+        if (foreign.Name == null || foreign.SizeBytes == null ||
+            foreign.CreatedStamp == null || foreign.PlainSHA256Hash == null)
         {
             throw new ArgumentException(
                 "Name, Size, CreatedStamp, and Hash are required fields in DataFileCreateRequestDTO");
@@ -25,8 +26,8 @@ public class FileCreateRequestDTOMapper : IImportMapper<DataFile, FileCreateRequ
         return new DataFile(name: foreign.Name)
         {
             FileType = arg,
-            SizeBytes = foreign.Size.Value,
-            SHA256Hash = foreign.Hash,
+            SizeBytes = foreign.SizeBytes.Value,
+            SHA256Hash = foreign.PlainSHA256Hash,
             CreatedStamp = foreign.CreatedStamp.Value,
             BeginStamp = foreign.BeginStamp,
             EndStamp = foreign.EndStamp

@@ -102,6 +102,8 @@ internal class Program
         builder.Services.AddScoped<IDataCollectionEntityService, DataCollectionEntityService>();
         builder.Services.AddScoped<IProjectService, ProjectService>();
         builder.Services.AddScoped<ISlugService, SlugService>();
+        builder.Services.AddScoped<IS3Service, S3Service>();
+        builder.Services.AddScoped<ISecretResolverService, SecretResolverService>();
 
 
         // init api and api exploration

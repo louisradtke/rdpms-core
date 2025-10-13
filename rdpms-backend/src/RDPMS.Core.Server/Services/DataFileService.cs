@@ -10,16 +10,14 @@ using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
-public class DataFileService(DbContext dbContext, LinkGenerator linkGenerator)
+public class DataFileService(
+    DbContext dbContext,
+    LinkGenerator linkGenerator)
     : GenericCollectionService<DataFile>(dbContext, files => files
         .Include(f => f.Locations)
         .Include(f => f.FileType)
     ), IFileService
 {
-    public Task<FileUploadTarget> RequestFileUploadAsync(DataFile file)
-    {
-        return Task.FromResult(new FileUploadTarget(new Uri("https://todo.com")));
-    }
 
     public async Task<Uri> GetFileDownloadUriAsync(Guid id, HttpContext context)
     {
