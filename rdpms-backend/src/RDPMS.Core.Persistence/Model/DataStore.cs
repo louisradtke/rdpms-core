@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace RDPMS.Core.Persistence.Model;
 
@@ -36,6 +37,9 @@ public abstract class DataStore(string name) : IUniqueEntity, IUniqueEntityWithS
 /// </summary>
 public class S3DataStore : DataStore
 {
+    public static readonly Regex UrlRegex = new(@"^http(s?)://[\w\-\.]+(:[0-9]{1,5})?$");
+    private string _endpointUrl = string.Empty;
+
     public S3DataStore(string name) : base(name)
     {
         StorageType = StorageType.S3;
@@ -44,7 +48,14 @@ public class S3DataStore : DataStore
     /// <summary>
     /// URL where the S3 instance is accessible. e.g., https://minio.example.com
     /// </summary>
-    public string EndpointUrl { get; set; } = string.Empty;
+    public string EndpointUrl
+    {
+        get => _endpointUrl;
+        set {
+            if (!UrlRegex.IsMatch(value)) throw new ArgumentException("Invalid URL");
+            _endpointUrl = value;
+        }
+    }
 
     /// <summary>
     /// Gets prepended to all keys (file identifiers) in the bucket. e.g., "data/vehicle/"
@@ -78,4 +89,8 @@ public class S3DataStore : DataStore
             { "bucket", Bucket }
         });
     }
+    
+    public bool IsSsl => EndpointUrl.StartsWith("https://");
+    
+    public string EndpointAddress => IsSsl ? EndpointUrl.Replace("https://", "") : EndpointUrl.Replace("http://", "");
 }
