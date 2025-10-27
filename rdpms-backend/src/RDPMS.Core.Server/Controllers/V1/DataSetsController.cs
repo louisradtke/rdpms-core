@@ -65,9 +65,10 @@ public class DataSetsController(
     /// Add a single item to the system.
     /// </summary>
     /// <param name="dto"></param>
-    /// <returns></returns>
+    /// <returns>On success, responds with the guid of the new data set.</returns>
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> Post([FromBody] DataSetSummaryDTO dto)
     {
         if (dto.Id != null)
@@ -75,8 +76,9 @@ public class DataSetsController(
             return BadRequest("Id is not allowed to be set.");
         }
 
-        await dataSetService.AddAsync(dataSetSummaryMapper.Import(dto));
-        return Ok();
+        var domainItem = dataSetSummaryMapper.Import(dto);
+        await dataSetService.AddAsync(domainItem);
+        return Ok(domainItem.Id);
     }
 
     /// <summary>
@@ -155,6 +157,13 @@ public class DataSetsController(
 
         var requestedFile = s3dfCreateReqMapper.Import(requestDto, type);
         requestedFile.ParentId = id;
+        if (dataset.Files.Any(f => f.Name == requestedFile.Name))
+        {
+            return BadRequest(new ErrorMessageDTO
+            {
+                Message = $"File with name {requestedFile.Name} is already registered."
+            });
+        }
         var reference = requestedFile.Locations.Single() as S3FileStorageReference ??
                         throw new InvalidOperationException();
         await fileService.AddAsync(requestedFile);
