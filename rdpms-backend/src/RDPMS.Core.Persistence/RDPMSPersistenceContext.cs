@@ -117,6 +117,16 @@ public class RDPMSPersistenceContext : DbContext
 
         model.Entity<DataSet>()
             .HasOne(e => e.CreateJob);
+        model.Entity<DataSet>()
+            .HasMany<DataFile>(ds => ds.Files)
+            .WithOne()
+            .HasForeignKey(f => f.ParentId);
+
+        model.Entity<DataCollectionEntity>()
+            .HasMany<DataSet>(c => c.ContainedDatasets)
+            .WithOne()
+            .HasForeignKey(ds => ds.ParentId);
+
 
         // set up (dual) many-to-many mapping of PipelineInstance, because DataSet holds SourceForJobs and CreateJob
         model.Entity<DataSetUsedForJobsRelation>()
@@ -128,14 +138,6 @@ public class RDPMSPersistenceContext : DbContext
         model.Entity<Job>()
             .HasMany(e => e.OutputDatasets)
             .WithOne(e => e.CreateJob);
-        
-        // set up many-to-many mapping of Label and DataSet
-        model.Entity<LabelsAssignedToDataSetsRelation>()
-            .HasKey(e => new {e.LabelId, e.DataSetId});
-        model.Entity<DataSet>()
-            .HasMany(e => e.AssignedLabels)
-            .WithMany(e => e.AssignedToDataSets)
-            .UsingEntity<LabelsAssignedToDataSetsRelation>();
 
         // set up data store hierarchy
         model.Entity<DataStore>()

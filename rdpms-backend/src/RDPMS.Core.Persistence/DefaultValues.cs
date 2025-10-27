@@ -114,6 +114,11 @@ public static class DefaultValues
             {
                 Abbreviation = "mcap", Name = "MCAP", Description = "Serialization-agnostic container file format.",
                 MimeType = "application/octet-stream", Id = Guid.Parse("2b31bbd9-0049-45c0-a9a4-b4893fa1085c")
+            },
+            new()
+            {
+                Abbreviation = "bag", Name = "Rosbag", Description = "ROS1 Message Container Format",
+                MimeType = "application/octet-stream", Id = Guid.Parse("8c40a331-5212-4f44-bc64-247cee83324c")
             }
         ];
 
@@ -122,7 +127,7 @@ public static class DefaultValues
             Id = RDPMSConstants.DummyS3StoreId,
             Slug = "dummy-s3-store",
             Bucket = "dummy-bucket",
-            EndpointUrl = "https://localhost:5002",
+            EndpointUrl = "http://localhost:5002",
             KeyPrefix = "data/",
             AccessKeyReference = "direct://admin",
             SecretKeyReference = "direct://thisisasecret"

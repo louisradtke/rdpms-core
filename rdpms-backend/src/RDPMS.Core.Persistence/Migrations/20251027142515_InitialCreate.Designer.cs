@@ -11,7 +11,7 @@ using RDPMS.Core.Persistence;
 namespace RDPMS.Core.Persistence.Migrations
 {
     [DbContext(typeof(RDPMSPersistenceContext))]
-    [Migration("20251010175811_InitialCreate")]
+    [Migration("20251027142515_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -19,6 +19,21 @@ namespace RDPMS.Core.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
+
+            modelBuilder.Entity("DataSetLabel", b =>
+                {
+                    b.Property<Guid>("AssignedLabelsId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("AssignedToDataSetsId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("AssignedLabelsId", "AssignedToDataSetsId");
+
+                    b.HasIndex("AssignedToDataSetsId");
+
+                    b.ToTable("DataSetLabel");
+                });
 
             modelBuilder.Entity("DataSetUsedForJobsRelation", b =>
                 {
@@ -108,9 +123,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<DateTime>("CreatedStamp")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("DataSetId")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime?>("DeletedStamp")
                         .HasColumnType("TEXT");
 
@@ -124,6 +136,9 @@ namespace RDPMS.Core.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("SHA256Hash")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -133,9 +148,9 @@ namespace RDPMS.Core.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DataSetId");
-
                     b.HasIndex("FileTypeId");
+
+                    b.HasIndex("ParentId");
 
                     b.ToTable("DataFiles");
                 });
@@ -154,9 +169,6 @@ namespace RDPMS.Core.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedStamp")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("DataCollectionEntityId")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("DeletedStamp")
@@ -179,7 +191,7 @@ namespace RDPMS.Core.Persistence.Migrations
 
                     b.HasIndex("CreateJobId");
 
-                    b.HasIndex("DataCollectionEntityId");
+                    b.HasIndex("ParentId");
 
                     b.ToTable("DataSets");
                 });
@@ -365,21 +377,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.HasIndex("SharedLabelId");
 
                     b.ToTable("LabelSharingPolicies");
-                });
-
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.LabelsAssignedToDataSetsRelation", b =>
-                {
-                    b.Property<Guid>("LabelId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("DataSetId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("LabelId", "DataSetId");
-
-                    b.HasIndex("DataSetId");
-
-                    b.ToTable("LabelsAssignedToDataSetsRelation");
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.LogSection", b =>
@@ -587,6 +584,21 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.HasDiscriminator().HasValue(1);
                 });
 
+            modelBuilder.Entity("DataSetLabel", b =>
+                {
+                    b.HasOne("RDPMS.Core.Persistence.Model.Label", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedLabelsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedToDataSetsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DataSetUsedForJobsRelation", b =>
                 {
                     b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
@@ -624,15 +636,15 @@ namespace RDPMS.Core.Persistence.Migrations
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataFile", b =>
                 {
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
-                        .WithMany("Files")
-                        .HasForeignKey("DataSetId");
-
                     b.HasOne("RDPMS.Core.Persistence.Model.ContentType", "FileType")
                         .WithMany()
                         .HasForeignKey("FileTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
+                        .WithMany("Files")
+                        .HasForeignKey("ParentId");
 
                     b.Navigation("FileType");
                 });
@@ -645,7 +657,7 @@ namespace RDPMS.Core.Persistence.Migrations
 
                     b.HasOne("RDPMS.Core.Persistence.Model.DataCollectionEntity", null)
                         .WithMany("ContainedDatasets")
-                        .HasForeignKey("DataCollectionEntityId");
+                        .HasForeignKey("ParentId");
 
                     b.Navigation("CreateJob");
                 });
@@ -717,21 +729,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Navigation("ProjectSharedTo");
 
                     b.Navigation("SharedLabel");
-                });
-
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.LabelsAssignedToDataSetsRelation", b =>
-                {
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
-                        .WithMany()
-                        .HasForeignKey("DataSetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RDPMS.Core.Persistence.Model.Label", null)
-                        .WithMany()
-                        .HasForeignKey("LabelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.LogSection", b =>

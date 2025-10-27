@@ -71,6 +71,7 @@ namespace RDPMS.Core.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    ParentId = table.Column<Guid>(type: "TEXT", nullable: true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     FileTypeId = table.Column<Guid>(type: "TEXT", nullable: false),
                     SizeBytes = table.Column<long>(type: "INTEGER", nullable: false),
@@ -78,12 +79,23 @@ namespace RDPMS.Core.Persistence.Migrations
                     CreatedStamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     DeletedStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
                     BeginStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    EndStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    DataSetId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    EndStamp = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DataFiles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DataSetLabel",
+                columns: table => new
+                {
+                    AssignedLabelsId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    AssignedToDataSetsId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DataSetLabel", x => new { x.AssignedLabelsId, x.AssignedToDataSetsId });
                 });
 
             migrationBuilder.CreateTable(
@@ -98,15 +110,14 @@ namespace RDPMS.Core.Persistence.Migrations
                     CreatedStamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     DeletedStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
                     State = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreateJobId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    DataCollectionEntityId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    CreateJobId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DataSets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DataSets_DataCollections_DataCollectionEntityId",
-                        column: x => x.DataCollectionEntityId,
+                        name: "FK_DataSets_DataCollections_ParentId",
+                        column: x => x.ParentId,
                         principalTable: "DataCollections",
                         principalColumn: "Id");
                 });
@@ -342,30 +353,6 @@ namespace RDPMS.Core.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "LabelsAssignedToDataSetsRelation",
-                columns: table => new
-                {
-                    LabelId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    DataSetId = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LabelsAssignedToDataSetsRelation", x => new { x.LabelId, x.DataSetId });
-                    table.ForeignKey(
-                        name: "FK_LabelsAssignedToDataSetsRelation_DataSets_DataSetId",
-                        column: x => x.DataSetId,
-                        principalTable: "DataSets",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_LabelsAssignedToDataSetsRelation_Label_LabelId",
-                        column: x => x.LabelId,
-                        principalTable: "Label",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "LabelSharingPolicies",
                 columns: table => new
                 {
@@ -408,14 +395,19 @@ namespace RDPMS.Core.Persistence.Migrations
                 column: "ParentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DataFiles_DataSetId",
-                table: "DataFiles",
-                column: "DataSetId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_DataFiles_FileTypeId",
                 table: "DataFiles",
                 column: "FileTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DataFiles_ParentId",
+                table: "DataFiles",
+                column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DataSetLabel_AssignedToDataSetsId",
+                table: "DataSetLabel",
+                column: "AssignedToDataSetsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DataSets_CreateJobId",
@@ -423,9 +415,9 @@ namespace RDPMS.Core.Persistence.Migrations
                 column: "CreateJobId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DataSets_DataCollectionEntityId",
+                name: "IX_DataSets_ParentId",
                 table: "DataSets",
-                column: "DataCollectionEntityId");
+                column: "ParentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DataSetUsedForJobsRelation_SourceForJobsId",
@@ -476,11 +468,6 @@ namespace RDPMS.Core.Persistence.Migrations
                 name: "IX_Label_ParentProjectId",
                 table: "Label",
                 column: "ParentProjectId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LabelsAssignedToDataSetsRelation_DataSetId",
-                table: "LabelsAssignedToDataSetsRelation",
-                column: "DataSetId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LabelSharingPolicies_ProjectSharedToId",
@@ -542,9 +529,9 @@ namespace RDPMS.Core.Persistence.Migrations
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_DataFiles_DataSets_DataSetId",
+                name: "FK_DataFiles_DataSets_ParentId",
                 table: "DataFiles",
-                column: "DataSetId",
+                column: "ParentId",
                 principalTable: "DataSets",
                 principalColumn: "Id");
 
@@ -553,6 +540,22 @@ namespace RDPMS.Core.Persistence.Migrations
                 table: "DataFiles",
                 column: "FileTypeId",
                 principalTable: "Types",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_DataSetLabel_DataSets_AssignedToDataSetsId",
+                table: "DataSetLabel",
+                column: "AssignedToDataSetsId",
+                principalTable: "DataSets",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_DataSetLabel_Label_AssignedLabelsId",
+                table: "DataSetLabel",
+                column: "AssignedLabelsId",
+                principalTable: "Label",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
@@ -587,6 +590,9 @@ namespace RDPMS.Core.Persistence.Migrations
                 table: "Projects");
 
             migrationBuilder.DropTable(
+                name: "DataSetLabel");
+
+            migrationBuilder.DropTable(
                 name: "DataSetsUsedForJobs");
 
             migrationBuilder.DropTable(
@@ -594,9 +600,6 @@ namespace RDPMS.Core.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "FileStorageReferences");
-
-            migrationBuilder.DropTable(
-                name: "LabelsAssignedToDataSetsRelation");
 
             migrationBuilder.DropTable(
                 name: "LabelSharingPolicies");

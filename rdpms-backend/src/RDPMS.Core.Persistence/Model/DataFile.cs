@@ -6,13 +6,14 @@ namespace RDPMS.Core.Persistence.Model;
 /// Entity identifying a file, independent of its storage location.
 /// </summary>
 /// <param name="name"></param>
-public class DataFile(string name) : IUniqueEntity
+public class DataFile(string name) : IUniqueEntity, IUniqueEntityWithParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid? ParentId { get; }
 
     public string Name { get; set; } = name;
     public required ContentType FileType { get; set; }
-    
+
     /// <summary>
     /// Size of the uncompressed file in bytes.
     /// </summary>
