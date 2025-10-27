@@ -88,6 +88,7 @@ public class DataSetsController(
     /// <returns></returns>
     [HttpPost("{id:guid}/add/s3")]
     [ProducesResponseType<FileCreateResponseDTO>(StatusCodes.Status200OK)]
+    [ProducesResponseType<FileCreateResponseDTO>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> PostAddS3([FromRoute] Guid id, [FromBody] S3FileCreateRequestDTO requestDto)
     {
@@ -113,6 +114,10 @@ public class DataSetsController(
             return StatusCode(
                 StatusCodes.Status500InternalServerError,
                 new ErrorMessageDTO { Message = "DataSet must have a parent collection." });
+        }
+        if (dataset.State != DataSetState.Uninitialized)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = $"DataSet must be in {nameof(DataSetState.Uninitialized)} state." });
         }
 
         S3DataStore? store;
@@ -158,6 +163,33 @@ public class DataSetsController(
         var target = FileCreateResponseDTOMapper.ToDTO(response);
 
         return Ok(target);
+    }
+
+    /// <summary>
+    /// Seals a data set. Only works for data sets that are in "Uninitialized" state.
+    /// </summary>
+    /// <param name="id">The data set id.</param>
+    /// <returns>An error, </returns>
+    [HttpPut("{id:guid}/seal")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> SealDataset([FromRoute] Guid id)
+    {
+        if (!await dataSetService.CheckForIdAsync(id))
+        {
+            return NotFound("no data set with that id");
+        }
+
+        try
+        {
+            await dataSetService.SealDataset(id);
+            return Ok();
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(new ErrorMessageDTO() {Message = e.Message });
+        }
     }
 
     // /// <summary>

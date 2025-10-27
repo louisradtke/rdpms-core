@@ -27,4 +27,16 @@ public class DataSetService(DbContext context)
         
         return collection.ContainedDatasets;
     }
+
+    public async Task SealDataset(Guid id)
+    {
+        var ds = await GetByIdAsync(id);
+        if (ds == null) throw new InvalidOperationException("Dataset not found");
+        if (ds.State is DataSetState.Uninitialized or DataSetState.Sealed)
+        {
+            ds.State = DataSetState.Sealed;
+        }
+        else throw new InvalidOperationException("Dataset is in invalid state");
+        await UpdateAsync(ds);
+    }
 }
