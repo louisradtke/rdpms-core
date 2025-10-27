@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="RDPMS.Core.Server + Static" type="CompoundRunConfigurationType">
     <toRun name="RDPMS.Core.Server (Dev)" type="LaunchSettings" />
-    <toRun name="compose static-server" type="docker-deploy" />
+    <toRun name="compose.yaml[static-server, minio]: Compose Deployment" type="docker-deploy" />
     <method v="2" />
   </configuration>
 </component>
