@@ -98,9 +98,10 @@ public class DataFileService(
         var uploadUrl = await s3Service.RequestPresignedUploadUrlAsync(store, key);
 
         reference.ObjectKey = key;
+        reference.StoreFid = store.Id;
 
         // Context.Update(file);
-        Context.Update(reference);
+        // Context.Update(reference);
         await Context.SaveChangesAsync();
 
         return new FileUploadTarget(new Uri(uploadUrl))

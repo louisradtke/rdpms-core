@@ -9,7 +9,7 @@ namespace RDPMS.Core.Persistence.Model;
 public class DataFile(string name) : IUniqueEntity, IUniqueEntityWithParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
-    public Guid? ParentId { get; }
+    public Guid? ParentId { get; set; }
 
     public string Name { get; set; } = name;
     public required ContentType FileType { get; set; }

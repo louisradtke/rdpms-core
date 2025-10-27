@@ -149,6 +149,7 @@ public class DataSetsController(
         // var url = s3Service.RequestPresignedUploadUrlAsync(store, file.Name);
 
         var requestedFile = s3dfCreateReqMapper.Import(requestDto, type);
+        requestedFile.ParentId = id;
         var reference = requestedFile.Locations.Single() as S3FileStorageReference ??
                         throw new InvalidOperationException();
         await fileService.AddAsync(requestedFile);
