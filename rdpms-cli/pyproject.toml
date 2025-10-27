@@ -1,0 +1,49 @@
+[project]
+#dynamic = ["version"]
+name = "rdpms-cli"
+authors = [
+    {name = "Louis Radtke", email = "louisradtke.dev@gmail.com"},
+]
+description = "RDPMS Command Line Tool"
+license = "Apache-2.0"
+readme = "README.md"
+keywords = ["Data", "Research Data Management", "CLI"]
+
+version = "0.0.1"
+classifiers = [
+    # How mature is this project? Common values are
+    #   3 - Alpha
+    #   4 - Beta
+    #   5 - Production/Stable
+    "Development Status :: 1 - Planning",
+    "Environment :: Console",
+
+    # Indicate who your project is intended for
+    "Intended Audience :: Researchers",
+    "Topic :: Scientific/Engineering",
+    "Topic :: System :: Archiving",
+    "Typing :: Typed",
+
+    # Specify the Python versions you support here.
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+requires-python = ">= 3.11"
+dependencies = [
+    "urllib3>=1.25.3",
+    "python-dateutil>=2.8.2",
+    "pydantic>=2",
+    "typing-extensions>=4.7.1"
+]
+
+[project.scripts]
+rdpms = "rdpms_cli:main_cli"
+
+[project.urls]
+repository = "https://github.com/louisradtke/rdpms-core"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
