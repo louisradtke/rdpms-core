@@ -17,15 +17,24 @@ import * as runtime from '../runtime';
 import type {
   DataSetDetailedDTO,
   DataSetSummaryDTO,
+  ErrorMessageDTO,
+  FileCreateResponseDTO,
   ProblemDetails,
+  S3FileCreateRequestDTO,
 } from '../models/index';
 import {
     DataSetDetailedDTOFromJSON,
     DataSetDetailedDTOToJSON,
     DataSetSummaryDTOFromJSON,
     DataSetSummaryDTOToJSON,
+    ErrorMessageDTOFromJSON,
+    ErrorMessageDTOToJSON,
+    FileCreateResponseDTOFromJSON,
+    FileCreateResponseDTOToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
+    S3FileCreateRequestDTOFromJSON,
+    S3FileCreateRequestDTOToJSON,
 } from '../models/index';
 
 export interface ApiV1DataDatasetsBatchPostRequest {
@@ -36,7 +45,16 @@ export interface ApiV1DataDatasetsGetRequest {
     collectionId?: string;
 }
 
+export interface ApiV1DataDatasetsIdAddS3PostRequest {
+    id: string;
+    s3FileCreateRequestDTO?: S3FileCreateRequestDTO;
+}
+
 export interface ApiV1DataDatasetsIdGetRequest {
+    id: string;
+}
+
+export interface ApiV1DataDatasetsIdSealPutRequest {
     id: string;
 }
 
@@ -106,6 +124,42 @@ export class DataSetsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Add a single file to the system. Request a single S3 upload URL.
+     */
+    async apiV1DataDatasetsIdAddS3PostRaw(requestParameters: ApiV1DataDatasetsIdAddS3PostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FileCreateResponseDTO>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataDatasetsIdAddS3Post().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/api/v1/data/datasets/{id}/add/s3`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: S3FileCreateRequestDTOToJSON(requestParameters['s3FileCreateRequestDTO']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FileCreateResponseDTOFromJSON(jsonValue));
+    }
+
+    /**
+     * Add a single file to the system. Request a single S3 upload URL.
+     */
+    async apiV1DataDatasetsIdAddS3Post(requestParameters: ApiV1DataDatasetsIdAddS3PostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileCreateResponseDTO> {
+        const response = await this.apiV1DataDatasetsIdAddS3PostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      */
     async apiV1DataDatasetsIdGetRaw(requestParameters: ApiV1DataDatasetsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DataSetDetailedDTO>> {
         if (requestParameters['id'] == null) {
@@ -137,9 +191,41 @@ export class DataSetsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Seals a data set. Only works for data sets that are in \"Uninitialized\" state.
+     */
+    async apiV1DataDatasetsIdSealPutRaw(requestParameters: ApiV1DataDatasetsIdSealPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataDatasetsIdSealPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/v1/data/datasets/{id}/seal`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Seals a data set. Only works for data sets that are in \"Uninitialized\" state.
+     */
+    async apiV1DataDatasetsIdSealPut(requestParameters: ApiV1DataDatasetsIdSealPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.apiV1DataDatasetsIdSealPutRaw(requestParameters, initOverrides);
+    }
+
+    /**
      * Add a single item to the system.
      */
-    async apiV1DataDatasetsPostRaw(requestParameters: ApiV1DataDatasetsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async apiV1DataDatasetsPostRaw(requestParameters: ApiV1DataDatasetsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -154,14 +240,19 @@ export class DataSetsApi extends runtime.BaseAPI {
             body: DataSetSummaryDTOToJSON(requestParameters['dataSetSummaryDTO']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Add a single item to the system.
      */
-    async apiV1DataDatasetsPost(requestParameters: ApiV1DataDatasetsPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.apiV1DataDatasetsPostRaw(requestParameters, initOverrides);
+    async apiV1DataDatasetsPost(requestParameters: ApiV1DataDatasetsPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.apiV1DataDatasetsPostRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
 }

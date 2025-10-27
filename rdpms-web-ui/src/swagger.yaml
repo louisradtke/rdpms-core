@@ -177,6 +177,17 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
   '/api/v1/data/datasets/{id}':
     get:
       tags:
@@ -201,6 +212,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
+  '/api/v1/data/datasets/{id}/add/s3':
+    post:
+      tags:
+        - DataSets
+      summary: Add a single file to the system. Request a single S3 upload URL.
+      parameters:
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/S3FileCreateRequestDTO'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileCreateResponseDTO'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileCreateResponseDTO'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+  '/api/v1/data/datasets/{id}/seal':
+    put:
+      tags:
+        - DataSets
+      summary: Seals a data set. Only works for data sets that are in "Uninitialized" state.
+      parameters:
+        - name: id
+          in: path
+          description: The data set id.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
   /api/v1/data/datasets/batch:
     post:
       tags:
@@ -231,29 +308,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FileSummaryDTO'
-    post:
-      tags:
-        - Files
-      summary: Request an upload for a new file.
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FileCreateRequestDTO'
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FileCreateResponseDTO'
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessageDTO'
   '/api/v1/data/files/{id}':
     get:
       tags:
@@ -579,7 +633,9 @@ components:
           format: date-time
           nullable: true
         state:
-          $ref: '#/components/schemas/DataSetStateDTO'
+          type: string
+          description: "Indicates, whether the dataset (and its files) are immutable.\nOnly to be set by server.\nLifecycle is: Uninitialized -> [Sealed ->] Deleted"
+          nullable: true
         isTimeSeries:
           type: boolean
           description: "Indicates if the dataset represents time-series data.\nOnly to be set by server."
@@ -610,13 +666,6 @@ components:
           nullable: true
       additionalProperties: false
       description: "Represents a summary of a dataset, including identifying information, timestamps, state, tags,\nand metadata fields."
-    DataSetStateDTO:
-      enum:
-        - 0
-        - 1
-      type: integer
-      description: "Enum indicating whether a dataset was just created or all associated files\nwere linked. Remember design decision: datasets shall be immutable."
-      format: int32
     DataSetSummaryDTO:
       type: object
       properties:
@@ -660,7 +709,9 @@ components:
           format: date-time
           nullable: true
         state:
-          $ref: '#/components/schemas/DataSetStateDTO'
+          type: string
+          description: "Indicates, whether the dataset (and its files) are immutable.\nOnly to be set by server.\nLifecycle is: Uninitialized -> [Sealed ->] Deleted"
+          nullable: true
         isTimeSeries:
           type: boolean
           description: "Indicates if the dataset represents time-series data.\nOnly to be set by server."
@@ -724,40 +775,6 @@ components:
         displayMessage:
           type: string
           description: 'A message dedicated to the user. If null, use RDPMS.Core.Server.Model.DTO.V1.ErrorMessageDTO.Message as fallback.'
-          nullable: true
-      additionalProperties: false
-    FileCreateRequestDTO:
-      type: object
-      properties:
-        name:
-          type: string
-          nullable: true
-        contentTypeId:
-          type: string
-          format: uuid
-          nullable: true
-        associatedDataSetId:
-          type: string
-          format: uuid
-          nullable: true
-        size:
-          type: integer
-          format: int64
-          nullable: true
-        hash:
-          type: string
-          nullable: true
-        createdStamp:
-          type: string
-          format: date-time
-          nullable: true
-        beginStamp:
-          type: string
-          format: date-time
-          nullable: true
-        endStamp:
-          type: string
-          format: date-time
           nullable: true
       additionalProperties: false
     FileCreateResponseDTO:
@@ -863,6 +880,47 @@ components:
           items:
             $ref: '#/components/schemas/DataStoreSummaryDTO'
           description: All data stores assigned to this project.
+          nullable: true
+      additionalProperties: false
+    S3FileCreateRequestDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        contentTypeId:
+          type: string
+          format: uuid
+          nullable: true
+        sizeBytes:
+          type: integer
+          format: int64
+          nullable: true
+        plainSHA256Hash:
+          type: string
+          nullable: true
+        createdStamp:
+          type: string
+          format: date-time
+          nullable: true
+        beginStamp:
+          type: string
+          format: date-time
+          nullable: true
+        endStamp:
+          type: string
+          format: date-time
+          nullable: true
+        compressionAlgorithm:
+          type: string
+          nullable: true
+        compressedSHA256Hash:
+          type: string
+          description: 'If file is compressed, this is the SHA256 hash of the compressed file.'
+          nullable: true
+        compressedSizeBytes:
+          type: integer
+          format: int64
           nullable: true
       additionalProperties: false
     TagDTO:

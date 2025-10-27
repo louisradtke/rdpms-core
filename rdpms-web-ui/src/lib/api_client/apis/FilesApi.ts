@@ -16,18 +16,12 @@
 import * as runtime from '../runtime';
 import type {
   ErrorMessageDTO,
-  FileCreateRequestDTO,
-  FileCreateResponseDTO,
   FileSummaryDTO,
   ProblemDetails,
 } from '../models/index';
 import {
     ErrorMessageDTOFromJSON,
     ErrorMessageDTOToJSON,
-    FileCreateRequestDTOFromJSON,
-    FileCreateRequestDTOToJSON,
-    FileCreateResponseDTOFromJSON,
-    FileCreateResponseDTOToJSON,
     FileSummaryDTOFromJSON,
     FileSummaryDTOToJSON,
     ProblemDetailsFromJSON,
@@ -49,10 +43,6 @@ export interface ApiV1DataFilesIdContentGetRequest {
 
 export interface ApiV1DataFilesIdGetRequest {
     id: string;
-}
-
-export interface ApiV1DataFilesPostRequest {
-    fileCreateRequestDTO?: FileCreateRequestDTO;
 }
 
 /**
@@ -213,35 +203,6 @@ export class FilesApi extends runtime.BaseAPI {
      */
     async apiV1DataFilesIdGet(requestParameters: ApiV1DataFilesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileSummaryDTO> {
         const response = await this.apiV1DataFilesIdGetRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Request an upload for a new file.
-     */
-    async apiV1DataFilesPostRaw(requestParameters: ApiV1DataFilesPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FileCreateResponseDTO>> {
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/api/v1/data/files`,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: FileCreateRequestDTOToJSON(requestParameters['fileCreateRequestDTO']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => FileCreateResponseDTOFromJSON(jsonValue));
-    }
-
-    /**
-     * Request an upload for a new file.
-     */
-    async apiV1DataFilesPost(requestParameters: ApiV1DataFilesPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileCreateResponseDTO> {
-        const response = await this.apiV1DataFilesPostRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

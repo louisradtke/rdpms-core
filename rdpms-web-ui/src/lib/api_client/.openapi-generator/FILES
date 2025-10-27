@@ -9,15 +9,14 @@ index.ts
 models/CollectionSummaryDTO.ts
 models/ContentTypeDTO.ts
 models/DataSetDetailedDTO.ts
-models/DataSetStateDTO.ts
 models/DataSetSummaryDTO.ts
 models/DataStoreSummaryDTO.ts
 models/ErrorMessageDTO.ts
-models/FileCreateRequestDTO.ts
 models/FileCreateResponseDTO.ts
 models/FileSummaryDTO.ts
 models/ProblemDetails.ts
 models/ProjectSummaryDTO.ts
+models/S3FileCreateRequestDTO.ts
 models/TagDTO.ts
 models/index.ts
 runtime.ts

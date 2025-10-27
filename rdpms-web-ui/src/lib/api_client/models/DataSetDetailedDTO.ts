@@ -19,12 +19,6 @@ import {
     FileSummaryDTOFromJSONTyped,
     FileSummaryDTOToJSON,
 } from './FileSummaryDTO';
-import type { DataSetStateDTO } from './DataSetStateDTO';
-import {
-    DataSetStateDTOFromJSON,
-    DataSetStateDTOFromJSONTyped,
-    DataSetStateDTOToJSON,
-} from './DataSetStateDTO';
 import type { TagDTO } from './TagDTO';
 import {
     TagDTOFromJSON,
@@ -92,11 +86,13 @@ export interface DataSetDetailedDTO {
      */
     endStampUTC?: Date | null;
     /**
-     * 
-     * @type {DataSetStateDTO}
+     * Indicates, whether the dataset (and its files) are immutable.
+     * Only to be set by server.
+     * Lifecycle is: Uninitialized -> [Sealed ->] Deleted
+     * @type {string}
      * @memberof DataSetDetailedDTO
      */
-    state?: DataSetStateDTO;
+    state?: string | null;
     /**
      * Indicates if the dataset represents time-series data.
      * Only to be set by server.
@@ -163,7 +159,7 @@ export function DataSetDetailedDTOFromJSONTyped(json: any, ignoreDiscriminator: 
         'deletedStampUTC': json['deletedStampUTC'] == null ? undefined : (new Date(json['deletedStampUTC'])),
         'beginStampUTC': json['beginStampUTC'] == null ? undefined : (new Date(json['beginStampUTC'])),
         'endStampUTC': json['endStampUTC'] == null ? undefined : (new Date(json['endStampUTC'])),
-        'state': json['state'] == null ? undefined : DataSetStateDTOFromJSON(json['state']),
+        'state': json['state'] == null ? undefined : json['state'],
         'isTimeSeries': json['isTimeSeries'] == null ? undefined : json['isTimeSeries'],
         'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
         'metadataFields': json['metadataFields'] == null ? undefined : json['metadataFields'],
@@ -187,7 +183,7 @@ export function DataSetDetailedDTOToJSON(value?: DataSetDetailedDTO | null): any
         'deletedStampUTC': value['deletedStampUTC'] == null ? undefined : ((value['deletedStampUTC'] as any).toISOString()),
         'beginStampUTC': value['beginStampUTC'] == null ? undefined : ((value['beginStampUTC'] as any).toISOString()),
         'endStampUTC': value['endStampUTC'] == null ? undefined : ((value['endStampUTC'] as any).toISOString()),
-        'state': DataSetStateDTOToJSON(value['state']),
+        'state': value['state'],
         'isTimeSeries': value['isTimeSeries'],
         'isDeleted': value['isDeleted'],
         'metadataFields': value['metadataFields'],
