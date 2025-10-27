@@ -40,4 +40,17 @@ public interface IFileService : IGenericCollectionService<DataFile>
     /// <returns>Enumerable of all matching instances</returns>
     public Task<IEnumerable<FileStorageReference>> GetStorageReferencesAsync(
         Guid? storeId = null, StorageType? type = null);
+    
+    /// <summary>
+    /// Request a file upload to S3 and updates the file in the database.
+    /// </summary>
+    /// <param name="file">Reference to the file</param>
+    /// <param name="reference">Explicit reference to the <see cref="S3FileStorageReference"/>.
+    /// Otherwise, the service would have to guess, which of the file's storage refs to take. </param>
+    /// <param name="dataSetId">Id of the parent dataset</param>
+    /// <param name="dataStoreId"></param>
+    /// <returns></returns>
+    Task<FileUploadTarget> RequestS3FileUploadAsync(
+        DataFile file, S3FileStorageReference reference,
+        Guid dataSetId, Guid dataStoreId);
 }

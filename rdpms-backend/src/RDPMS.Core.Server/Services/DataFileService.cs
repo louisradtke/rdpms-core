@@ -12,7 +12,8 @@ namespace RDPMS.Core.Server.Services;
 
 public class DataFileService(
     DbContext dbContext,
-    LinkGenerator linkGenerator)
+    LinkGenerator linkGenerator,
+    IS3Service s3Service)
     : GenericCollectionService<DataFile>(dbContext, files => files
         .Include(f => f.Locations)
         .Include(f => f.FileType)
@@ -28,8 +29,12 @@ public class DataFileService(
 
         switch (location)
         {
-            case S3FileStorageReference:
-                throw new NotImplementedException("S3 is yet not implemented!");
+            case S3FileStorageReference s3Location:
+                var store = dbContext.Set<DataStore>().Single(s => s.Id == s3Location.StoreFid);
+                if (store is not S3DataStore s3Store)
+                    throw new IllegalStateException("File ref has invalid store");
+                var uriStr = await s3Service.RequestPresignedDownloadUrlAsync(s3Location, s3Store);
+                return new Uri(uriStr);
             case StaticFileStorageReference staticLocation:
                 return new Uri(staticLocation.URL);
             // case InternalFileStorageReference:
@@ -68,5 +73,39 @@ public class DataFileService(
             query = query.Where(r => r.StorageType == type);
         }
         return await query.ToListAsync();
+    }
+
+    public async Task<FileUploadTarget> RequestS3FileUploadAsync(
+        DataFile file, S3FileStorageReference reference,
+        Guid dataSetId, Guid dataStoreId)
+    {
+        var store = await Context.Set<DataStore>()
+                .SingleOrDefaultAsync(s => s.Id == dataStoreId && s.StorageType == StorageType.S3)
+            as S3DataStore;
+        if (store is null)
+        {
+            throw new InvalidOperationException("Store not found or not S3!");
+        }
+
+        // var dataSetExits = await Context.Set<DataSet>()
+        //     .AnyAsync(d => d.Id == dataSetId && d.State == DataSetState.Uninitialized);
+        // if (!dataSetExits)
+        // {
+        //     throw new InvalidOperationException("DataSet not found or not in invalid state!");
+        // }
+
+        var key = $"{dataSetId}/{file.Name}";
+        var uploadUrl = await s3Service.RequestPresignedUploadUrlAsync(store, key);
+
+        reference.ObjectKey = key;
+
+        // Context.Update(file);
+        Context.Update(reference);
+        await Context.SaveChangesAsync();
+
+        return new FileUploadTarget(new Uri(uploadUrl))
+        {
+            FileId = file.Id
+        };
     }
 }

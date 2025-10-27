@@ -17,7 +17,7 @@ public class DataSetsController(
     IDataSetService dataSetService,
     IFileService fileService,
     IS3Service s3Service,
-    IStoreService storeService,
+    // IStoreService storeService,
     IContentTypeService typeService,
     IDataCollectionEntityService collectionService,
     DataSetSummaryDTOMapper dataSetSummaryMapper,
@@ -89,8 +89,7 @@ public class DataSetsController(
     [HttpPost("{id:guid}/add/s3")]
     [ProducesResponseType<FileCreateResponseDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> PostAddS3([FromRoute] Guid id, Guid? storeId,
-        [FromBody] S3FileCreateRequestDTO requestDto)
+    public async Task<ActionResult> PostAddS3([FromRoute] Guid id, [FromBody] S3FileCreateRequestDTO requestDto)
     {
         if (requestDto.ContentTypeId == null)
         {
@@ -117,38 +116,46 @@ public class DataSetsController(
         }
 
         S3DataStore? store;
-        if (storeId == null)
+        var collection = await collectionService.GetByIdAsync(dataset.ParentId!.Value);
+        if (collection.DefaultDataStore is S3DataStore s3Store) store = s3Store;
+        else return BadRequest(new ErrorMessageDTO
         {
-            var collection = await collectionService.GetByIdAsync(dataset.ParentId!.Value);
-            if (collection.DefaultDataStore is S3DataStore s3Store) store = s3Store;
-            else return BadRequest(new ErrorMessageDTO
-            {
-                Message = "Collection must have a default S3 data store, or you must provide a storeId."
-            });
-        }
-        else
-        {
-            var requestedStore = await storeService.GetByIdAsync(storeId.Value);
-            if (requestedStore is not S3DataStore s3Store)
-            {
-                return BadRequest(new ErrorMessageDTO
-                {
-                    Message = "StoreId must refer to an S3 data store."
-                });
-            }
-            store = s3Store;
-        }
+            Message = "Collection must have a default S3 data store, or you must provide a storeId."
+        });
+
+        // S3DataStore? store;
+        // if (storeId == null)
+        // {
+        //     var collection = await collectionService.GetByIdAsync(dataset.ParentId!.Value);
+        //     if (collection.DefaultDataStore is S3DataStore s3Store) store = s3Store;
+        //     else return BadRequest(new ErrorMessageDTO
+        //     {
+        //         Message = "Collection must have a default S3 data store, or you must provide a storeId."
+        //     });
+        // }
+        // else
+        // {
+        //     var requestedStore = await storeService.GetByIdAsync(storeId.Value);
+        //     if (requestedStore is not S3DataStore s3Store)
+        //     {
+        //         return BadRequest(new ErrorMessageDTO
+        //         {
+        //             Message = "StoreId must refer to an S3 data store."
+        //         });
+        //     }
+        //     store = s3Store;
+        // }
 
         // var url = s3Service.RequestPresignedUploadUrlAsync(store, file.Name);
-        
+
         var requestedFile = s3dfCreateReqMapper.Import(requestDto, type);
         var reference = requestedFile.Locations.Single() as S3FileStorageReference ??
                         throw new InvalidOperationException();
-        var response = await storeService.RequestS3FileUploadAsync(
-            requestedFile, reference, id, store.Id);
         await fileService.AddAsync(requestedFile);
+        var response = await fileService.RequestS3FileUploadAsync(
+            requestedFile, reference, id, store.Id);
         var target = FileCreateResponseDTOMapper.ToDTO(response);
-        
+
         return Ok(target);
     }
 
