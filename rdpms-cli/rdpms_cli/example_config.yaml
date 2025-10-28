@@ -1,0 +1,5 @@
+active_instance: local
+instances:
+  local:
+    base_url: http://localhost:5000/api/v1
+    token: abc
