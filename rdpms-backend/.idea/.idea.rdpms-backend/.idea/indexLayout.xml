@@ -3,6 +3,7 @@
   <component name="UserContentModel">
     <attachedFolders>
       <Path>../../rdpms-core</Path>
+      <Path>../rdpms-cli</Path>
     </attachedFolders>
     <explicitIncludes />
     <explicitExcludes />
