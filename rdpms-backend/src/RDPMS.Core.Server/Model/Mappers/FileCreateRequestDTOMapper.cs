@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using RDPMS.Core.Infra.AppInitialization;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
@@ -9,8 +10,26 @@ namespace RDPMS.Core.Server.Model.Mappers;
 [AutoRegister]
 public class FileCreateRequestDTOMapper : IImportMapper<DataFile, FileCreateRequestDTO, ContentType>
 {
+    private IEnumerable<CheckSet<FileCreateRequestDTO>> _importChecks;
+
+    public FileCreateRequestDTOMapper()
+    {
+        _importChecks = [
+            CheckSet<FileCreateRequestDTO>.CreateErrCond(
+                dto => CheckIfPathIsValid(dto.Name), _ => "Name cannot contain '..'")
+        ];
+    }
+
     public DataFile Import(FileCreateRequestDTO foreign, ContentType arg)
     {
+        foreach (var checkSet in _importChecks)
+        {
+            if (checkSet.CheckFunc(foreign) || (int)checkSet.Severity <= (int)ErrorSeverity.Error)
+                continue;
+            
+            throw new ArgumentException(checkSet.MessageFunc(foreign));
+        }
+
         if (foreign.Name == null || foreign.SizeBytes == null ||
             foreign.CreatedStamp == null || foreign.PlainSHA256Hash == null)
         {
@@ -34,5 +53,17 @@ public class FileCreateRequestDTOMapper : IImportMapper<DataFile, FileCreateRequ
         };
     }
 
-    public IEnumerable<CheckSet<FileCreateRequestDTO>> ImportChecks() => [];
+    public IEnumerable<CheckSet<FileCreateRequestDTO>> ImportChecks() => _importChecks;
+
+    public static bool CheckIfPathIsValid(string? path)
+    {
+        // TODO: this should not be done manually!
+        if (string.IsNullOrWhiteSpace(path)) return false;
+        var invalidChars = Path.GetInvalidPathChars().Concat(['\\', '~']).ToArray();
+        var invalidComponents = new[] { ".", ".." };
+        if (path.Any(c => invalidChars.Contains(c))) return false;
+        if (path.Split('/').Any(c => invalidComponents.Contains(c) || string.IsNullOrWhiteSpace(c))) return false;
+        
+        return !Path.IsPathRooted(path);
+    }
 }
