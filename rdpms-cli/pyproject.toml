@@ -40,7 +40,7 @@ dependencies = [
 ]
 
 [project.scripts]
-rdpms = "rdpms_cli:main_cli"
+rdpms = "rdpms_cli:main"
 
 [project.urls]
 repository = "https://github.com/louisradtke/rdpms-core"

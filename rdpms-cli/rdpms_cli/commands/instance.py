@@ -16,7 +16,12 @@ def cmd_instance_add(args):
         print(f'new default set')
 
 def cmd_instance_list(args):
-    print("[instance list] Listing all instances")
+    conf = load_file()
+    
+    print(f'default: {conf.active_instance_key}')
+    
+    for name, instance in conf.instances.items():
+        print(f'- {name}: {instance.base_url}')
 
 
 def cmd_instance_select(args):
