@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 from typing import Union
 
-from rdpms_cli.commands.collection import cmd_collection_create, cmd_collection_describe, cmd_collection_list
+from rdpms_cli.commands.collection import cmd_collection_new, cmd_collection_list
 from rdpms_cli.commands.dataset import (cmd_dataset_upload, cmd_dataset_download, cmd_dataset_seal,
                                         cmd_dataset_metadata, cmd_dataset_list, cmd_dataset_describe)
 from rdpms_cli.commands.metadata import cmd_metadata_show, cmd_metadata_set, cmd_metadata_validate
@@ -47,7 +47,7 @@ def build_parser() -> ArgumentParser:
                               action='store_true')
     instance_add.set_defaults(func=cmd_instance_add)
 
-    instance_list = instance_subparsers.add_parser('list', help='List all configured instances')
+    instance_list = instance_subparsers.add_parser('list', aliases=['ls'], help='List all configured instances')
     instance_list.set_defaults(func=cmd_instance_list)
 
     instance_select = instance_subparsers.add_parser('select', help='Select an instance to use')
@@ -59,10 +59,10 @@ def build_parser() -> ArgumentParser:
     instance_remove.set_defaults(func=cmd_instance_remove)
 
     # project command
-    project_parser = subparsers.add_parser('project', help='Manage projects (list, select, create)')
+    project_parser = subparsers.add_parser('project', aliases=['p'], help='Manage projects (list, select, create)')
     project_subparsers = project_parser.add_subparsers(dest='project_command', help='Project operations')
 
-    project_list = project_subparsers.add_parser('list', help='List all projects')
+    project_list = project_subparsers.add_parser('list', aliases=['ls'], help='List all projects')
     project_list.set_defaults(func=cmd_project_list)
 
     project_select = project_subparsers.add_parser('select', help='Select a project')
@@ -75,35 +75,39 @@ def build_parser() -> ArgumentParser:
     project_create.set_defaults(func=cmd_project_create)
 
     # collection command
-    collection_parser = subparsers.add_parser('collection', help='Manage collections (list, create, describe)')
+    collection_parser = subparsers.add_parser('collection', aliases=['c'],
+                                              help='Manage collections (list, create, describe)')
     collection_subparsers = collection_parser.add_subparsers(dest='collection_command', help='Collection operations')
 
-    collection_list = collection_subparsers.add_parser('list', help='List all collections')
+    collection_list = collection_subparsers.add_parser('list', aliases=['ls'], help='List all collections')
     collection_list.set_defaults(func=cmd_collection_list)
+    # collection_list.add_argument('--project', '-p', help='Project ID')
 
-    collection_create = collection_subparsers.add_parser('create', help='Create a new collection')
+    collection_create = collection_subparsers.add_parser('new', help='Create a new collection')
     collection_create.add_argument('name', help='Collection name')
     collection_create.add_argument('--description', help='Collection description')
-    collection_create.set_defaults(func=cmd_collection_create)
-
-    collection_describe = collection_subparsers.add_parser('describe', help='Describe a collection')
-    collection_describe.add_argument('collection_id', help='Collection ID')
-    collection_describe.set_defaults(func=cmd_collection_describe)
+    collection_create.set_defaults(func=cmd_collection_new)
 
     # dataset command
-    dataset_parser = subparsers.add_parser('dataset', help='Manage datasets (upload, list, describe)')
+    dataset_parser = subparsers.add_parser('dataset', aliases=['ds'],
+                                           help='Manage datasets (upload, list, describe)')
     dataset_subparsers = dataset_parser.add_subparsers(dest='dataset_command', help='Dataset operations')
 
-    dataset_upload = dataset_subparsers.add_parser('upload', help='Upload a dataset')
+    dataset_upload = dataset_subparsers.add_parser('upload', aliases=['u'], help='Upload a dataset')
     dataset_upload.add_argument('path', help='Path to dataset file or directory')
     dataset_upload.add_argument('--name', help='Dataset name')
     dataset_upload.add_argument('--collection', help='Collection ID')
     dataset_upload.set_defaults(func=cmd_dataset_upload)
 
-    dataset_download = dataset_subparsers.add_parser('download', help='Download a dataset')
+    dataset_download = dataset_subparsers.add_parser('download', aliases=['d', 'get'], help='Download a dataset')
     dataset_download.add_argument('dataset_id', help='Dataset ID')
-    dataset_download.add_argument('--output', help='Output path')
+    dataset_download.add_argument('--output', '-o', help='Output path')
     dataset_download.set_defaults(func=cmd_dataset_download)
+
+    dataset_upload = dataset_subparsers.add_parser('new', help='Create a new dataset, but do not upload anything')
+    dataset_upload.add_argument('--name', '-n', help='Dataset name')
+    dataset_upload.add_argument('--collection', '-c', help='Collection ID')
+    dataset_upload.set_defaults(func=cmd_dataset_upload)
 
     dataset_seal = dataset_subparsers.add_parser('seal', help='Seal a dataset (make immutable)')
     dataset_seal.add_argument('dataset_id', help='Dataset ID to seal')
@@ -113,7 +117,8 @@ def build_parser() -> ArgumentParser:
     dataset_metadata.add_argument('dataset_id', help='Dataset ID')
     dataset_metadata.set_defaults(func=cmd_dataset_metadata)
 
-    dataset_list = dataset_subparsers.add_parser('list', help='List all datasets')
+    dataset_list = dataset_subparsers.add_parser('list', aliases=['ls'], help='List all datasets')
+    dataset_list.add_argument('--collection', '-c', help='Query in Collection with ID')
     dataset_list.set_defaults(func=cmd_dataset_list)
 
     dataset_describe = dataset_subparsers.add_parser('describe', help='Describe a dataset')
@@ -149,7 +154,7 @@ def build_parser() -> ArgumentParser:
     pipeline_run.add_argument('pipeline_id', help='Pipeline ID')
     pipeline_run.set_defaults(func=cmd_pipeline_run)
 
-    pipeline_list = pipeline_subparsers.add_parser('list', help='List pipelines')
+    pipeline_list = pipeline_subparsers.add_parser('list', aliases=['ls'], help='List pipelines')
     pipeline_list.set_defaults(func=cmd_pipeline_list)
 
     pipeline_status = pipeline_subparsers.add_parser('status', help='Check pipeline status')

@@ -1,3 +1,5 @@
+from tabulate import tabulate
+
 from rdpms_cli.util.config_store import load_file
 
 
@@ -16,10 +18,15 @@ def cmd_project_list(args):
     client = ApiClient(api_conf)
     project_api = ProjectsApi(client)
     
-    dto = project_api.api_v1_projects_get()
+    project_list = project_api.api_v1_projects_get()
+
+    if not project_list:
+        print('no projects found')
+        return
     
-    for project in dto:
-        print(f'{project.name} (collections: {len(project.collections)}, stores: {len(project.data_stores)})')
+    header = ["project name", "# collections", "# stores"]
+    table = [[p.name, len(p.collections), len(p.data_stores)] for p in project_list]    
+    print(tabulate(headers=header, tabular_data=table))
 
 
 def cmd_project_select(args):
