@@ -4,11 +4,14 @@
     import type {CollectionSummaryDTO} from "$lib/api_client";
     import {page} from "$app/state";
 
-    let projectId: string = page.params.project_id ?? '';
+    // Reactive project ID from URL params
+    let projectId = $derived(page.params.project_id ?? '');
 
-    // const conf = await getApiConfig();
-    let collectionsRepo = new CollectionsRepository(getOrFetchConfig().then(toApiConfig));
-    let collectionsPromise = collectionsRepo.getCollections({projectId: projectId});
+    // Re-fetch collections whenever projectId changes
+    let collectionsPromise = $derived.by(() => {
+        const repo = new CollectionsRepository(getOrFetchConfig().then(toApiConfig));
+        return repo.getCollections({projectId: projectId});
+    });
 
     let tableAccessors: Array<{visibleTitle: string, accessor: (container: CollectionSummaryDTO) => string}> = [
         {visibleTitle: 'ID', accessor: (container) => container.id ?? 'null'},
@@ -36,7 +39,7 @@
         {#each collections as container (container.id)}
             <tr class="even:bg-gray-50">
                 <td class="border border-gray-300 px-4 py-2">
-                    <a href="/c/{container.id}">{container.id}</a>
+                    <a href={`/projects/${projectId}/c/${container.id}`}>{container.id}</a>
                 </td>
                 {#each tableAccessors.slice(1).map(dct => dct.accessor(container)) as entry (entry)}
                     <td class="border border-gray-300 px-4 py-2">{entry}</td>
@@ -46,7 +49,7 @@
         </tbody>
     </table>
 {:catch error}
-    <p class="italic text-gray-500 mt-4">failed to load collections: ${error}</p>
+    <p class="italic text-gray-500 mt-4">failed to load collections: {error}</p>
 {/await}
 
 </main>

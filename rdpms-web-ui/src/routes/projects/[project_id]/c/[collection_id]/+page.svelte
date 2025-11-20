@@ -1,3 +1,4 @@
+
 <script lang="ts">
     import Sidebar from "$lib/layout/Sidebar.svelte";
 
@@ -9,38 +10,58 @@
     import LoadingCircle from "$lib/layout/LoadingCircle.svelte";
     import EntityHeader from "$lib/layout/EntityHeader.svelte";
 
-    let collectionId: string = page.params.collection_id ?? '';
-    let projectId: string = page.params.project_id ?? '';
-    if (!collectionId) throw new Error('Collection ID is required');
+    // Reactive params
+    let collectionSlug = $derived(page.params.collection_id ?? '');
+    let projectSlug = $derived(page.params.project_id ?? '');
 
-    let collectionsRepo = new CollectionsRepository(getOrFetchConfig().then(toApiConfig));
-    let datasetsRepo = new DataSetsRepository(getOrFetchConfig().then(toApiConfig));
-    let allCollections = collectionsRepo.getCollections().then(cl => cl.map(c => ({
-        label: c.name ?? c.id ?? 'none',
-        hrefValue: c.slug ?? c.id ?? 'none',
-        tooltip: `data container with ID ${c.id}`
-    })));
-    let collectionReq = collectionsRepo.getCollectionByIdOrSlug(collectionId, projectId);
-    let datasetsReq = collectionReq.then(c => datasetsRepo.listByCollection(c.id ?? ''));
+    // Validate required params
+    $effect(() => {
+        if (!collectionSlug) throw new Error('Collection ID is required');
+    });
 
-    let title = 'RDPMS';
-    collectionReq.then(summary => {
-        let slug = summary.name ?? summary.id ?? 'none';
-        if (slug) {
-            title = `${slug} - RDPMS`;
-        }
+    // Re-create promises when params change
+    let allCollections = $derived.by(async () => {
+        const repo = new CollectionsRepository(getOrFetchConfig().then(toApiConfig));
+        let cl = await repo.getCollections({projectSlug: projectSlug});
+        return cl.map(c => ({
+            label: c.name ?? c.id ?? 'none',
+            hrefValue: c.slug ?? c.id ?? 'none',
+            tooltip: `data container with ID ${c.id}`
+        }));
+    });
+
+    let collectionReq = $derived.by(() => {
+        const repo = new CollectionsRepository(getOrFetchConfig().then(toApiConfig));
+        return repo.getCollectionByIdOrSlug(collectionSlug, projectSlug);
+    });
+
+    let datasetsReq = $derived.by(async () => {
+        const repo = new DataSetsRepository(getOrFetchConfig().then(toApiConfig));
+        let c = await collectionReq;
+        return await repo.listByCollection(c.id ?? '');
+    });
+
+    // Reactive title
+    let title = $state('RDPMS');
+    $effect(() => {
+        collectionReq.then(summary => {
+            const slug = summary.name ?? summary.id ?? 'none';
+            if (slug) {
+                title = `${slug} - RDPMS`;
+            }
+        });
     });
 </script>
 
 <svelte:head>
-        <title>{title}</title>
+    <title>{title}</title>
 </svelte:head>
 
 <div class="flex h-full">
 
     <Sidebar
         itemsPromise={allCollections}
-        baseUrl="/projects/{projectId}/c/*"
+        baseUrl="/projects/{projectSlug}/c/*"
     />
 
     <div class="flex flex-col flex-1">
@@ -84,7 +105,7 @@
                         {#each datasets as dataset (dataset.id)}
                             <tr>
                                 <td class="text-left">
-                                    <a href="/projects/{projectId}/c/{collectionId}/{dataset.slug ?? dataset.id}"
+                                    <a href="/projects/{projectSlug}/c/{collectionSlug}/{dataset.slug ?? dataset.id}"
                                        class="text-blue-500 hover:underline">
                                         {dataset.name}
                                     </a>

@@ -41,7 +41,11 @@ export class FileSize {
                     break;
                 }
             }
-            
+
+            if (bestUnit === '') {
+                decimalPlaces = 0;
+            }
+
             // Format the number with specified or automatic precision
             let formattedValue: string;
             if (decimalPlaces !== undefined) {

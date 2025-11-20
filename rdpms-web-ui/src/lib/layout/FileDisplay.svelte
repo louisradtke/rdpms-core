@@ -39,7 +39,7 @@
     export let fileSlug: string;
     export let file: FileSummaryDTO;
 
-    let size = file?.size? new FileSize(file.size) : undefined;
+    let size = !Number.isNaN(file?.size) ? new FileSize(file.size || 0) : undefined;
 
     let fileType: string | undefined = undefined;
     if (file?.contentType?.abbreviation ?? '' in ["png", "jpg", "jpeg"]) fileType = 'image';
@@ -53,7 +53,7 @@
         <header class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-2">
             <h2 class="font-medium text-gray-800">{title}</h2>
             <div class="flex items-center gap-4">
-                <span class="text-xs text-gray-500">{size ? size.getString('*B', true, 1) : 'undefined'}</span>
+                <span class="text-xs text-gray-500">{size !== undefined ? size.getString('*B', true, 1) : 'undefined'}</span>
                 <button on:click={(e) => handleDownload(e, file)}
                    class="text-gray-500 hover:text-gray-700 cursor-pointer" aria-label="Download">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
