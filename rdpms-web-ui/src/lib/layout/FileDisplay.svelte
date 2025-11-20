@@ -3,6 +3,7 @@
 	import ImagePlugin from "./displayPlugins/ImagePlugin.svelte";
     import {FileSize} from "$lib/data/FileSize";
     import CodeCopyField from "$lib/layout/CodeCopyField.svelte";
+    import TablePlugin from "$lib/layout/displayPlugins/TablePlugin.svelte";
 
     function downloadName(file: FileSummaryDTO): string {
         if (file.name) return file.name;
@@ -42,9 +43,10 @@
     let size = !Number.isNaN(file?.size) ? new FileSize(file.size || 0) : undefined;
 
     let fileType: string | undefined = undefined;
-    if (file?.contentType?.abbreviation ?? '' in ["png", "jpg", "jpeg"]) fileType = 'image';
-    else if (file?.contentType?.abbreviation ?? '' in ["mp4", "avi", "mov"]) fileType = 'video';
-    else if (file?.contentType?.abbreviation ?? '' in ["pdf"]) fileType = 'pdf';
+    if (["png", "jpg", "jpeg"].includes(file?.contentType?.abbreviation ?? '')) fileType = 'image';
+    else if (["mp4", "avi", "mov"].includes(file?.contentType?.abbreviation ?? '')) fileType = 'video';
+    else if (["pdf"].includes(file?.contentType?.abbreviation ?? '')) fileType = 'pdf';
+    else if (["csv"].includes(file?.contentType?.abbreviation ?? '')) fileType = 'csv';
 </script>
 
 <div id="{fileSlug}">
@@ -68,13 +70,15 @@
         <div class="p-4">
             {#if fileType === 'image'}
                 <ImagePlugin uri={file.downloadURI ?? ''} />
+            {:else if fileType === 'csv'}
+                <TablePlugin dataUri="{file.downloadURI ?? ''}" />
             <!--{:else if fileType === 'video'}-->
             <!--    <video controls>-->
             <!--        <source src={file.downloadURI ?? ''} type="video/mp4" />-->
             <!--        Your browser does not support the video tag.-->
             <!--    </video>-->
             {:else}
-                <p>File type not supported</p>
+                <p class="text-center text-sm text-gray-500">File type not supported</p>
             {/if}
             <!-- ... -->
         </div>
