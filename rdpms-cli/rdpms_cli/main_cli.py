@@ -15,7 +15,7 @@ from rdpms_cli.commands.pipeline import cmd_pipeline_run, cmd_pipeline_list, cmd
 def build_parser() -> ArgumentParser:
     parser = ArgumentParser(
         prog='rdpms',
-        description='Research Data Project Management System CLI'
+        description='Research Data and Pipeline Management System CLI'
     )
 
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
@@ -81,7 +81,7 @@ def build_parser() -> ArgumentParser:
 
     collection_list = collection_subparsers.add_parser('list', aliases=['ls'], help='List all collections')
     collection_list.set_defaults(func=cmd_collection_list)
-    # collection_list.add_argument('--project', '-p', help='Project ID')
+    collection_list.add_argument('--project', '-p', help='Project ID')
 
     collection_create = collection_subparsers.add_parser('new', help='Create a new collection')
     collection_create.add_argument('name', help='Collection name')
@@ -95,8 +95,8 @@ def build_parser() -> ArgumentParser:
 
     dataset_upload = dataset_subparsers.add_parser('upload', aliases=['u'], help='Upload a dataset')
     dataset_upload.add_argument('path', help='Path to dataset file or directory')
-    dataset_upload.add_argument('--name', help='Dataset name')
-    dataset_upload.add_argument('--collection', help='Collection ID')
+    dataset_upload.add_argument('--name', '-n', help='Dataset name')
+    dataset_upload.add_argument('--collection', '-c', help='Collection ID')
     dataset_upload.set_defaults(func=cmd_dataset_upload)
 
     dataset_download = dataset_subparsers.add_parser('download', aliases=['d', 'get'], help='Download a dataset')
@@ -104,10 +104,10 @@ def build_parser() -> ArgumentParser:
     dataset_download.add_argument('--output', '-o', help='Output path')
     dataset_download.set_defaults(func=cmd_dataset_download)
 
-    dataset_upload = dataset_subparsers.add_parser('new', help='Create a new dataset, but do not upload anything')
-    dataset_upload.add_argument('--name', '-n', help='Dataset name')
-    dataset_upload.add_argument('--collection', '-c', help='Collection ID')
-    dataset_upload.set_defaults(func=cmd_dataset_upload)
+    dataset_new = dataset_subparsers.add_parser('new', help='Create a new dataset, but do not upload anything')
+    dataset_new.add_argument('--name', '-n', help='Dataset name')
+    dataset_new.add_argument('--collection', '-c', help='Collection ID')
+    dataset_new.set_defaults(func=cmd_dataset_upload)
 
     dataset_seal = dataset_subparsers.add_parser('seal', help='Seal a dataset (make immutable)')
     dataset_seal.add_argument('dataset_id', help='Dataset ID to seal')

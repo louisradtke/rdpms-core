@@ -1,11 +1,92 @@
-from tabulate import tabulate
+from pstats import Stats
 
+from tabulate import tabulate
+import hashlib
+
+import requests
+
+from rdpms_cli.util.TypeStore import TypeStore, get_types
 from rdpms_cli.util.config_store import load_file
 
 
 def cmd_dataset_upload(args):
+    from pathlib import Path
+    import datetime
+    from rdpms_cli.openapi_client import ApiClient, Configuration
+    from rdpms_cli.openapi_client import DataSetsApi, DataSetSummaryDTO, S3FileCreateRequestDTO
+
     print(f"[dataset upload] Uploading dataset from: {args.path}, name: {args.name}, collection: {args.collection}")
 
+    conf = load_file()
+    if conf.active_instance_key not in conf.instances:
+        print(f'error: unknown instance key in conf!')
+        exit(1)
+
+    pth = Path(args.path)
+    if not pth.exists():
+        print(f'error: path does not exist!')
+        exit(1)
+
+    instance = conf.instances[conf.active_instance_key]
+    api_conf = Configuration(host=instance.base_url)
+    client = ApiClient(api_conf)
+    ds_api = DataSetsApi(client)
+
+    stamp = datetime.datetime.now(datetime.UTC)
+    ds_req_dto = DataSetSummaryDTO(
+        name=args.name,
+        slug=args.name,
+        createdStampUTC=stamp,
+        collectionId=args.collection
+    )
+    ds_id = ds_api.api_v1_data_datasets_post(ds_req_dto)
+
+    types = get_types('', client)
+
+    def upload_file(ds_id: str, base_path: Path, file_path: Path, type_store: TypeStore):
+        stats = (base_path / file_path).stat()
+        sha256 = hashlib.new('sha256')
+        with open(base_path / file_path, 'rb') as f:
+            while True:
+                data = f.read(65536)
+                if not data:
+                    break
+                sha256.update(data)
+
+        create_stamp = datetime.datetime.fromtimestamp(stats.st_ctime, datetime.UTC)
+        content_type = type_store.resolve_by_ending(file_path.name)
+        print(f'\tstats for {file_path}: size={stats.st_size}, sha256={sha256.hexdigest()}, content_type={content_type.display_name}, created={create_stamp}')
+        upload_req = S3FileCreateRequestDTO(
+            name=str(file_path),
+            sizeBytes=stats.st_size,
+            plainSHA256Hash=sha256.hexdigest(),
+            createdStamp=create_stamp,
+            contentTypeId=content_type.id
+        )
+        upload_resp = ds_api.api_v1_data_datasets_id_add_s3_post(ds_id, upload_req)
+
+        if stats.st_size == 0:
+            # Explicitly tell the server "body is empty and length is 0"
+            resp = requests.put(upload_resp.upload_uri, data=b'', headers={
+                'Content-Length': '0',
+            })
+            print(f'\tupload complete ({resp.status_code}) for {file_path}')
+        else:
+            with open(base_path / file_path, 'rb') as f:
+                resp = requests.put(upload_resp.upload_uri, data=f)
+            print(f'\tupload complete ({resp.status_code}) for {file_path}')
+
+    if pth.is_dir():
+        for dirpath, dirnames, filenames in pth.walk():
+            for child in filenames:
+                relative_file = (dirpath / child).relative_to(pth)
+                print(f'uploading file: {child} (in {dirpath}) -> {relative_file}')
+                upload_file(ds_id, pth, relative_file, types)
+    else:
+        upload_file(ds_id, Path('.'), pth, types)
+
+    # seal dataset
+    ds_api.api_v1_data_datasets_id_seal_put(ds_id)
 
 def cmd_dataset_download(args):
     print(f"[dataset download] Downloading dataset {args.dataset_id} to: {args.output}")
@@ -26,7 +107,6 @@ def cmd_dataset_metadata(args):
 def cmd_dataset_list(args):
     from rdpms_cli.openapi_client import ApiClient, Configuration
     from rdpms_cli.openapi_client.api.data_sets_api import DataSetsApi
-    from rdpms_cli.openapi_client.api.collections_api import CollectionsApi
 
     conf = load_file()
     if conf.active_instance_key not in conf.instances:

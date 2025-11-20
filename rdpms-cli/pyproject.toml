@@ -25,12 +25,13 @@ classifiers = [
     "Typing :: Typed",
 
     # Specify the Python versions you support here.
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
 
-requires-python = ">= 3.11"
+requires-python = ">= 3.10"
 dependencies = [
     "urllib3>=1.25.3",
     "python-dateutil>=2.8.2",
