@@ -18,8 +18,17 @@ public class SlugUtilTests
         Assert.That(regex.IsMatch(slug), Is.True);
     }
 
+    [TestCase("")]
+    [TestCase(" ")]
+    [TestCase("my project")]
+    public void SlugRegex_Denies_Expected_Valid_Slugs(string slug)
+    {
+        var regex = SlugUtil.SlugRegex;
+        Assert.That(regex.IsMatch(slug), Is.False);
+    }
+
     [TestCase]
-    public void SlugRegex_Rejects()
+    public void SlugRegex_TestLengths()
     {
         var shortSlug = string.Join("", Enumerable.Range(0, 64).Select(_ => "a"));
         var longSlug = string.Join("", Enumerable.Range(0, 65).Select(_ => "a"));

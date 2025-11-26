@@ -14,4 +14,11 @@ public interface IDataSetService : IGenericCollectionService<DataSet>
     /// <param name="id">The id of the dataset.</param>
     /// <exception cref="InvalidOperationException">Thrown, if data set is not found or in invalid state.</exception>
     public Task SealDataset(Guid id);
+
+    /// <summary>
+    /// Check, whether slug is unique and fulfils the slug constraints.
+    /// </summary>
+    /// <param name="slug">slug to check</param>
+    /// <returns>true if valid, false otherwise</returns>
+    Task<bool> ValidateSlug(string slug);
 }

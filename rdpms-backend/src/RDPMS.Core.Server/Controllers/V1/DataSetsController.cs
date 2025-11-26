@@ -29,13 +29,23 @@ public class DataSetsController(
 {
     [HttpGet]
     [ProducesResponseType<IEnumerable<DataSetSummaryDTO>>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<DataSetSummaryDTO>>> Get([FromQuery] Guid? collectionId = null)
+    public async Task<ActionResult<IEnumerable<DataSetSummaryDTO>>> Get(
+        [FromQuery] Guid? collectionId = null,
+        [FromQuery] bool? deleted = null
+    )
     {
-        IEnumerable<DataSet> datasets;
+        IQueryable<DataSet> datasets;
         try
         {
-            if (collectionId != null) datasets = await dataSetService.GetByCollectionAsync(collectionId.Value);
-            else datasets = await dataSetService.GetAllAsync();
+            if (collectionId != null)
+            {
+                datasets = (await dataSetService.GetByCollectionAsync(collectionId.Value))
+                    .AsQueryable();
+            }
+            else {
+                datasets = (await dataSetService.GetAllAsync())
+                    .AsQueryable();
+            }
         }
         catch (InvalidOperationException e)
         {
@@ -43,7 +53,16 @@ public class DataSetsController(
             return NotFound($"Collection {collectionId} was not found.");
         }
 
-        var dtos = datasets.Select(dataSetSummaryMapper.Export);
+        if (deleted == true)
+        {
+            datasets = datasets.Where(ds => ds.State == DataSetState.Deleted);
+        }
+        else if (deleted == false)
+        {
+            datasets = datasets.Where(ds => ds.State != DataSetState.Deleted);
+        }
+
+        var dtos = datasets.AsEnumerable().Select(dataSetSummaryMapper.Export);
         return Ok(dtos);
     }
 
@@ -59,6 +78,23 @@ public class DataSetsController(
             file.DownloadURI = fileService.GetContentApiUri(file.Id!.Value, HttpContext);
         }
         return Ok(dto);
+    }
+
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> DeleteById([FromRoute] Guid id)
+    {
+        if (!await dataSetService.CheckForIdAsync(id))
+        {
+            return NotFound(new ErrorMessageDTO { Message = "no data set with that id" });
+        }
+        
+        var ds = await dataSetService.GetByIdAsync(id);
+        ds.DeletedStamp = DateTime.UtcNow;
+        ds.State = DataSetState.Deleted;
+        await dataSetService.UpdateAsync(ds);
+        return Ok();
     }
 
     /// <summary>
@@ -77,6 +113,22 @@ public class DataSetsController(
         }
 
         var domainItem = dataSetSummaryMapper.Import(dto);
+
+        if (domainItem.ParentId == null)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "ParentId (collection) is required." });
+        }
+
+        if (domainItem.Slug == null)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "Slug is required." });
+        }
+
+        if (!await dataSetService.ValidateSlug(domainItem.Slug))
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "Slug is not valid." });
+        }
+
         await dataSetService.AddAsync(domainItem);
         return Ok(domainItem.Id);
     }

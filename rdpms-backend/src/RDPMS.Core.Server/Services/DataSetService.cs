@@ -39,4 +39,15 @@ public class DataSetService(DbContext context)
         else throw new InvalidOperationException("Dataset is in invalid state");
         await UpdateAsync(ds);
     }
+
+    public async Task<bool> ValidateSlug(string slug)
+    {
+        if (await Context.Set<DataSet>()
+                .AnyAsync(d => d.Slug == slug))
+        {
+            return false;
+        }
+        
+        return SlugUtil.IsValidSlug(slug);
+    }
 }
