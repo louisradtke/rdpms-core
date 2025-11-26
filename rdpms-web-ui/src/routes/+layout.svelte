@@ -9,6 +9,13 @@
 	let { children } = $props();
 </script>
 
+<!-- body with class="h-screen overflow-hidden" is wrapped in app.html -->
+
 <Header/>
 
-{@render children()}
+<!-- Body below header: sidebar + main -->
+<div class="flex h-[calc(100vh-4rem)]">
+
+    {@render children()}
+
+</div>

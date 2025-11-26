@@ -73,37 +73,34 @@
     <title>{title}</title>
 </svelte:head>
 
-<div class="flex h-full">
+<Sidebar
+        itemsPromise={allDataSets}
+        baseUrl="/projects/{projectId}/c/{collectionId}/*"
+/>
 
-    <Sidebar
-            itemsPromise={allDataSets}
-            baseUrl="/projects/{projectId}/c/{collectionId}/*"
-    />
+<div class="flex flex-col flex-1 overflow-y-auto">
 
-    <div class="flex flex-col flex-1">
+    <main class="m-5 flex-1 p-4">
 
-        <main class="m-5 flex-1 overflow-y-auto p-4">
+        {#await datasetDetailedReq}
+            <LoadingCircle/>
+        {:then dsDetail}
+            <EntityHeader type="DATASET" entity={dsDetail} />
+            <div class="my-6"></div>
 
-            {#await datasetDetailedReq}
-                <LoadingCircle/>
-            {:then dsDetail}
-                <EntityHeader type="DATASET" entity={dsDetail} />
-                <div class="my-6"></div>
+            {#if dsDetail.files}
+                <div class="space-y-4">
+                    {#each dsDetail.files as file (file.id)}
+                        <FileDisplay
+                            title={file.name ?? file.id ?? 'none'}
+                            fileSlug={"file" + file.id}
+                            file={file}/>
+                    {/each}
+                </div>
+            {/if}
+        {:catch error}
+            <p>{error}</p>
+        {/await}
 
-                {#if dsDetail.files}
-                    <div class="space-y-4">
-                        {#each dsDetail.files as file (file.id)}
-                            <FileDisplay
-                                title={file.name ?? file.id ?? 'none'}
-                                fileSlug={"file" + file.id}
-                                file={file}/>
-                        {/each}
-                    </div>
-                {/if}
-            {:catch error}
-                <p>{error}</p>
-            {/await}
-
-        </main>
-    </div>
+    </main>
 </div>

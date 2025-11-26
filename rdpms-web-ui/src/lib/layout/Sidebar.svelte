@@ -10,7 +10,7 @@
     };
 </script>
 
-<aside class="w-64 bg-gray-100 text-gray-800 border-gray-400 p-4 space-y-2">
+<aside class="w-64 bg-gray-100 text-gray-800 border-gray-400 p-4 space-y-2 overflow-y-auto">
     <ul class="space-y-1">
 
         {#await itemsPromise}
