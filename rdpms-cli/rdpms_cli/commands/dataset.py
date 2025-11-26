@@ -1,3 +1,4 @@
+import sys
 from pstats import Stats
 
 from tabulate import tabulate
@@ -5,6 +6,7 @@ import hashlib
 
 import requests
 
+from rdpms_cli.openapi_client.exceptions import BadRequestException
 from rdpms_cli.util.TypeStore import TypeStore, get_types
 from rdpms_cli.util.config_store import load_file
 
@@ -14,8 +16,6 @@ def cmd_dataset_upload(args):
     import datetime
     from rdpms_cli.openapi_client import ApiClient, Configuration
     from rdpms_cli.openapi_client import DataSetsApi, DataSetSummaryDTO, S3FileCreateRequestDTO
-
-    print(f"[dataset upload] Uploading dataset from: {args.path}, name: {args.name}, collection: {args.collection}")
 
     conf = load_file()
     if conf.active_instance_key not in conf.instances:
@@ -33,13 +33,25 @@ def cmd_dataset_upload(args):
     ds_api = DataSetsApi(client)
 
     stamp = datetime.datetime.now(datetime.UTC)
+    name = args.name
+    if not name:
+        name = pth.name
+
+    print(f"[dataset upload] Uploading dataset from: {args.path}, name: {name}, collection: {args.collection}")
+
     ds_req_dto = DataSetSummaryDTO(
-        name=args.name,
-        slug=args.name,
+        name=name,
+        slug=name,
         createdStampUTC=stamp,
         collectionId=args.collection
     )
-    ds_id = ds_api.api_v1_data_datasets_post(ds_req_dto)
+    try:
+        ds_id = ds_api.api_v1_data_datasets_post(ds_req_dto)
+    except BadRequestException as bre:
+        print(f'encountered HTTP 400', file=sys.stderr)
+        print(f'Reason: {bre.reason}')
+        print(f'Body:\n{bre.body}\n')
+        exit(1)
 
     types = get_types('', client)
 
@@ -55,7 +67,7 @@ def cmd_dataset_upload(args):
 
         create_stamp = datetime.datetime.fromtimestamp(stats.st_ctime, datetime.UTC)
         content_type = type_store.resolve_by_ending(file_path.name)
-        print(f'\tstats for {file_path}: size={stats.st_size}, sha256={sha256.hexdigest()}, content_type={content_type.display_name}, created={create_stamp}')
+        # print(f'\tstats for {file_path}: size={stats.st_size}, sha256={sha256.hexdigest()}, content_type={content_type.display_name}, created={create_stamp}')
         upload_req = S3FileCreateRequestDTO(
             name=str(file_path),
             sizeBytes=stats.st_size,
