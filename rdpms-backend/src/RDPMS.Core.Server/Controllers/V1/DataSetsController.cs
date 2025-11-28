@@ -249,7 +249,7 @@ public class DataSetsController(
         }
         catch (InvalidOperationException e)
         {
-            return BadRequest(new ErrorMessageDTO() {Message = e.Message });
+            return BadRequest(new ErrorMessageDTO() { Message = e.Message });
         }
     }
 

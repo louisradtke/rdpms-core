@@ -6,7 +6,7 @@ using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
-public class DataSetService(DbContext context)
+public class DataSetService(DbContext context, IS3Service s3Service)
     : GenericCollectionService<DataSet>(context, files => files
             .Include(ds => ds.Files)
             .ThenInclude(f => f.FileType)
@@ -32,6 +32,41 @@ public class DataSetService(DbContext context)
     {
         var ds = await GetByIdAsync(id);
         if (ds == null) throw new InvalidOperationException("Dataset not found");
+
+        var locations = ds.Files
+            .SelectMany(f => f.Locations.Where(l => l.StorageType == StorageType.S3))
+            .ToList();
+
+        var storeIds = locations
+            .Where(l => l.StoreFid is not null || l.StoreFid != Guid.Empty)
+            .Select(l => l.StoreFid)
+            .Distinct()
+            .ToList();
+        var storeDict = Context.Set<DataStore>()
+            .Where(s => storeIds.Contains(s.Id))
+            .ToDictionary(s => s.Id);
+        var checkTasks = locations
+            .Select(l => Task.Run(() =>
+                    s3Service.ValidateFileRef((S3FileStorageReference)l, (S3DataStore) storeDict[l.StoreFid!.Value])));
+
+        var success = true;
+        foreach (var task in checkTasks)
+        {
+            try
+            {
+                success = success && await task;
+            }
+            catch (Exception)
+            {
+                success = false;
+            }
+        }
+
+        if (!success)
+        {
+            throw new InvalidOperationException("Could not validate all files.");
+        }
+
         if (ds.State is DataSetState.Uninitialized or DataSetState.Sealed)
         {
             ds.State = DataSetState.Sealed;

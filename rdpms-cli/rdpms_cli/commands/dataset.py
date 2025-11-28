@@ -6,7 +6,6 @@ import hashlib
 
 import requests
 
-from rdpms_cli.openapi_client.exceptions import BadRequestException
 from rdpms_cli.util.TypeStore import TypeStore, get_types
 from rdpms_cli.util.config_store import load_file
 
@@ -16,6 +15,7 @@ def cmd_dataset_upload(args):
     import datetime
     from rdpms_cli.openapi_client import ApiClient, Configuration
     from rdpms_cli.openapi_client import DataSetsApi, DataSetSummaryDTO, S3FileCreateRequestDTO
+    from rdpms_cli.openapi_client.exceptions import BadRequestException, ApiException
 
     conf = load_file()
     if conf.active_instance_key not in conf.instances:
@@ -47,10 +47,10 @@ def cmd_dataset_upload(args):
     )
     try:
         ds_id = ds_api.api_v1_data_datasets_post(ds_req_dto)
-    except BadRequestException as bre:
+    except ApiException as api_Ex:
         print(f'encountered HTTP 400', file=sys.stderr)
-        print(f'Reason: {bre.reason}')
-        print(f'Body:\n{bre.body}\n')
+        print(f'Reason: {api_Ex.reason}')
+        print(f'Body:\n{api_Ex.body}\n')
         exit(1)
 
     types = get_types('', client)
@@ -98,7 +98,12 @@ def cmd_dataset_upload(args):
         upload_file(ds_id, Path('.'), pth, types)
 
     # seal dataset
-    ds_api.api_v1_data_datasets_id_seal_put(ds_id)
+    try:
+        ds_api.api_v1_data_datasets_id_seal_put(ds_id)
+    except ApiException as api_ex:
+        print(f'encountered HTTP {api_ex.status}', file=sys.stderr)
+        print(f'Reason: {api_ex.reason}')
+        print(f'Body:\n{api_ex.body}\n')
 
 def cmd_dataset_download(args):
     print(f"[dataset download] Downloading dataset {args.dataset_id} to: {args.output}")
