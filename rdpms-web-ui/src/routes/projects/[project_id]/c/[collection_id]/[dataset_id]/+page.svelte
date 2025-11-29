@@ -46,11 +46,20 @@
     });
 
     let allDataSets = $derived.by(async () => {
-        let dsl = await datasetsReq;
-        return dsl.map(ds => ({
+        let datasets = await datasetsReq;
+        datasets = datasets.filter(ds => ds.state?.toLowerCase() === 'sealed');
+        datasets.sort((a, b) => {
+            if (a.createdStampUTC && b.createdStampUTC) {
+                return b.createdStampUTC.getTime() - a.createdStampUTC.getTime();
+            }
+            if (a.createdStampUTC) return 1;
+            if (b.createdStampUTC) return -1;
+            return 0;
+        });
+        return datasets.map(ds => ({
             label: ds.name ?? ds.id ?? 'none',
             hrefValue: ds.slug ?? ds.id ?? 'none',
-            tooltip: `data container with ID ${ds.id}`
+            tooltip: `data set with ID ${ds.id}`
         }));
     });
 
