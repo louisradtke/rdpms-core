@@ -27,11 +27,18 @@ public class DataSetsController(
     ILogger<DataSetsController> logger)
     : ControllerBase
 {
+    /// <summary>
+    /// Get data sets.
+    /// </summary>
+    /// <param name="collectionId"></param>
+    /// <param name="deleted">comma-separated list of strings, case-insensitive.
+    /// Valid values can be found in <see cref="DataSetSummaryDTO"/></param>
+    /// <returns></returns>
     [HttpGet]
     [ProducesResponseType<IEnumerable<DataSetSummaryDTO>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<DataSetSummaryDTO>>> Get(
         [FromQuery] Guid? collectionId = null,
-        [FromQuery] bool? deleted = null
+        [FromQuery] string? deleted = null
     )
     {
         IQueryable<DataSet> datasets;
@@ -53,13 +60,24 @@ public class DataSetsController(
             return NotFound($"Collection {collectionId} was not found.");
         }
 
-        if (deleted == true)
+        try
         {
-            datasets = datasets.Where(ds => ds.State == DataSetState.Deleted);
+            var queriedDeletionStates = deleted?
+                .Split(',')
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(s => s.Trim())
+                .Select(s => Enum.Parse<DeletionState>(s, true))
+                .ToArray();
+            if (queriedDeletionStates is not null && queriedDeletionStates.Length > 0)
+            {
+                datasets = datasets
+                    .Where(ds => queriedDeletionStates.Contains(ds.DeletionState))
+                    .AsQueryable();
+            }
         }
-        else if (deleted == false)
+        catch (ArgumentException ae)
         {
-            datasets = datasets.Where(ds => ds.State != DataSetState.Deleted);
+            return BadRequest(new ErrorMessageDTO() { Message = $"Invalid value for deleted: {ae.Message}" });
         }
 
         var dtos = datasets.AsEnumerable().Select(dataSetSummaryMapper.Export);
@@ -92,7 +110,7 @@ public class DataSetsController(
         
         var ds = await dataSetService.GetByIdAsync(id);
         ds.DeletedStamp = DateTime.UtcNow;
-        ds.State = DataSetState.Deleted;
+        ds.DeletionState = DeletionState.DeletionPending;
         await dataSetService.UpdateAsync(ds);
         return Ok();
     }
@@ -169,7 +187,7 @@ public class DataSetsController(
                 StatusCodes.Status500InternalServerError,
                 new ErrorMessageDTO { Message = "DataSet must have a parent collection." });
         }
-        if (dataset.State != DataSetState.Uninitialized)
+        if (dataset.LifecycleState != DataSetState.Uninitialized)
         {
             return BadRequest(new ErrorMessageDTO { Message = $"DataSet must be in {nameof(DataSetState.Uninitialized)} state." });
         }

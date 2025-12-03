@@ -178,7 +178,7 @@ public static class DefaultValues
                     Id = Guid.Parse("fae41903-b023-427e-93cf-1a7f9d6437e8"),
                     Slug = "dummy-recording-01",
                     CreatedStamp = DateTime.Parse("2025-09-11T22:57:38.000+02:00"),
-                    State = DataSetState.Sealed,
+                    LifecycleState = DataSetState.Sealed,
                     Files =
                     [
                         new DataFile("demo_2025-09-11_22-57-38.mcap")
@@ -247,7 +247,7 @@ public static class DefaultValues
                     Id = Guid.Parse("3b5a0c9b-d1da-42ae-92ac-4dc700224cda"),
                     Slug = "dummy-recording-02",
                     CreatedStamp = DateTime.Parse("2025-10-04T13:52:00.000+02:00"),
-                    State = DataSetState.Sealed,
+                    LifecycleState = DataSetState.Sealed,
                     Files = []
                 }
             ]

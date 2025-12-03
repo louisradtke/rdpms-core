@@ -67,9 +67,9 @@ public class DataSetService(DbContext context, IS3Service s3Service)
             throw new InvalidOperationException("Could not validate all files.");
         }
 
-        if (ds.State is DataSetState.Uninitialized or DataSetState.Sealed)
+        if (ds.LifecycleState is DataSetState.Uninitialized or DataSetState.Sealed)
         {
-            ds.State = DataSetState.Sealed;
+            ds.LifecycleState = DataSetState.Sealed;
         }
         else throw new InvalidOperationException("Dataset is in invalid state");
         await UpdateAsync(ds);

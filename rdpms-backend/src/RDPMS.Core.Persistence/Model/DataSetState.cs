@@ -10,14 +10,9 @@ public enum DataSetState
     /// Data set was created, but not sealed yet.
     /// </summary>
     Uninitialized = 0,
-    
+
     /// <summary>
     /// Data set is sealed, and a defined set of checks was performed.
     /// </summary>
     Sealed = 1,
-    
-    /// <summary>
-    /// Data set was deleted permanently, so the files are irrecoverably gone.
-    /// </summary>
-    Deleted = 2,
 }

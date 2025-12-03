@@ -34,12 +34,20 @@ public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParen
     public DateTime CreatedStamp { get; set; } = DateTime.UtcNow;
 
     /// <summary>
-    /// Respective stamp in <b>UTC</b>. If this file was deleted, the value represents the deletion stamp.
-    /// false otherwise.
+    /// Stamp in <b>UTC</b>, where the dataset was selected for deletion
+    /// (leaving <see cref="DeletionState.None"/>).
     /// </summary>
     public DateTime? DeletedStamp { get; set; }
 
-    public DataSetState State { get; set; } = DataSetState.Uninitialized;
+    /// <summary>
+    /// State indicating, whether the data set was initialized/verified.
+    /// </summary>
+    public DataSetState LifecycleState { get; set; } = DataSetState.Uninitialized;
+
+    /// <summary>
+    /// State indicating, whether the data set was deleted.
+    /// </summary>
+    public DeletionState DeletionState { get; set; } = DeletionState.None;
 
     /// <summary>
     /// If data set was created by a job, refer it
