@@ -149,12 +149,19 @@ paths:
     get:
       tags:
         - DataSets
+      summary: Get data sets.
       parameters:
         - name: collectionId
           in: query
+          description: ''
           schema:
             type: string
             format: uuid
+        - name: deleted
+          in: query
+          description: "comma-separated list of strings, case-insensitive.\n            Valid values can be found in RDPMS.Core.Server.Model.DTO.V1.DataSetSummaryDTO"
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -206,6 +213,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DataSetDetailedDTO'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+    delete:
+      tags:
+        - DataSets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
         '404':
           description: Not Found
           content:
@@ -632,17 +658,15 @@ components:
           description: "UTC timestamp that marks the period end of the dataset.\nOnly to be set by server."
           format: date-time
           nullable: true
-        state:
+        lifecycleState:
           type: string
-          description: "Indicates, whether the dataset (and its files) are immutable.\nOnly to be set by server.\nLifecycle is: Uninitialized -> [Sealed ->] Deleted"
+          description: "Indicates, whether the dataset (and its files) are immutable.\nOnly to be set by server.\nLifecycle is: Uninitialized -> Sealed"
           nullable: true
+        deletionState:
+          $ref: '#/components/schemas/DeletionStateDTO'
         isTimeSeries:
           type: boolean
           description: "Indicates if the dataset represents time-series data.\nOnly to be set by server."
-          nullable: true
-        isDeleted:
-          type: boolean
-          description: "Flags whether the dataset has been marked as deleted.\nOnly to be set by server."
           nullable: true
         metadataFields:
           type: array
@@ -708,17 +732,15 @@ components:
           description: "UTC timestamp that marks the period end of the dataset.\nOnly to be set by server."
           format: date-time
           nullable: true
-        state:
+        lifecycleState:
           type: string
-          description: "Indicates, whether the dataset (and its files) are immutable.\nOnly to be set by server.\nLifecycle is: Uninitialized -> [Sealed ->] Deleted"
+          description: "Indicates, whether the dataset (and its files) are immutable.\nOnly to be set by server.\nLifecycle is: Uninitialized -> Sealed"
           nullable: true
+        deletionState:
+          $ref: '#/components/schemas/DeletionStateDTO'
         isTimeSeries:
           type: boolean
           description: "Indicates if the dataset represents time-series data.\nOnly to be set by server."
-          nullable: true
-        isDeleted:
-          type: boolean
-          description: "Flags whether the dataset has been marked as deleted.\nOnly to be set by server."
           nullable: true
         metadataFields:
           type: array
@@ -765,6 +787,13 @@ components:
           format: uuid
           nullable: true
       additionalProperties: false
+    DeletionStateDTO:
+      enum:
+        - Active
+        - DeletionPending
+        - Deleted
+      type: string
+      description: Enum indicating whether an entity was deleted.
     ErrorMessageDTO:
       type: object
       properties:

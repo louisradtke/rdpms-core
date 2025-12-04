@@ -1,3 +1,5 @@
+using RDPMS.Core.Persistence.Model;
+
 namespace RDPMS.Core.Server.Model.DTO.V1;
 
 /// <summary>
@@ -62,19 +64,13 @@ public record DataSetSummaryDTO
     /// Only to be set by server.
     /// Lifecycle is: None -> [DeletionPending ->] Deleted
     /// </summary>
-    public string? DeletionState { get; set; }
+    public DeletionStateDTO? DeletionState { get; set; }
 
     /// <summary>
     /// Indicates if the dataset represents time-series data.
     /// Only to be set by server.
     /// </summary>
     public bool? IsTimeSeries { get; set; }
-
-    /// <summary>
-    /// Flags whether the dataset has been marked as deleted.
-    /// Only to be set by server.
-    /// </summary>
-    public bool? IsDeleted { get; set; }
 
     /// <summary>
     /// Fields, for which metadata exists.

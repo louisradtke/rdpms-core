@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
@@ -121,7 +122,9 @@ internal class Program
             options.SubstituteApiVersionInUrl = true; // Replace {version} in URL with actual version
         });
 
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddJsonOptions(options => // show enum value in swagger.
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         // builder.Services.AddSwaggerGen();
@@ -145,7 +148,7 @@ internal class Program
             var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
         });
-
+            
         
         // instantiate and launch app
         var app = builder.Build();

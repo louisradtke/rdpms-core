@@ -1,9 +1,11 @@
-namespace RDPMS.Core.Persistence.Model;
+using System.ComponentModel;
+
+namespace RDPMS.Core.Server.Model.DTO.V1;
 
 /// <summary>
 /// Enum indicating whether an entity was deleted.
 /// </summary>
-public enum DeletionState
+public enum DeletionStateDTO
 {
     /// <summary>
     /// Entity is untouched.

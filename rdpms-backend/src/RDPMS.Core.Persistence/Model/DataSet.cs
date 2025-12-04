@@ -35,7 +35,7 @@ public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParen
 
     /// <summary>
     /// Stamp in <b>UTC</b>, where the dataset was selected for deletion
-    /// (leaving <see cref="DeletionState.None"/>).
+    /// (leaving <see cref="Model.DeletionState.Active"/>).
     /// </summary>
     public DateTime? DeletedStamp { get; set; }
 
@@ -47,7 +47,7 @@ public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParen
     /// <summary>
     /// State indicating, whether the data set was deleted.
     /// </summary>
-    public DeletionState DeletionState { get; set; } = DeletionState.None;
+    public DeletionState DeletionState { get; set; } = DeletionState.Active;
 
     /// <summary>
     /// If data set was created by a job, refer it
