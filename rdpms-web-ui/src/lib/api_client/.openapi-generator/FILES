@@ -11,6 +11,7 @@ models/ContentTypeDTO.ts
 models/DataSetDetailedDTO.ts
 models/DataSetSummaryDTO.ts
 models/DataStoreSummaryDTO.ts
+models/DeletionStateDTO.ts
 models/ErrorMessageDTO.ts
 models/FileCreateResponseDTO.ts
 models/FileSummaryDTO.ts

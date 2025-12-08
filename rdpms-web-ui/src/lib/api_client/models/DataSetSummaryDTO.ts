@@ -13,6 +13,12 @@
  */
 
 import { mapValues } from '../runtime';
+import type { DeletionStateDTO } from './DeletionStateDTO';
+import {
+    DeletionStateDTOFromJSON,
+    DeletionStateDTOFromJSONTyped,
+    DeletionStateDTOToJSON,
+} from './DeletionStateDTO';
 import type { TagDTO } from './TagDTO';
 import {
     TagDTOFromJSON,
@@ -82,11 +88,17 @@ export interface DataSetSummaryDTO {
     /**
      * Indicates, whether the dataset (and its files) are immutable.
      * Only to be set by server.
-     * Lifecycle is: Uninitialized -> [Sealed ->] Deleted
+     * Lifecycle is: Uninitialized -> Sealed
      * @type {string}
      * @memberof DataSetSummaryDTO
      */
-    state?: string | null;
+    lifecycleState?: string | null;
+    /**
+     * 
+     * @type {DeletionStateDTO}
+     * @memberof DataSetSummaryDTO
+     */
+    deletionState?: DeletionStateDTO;
     /**
      * Indicates if the dataset represents time-series data.
      * Only to be set by server.
@@ -94,13 +106,6 @@ export interface DataSetSummaryDTO {
      * @memberof DataSetSummaryDTO
      */
     isTimeSeries?: boolean | null;
-    /**
-     * Flags whether the dataset has been marked as deleted.
-     * Only to be set by server.
-     * @type {boolean}
-     * @memberof DataSetSummaryDTO
-     */
-    isDeleted?: boolean | null;
     /**
      * Fields, for which metadata exists.
      * Only to be set by server.
@@ -147,9 +152,9 @@ export function DataSetSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: b
         'deletedStampUTC': json['deletedStampUTC'] == null ? undefined : (new Date(json['deletedStampUTC'])),
         'beginStampUTC': json['beginStampUTC'] == null ? undefined : (new Date(json['beginStampUTC'])),
         'endStampUTC': json['endStampUTC'] == null ? undefined : (new Date(json['endStampUTC'])),
-        'state': json['state'] == null ? undefined : json['state'],
+        'lifecycleState': json['lifecycleState'] == null ? undefined : json['lifecycleState'],
+        'deletionState': json['deletionState'] == null ? undefined : DeletionStateDTOFromJSON(json['deletionState']),
         'isTimeSeries': json['isTimeSeries'] == null ? undefined : json['isTimeSeries'],
-        'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
         'metadataFields': json['metadataFields'] == null ? undefined : json['metadataFields'],
         'fileCount': json['fileCount'] == null ? undefined : json['fileCount'],
         'collectionId': json['collectionId'] == null ? undefined : json['collectionId'],
@@ -170,9 +175,9 @@ export function DataSetSummaryDTOToJSON(value?: DataSetSummaryDTO | null): any {
         'deletedStampUTC': value['deletedStampUTC'] == null ? undefined : ((value['deletedStampUTC'] as any).toISOString()),
         'beginStampUTC': value['beginStampUTC'] == null ? undefined : ((value['beginStampUTC'] as any).toISOString()),
         'endStampUTC': value['endStampUTC'] == null ? undefined : ((value['endStampUTC'] as any).toISOString()),
-        'state': value['state'],
+        'lifecycleState': value['lifecycleState'],
+        'deletionState': DeletionStateDTOToJSON(value['deletionState']),
         'isTimeSeries': value['isTimeSeries'],
-        'isDeleted': value['isDeleted'],
         'metadataFields': value['metadataFields'],
         'fileCount': value['fileCount'],
         'collectionId': value['collectionId'],

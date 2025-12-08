@@ -5,6 +5,7 @@ export * from './ContentTypeDTO';
 export * from './DataSetDetailedDTO';
 export * from './DataSetSummaryDTO';
 export * from './DataStoreSummaryDTO';
+export * from './DeletionStateDTO';
 export * from './ErrorMessageDTO';
 export * from './FileCreateResponseDTO';
 export * from './FileSummaryDTO';

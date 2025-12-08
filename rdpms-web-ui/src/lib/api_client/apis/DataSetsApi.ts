@@ -43,11 +43,16 @@ export interface ApiV1DataDatasetsBatchPostRequest {
 
 export interface ApiV1DataDatasetsGetRequest {
     collectionId?: string;
+    deleted?: string;
 }
 
 export interface ApiV1DataDatasetsIdAddS3PostRequest {
     id: string;
     s3FileCreateRequestDTO?: S3FileCreateRequestDTO;
+}
+
+export interface ApiV1DataDatasetsIdDeleteRequest {
+    id: string;
 }
 
 export interface ApiV1DataDatasetsIdGetRequest {
@@ -96,12 +101,17 @@ export class DataSetsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get data sets.
      */
     async apiV1DataDatasetsGetRaw(requestParameters: ApiV1DataDatasetsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<DataSetSummaryDTO>>> {
         const queryParameters: any = {};
 
         if (requestParameters['collectionId'] != null) {
             queryParameters['collectionId'] = requestParameters['collectionId'];
+        }
+
+        if (requestParameters['deleted'] != null) {
+            queryParameters['deleted'] = requestParameters['deleted'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -117,6 +127,7 @@ export class DataSetsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get data sets.
      */
     async apiV1DataDatasetsGet(requestParameters: ApiV1DataDatasetsGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<DataSetSummaryDTO>> {
         const response = await this.apiV1DataDatasetsGetRaw(requestParameters, initOverrides);
@@ -157,6 +168,36 @@ export class DataSetsApi extends runtime.BaseAPI {
     async apiV1DataDatasetsIdAddS3Post(requestParameters: ApiV1DataDatasetsIdAddS3PostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileCreateResponseDTO> {
         const response = await this.apiV1DataDatasetsIdAddS3PostRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async apiV1DataDatasetsIdDeleteRaw(requestParameters: ApiV1DataDatasetsIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataDatasetsIdDelete().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/v1/data/datasets/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async apiV1DataDatasetsIdDelete(requestParameters: ApiV1DataDatasetsIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.apiV1DataDatasetsIdDeleteRaw(requestParameters, initOverrides);
     }
 
     /**
@@ -252,6 +293,32 @@ export class DataSetsApi extends runtime.BaseAPI {
      */
     async apiV1DataDatasetsPost(requestParameters: ApiV1DataDatasetsPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
         const response = await this.apiV1DataDatasetsPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * OData enabled query.
+     */
+    async apiV1DataDatasetsQueryGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<DataSetSummaryDTO>>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/v1/data/datasets/query`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(DataSetSummaryDTOFromJSON));
+    }
+
+    /**
+     * OData enabled query.
+     */
+    async apiV1DataDatasetsQueryGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<DataSetSummaryDTO>> {
+        const response = await this.apiV1DataDatasetsQueryGetRaw(initOverrides);
         return await response.value();
     }
 
