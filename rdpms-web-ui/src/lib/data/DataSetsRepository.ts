@@ -41,7 +41,7 @@ export class DataSetsRepository {
         return api.apiV1DataDatasetsIdGet({ id });
     }
 
-    public async create(dto: Partial<DataSetSummaryDTO>): Promise<void> {
+    public async create(dto: Partial<DataSetSummaryDTO>): Promise<string> {
         const api = await this.ensureReady();
         return api.apiV1DataDatasetsPost({ dataSetSummaryDTO: dto as DataSetSummaryDTO });
     }

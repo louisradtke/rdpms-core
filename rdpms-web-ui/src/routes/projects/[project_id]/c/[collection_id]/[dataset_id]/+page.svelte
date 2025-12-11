@@ -47,7 +47,7 @@
 
     let allDataSets = $derived.by(async () => {
         let datasets = await datasetsReq;
-        datasets = datasets.filter(ds => ds.state?.toLowerCase() === 'sealed');
+        datasets = datasets.filter(ds => ds.lifecycleState?.toLowerCase() === 'sealed');
         datasets.sort((a, b) => {
             if (a.createdStampUTC && b.createdStampUTC) {
                 return b.createdStampUTC.getTime() - a.createdStampUTC.getTime();
