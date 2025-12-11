@@ -36,13 +36,10 @@ public abstract class FileStorageReference : IUniqueEntity
 }
 
 /// <summary>
-/// Represents a location to a file, available via S3.
+/// Represents a reference to a file, available via S3.
 /// </summary>
 public class S3FileStorageReference : FileStorageReference
 {
-    /// <summary>
-    /// Represents a location to a file, available via S3.
-    /// </summary>
     public S3FileStorageReference()
     {
         StorageType = StorageType.S3;
@@ -52,17 +49,27 @@ public class S3FileStorageReference : FileStorageReference
 }
 
 /// <summary>
-/// Represents a location to a file, available without authentication.
+/// Represents a reference to a file, available without authentication.
 /// </summary>
 public class StaticFileStorageReference : FileStorageReference
 {
-    /// <summary>
-    /// Represents a location to a file, available without authentication.
-    /// </summary>
     public StaticFileStorageReference()
     {
         StorageType = StorageType.Static;
     }
     
     public string URL { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Represents a reference to a file, stored in the database.
+/// </summary>
+public class DbFileStorageReference : FileStorageReference
+{
+    public DbFileStorageReference()
+    {
+        StorageType = StorageType.Db;
+    }
+
+    byte[] Data { get; set; } = [];
 }

@@ -57,7 +57,7 @@ public class DataSetSummaryDTOMapper
             CreateJob = null, // Since DTO provides no information here
             Files = new List<DataFile>(), // Initializing empty as no information from DTO
             SourceForJobs = new List<Job>(), // Again, initialize empty
-            MetadataJsonFields = new List<MetadataJsonField>() // Also initializing empty
+            MetadataJsonFields = new List<DataEntityMetadataJsonField>() // Also initializing empty
         };
 
         return dataSet;
@@ -85,7 +85,7 @@ public class DataSetSummaryDTOMapper
             LifecycleState = domain.LifecycleState.ToString(),
             DeletionState = (DeletionStateDTO) (int) domain.DeletionState,
             IsTimeSeries = domain.Files.Any(file => file.BeginStamp.HasValue),
-            MetadataFields = domain.MetadataJsonFields.Select(f => f.Key).ToList(),
+            MetadataFields = domain.MetadataJsonFields.Select(f => f.MetadataKey).ToList(),
             FileCount = domain.Files.Count,
             CollectionId = domain.ParentId
         };

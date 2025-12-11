@@ -61,4 +61,23 @@ public class DataFile(string name) : IUniqueEntity, IUniqueEntityWithParent
     /// References to the storage location(s) of this file.
     /// </summary>
     public List<FileStorageReference> Locations { get; set; } = [];
+
+    /// <summary>
+    /// Metadata fields associated with this data file, including their file-specific key.
+    /// </summary>
+    public List<DataEntityMetadataJsonField> MetadataJsonFields { get; set; } = [];
+
+    public IReadOnlyDictionary<string, MetadataJsonField> Metadata
+    {
+        get
+        {
+            var dict = new Dictionary<string, MetadataJsonField>();
+            foreach (var field in MetadataJsonFields)
+            {
+                dict[field.MetadataKey] = field.MetadataJsonField;
+            }
+
+            return dict.AsReadOnly();
+        }
+    }
 }

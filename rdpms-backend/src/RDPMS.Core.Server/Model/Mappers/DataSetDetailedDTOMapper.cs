@@ -30,7 +30,7 @@ public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper)
             EndStampUTC = endStamp,
             LifecycleState = domain.LifecycleState.ToString(),
             IsTimeSeries = domain.Files.Any(file => file.BeginStamp.HasValue),
-            MetadataFields = domain.MetadataJsonFields.Select(f => f.Key).ToList(),
+            MetadataFields = domain.MetadataJsonFields.Select(f => f.MetadataKey).ToList(),
             Files = domain.Files.Select(fileMapper.Export).ToList(),
             CollectionId = domain.ParentId
         };

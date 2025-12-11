@@ -27,10 +27,11 @@ public class RDPMSPersistenceContext : DbContext
     public DbSet<Job> Jobs { get; private set; }
     public DbSet<PipelineInstance> PipelineInstances { get; private set; }
     public DbSet<Tag> Tags { get; private set; }
-    public DbSet<DataSetUsedForJobsRelation> DataSetsUsedForJobs { get; private set; }
     public DbSet<Project> Projects { get; private set; }
     public DbSet<LabelSharingPolicy> LabelSharingPolicies { get; private set; }
     public DbSet<Slug> Slugs { get; private set; }
+    public DbSet<MetadataJsonField> MetadataJsonFields { get; private set; }
+    public DbSet<JsonSchemaEntity> JsonSchemas { get; private set; }
     // ReSharper restore UnusedMember.Global
     // ReSharper restore UnusedAutoPropertyAccessor.Local
 
@@ -70,9 +71,10 @@ public class RDPMSPersistenceContext : DbContext
         logD($"Using {DbConfiguration.GetConnectionDescription()}");
         logD($"Database init mode: {_dbInitMode}");
         
-        var stack = new System.Diagnostics.StackTrace();
-        logT($"PID={Environment.ProcessId}, TID={Environment.CurrentManagedThreadId}, Call stack:\n{stack}\n" +
-             $"----------------------------------------");
+        // var stack = new System.Diagnostics.StackTrace();
+        // logT($"PID={Environment.ProcessId}, TID={Environment.CurrentManagedThreadId}, Call stack:\n{stack}\n" +
+        //      $"----------------------------------------");
+        logT($"PID={Environment.ProcessId}, TID={Environment.CurrentManagedThreadId}");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -127,14 +129,12 @@ public class RDPMSPersistenceContext : DbContext
             .WithOne()
             .HasForeignKey(ds => ds.ParentId);
 
-
         // set up (dual) many-to-many mapping of PipelineInstance, because DataSet holds SourceForJobs and CreateJob
-        model.Entity<DataSetUsedForJobsRelation>()
-            .HasKey(e => new {e.JobId, e.SourceDatasetId});
         model.Entity<Job>()
             .HasMany(e => e.SourceDatasets)
-            .WithMany(e => e.SourceForJobs)
-            .UsingEntity(nameof(DataSetUsedForJobsRelation));
+            .WithMany(e => e.SourceForJobs);
+        
+        // set up job output data sets, or tell data set in which job it was created
         model.Entity<Job>()
             .HasMany(e => e.OutputDatasets)
             .WithOne(e => e.CreateJob);
@@ -152,8 +152,9 @@ public class RDPMSPersistenceContext : DbContext
         model.Entity<FileStorageReference>()
             .HasDiscriminator(e => e.StorageType)
             .HasValue<S3FileStorageReference>(StorageType.S3)
-            .HasValue<StaticFileStorageReference>(StorageType.Static);
-        
+            .HasValue<StaticFileStorageReference>(StorageType.Static)
+            .HasValue<DbFileStorageReference>(StorageType.Db);
+
         // set up many-to-many mapping of Label and Project
         model.Entity<Project>()
             .HasMany<Label>(e => e.Labels)
@@ -177,6 +178,13 @@ public class RDPMSPersistenceContext : DbContext
             .HasMany<DataStore>(p => p.DataStores)
             .WithOne()
             .HasForeignKey(s => s.ParentId);
+        model.Entity<Project>()
+            .HasMany<Tag>(p => p.Tags)
+            .WithOne(t => t.ParentProject);
+
+        model.Entity<DataSet>()
+            .HasMany(ds => ds.AssignedTags)
+            .WithMany(t => t.AssignedToDataSets);
 
         // set up fast searching for Job ID and State
         model.Entity<Job>()
@@ -186,6 +194,51 @@ public class RDPMSPersistenceContext : DbContext
 
         model.Entity<PipelineInstance>()
             .HasIndex(e => e.LocalId);
+
+        // many-to-many of DataFile to MetadataJsonField
+        model.Entity<MetadataJsonField>()
+            .HasOne(f => f.Value)
+            .WithMany()
+            .IsRequired();
+
+        // many-to-many of MetadataJsonField to JsonSchemaEntity
+        model.Entity<MetadataJsonField>()
+            .HasMany(f => f.ValidatedSchemas)
+            .WithMany();
+
+        
+        // set-up and many-to-many of DataEntityMetadataJsonField MetadataJsonField
+        model.Entity<DataEntityMetadataJsonField>()
+            .HasKey(link => link.Id);
+        model.Entity<DataEntityMetadataJsonField>()
+            .HasIndex(link => link.MetadataJsonFieldId);
+        model.Entity<DataEntityMetadataJsonField>()
+            .HasIndex(link => link.DataFileId);
+        model.Entity<DataEntityMetadataJsonField>()
+            .HasIndex(link => link.DataSetId);
+        model.Entity<DataEntityMetadataJsonField>()
+            .HasOne(link => link.MetadataJsonField)
+            .WithMany()
+            .HasForeignKey(link => link.MetadataJsonFieldId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // metadata fields assigned to data sets
+        model.Entity<DataEntityMetadataJsonField>()
+            .HasOne(link => link.DataSet)
+            .WithMany(ds => ds.MetadataJsonFields)
+            .HasForeignKey(link => link.DataSetId)
+            .OnDelete(DeleteBehavior.Cascade);
+        model.Entity<DataEntityMetadataJsonField>()
+            .HasIndex(link => new { link.DataSetId, link.MetadataKey });
+
+        // metadata fields assigned to data files
+        model.Entity<DataEntityMetadataJsonField>()
+            .HasOne(link => link.DataFile)
+            .WithMany(df => df.MetadataJsonFields)
+            .HasForeignKey(link => link.DataFileId)
+            .OnDelete(DeleteBehavior.Cascade);
+        model.Entity<DataEntityMetadataJsonField>()
+            .HasIndex(link => new { link.DataFileId, link.MetadataKey });
     }
 
     private async Task SeedDataAsync(DbContext context, bool _, CancellationToken token)

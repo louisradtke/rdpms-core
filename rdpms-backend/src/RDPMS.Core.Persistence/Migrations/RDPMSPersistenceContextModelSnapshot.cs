@@ -17,6 +17,21 @@ namespace RDPMS.Core.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
 
+            modelBuilder.Entity("DataSetJob", b =>
+                {
+                    b.Property<Guid>("SourceDatasetsId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("SourceForJobsId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("SourceDatasetsId", "SourceForJobsId");
+
+                    b.HasIndex("SourceForJobsId");
+
+                    b.ToTable("DataSetJob");
+                });
+
             modelBuilder.Entity("DataSetLabel", b =>
                 {
                     b.Property<Guid>("AssignedLabelsId")
@@ -32,19 +47,34 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.ToTable("DataSetLabel");
                 });
 
-            modelBuilder.Entity("DataSetUsedForJobsRelation", b =>
+            modelBuilder.Entity("DataSetTag", b =>
                 {
-                    b.Property<Guid>("SourceDatasetsId")
+                    b.Property<Guid>("AssignedTagsId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("SourceForJobsId")
+                    b.Property<Guid>("AssignedToDataSetsId")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("SourceDatasetsId", "SourceForJobsId");
+                    b.HasKey("AssignedTagsId", "AssignedToDataSetsId");
 
-                    b.HasIndex("SourceForJobsId");
+                    b.HasIndex("AssignedToDataSetsId");
 
-                    b.ToTable("DataSetUsedForJobsRelation");
+                    b.ToTable("DataSetTag");
+                });
+
+            modelBuilder.Entity("JsonSchemaEntityMetadataJsonField", b =>
+                {
+                    b.Property<Guid>("MetadataJsonFieldId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ValidatedSchemasId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("MetadataJsonFieldId", "ValidatedSchemasId");
+
+                    b.HasIndex("ValidatedSchemasId");
+
+                    b.ToTable("JsonSchemaEntityMetadataJsonField");
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.ContentType", b =>
@@ -106,6 +136,40 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.HasIndex("ParentId");
 
                     b.ToTable("DataCollections");
+                });
+
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataEntityMetadataJsonField", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("DataFileId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("DataSetId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MetadataJsonFieldId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MetadataKey")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DataFileId");
+
+                    b.HasIndex("DataSetId");
+
+                    b.HasIndex("MetadataJsonFieldId");
+
+                    b.HasIndex("DataFileId", "MetadataKey");
+
+                    b.HasIndex("DataSetId", "MetadataKey");
+
+                    b.ToTable("DataEntityMetadataJsonField");
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataFile", b =>
@@ -194,19 +258,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.HasIndex("ParentId");
 
                     b.ToTable("DataSets");
-                });
-
-            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataSetUsedForJobsRelation", b =>
-                {
-                    b.Property<Guid>("JobId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("SourceDatasetId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("JobId", "SourceDatasetId");
-
-                    b.ToTable("DataSetsUsedForJobs");
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataStore", b =>
@@ -332,6 +383,25 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.ToTable("Jobs");
                 });
 
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.JsonSchemaEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SchemaId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SchemaString")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("JsonSchemas");
+                });
+
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.Label", b =>
                 {
                     b.Property<Guid>("Id")
@@ -413,22 +483,14 @@ namespace RDPMS.Core.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("DataSetId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
+                    b.Property<Guid>("ValueId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DataSetId");
+                    b.HasIndex("ValueId");
 
-                    b.ToTable("MetadataJsonField");
+                    b.ToTable("MetadataJsonFields");
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.PipelineInstance", b =>
@@ -517,16 +579,16 @@ namespace RDPMS.Core.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("DataSetId")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("ParentProjectId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("DataSetId");
+                    b.HasIndex("ParentProjectId");
 
                     b.ToTable("Tags");
                 });
@@ -562,6 +624,13 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.HasDiscriminator().HasValue(0);
                 });
 
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DbFileStorageReference", b =>
+                {
+                    b.HasBaseType("RDPMS.Core.Persistence.Model.FileStorageReference");
+
+                    b.HasDiscriminator().HasValue(2);
+                });
+
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.S3FileStorageReference", b =>
                 {
                     b.HasBaseType("RDPMS.Core.Persistence.Model.FileStorageReference");
@@ -584,6 +653,21 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.HasDiscriminator().HasValue(1);
                 });
 
+            modelBuilder.Entity("DataSetJob", b =>
+                {
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
+                        .WithMany()
+                        .HasForeignKey("SourceDatasetsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RDPMS.Core.Persistence.Model.Job", null)
+                        .WithMany()
+                        .HasForeignKey("SourceForJobsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DataSetLabel", b =>
                 {
                     b.HasOne("RDPMS.Core.Persistence.Model.Label", null)
@@ -599,17 +683,32 @@ namespace RDPMS.Core.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DataSetUsedForJobsRelation", b =>
+            modelBuilder.Entity("DataSetTag", b =>
                 {
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
+                    b.HasOne("RDPMS.Core.Persistence.Model.Tag", null)
                         .WithMany()
-                        .HasForeignKey("SourceDatasetsId")
+                        .HasForeignKey("AssignedTagsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RDPMS.Core.Persistence.Model.Job", null)
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
                         .WithMany()
-                        .HasForeignKey("SourceForJobsId")
+                        .HasForeignKey("AssignedToDataSetsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("JsonSchemaEntityMetadataJsonField", b =>
+                {
+                    b.HasOne("RDPMS.Core.Persistence.Model.MetadataJsonField", null)
+                        .WithMany()
+                        .HasForeignKey("MetadataJsonFieldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RDPMS.Core.Persistence.Model.JsonSchemaEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ValidatedSchemasId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -632,6 +731,31 @@ namespace RDPMS.Core.Persistence.Migrations
                         .HasForeignKey("ParentId");
 
                     b.Navigation("DefaultDataStore");
+                });
+
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataEntityMetadataJsonField", b =>
+                {
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataFile", "DataFile")
+                        .WithMany("MetadataJsonFields")
+                        .HasForeignKey("DataFileId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", "DataSet")
+                        .WithMany("MetadataJsonFields")
+                        .HasForeignKey("DataSetId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("RDPMS.Core.Persistence.Model.MetadataJsonField", "MetadataJsonField")
+                        .WithMany()
+                        .HasForeignKey("MetadataJsonFieldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DataFile");
+
+                    b.Navigation("DataSet");
+
+                    b.Navigation("MetadataJsonField");
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataFile", b =>
@@ -746,9 +870,13 @@ namespace RDPMS.Core.Persistence.Migrations
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.MetadataJsonField", b =>
                 {
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
-                        .WithMany("MetadataJsonFields")
-                        .HasForeignKey("DataSetId");
+                    b.HasOne("RDPMS.Core.Persistence.Model.DataFile", "Value")
+                        .WithMany()
+                        .HasForeignKey("ValueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Value");
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.Project", b =>
@@ -762,9 +890,13 @@ namespace RDPMS.Core.Persistence.Migrations
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.Tag", b =>
                 {
-                    b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
-                        .WithMany("AssignedTags")
-                        .HasForeignKey("DataSetId");
+                    b.HasOne("RDPMS.Core.Persistence.Model.Project", "ParentProject")
+                        .WithMany("Tags")
+                        .HasForeignKey("ParentProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ParentProject");
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataCollectionEntity", b =>
@@ -775,12 +907,12 @@ namespace RDPMS.Core.Persistence.Migrations
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataFile", b =>
                 {
                     b.Navigation("Locations");
+
+                    b.Navigation("MetadataJsonFields");
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.DataSet", b =>
                 {
-                    b.Navigation("AssignedTags");
-
                     b.Navigation("Files");
 
                     b.Navigation("MetadataJsonFields");
@@ -809,6 +941,8 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Navigation("Labels");
 
                     b.Navigation("SharedLabels");
+
+                    b.Navigation("Tags");
                 });
 #pragma warning restore 612, 618
         }

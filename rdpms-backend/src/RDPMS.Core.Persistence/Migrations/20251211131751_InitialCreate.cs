@@ -12,15 +12,16 @@ namespace RDPMS.Core.Persistence.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "DataSetsUsedForJobs",
+                name: "JsonSchemas",
                 columns: table => new
                 {
-                    SourceDatasetId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    JobId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    SchemaId = table.Column<string>(type: "TEXT", nullable: false),
+                    SchemaString = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DataSetsUsedForJobs", x => new { x.JobId, x.SourceDatasetId });
+                    table.PrimaryKey("PK_JsonSchemas", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -67,6 +68,21 @@ namespace RDPMS.Core.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DataEntityMetadataJsonField",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    DataSetId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    DataFileId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    MetadataKey = table.Column<string>(type: "TEXT", nullable: false),
+                    MetadataJsonFieldId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DataEntityMetadataJsonField", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DataFiles",
                 columns: table => new
                 {
@@ -84,6 +100,60 @@ namespace RDPMS.Core.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DataFiles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MetadataJsonFields",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    ValueId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MetadataJsonFields", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MetadataJsonFields_DataFiles_ValueId",
+                        column: x => x.ValueId,
+                        principalTable: "DataFiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "JsonSchemaEntityMetadataJsonField",
+                columns: table => new
+                {
+                    MetadataJsonFieldId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    ValidatedSchemasId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JsonSchemaEntityMetadataJsonField", x => new { x.MetadataJsonFieldId, x.ValidatedSchemasId });
+                    table.ForeignKey(
+                        name: "FK_JsonSchemaEntityMetadataJsonField_JsonSchemas_ValidatedSchemasId",
+                        column: x => x.ValidatedSchemasId,
+                        principalTable: "JsonSchemas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_JsonSchemaEntityMetadataJsonField_MetadataJsonFields_MetadataJsonFieldId",
+                        column: x => x.MetadataJsonFieldId,
+                        principalTable: "MetadataJsonFields",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DataSetJob",
+                columns: table => new
+                {
+                    SourceDatasetsId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    SourceForJobsId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DataSetJob", x => new { x.SourceDatasetsId, x.SourceForJobsId });
                 });
 
             migrationBuilder.CreateTable(
@@ -124,55 +194,18 @@ namespace RDPMS.Core.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MetadataJsonField",
+                name: "DataSetTag",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Key = table.Column<string>(type: "TEXT", nullable: false),
-                    Value = table.Column<string>(type: "TEXT", nullable: false),
-                    DataSetId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    AssignedTagsId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    AssignedToDataSetsId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MetadataJsonField", x => x.Id);
+                    table.PrimaryKey("PK_DataSetTag", x => new { x.AssignedTagsId, x.AssignedToDataSetsId });
                     table.ForeignKey(
-                        name: "FK_MetadataJsonField_DataSets_DataSetId",
-                        column: x => x.DataSetId,
-                        principalTable: "DataSets",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Tags",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    DataSetId = table.Column<Guid>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tags", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Tags_DataSets_DataSetId",
-                        column: x => x.DataSetId,
-                        principalTable: "DataSets",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "DataSetUsedForJobsRelation",
-                columns: table => new
-                {
-                    SourceDatasetsId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    SourceForJobsId = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DataSetUsedForJobsRelation", x => new { x.SourceDatasetsId, x.SourceForJobsId });
-                    table.ForeignKey(
-                        name: "FK_DataSetUsedForJobsRelation_DataSets_SourceDatasetsId",
-                        column: x => x.SourceDatasetsId,
+                        name: "FK_DataSetTag_DataSets_AssignedToDataSetsId",
+                        column: x => x.AssignedToDataSetsId,
                         principalTable: "DataSets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -333,6 +366,25 @@ namespace RDPMS.Core.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    ParentProjectId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tags_Projects_ParentProjectId",
+                        column: x => x.ParentProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Types",
                 columns: table => new
                 {
@@ -396,6 +448,31 @@ namespace RDPMS.Core.Persistence.Migrations
                 column: "ParentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DataEntityMetadataJsonField_DataFileId",
+                table: "DataEntityMetadataJsonField",
+                column: "DataFileId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DataEntityMetadataJsonField_DataFileId_MetadataKey",
+                table: "DataEntityMetadataJsonField",
+                columns: new[] { "DataFileId", "MetadataKey" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DataEntityMetadataJsonField_DataSetId",
+                table: "DataEntityMetadataJsonField",
+                column: "DataSetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DataEntityMetadataJsonField_DataSetId_MetadataKey",
+                table: "DataEntityMetadataJsonField",
+                columns: new[] { "DataSetId", "MetadataKey" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DataEntityMetadataJsonField_MetadataJsonFieldId",
+                table: "DataEntityMetadataJsonField",
+                column: "MetadataJsonFieldId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DataFiles_FileTypeId",
                 table: "DataFiles",
                 column: "FileTypeId");
@@ -404,6 +481,11 @@ namespace RDPMS.Core.Persistence.Migrations
                 name: "IX_DataFiles_ParentId",
                 table: "DataFiles",
                 column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DataSetJob_SourceForJobsId",
+                table: "DataSetJob",
+                column: "SourceForJobsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DataSetLabel_AssignedToDataSetsId",
@@ -421,9 +503,9 @@ namespace RDPMS.Core.Persistence.Migrations
                 column: "ParentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DataSetUsedForJobsRelation_SourceForJobsId",
-                table: "DataSetUsedForJobsRelation",
-                column: "SourceForJobsId");
+                name: "IX_DataSetTag_AssignedToDataSetsId",
+                table: "DataSetTag",
+                column: "AssignedToDataSetsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DataStores_ParentId",
@@ -466,6 +548,11 @@ namespace RDPMS.Core.Persistence.Migrations
                 column: "State");
 
             migrationBuilder.CreateIndex(
+                name: "IX_JsonSchemaEntityMetadataJsonField_ValidatedSchemasId",
+                table: "JsonSchemaEntityMetadataJsonField",
+                column: "ValidatedSchemasId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Label_ParentProjectId",
                 table: "Label",
                 column: "ParentProjectId");
@@ -491,9 +578,9 @@ namespace RDPMS.Core.Persistence.Migrations
                 column: "StoredFileId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MetadataJsonField_DataSetId",
-                table: "MetadataJsonField",
-                column: "DataSetId");
+                name: "IX_MetadataJsonFields_ValueId",
+                table: "MetadataJsonFields",
+                column: "ValueId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PipelineInstances_LocalId",
@@ -506,9 +593,9 @@ namespace RDPMS.Core.Persistence.Migrations
                 column: "DefaultDataStoreId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tags_DataSetId",
+                name: "IX_Tags_ParentProjectId",
                 table: "Tags",
-                column: "DataSetId");
+                column: "ParentProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Types_ProjectId",
@@ -530,6 +617,30 @@ namespace RDPMS.Core.Persistence.Migrations
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
+                name: "FK_DataEntityMetadataJsonField_DataFiles_DataFileId",
+                table: "DataEntityMetadataJsonField",
+                column: "DataFileId",
+                principalTable: "DataFiles",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_DataEntityMetadataJsonField_DataSets_DataSetId",
+                table: "DataEntityMetadataJsonField",
+                column: "DataSetId",
+                principalTable: "DataSets",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_DataEntityMetadataJsonField_MetadataJsonFields_MetadataJsonFieldId",
+                table: "DataEntityMetadataJsonField",
+                column: "MetadataJsonFieldId",
+                principalTable: "MetadataJsonFields",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_DataFiles_DataSets_ParentId",
                 table: "DataFiles",
                 column: "ParentId",
@@ -541,6 +652,22 @@ namespace RDPMS.Core.Persistence.Migrations
                 table: "DataFiles",
                 column: "FileTypeId",
                 principalTable: "Types",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_DataSetJob_DataSets_SourceDatasetsId",
+                table: "DataSetJob",
+                column: "SourceDatasetsId",
+                principalTable: "DataSets",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_DataSetJob_Jobs_SourceForJobsId",
+                table: "DataSetJob",
+                column: "SourceForJobsId",
+                principalTable: "Jobs",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
@@ -568,10 +695,10 @@ namespace RDPMS.Core.Persistence.Migrations
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_DataSetUsedForJobsRelation_Jobs_SourceForJobsId",
-                table: "DataSetUsedForJobsRelation",
-                column: "SourceForJobsId",
-                principalTable: "Jobs",
+                name: "FK_DataSetTag_Tags_AssignedTagsId",
+                table: "DataSetTag",
+                column: "AssignedTagsId",
+                principalTable: "Tags",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
@@ -591,16 +718,22 @@ namespace RDPMS.Core.Persistence.Migrations
                 table: "Projects");
 
             migrationBuilder.DropTable(
+                name: "DataEntityMetadataJsonField");
+
+            migrationBuilder.DropTable(
+                name: "DataSetJob");
+
+            migrationBuilder.DropTable(
                 name: "DataSetLabel");
 
             migrationBuilder.DropTable(
-                name: "DataSetsUsedForJobs");
-
-            migrationBuilder.DropTable(
-                name: "DataSetUsedForJobsRelation");
+                name: "DataSetTag");
 
             migrationBuilder.DropTable(
                 name: "FileStorageReferences");
+
+            migrationBuilder.DropTable(
+                name: "JsonSchemaEntityMetadataJsonField");
 
             migrationBuilder.DropTable(
                 name: "LabelSharingPolicies");
@@ -609,13 +742,16 @@ namespace RDPMS.Core.Persistence.Migrations
                 name: "LogSection");
 
             migrationBuilder.DropTable(
-                name: "MetadataJsonField");
-
-            migrationBuilder.DropTable(
                 name: "Slugs");
 
             migrationBuilder.DropTable(
                 name: "Tags");
+
+            migrationBuilder.DropTable(
+                name: "JsonSchemas");
+
+            migrationBuilder.DropTable(
+                name: "MetadataJsonFields");
 
             migrationBuilder.DropTable(
                 name: "Label");

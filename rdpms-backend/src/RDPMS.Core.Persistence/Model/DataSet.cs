@@ -21,7 +21,7 @@ public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParen
     /// Non-unique name of a dataset
     /// </summary>
     public string Name { get; set; } = name;
-    
+
     /// <summary>
     /// Id of the parent <see cref="DataCollectionEntity"/>. Nullability is a convenience feature, every dataset should
     /// have a parent collection.
@@ -60,7 +60,21 @@ public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParen
     public List<Job> SourceForJobs { get; set; } = [];
 
     /// <summary>
-    /// Maps a string/name (unique per dataset) to a JSON field
+    /// Metadata fields associated with this dataset, including their dataset-specific key.
     /// </summary>
-    public List<MetadataJsonField> MetadataJsonFields { get; set; } = [];
+    public List<DataEntityMetadataJsonField> MetadataJsonFields { get; set; } = [];
+
+    public IReadOnlyDictionary<string, MetadataJsonField> Metadata 
+    {
+        get {
+            // todo: not very efficient, return value calculated on every access
+            var dict = new Dictionary<string, MetadataJsonField>();
+            foreach (var field in MetadataJsonFields)
+            {
+                dict[field.MetadataKey] = field.MetadataJsonField;
+            }
+
+            return dict.AsReadOnly();
+        }
+    }
 }

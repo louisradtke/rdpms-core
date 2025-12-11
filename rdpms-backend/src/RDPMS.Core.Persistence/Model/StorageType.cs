@@ -12,8 +12,8 @@ public enum StorageType
     /// </summary>
     Static = 1,
 
-    // /// <summary>
-    // /// File is served by the application.
-    // /// </summary>
-    // Internal = 2
+    /// <summary>
+    /// File is served by the application.
+    /// </summary>
+    Db = 2
 }

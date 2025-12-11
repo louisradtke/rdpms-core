@@ -35,4 +35,9 @@ public class Project(string name) : IUniqueEntity, IUniqueEntityWithSlug
     /// All data stores assigned to this project.
     /// </summary>
     public List<DataStore> DataStores { get; set; } = [];
+
+    /// <summary>
+    /// Tags defined inside this project.
+    /// </summary>
+    public List<Tag> Tags { get; set; } = [];
 }
