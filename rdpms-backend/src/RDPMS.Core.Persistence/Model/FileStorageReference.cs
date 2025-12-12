@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace RDPMS.Core.Persistence.Model;
 
 /// <summary>
@@ -29,10 +31,17 @@ public abstract class FileStorageReference : IUniqueEntity
     /// <summary>
     /// The resource type (S3, Static, ...).
     /// </summary>
-    public StorageType StorageType { get; set; }
+    public StorageType StorageType { get; internal set; }
 
     public Guid? StoreFid { get; set; }
     public Guid? FileFid { get; set; }
+
+    [NotMapped]
+    public StorageAttributes Attributes
+    {
+        get => new() {Algorithm = Algorithm, SizeBytes = SizeBytes, SHA256Hash = SHA256Hash};
+        set => (Algorithm, SizeBytes, SHA256Hash) = (value.Algorithm, value.SizeBytes, value.SHA256Hash);
+    }
 }
 
 /// <summary>
@@ -71,5 +80,12 @@ public class DbFileStorageReference : FileStorageReference
         StorageType = StorageType.Db;
     }
 
-    byte[] Data { get; set; } = [];
+    public byte[] Data { get; set; } = [];
+}
+
+public class StorageAttributes
+{
+    public CompressionAlgorithm Algorithm { get; set; }
+    public long SizeBytes { get; set; }
+    public string SHA256Hash { get; set; } = string.Empty;
 }

@@ -5,7 +5,6 @@ using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using CommandLine;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.OpenApi.Models;
 using NLog;
 using NLog.Config;
@@ -17,6 +16,7 @@ using RDPMS.Core.Persistence;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Model.Repositories;
 using RDPMS.Core.Server.Services;
+using RDPMS.Core.Server.Util;
 
 namespace RDPMS.Core.Server;
 
@@ -122,7 +122,11 @@ internal class Program
             options.SubstituteApiVersionInUrl = true; // Replace {version} in URL with actual version
         });
 
-        builder.Services.AddControllers()
+        builder.Services.AddControllers(options =>
+            {
+                // Allow binding raw request bodies to byte[] for both json and octet-stream.
+                options.InputFormatters.Insert(0, new RawBodyInputFormatter());
+            })
             .AddJsonOptions(options => // show enum value in swagger.
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

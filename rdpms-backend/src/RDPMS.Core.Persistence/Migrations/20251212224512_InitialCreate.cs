@@ -245,6 +245,7 @@ namespace RDPMS.Core.Persistence.Migrations
                     StorageType = table.Column<int>(type: "INTEGER", nullable: false),
                     StoreFid = table.Column<Guid>(type: "TEXT", nullable: true),
                     FileFid = table.Column<Guid>(type: "TEXT", nullable: true),
+                    Data = table.Column<byte[]>(type: "BLOB", nullable: true),
                     ObjectKey = table.Column<string>(type: "TEXT", nullable: true),
                     URL = table.Column<string>(type: "TEXT", nullable: true)
                 },

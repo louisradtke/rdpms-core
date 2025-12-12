@@ -11,7 +11,7 @@ using RDPMS.Core.Persistence;
 namespace RDPMS.Core.Persistence.Migrations
 {
     [DbContext(typeof(RDPMSPersistenceContext))]
-    [Migration("20251211131751_InitialCreate")]
+    [Migration("20251212224512_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -630,6 +630,10 @@ namespace RDPMS.Core.Persistence.Migrations
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.DbFileStorageReference", b =>
                 {
                     b.HasBaseType("RDPMS.Core.Persistence.Model.FileStorageReference");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
 
                     b.HasDiscriminator().HasValue(2);
                 });

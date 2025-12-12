@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using RDPMS.Core.Infra.Exceptions;
 using RDPMS.Core.Persistence;
@@ -94,7 +95,7 @@ public class DataFileService(
         //     throw new InvalidOperationException("DataSet not found or not in invalid state!");
         // }
 
-        var key = $"{dataSetId}/{file.Name}";
+        var key = $"stores/{dataStoreId}/{file.Name}";
         var uploadUrl = await s3Service.RequestPresignedUploadUrlAsync(store, key);
 
         reference.ObjectKey = key;
@@ -108,5 +109,28 @@ public class DataFileService(
         {
             FileId = file.Id
         };
+    }
+
+    public async Task StoreInDb(DataFile file, StorageAttributes referenceAttributes, byte[] content)
+    {
+        if (referenceAttributes.SizeBytes != content.Length)
+        {
+            throw new ArgumentException("File size mismatch");
+        }
+        
+        var calculatedSha256Hash = Convert.ToHexString(SHA256.HashData(content));
+        if (referenceAttributes.SHA256Hash != calculatedSha256Hash)
+        {
+            throw new ArgumentException("File hash mismatch");
+        }
+
+        var fileRef = new DbFileStorageReference
+        {
+            Attributes = referenceAttributes,
+            Data = content
+        };
+        file.Locations.Add(fileRef);
+
+        await Context.SaveChangesAsync();
     }
 }

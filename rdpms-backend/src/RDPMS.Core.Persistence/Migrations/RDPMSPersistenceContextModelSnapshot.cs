@@ -628,6 +628,10 @@ namespace RDPMS.Core.Persistence.Migrations
                 {
                     b.HasBaseType("RDPMS.Core.Persistence.Model.FileStorageReference");
 
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
+
                     b.HasDiscriminator().HasValue(2);
                 });
 

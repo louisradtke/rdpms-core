@@ -1,5 +1,5 @@
+using System.Text;
 using Asp.Versioning;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
@@ -10,20 +10,16 @@ namespace RDPMS.Core.Server.Controllers.V1;
 
 [ApiController]
 [Produces("application/json")]
-[Consumes("application/json")]
 [Route("api/v{version:apiVersion}/data/datasets")]
 [ApiVersion("1.0")]
 public class DataSetsController(
     IDataSetService dataSetService,
     IFileService fileService,
-    IS3Service s3Service,
-    // IStoreService storeService,
     IContentTypeService typeService,
     IDataCollectionEntityService collectionService,
     DataSetSummaryDTOMapper dataSetSummaryMapper,
     DataSetDetailedDTOMapper dataSetDetailedMapper,
     IImportMapper<DataFile, S3FileCreateRequestDTO, ContentType> s3dfCreateReqMapper,
-    LinkGenerator linkGenerator,
     ILogger<DataSetsController> logger)
     : ControllerBase
 {
@@ -121,6 +117,7 @@ public class DataSetsController(
     /// <param name="dto"></param>
     /// <returns>On success, responds with the guid of the new data set.</returns>
     [HttpPost]
+    [Consumes("application/json")]
     [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> Post([FromBody] DataSetSummaryDTO dto)
@@ -159,6 +156,7 @@ public class DataSetsController(
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpPost("{id:guid}/add/s3")]
+    [Consumes("application/json")]
     [ProducesResponseType<FileCreateResponseDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType<FileCreateResponseDTO>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
@@ -271,6 +269,27 @@ public class DataSetsController(
         }
     }
 
+    /// <summary>
+    /// Adds or sets meta documents for a data set.
+    /// </summary>
+    /// <param name="id">ID of the data set</param>
+    /// <param name="key">key of the meta date on the data set</param>
+    /// <param name="value">JSON meta document</param>
+    /// <returns>HTTP 200 if meta date was replaced successfully. HTTP 201, if a new meta date was created.
+    /// HTTP 404</returns>
+    [HttpPut("{id:guid}/metadata/{key}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
+    [Consumes("application/octet-stream", "application/json")]
+    public async Task<ActionResult> AssignMetadate([FromRoute] Guid id, [FromRoute] string key,
+        [FromBody] byte[] value)
+    {
+        var valueStr = Encoding.UTF8.GetString(value);
+        Console.WriteLine($"new meta date: {key} = {valueStr}");
+        return Ok();
+    }
+
     // /// <summary>
     // /// 
     // /// </summary>
@@ -297,23 +316,23 @@ public class DataSetsController(
     //     
     // }
 
-    /// <summary>
-    /// Add a batch of item to the system.
-    /// </summary>
-    /// <param name="dtos"></param>
-    /// <returns></returns>
-    [HttpPost("batch")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [RequestSizeLimit(10_000_000)]
-    public async Task<ActionResult> PostBatch([FromBody] IEnumerable<DataSetSummaryDTO> dtos)
-    {
-        var dtosList = dtos.ToList();
-        if (dtosList.Any(d => d.Id != null))
-        {
-            return BadRequest("Id is not allowed to be set.");
-        }
-
-        await dataSetService.AddRangeAsync(dtosList.Select(dataSetSummaryMapper.Import));
-        return Ok();
-    }
+    // /// <summary>
+    // /// Add a batch of item to the system.
+    // /// </summary>
+    // /// <param name="dtos"></param>
+    // /// <returns></returns>
+    // [HttpPost("batch")]
+    // [ProducesResponseType(StatusCodes.Status200OK)]
+    // [RequestSizeLimit(10_000_000)]
+    // public async Task<ActionResult> PostBatch([FromBody] IEnumerable<DataSetSummaryDTO> dtos)
+    // {
+    //     var dtosList = dtos.ToList();
+    //     if (dtosList.Any(d => d.Id != null))
+    //     {
+    //         return BadRequest("Id is not allowed to be set.");
+    //     }
+    //
+    //     await dataSetService.AddRangeAsync(dtosList.Select(dataSetSummaryMapper.Import));
+    //     return Ok();
+    // }
 }
