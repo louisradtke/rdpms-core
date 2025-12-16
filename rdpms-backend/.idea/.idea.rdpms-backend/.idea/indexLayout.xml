@@ -4,6 +4,7 @@
     <attachedFolders>
       <Path>../../rdpms-core</Path>
       <Path>../rdpms-cli</Path>
+      <Path>../rdpms-web-ui</Path>
     </attachedFolders>
     <explicitIncludes />
     <explicitExcludes />
