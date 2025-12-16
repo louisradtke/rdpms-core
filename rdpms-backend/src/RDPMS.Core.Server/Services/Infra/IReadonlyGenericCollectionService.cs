@@ -8,4 +8,5 @@ public interface IReadonlyGenericCollectionService<T>
     Task<IEnumerable<T>> GetAllAsync();
     Task<T> GetByIdAsync(Guid id);
     Task<bool> CheckForIdAsync(Guid id);
+    IQueryable<T> Query();
 }

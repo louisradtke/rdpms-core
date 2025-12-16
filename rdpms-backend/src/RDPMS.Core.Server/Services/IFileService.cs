@@ -63,5 +63,5 @@ public interface IFileService : IGenericCollectionService<DataFile>
     /// <param name="content">Actual content</param>
     /// <exception cref="ArgumentException">If inputs mismatch content attributes</exception>
     /// <returns></returns>
-    public Task StoreInDb(DataFile file, StorageAttributes referenceAttributes, byte[] content);
+    public Task StoreInDb(DataFile file, byte[] content, StorageAttributes? referenceAttributes);
 }

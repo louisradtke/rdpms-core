@@ -19,6 +19,8 @@ public class DataSetsController(
     IDataCollectionEntityService collectionService,
     DataSetSummaryDTOMapper dataSetSummaryMapper,
     DataSetDetailedDTOMapper dataSetDetailedMapper,
+    IMetadataService metadataService,
+    IContentTypeService contentTypeService,
     IImportMapper<DataFile, S3FileCreateRequestDTO, ContentType> s3dfCreateReqMapper,
     ILogger<DataSetsController> logger)
     : ControllerBase
@@ -224,7 +226,7 @@ public class DataSetsController(
         // var url = s3Service.RequestPresignedUploadUrlAsync(store, file.Name);
 
         var requestedFile = s3dfCreateReqMapper.Import(requestDto, type);
-        requestedFile.ParentId = id;
+        requestedFile.ParentDataSetId = id;
         if (dataset.Files.Any(f => f.Name == requestedFile.Name))
         {
             return BadRequest(new ErrorMessageDTO
@@ -232,7 +234,7 @@ public class DataSetsController(
                 Message = $"File with name {requestedFile.Name} is already registered."
             });
         }
-        var reference = requestedFile.Locations.Single() as S3FileStorageReference ??
+        var reference = requestedFile.References.Single() as S3FileStorageReference ??
                         throw new InvalidOperationException();
         await fileService.AddAsync(requestedFile);
         var response = await fileService.RequestS3FileUploadAsync(
@@ -273,21 +275,35 @@ public class DataSetsController(
     /// Adds or sets meta documents for a data set.
     /// </summary>
     /// <param name="id">ID of the data set</param>
-    /// <param name="key">key of the meta date on the data set</param>
+    /// <param name="key">Case-insensitive key of the meta date on the data set</param>
     /// <param name="value">JSON meta document</param>
-    /// <returns>HTTP 200 if meta date was replaced successfully. HTTP 201, if a new meta date was created.
-    /// HTTP 404</returns>
+    /// <returns>HTTP 200 if meta date was replaced successfully (key refers to new date).
+    /// HTTP 201, if a new meta date was created.
+    /// HTTP 400, if an input-related problem occurs.</returns>
     [HttpPut("{id:guid}/metadata/{key}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
+    [ProducesResponseType<Guid>(StatusCodes.Status201Created)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
     [Consumes("application/octet-stream", "application/json")]
     public async Task<ActionResult> AssignMetadate([FromRoute] Guid id, [FromRoute] string key,
         [FromBody] byte[] value)
     {
+        var dataSet = await dataSetService.GetByIdAsync(id);
+        var contentType = await contentTypeService.GetByMimeType(
+            "application/json",
+            dataSet.ParentCollection?.ParentId
+                ?? throw new InvalidOperationException("DataSet must have a parent collection.")
+        );
+
         var valueStr = Encoding.UTF8.GetString(value);
-        Console.WriteLine($"new meta date: {key} = {valueStr}");
-        return Ok();
+        var field = await metadataService.MakeFieldFromValue(valueStr, contentType);
+        var modified = dataSet.MetadataJsonFields.Any(f =>
+            f.MetadataKey.Equals(key, StringComparison.CurrentCultureIgnoreCase));
+        
+        await metadataService.AssignMetadate(dataSet, key, field);
+        
+        if (!modified) return CreatedAtAction(nameof(AssignMetadate), new { id, key }, field.Id);
+        return Ok(field.Id);
     }
 
     // /// <summary>

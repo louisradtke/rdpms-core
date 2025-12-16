@@ -34,6 +34,18 @@ public abstract class ReadonlyGenericCollectionService<T> : IReadonlyGenericColl
         return await query.ToListAsync();
     }
 
+    public IQueryable<T> Query()
+    {
+        var query = Context.Set<T>()
+            .AsQueryable();
+        if (IncludeConfiguration != null)
+        {
+            query = IncludeConfiguration.ConfigureIncludes(query);
+        }
+
+        return query;
+    }
+
     public async Task<T> GetByIdAsync(Guid id)
     {
         var query = Context.Set<T>()

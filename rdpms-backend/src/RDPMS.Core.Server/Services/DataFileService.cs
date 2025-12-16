@@ -111,20 +111,36 @@ public class DataFileService(
         };
     }
 
-    public async Task StoreInDb(DataFile file, StorageAttributes referenceAttributes, byte[] content)
+    public async Task StoreInDb(DataFile file, byte[] content, StorageAttributes? referenceAttributes)
     {
-        if (referenceAttributes.SizeBytes != content.Length)
+        referenceAttributes ??= new StorageAttributes();
+
+        if (referenceAttributes.SizeBytes == null)
+        {
+            referenceAttributes.SizeBytes = content.Length;
+        }
+        else if (referenceAttributes.SizeBytes != content.Length)
         {
             throw new ArgumentException("File size mismatch");
         }
-        
-        var calculatedSha256Hash = Convert.ToHexString(SHA256.HashData(content));
-        if (referenceAttributes.SHA256Hash != calculatedSha256Hash)
+
+        if (referenceAttributes.SHA256Hash == null)
         {
-            throw new ArgumentException("File hash mismatch");
+            var calculatedSha256Hash = Convert.ToHexString(SHA256.HashData(content));
+            referenceAttributes.SHA256Hash = calculatedSha256Hash;
+        }
+        else
+        {
+            var calculatedSha256Hash = Convert.ToHexString(SHA256.HashData(content));
+            if (referenceAttributes.SHA256Hash != calculatedSha256Hash)
+            {
+                throw new ArgumentException("File hash mismatch");
+            }
         }
 
-        var fileRef = new DbFileStorageReference
+        referenceAttributes.Algorithm ??= CompressionAlgorithm.Plain;
+
+        var storageRef = new DbFileStorageReference
         {
             Attributes = referenceAttributes,
             Data = content

@@ -1,13 +1,10 @@
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.Logic;
+using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
-public interface IContentTypeService
+public interface IContentTypeService : IGenericCollectionService<ContentType>
 {
-    public Task<IEnumerable<ContentType>> GetAllAsync();
-    Task<ContentType> GetByIdAsync(Guid id);
-    Task<bool> CheckForIdAsync(Guid id);
-    Task AddAsync(ContentType item);
-    Task AddRangeAsync(IEnumerable<ContentType> items);
+    public Task<ContentType> GetByMimeType(string mimeType, Guid? scopeProject);
 }
