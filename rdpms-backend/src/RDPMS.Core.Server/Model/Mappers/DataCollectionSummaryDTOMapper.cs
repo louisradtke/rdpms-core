@@ -54,7 +54,7 @@ public class DataCollectionSummaryDTOMapper
             Description = dto.Description,
             ContainedDatasets = new List<DataSet>(),
             DefaultDataStore = defaultStore,
-            ParentId = parentProject.Id
+            ParentProjectId = parentProject.Id
         };
 
         return collection;

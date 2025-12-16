@@ -1,8 +1,17 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace RDPMS.Core.Persistence.Model;
 
-public class Project(string name) : IUniqueEntity, IUniqueEntityWithSlug
+public class Project(string name) : IUniqueEntityWithSlugAndParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
+    /// <summary>
+    /// At least one project is a root project and has no parent, thus nullable
+    /// </summary>
+    public Guid? ParentProjectId { get; set; }
+    public Project? ParentProject { get; set; }
+    [NotMapped]
+    public Guid? ParentId => ParentProjectId;
     
     public string Name { get; set; } = name;
 

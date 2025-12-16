@@ -9,7 +9,10 @@ namespace RDPMS.Core.Persistence.Model;
 public class DataFile(string name) : IUniqueEntity, IUniqueEntityWithParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
-    public Guid? ParentId { get; set; }
+    public Guid? ParentDataSetId { get; set; }
+    public DataSet? ParentDataSet { get; set; }
+    [NotMapped]
+    public Guid? ParentId => ParentDataSetId;
 
     public string Name { get; set; } = name;
     public required ContentType FileType { get; set; }
@@ -60,7 +63,7 @@ public class DataFile(string name) : IUniqueEntity, IUniqueEntityWithParent
     /// <summary>
     /// References to the storage location(s) of this file.
     /// </summary>
-    public List<FileStorageReference> Locations { get; set; } = [];
+    public List<FileStorageReference> References { get; set; } = [];
 
     /// <summary>
     /// Metadata fields associated with this data file, including their file-specific key.

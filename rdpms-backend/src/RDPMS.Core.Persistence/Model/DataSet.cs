@@ -1,4 +1,6 @@
-﻿namespace RDPMS.Core.Persistence.Model;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace RDPMS.Core.Persistence.Model;
 
 /// <summary>
 /// A dataset is a collection of data files. The workflow is: a worker creates a dataset, then uploads the associated
@@ -8,6 +10,17 @@
 public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid ParentCollectionId { get; set; }
+    public DataCollectionEntity? ParentCollection { get; set; }
+
+    /// <summary>
+    /// Id of the parent <see cref="DataCollectionEntity"/>. Nullability is a convenience feature, every dataset should
+    /// have a parent collection.
+    /// </summary>
+    [NotMapped]
+    public Guid? ParentId => ParentCollectionId;
+
+
     public string? Slug { get; set; }
 
     /// <summary>
@@ -21,13 +34,7 @@ public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParen
     /// Non-unique name of a dataset
     /// </summary>
     public string Name { get; set; } = name;
-
-    /// <summary>
-    /// Id of the parent <see cref="DataCollectionEntity"/>. Nullability is a convenience feature, every dataset should
-    /// have a parent collection.
-    /// </summary>
-    public Guid? ParentId { get; set; }
-
+    
     public List<DataFile> Files { get; set; } = [];
     public List<Tag> AssignedTags { get; set; } = [];
     public List<Label> AssignedLabels { get; set; } = [];

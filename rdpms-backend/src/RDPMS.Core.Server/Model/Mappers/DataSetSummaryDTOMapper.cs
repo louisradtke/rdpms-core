@@ -43,14 +43,14 @@ public class DataSetSummaryDTOMapper
 
         var tags = new List<Tag>();
         
-        var dataSet = new DataSet(foreign.Name ?? throw new IllegalStateException("Name is required."))
+        var dataSet = new DataSet(foreign.Name ?? throw new ArgumentException("Name is required."))
         {
             Id = Guid.NewGuid(),
             Slug = foreign.Slug,
-            ParentId = foreign.CollectionId,
+            ParentCollectionId = foreign.CollectionId ?? throw new ArgumentException("CollectionId is required."),
             AncestorDatasetIds = new List<Guid>(), // Initializing empty, as no information given
             AssignedTags = tags,
-            CreatedStamp = foreign.CreatedStampUTC ?? throw new IllegalStateException("CreatedStampUTC is required."),
+            CreatedStamp = foreign.CreatedStampUTC ?? throw new ArgumentException("CreatedStampUTC is required."),
             DeletedStamp = foreign.DeletedStampUTC,
             LifecycleState = DataSetState.Uninitialized, // server determines state, no one else can
             DeletionState = DeletionState.Active,

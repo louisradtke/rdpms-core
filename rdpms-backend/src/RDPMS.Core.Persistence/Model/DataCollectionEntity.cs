@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace RDPMS.Core.Persistence.Model;
 
 /// <summary>
@@ -6,18 +8,21 @@ namespace RDPMS.Core.Persistence.Model;
 public class DataCollectionEntity(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
-    
+    public Guid ParentProjectId { get; set; }
+    public Project? ParentProject { get; set; }
+
+    /// <summary>
+    /// Id of the parent <see cref="Project"/>. Nullability is a convenience feature, every collection should have a
+    /// parent project.
+    /// </summary>
+    [NotMapped]
+    public Guid? ParentId => ParentProjectId;
+
     public string? Slug { get; set; }
 
     public string Name { get; set; } = name;
 
     public string? Description { get; set; }
-    
-    /// <summary>
-    /// Id of the parent <see cref="Project"/>. Nullability is a convenience feature, every collection should have a
-    /// parent project.
-    /// </summary>
-    public Guid? ParentId { get; set; }
 
     /// <summary>
     /// List of all data sets this collection holds

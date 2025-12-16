@@ -8,11 +8,14 @@ namespace RDPMS.Core.Server.Services;
 
 public class DataSetService(DbContext context, IS3Service s3Service)
     : GenericCollectionService<DataSet>(context, files => files
-            .Include(ds => ds.Files)
-            .ThenInclude(f => f.FileType)
-            .Include(ds => ds.Files)
-            .ThenInclude(f => f.Locations)
-        ), IDataSetService
+        .Include(ds => ds.ParentCollection)
+        .Include(ds => ds.MetadataJsonFields)
+        .ThenInclude(f => f.MetadataJsonField)
+        .Include(ds => ds.Files)
+        .ThenInclude(f => f.FileType)
+        .Include(ds => ds.Files)
+        .ThenInclude(f => f.References)
+    ), IDataSetService
 {
     public async Task<IEnumerable<DataSet>> GetByCollectionAsync(Guid collectionId)
     {
@@ -34,7 +37,7 @@ public class DataSetService(DbContext context, IS3Service s3Service)
         if (ds == null) throw new InvalidOperationException("Dataset not found");
 
         var locations = ds.Files
-            .SelectMany(f => f.Locations.Where(l => l.StorageType == StorageType.S3))
+            .SelectMany(f => f.References.Where(l => l.StorageType == StorageType.S3))
             .ToList();
 
         var storeIds = locations

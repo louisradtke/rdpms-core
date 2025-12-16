@@ -10,7 +10,7 @@ public class DataSetRepository(DbContext ctx) : GenericRepository<DataSet>(ctx,
             .Include(ds => ds.Files)
             .ThenInclude(f => f.FileType)
             .Include(ds => ds.Files)
-            .ThenInclude(f => f.Locations)
+            .ThenInclude(f => f.References)
         ),
     IDataSetRepository
 {
@@ -23,7 +23,7 @@ public class DataSetRepository(DbContext ctx) : GenericRepository<DataSet>(ctx,
             .ThenInclude(f => f.FileType)
             .Include(c => c.ContainedDatasets)
             .ThenInclude(d => d.Files)
-            .ThenInclude(f => f.Locations)
+            .ThenInclude(f => f.References)
             .SingleAsync(e => e.Id == collectionId);
         return collection.ContainedDatasets;
     }

@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
 namespace RDPMS.Core.Persistence.Model;
@@ -10,6 +11,15 @@ namespace RDPMS.Core.Persistence.Model;
 public abstract class DataStore(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid ParentProjectId { get; set; }
+    public Project? ParentProject { get; set; }
+
+    /// <summary>
+    /// Id of the parent <see cref="Project"/>. Nullability is a convenience feature, every store should have a parent
+    /// project.
+    /// </summary>
+    [NotMapped]
+    public Guid? ParentId => ParentProjectId;
 
     public string? Slug { get; set; }
 
@@ -17,13 +27,6 @@ public abstract class DataStore(string name) : IUniqueEntity, IUniqueEntityWithS
     /// Name of the data store
     /// </summary>
     public string Name { get; set; } = name;
-
-    /// <summary>
-    /// Id of the parent <see cref="Project"/>. Nullability is a convenience feature, every store should have a parent
-    /// project.
-    /// </summary>
-    public Guid? ParentId { get; set; }
-    
 
     public string? Description { get; set; }
 

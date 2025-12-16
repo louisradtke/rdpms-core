@@ -16,7 +16,7 @@ public class DataFileService(
     LinkGenerator linkGenerator,
     IS3Service s3Service)
     : GenericCollectionService<DataFile>(dbContext, files => files
-        .Include(f => f.Locations)
+        .Include(f => f.References)
         .Include(f => f.FileType)
     ), IFileService
 {
@@ -24,9 +24,9 @@ public class DataFileService(
     public async Task<Uri> GetFileDownloadUriAsync(Guid id, HttpContext context)
     {
         var file = await GetByIdAsync(id);
-        var location = file.Locations
+        var location = file.References
             .FirstOrDefault(lRef => lRef.StorageType == StorageType.S3);
-        location ??= file.Locations.FirstOrDefault();
+        location ??= file.References.FirstOrDefault();
 
         switch (location)
         {
@@ -129,7 +129,7 @@ public class DataFileService(
             Attributes = referenceAttributes,
             Data = content
         };
-        file.Locations.Add(fileRef);
+        file.References.Add(storageRef);
 
         await Context.SaveChangesAsync();
     }

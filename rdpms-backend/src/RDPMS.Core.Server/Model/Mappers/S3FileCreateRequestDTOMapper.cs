@@ -48,7 +48,7 @@ public class S3FileCreateRequestDTOMapper : IImportMapper<DataFile, S3FileCreate
             CreatedStamp = foreign.CreatedStamp.Value,
             BeginStamp = foreign.BeginStamp,
             EndStamp = foreign.EndStamp,
-            Locations = [new S3FileStorageReference
+            References = [new S3FileStorageReference
             {
                 Algorithm = compression ?? CompressionAlgorithm.Plain,
                 SHA256Hash = foreign.CompressedSHA256Hash ?? foreign.PlainSHA256Hash,

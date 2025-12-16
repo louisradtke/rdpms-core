@@ -27,9 +27,11 @@ public class RDPMSPersistenceContext : DbContext
     public DbSet<Job> Jobs { get; private set; }
     public DbSet<PipelineInstance> PipelineInstances { get; private set; }
     public DbSet<Tag> Tags { get; private set; }
+    public DbSet<Label> Labels { get; private set; }
     public DbSet<Project> Projects { get; private set; }
     public DbSet<LabelSharingPolicy> LabelSharingPolicies { get; private set; }
     public DbSet<Slug> Slugs { get; private set; }
+    public DbSet<DataEntityMetadataJsonField> DataEntityMetadataJsonFields { get; private set; }
     public DbSet<MetadataJsonField> MetadataJsonFields { get; private set; }
     public DbSet<JsonSchemaEntity> JsonSchemas { get; private set; }
     // ReSharper restore UnusedMember.Global
@@ -110,7 +112,7 @@ public class RDPMSPersistenceContext : DbContext
 
         // set up data file
         model.Entity<DataFile>()
-            .HasMany<FileStorageReference>(e => e.Locations)
+            .HasMany<FileStorageReference>(e => e.References)
             .WithOne()
             .HasForeignKey(r => r.FileFid);
         model.Entity<DataFile>()
@@ -121,13 +123,15 @@ public class RDPMSPersistenceContext : DbContext
             .HasOne(e => e.CreateJob);
         model.Entity<DataSet>()
             .HasMany<DataFile>(ds => ds.Files)
-            .WithOne()
-            .HasForeignKey(f => f.ParentId);
+            .WithOne(f => f.ParentDataSet)
+            .HasForeignKey(f => f.ParentDataSetId)
+            .IsRequired(false); // datafile can also be stored by a meta date
 
         model.Entity<DataCollectionEntity>()
             .HasMany<DataSet>(c => c.ContainedDatasets)
-            .WithOne()
-            .HasForeignKey(ds => ds.ParentId);
+            .WithOne(c => c.ParentCollection)
+            .HasForeignKey(ds => ds.ParentCollectionId)
+            .IsRequired();
 
         // set up (dual) many-to-many mapping of PipelineInstance, because DataSet holds SourceForJobs and CreateJob
         model.Entity<Job>()
@@ -158,11 +162,36 @@ public class RDPMSPersistenceContext : DbContext
         // set up many-to-many mapping of Label and Project
         model.Entity<Project>()
             .HasMany<Label>(e => e.Labels)
-            .WithOne(e => e.ParentProject);
+            .WithOne(e => e.ParentProject)
+            .HasForeignKey(e => e.ParentProjectId)
+            .IsRequired();
         model.Entity<Project>()
             .HasMany<LabelSharingPolicy>(e => e.SharedLabels);
         model.Entity<Project>()
-            .HasMany<ContentType>(e => e.FileTypes);
+            .HasMany<ContentType>(e => e.FileTypes)
+            .WithOne(c => c.ParentProject)
+            .HasForeignKey(c => c.ParentProjectId)
+            .IsRequired();
+        model.Entity<Project>()
+            .HasMany<DataCollectionEntity>(p => p.DataCollections)
+            .WithOne(c => c.ParentProject)
+            .HasForeignKey(c => c.ParentProjectId)
+            .IsRequired();
+        model.Entity<Project>()
+            .HasMany<DataStore>(p => p.DataStores)
+            .WithOne(s => s.ParentProject)
+            .HasForeignKey(s => s.ParentProjectId)
+            .IsRequired();
+        model.Entity<Project>()
+            .HasMany<Tag>(p => p.Tags)
+            .WithOne(t => t.ParentProject)
+            .HasForeignKey(t => t.ParentProjectId)
+            .IsRequired();
+        model.Entity<Project>()
+            .HasMany<Project>()
+            .WithOne(p => p.ParentProject)
+            .HasForeignKey(p => p.ParentProjectId)
+            .IsRequired(false);
         model.Entity<Project>()
             .HasData(new Project("_global")
             {
@@ -170,17 +199,6 @@ public class RDPMSPersistenceContext : DbContext
                 Slug = "_global",
                 Description = "The instances global mockup project."
             });
-        model.Entity<Project>()
-            .HasMany<DataCollectionEntity>(p => p.DataCollections)
-            .WithOne()
-            .HasForeignKey(c => c.ParentId);
-        model.Entity<Project>()
-            .HasMany<DataStore>(p => p.DataStores)
-            .WithOne()
-            .HasForeignKey(s => s.ParentId);
-        model.Entity<Project>()
-            .HasMany<Tag>(p => p.Tags)
-            .WithOne(t => t.ParentProject);
 
         model.Entity<DataSet>()
             .HasMany(ds => ds.AssignedTags)
@@ -199,6 +217,7 @@ public class RDPMSPersistenceContext : DbContext
         model.Entity<MetadataJsonField>()
             .HasOne(f => f.Value)
             .WithMany()
+            .HasForeignKey(f => f.ValueId)
             .IsRequired();
 
         // many-to-many of MetadataJsonField to JsonSchemaEntity
@@ -219,14 +238,16 @@ public class RDPMSPersistenceContext : DbContext
             .HasOne(link => link.MetadataJsonField)
             .WithMany()
             .HasForeignKey(link => link.MetadataJsonFieldId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired(false);
 
         // metadata fields assigned to data sets
         model.Entity<DataEntityMetadataJsonField>()
             .HasOne(link => link.DataSet)
             .WithMany(ds => ds.MetadataJsonFields)
             .HasForeignKey(link => link.DataSetId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired(false);
         model.Entity<DataEntityMetadataJsonField>()
             .HasIndex(link => new { link.DataSetId, link.MetadataKey });
 

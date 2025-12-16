@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace RDPMS.Core.Persistence.Model;
 
 /// <summary>
@@ -6,11 +8,17 @@ namespace RDPMS.Core.Persistence.Model;
 /// MIME docs
 /// </see>
 /// </summary>
-public class ContentType : IUniqueEntity
+public class ContentType : IUniqueEntityWithParent
 {
     private string _abbreviation = string.Empty;
 
     public Guid Id { get; init; } = Guid.NewGuid();
+
+    public Guid ParentProjectId { get; set; }
+    public Project? ParentProject { get; set; }
+
+    [NotMapped]
+    public Guid? ParentId => ParentProjectId;
 
     /// <summary>
     /// the common file ending this file would have, lowercase, without leading dot (e.g. bag, png, json, ...)

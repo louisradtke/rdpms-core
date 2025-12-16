@@ -36,11 +36,20 @@ public abstract class FileStorageReference : IUniqueEntity
     public Guid? StoreFid { get; set; }
     public Guid? FileFid { get; set; }
 
+    /// <summary>
+    /// Wrapper for the fields <see cref="Algorithm"/>, <see cref="SizeBytes"/> and <see cref="SHA256Hash"/>.
+    /// When setting them, no property of the <see cref="StorageAttributes"/> instance may be null.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">If a property of </exception>
     [NotMapped]
     public StorageAttributes Attributes
     {
         get => new() {Algorithm = Algorithm, SizeBytes = SizeBytes, SHA256Hash = SHA256Hash};
-        set => (Algorithm, SizeBytes, SHA256Hash) = (value.Algorithm, value.SizeBytes, value.SHA256Hash);
+        set {
+            Algorithm = value.Algorithm ?? throw new ArgumentNullException(nameof(value.Algorithm));
+            SizeBytes = value.SizeBytes ?? throw new ArgumentNullException(nameof(value.SizeBytes));
+            SHA256Hash = value.SHA256Hash ?? throw new ArgumentNullException(nameof(value.SHA256Hash));
+        }
     }
 }
 
@@ -85,7 +94,7 @@ public class DbFileStorageReference : FileStorageReference
 
 public class StorageAttributes
 {
-    public CompressionAlgorithm Algorithm { get; set; }
-    public long SizeBytes { get; set; }
-    public string SHA256Hash { get; set; } = string.Empty;
+    public CompressionAlgorithm? Algorithm { get; set; }
+    public long? SizeBytes { get; set; }
+    public string? SHA256Hash { get; set; }
 }
