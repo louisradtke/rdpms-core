@@ -35,9 +35,10 @@ public class MetadataService(DbContext context, IFileService fileService) : IMet
 
         var field = new MetadataJsonField()
         {
-            Value = file
+            Value = file,
         };
 
+        context.Add(file);
         context.Add(field);
         await context.SaveChangesAsync();
         
@@ -59,9 +60,11 @@ public class MetadataService(DbContext context, IFileService fileService) : IMet
         {
             case DataSet dataSet:
                 existingRefs = existingRefs.Where(l => l.DataSetId == dataSet.Id);
+                link.DataSetId = dataSet.Id;
                 break;
-            case DataFile file:
-                existingRefs = existingRefs.Where(l => l.DataFileId == file.Id);
+            case DataFile dataFile:
+                existingRefs = existingRefs.Where(l => l.DataFileId == dataFile.Id);
+                link.DataFileId = dataFile.Id;
                 break;
             default:
                 throw new ArgumentException("Unknown entity type");

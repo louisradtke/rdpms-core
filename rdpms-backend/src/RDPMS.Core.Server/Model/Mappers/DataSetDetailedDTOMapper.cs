@@ -7,7 +7,8 @@ using RDPMS.Core.Server.Util;
 namespace RDPMS.Core.Server.Model.Mappers;
 
 [AutoRegister(registerFlags: RegisterFlags.ShallowInterfaces | RegisterFlags.Self)]
-public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper)
+public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper,
+    IExportMapper<MetadataJsonField, MetaDateDTO> metaDateMapper)
     : IExportMapper<DataSet, DataSetDetailedDTO>
 {
     public DataSetDetailedDTO Export(DataSet domain)
@@ -32,7 +33,11 @@ public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper)
             IsTimeSeries = domain.Files.Any(file => file.BeginStamp.HasValue),
             MetadataFields = domain.MetadataJsonFields.Select(f => f.MetadataKey).ToList(),
             Files = domain.Files.Select(fileMapper.Export).ToList(),
-            CollectionId = domain.ParentId
+            CollectionId = domain.ParentId,
+            MetaDates = domain.MetadataJsonFields
+                .Select(f => f.MetadataJsonField)
+                .Select(metaDateMapper.Export)
+                .ToList()
         };
     }
 }

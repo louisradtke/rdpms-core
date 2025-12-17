@@ -10,7 +10,6 @@ using RDPMS.Core.Server.Services;
 namespace RDPMS.Core.Server.Controllers.V1;
 
 [ApiController]
-[Produces("application/json")]
 [Consumes("application/json")]
 [Route("api/v{version:apiVersion}/data")]
 [ApiVersion("1.0")]
@@ -29,6 +28,7 @@ public class FilesController(
     /// <returns></returns>
     [HttpGet("files")]
     [ProducesResponseType<IEnumerable<FileSummaryDTO>>(StatusCodes.Status200OK)]
+    [Produces("application/json")]
     public async Task<ActionResult<IEnumerable<FileSummaryDTO>>> Get()
     {
         var list = (await fileService.GetAllAsync()).Select(fileMapper.Export).ToList();
@@ -85,6 +85,7 @@ public class FilesController(
     [HttpGet("files/{id:guid}")]
     [ProducesResponseType<FileSummaryDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Produces("application/json")]
     public async Task<ActionResult<FileSummaryDTO>> Get(Guid id)
     {
         try
@@ -109,6 +110,7 @@ public class FilesController(
     [ProducesResponseType(StatusCodes.Status302Found)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
     [EnableCors("ExternalCorsPolicy")] // needed for redirect
+    [Produces("application/json")]
     public async Task<ActionResult> GetContent(Guid id)
     {
         try
@@ -139,14 +141,28 @@ public class FilesController(
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status501NotImplemented)]
-    public Task<ActionResult> GetBlob(Guid id)
+    [Produces("application/octet-stream", "application/json", Type = typeof(FileContentResult))]
+    public async Task<ActionResult> GetBlob(Guid id)
     {
-        return Task.FromResult<ActionResult>(StatusCode(501, "Not Implemented"));
+        var file = await fileService.GetByIdAsync(id);
+        var reference = file.References.FirstOrDefault(r => r.StorageType == StorageType.Db);
+        if (reference == null) return BadRequest(
+            new ErrorMessageDTO { Message = $"File {id} cannot be retrieved as blob from server."});
+        if (!(reference is DbFileStorageReference dbRef)) return StatusCode(StatusCodes.Status500InternalServerError);
+
+        if (reference.Algorithm == CompressionAlgorithm.Plain)
+        {
+            return File(dbRef.Data, file.FileType.MimeType ?? "application/octet-stream", 
+                $"{file.Name}.{file.FileType.Abbreviation}");
+        }
+
+        return File(dbRef.Data, "application/octet-stream", $"{file.Name}.dat");
     }
 
     
     [HttpGet("file-refs")]
     [ProducesResponseType<FileSummaryDTO>(StatusCodes.Status200OK)]
+    [Produces("application/json")]
     public async Task<ActionResult> GetReferences([FromQuery] Guid? storeGuid, [FromQuery] string? type)
     {
         StorageType? storageType = null;
