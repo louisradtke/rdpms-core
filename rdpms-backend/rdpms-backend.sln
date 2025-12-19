@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RDPMS.Core.Tests.Data", "te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RDPMS.Core.Infra", "src\RDPMS.Core.Infra\RDPMS.Core.Infra.csproj", "{12C82B75-61A4-4F06-8273-0F58A4A654DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RDPMS.TestS3", "src\RDPMS.TestS3\RDPMS.TestS3.csproj", "{427E282F-A4CF-4385-B090-39518A97A626}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RDPMS.MockS3Interaction", "src\RDPMS.MockS3Interaction\RDPMS.MockS3Interaction.csproj", "{427E282F-A4CF-4385-B090-39518A97A626}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
