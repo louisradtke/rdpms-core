@@ -1,11 +1,10 @@
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
+using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
-public interface IMetadataService
+public interface IMetadataService : IGenericCollectionService<MetadataJsonField>
 {
     public Task<MetadataJsonField> MakeFieldFromValue(string value, ContentType contentType);
     
@@ -17,62 +16,4 @@ public interface IMetadataService
     /// <param name="key">Case-insensitive key of meta date</param>
     /// <param name="value">value of meta date</param>
     public Task AssignMetadate(IUniqueEntity entity, string key, MetadataJsonField value);
-}
-
-public class MetadataService(DbContext context, IFileService fileService) : IMetadataService
-{
-    public async Task<MetadataJsonField> MakeFieldFromValue(string value, ContentType contentType)
-    {
-        var id = Guid.NewGuid();
-        var file = new DataFile(id.ToString())
-        {
-            Id = id,
-            FileType = contentType,
-        };
-
-        var content = Encoding.UTF8.GetBytes(value);
-        await fileService.StoreInDb(file, content, null);
-
-        var field = new MetadataJsonField()
-        {
-            Value = file,
-        };
-
-        context.Add(file);
-        context.Add(field);
-        await context.SaveChangesAsync();
-        
-        return field;
-    }
-
-    public async Task AssignMetadate(IUniqueEntity entity, string key, MetadataJsonField value)
-    {
-        var link = new DataEntityMetadataJsonField()
-        {
-            MetadataKey = key,
-            MetadataJsonField = value,
-        };
-
-        var existingRefs = context.Set<DataEntityMetadataJsonField>()
-            .Where(l => l.MetadataKey == key)
-            .AsQueryable();
-        switch (entity)
-        {
-            case DataSet dataSet:
-                existingRefs = existingRefs.Where(l => l.DataSetId == dataSet.Id);
-                link.DataSetId = dataSet.Id;
-                break;
-            case DataFile dataFile:
-                existingRefs = existingRefs.Where(l => l.DataFileId == dataFile.Id);
-                link.DataFileId = dataFile.Id;
-                break;
-            default:
-                throw new ArgumentException("Unknown entity type");
-        }
-        
-        context.RemoveRange(existingRefs.Cast<object>().AsEnumerable());
-
-        context.Add(link);
-        await context.SaveChangesAsync();
-    }
 }

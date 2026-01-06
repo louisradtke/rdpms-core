@@ -46,6 +46,12 @@ public abstract class ReadonlyGenericCollectionService<T> : IReadonlyGenericColl
         return query;
     }
 
+    /// <summary>
+    /// Returns the entity with the given Id.
+    /// </summary>
+    /// <param name="id">Id of the entity.</param>
+    /// <throws cref="InvalidOperationException">If no entity with the given Id exists.</throws>
+    /// <returns>Instance matching the ID.</returns>
     public async Task<T> GetByIdAsync(Guid id)
     {
         var query = Context.Set<T>()

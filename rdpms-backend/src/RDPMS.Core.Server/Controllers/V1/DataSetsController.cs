@@ -302,7 +302,8 @@ public class DataSetsController(
         
         await metadataService.AssignMetadate(dataSet, key, field);
         
-        if (!modified) return CreatedAtAction(nameof(AssignMetadate), new { id, key }, field.Id);
+        if (!modified) return CreatedAtAction(nameof(MetaDataController.GetMetadate), "MetaData",
+            new { field.Id }, field.Id);
         return Ok(field.Id);
     }
 
