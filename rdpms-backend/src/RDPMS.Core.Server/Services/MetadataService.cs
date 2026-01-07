@@ -1,4 +1,6 @@
 using System.Text;
+using System.Text.Json;
+using Json.Schema;
 using Microsoft.EntityFrameworkCore;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
@@ -6,10 +8,16 @@ using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
-public class MetadataService(DbContext context, IFileService fileService)
+public class MetadataService(
+    DbContext context,
+    IFileService fileService,
+    ISchemaService schemaService)
     : GenericCollectionService<MetadataJsonField>(context, q => q
         .Include(f => f.Value)
         .ThenInclude(f => f!.FileType)
+        .Include(f => f.Value)
+        .ThenInclude(f => f!.References)
+        .Include(f => f.ValidatedSchemas)
     ), IMetadataService
 {
     public async Task<MetadataJsonField> MakeFieldFromValue(string value, ContentType contentType)
@@ -65,5 +73,50 @@ public class MetadataService(DbContext context, IFileService fileService)
 
         Context.Add(link);
         await Context.SaveChangesAsync();
+    }
+
+    public async Task<bool> VerifySchema(Guid metadateId, Guid schemaId)
+    {
+        var metadate = await GetByIdAsync(metadateId);
+        DbFileStorageReference? metadateRef;
+        try
+        {
+            metadateRef = metadate
+                    .Value?
+                    .References
+                    .Single(r => r.StorageType == StorageType.Db)
+                as DbFileStorageReference;
+        }
+        catch (InvalidOperationException e)
+        {
+            throw new InvalidOperationException("Single() LINQ query failed for metadateId", e);
+        }
+        if (metadateRef is null) throw new InvalidOperationException("Metadate reference is null");
+        
+        if (metadate.ValidatedSchemas.Any(s => s.Id == schemaId)) return true;
+
+        JsonSchemaEntity schemaEntity = null!;
+        try
+        {
+            schemaEntity = await schemaService.Query()
+                .SingleAsync(s => s.Id == schemaId);
+        }
+        catch (InvalidOperationException e)
+        {
+            throw new InvalidOperationException("Single() LINQ query failed for schemaId", e);
+        }
+        
+        var metadateString = Encoding.UTF8.GetString(metadateRef.Data);
+        var metadateJson = JsonDocument.Parse(metadateString).RootElement;
+        var schemaJson = JsonDocument.Parse(schemaEntity.SchemaString).RootElement;
+        var schema = JsonSchema.Build(schemaJson); // optionally include build options
+        var evaluationResults = schema.Evaluate(metadateJson);
+
+        if (!evaluationResults.IsValid) return false;
+        metadate.ValidatedSchemas.Add(schemaEntity);
+        Context.Update(metadate);
+        await Context.SaveChangesAsync();
+
+        return true;
     }
 }

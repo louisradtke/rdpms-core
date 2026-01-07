@@ -111,7 +111,7 @@ public class FilesController(
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
     [EnableCors("ExternalCorsPolicy")] // needed for redirect
     [Produces("application/json")]
-    public async Task<ActionResult> GetContent(Guid id)
+    public async Task<ActionResult> GetContent([FromRoute] Guid id)
     {
         try
         {

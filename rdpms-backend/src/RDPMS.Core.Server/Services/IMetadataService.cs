@@ -6,7 +6,7 @@ namespace RDPMS.Core.Server.Services;
 
 public interface IMetadataService : IGenericCollectionService<MetadataJsonField>
 {
-    public Task<MetadataJsonField> MakeFieldFromValue(string value, ContentType contentType);
+    Task<MetadataJsonField> MakeFieldFromValue(string value, ContentType contentType);
     
     /// <summary>
     /// Assigns a metadata field to an entity.
@@ -15,5 +15,15 @@ public interface IMetadataService : IGenericCollectionService<MetadataJsonField>
     /// <param name="entity">Instance of the entity</param>
     /// <param name="key">Case-insensitive key of meta date</param>
     /// <param name="value">value of meta date</param>
-    public Task AssignMetadate(IUniqueEntity entity, string key, MetadataJsonField value);
+    Task AssignMetadate(IUniqueEntity entity, string key, MetadataJsonField value);
+
+    /// <summary>
+    /// Checks, whether the given schemaId is valid for the given metadataId and updates the meta dates validated
+    /// schemas accordingly. If schema was already valid, returns true.
+    /// </summary>
+    /// <throws cref="InvalidOperationException">If ids fail to resolve</throws>
+    /// <param name="metadateId">Id of the meta date</param>
+    /// <param name="schemaId">Id of the schema</param>
+    /// <returns>true, if schema is valid or was valid before, false otherwise</returns>
+    Task<bool> VerifySchema(Guid metadateId, Guid schemaId);
 }
