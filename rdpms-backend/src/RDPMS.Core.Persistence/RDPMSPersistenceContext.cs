@@ -132,6 +132,21 @@ public class RDPMSPersistenceContext : DbContext
             .WithOne(c => c.ParentCollection)
             .HasForeignKey(ds => ds.ParentCollectionId)
             .IsRequired();
+        model.Entity<DataCollectionEntity>()
+            .HasOne(c => c.DefaultDataStore)
+            .WithMany()
+            .HasForeignKey(c => c.DefaultDataStoreId)
+            .IsRequired(false);
+        model.Entity<DataCollectionEntity>()
+            .HasMany(c => c.MetaDataColumns)
+            .WithOne(col => col.ParentCollection)
+            .HasForeignKey(col => col.ParentCollectionId)
+            .IsRequired();
+        // model.Entity<DataCollectionEntity>()
+        //     .HasOne(c => c.DefaultLabel)
+        //     .WithMany()
+        //     .HasForeignKey(c => c.DefaultLabelId)
+        //     .IsRequired(false);
 
         // set up (dual) many-to-many mapping of PipelineInstance, because DataSet holds SourceForJobs and CreateJob
         model.Entity<Job>()
@@ -229,15 +244,15 @@ public class RDPMSPersistenceContext : DbContext
         model.Entity<DataEntityMetadataJsonField>()
             .HasKey(link => link.Id);
         model.Entity<DataEntityMetadataJsonField>()
-            .HasIndex(link => link.MetadataJsonFieldId);
+            .HasIndex(link => link.FieldId);
         model.Entity<DataEntityMetadataJsonField>()
             .HasIndex(link => link.DataFileId);
         model.Entity<DataEntityMetadataJsonField>()
             .HasIndex(link => link.DataSetId);
         model.Entity<DataEntityMetadataJsonField>()
-            .HasOne(link => link.MetadataJsonField)
+            .HasOne(link => link.Field)
             .WithMany()
-            .HasForeignKey(link => link.MetadataJsonFieldId)
+            .HasForeignKey(link => link.FieldId)
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired(false);
 

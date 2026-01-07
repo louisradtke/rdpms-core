@@ -35,7 +35,7 @@ public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper,
             Files = domain.Files.Select(fileMapper.Export).ToList(),
             CollectionId = domain.ParentId,
             MetaDates = domain.MetadataJsonFields
-                .Select(f => f.MetadataJsonField)
+                .Select(f => f.Field)
                 .Select(metaDateMapper.Export)
                 .ToList()
         };

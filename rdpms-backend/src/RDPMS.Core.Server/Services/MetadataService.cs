@@ -49,7 +49,7 @@ public class MetadataService(
         var link = new DataEntityMetadataJsonField()
         {
             MetadataKey = key,
-            MetadataJsonField = value,
+            Field = value,
         };
 
         var existingRefs = Context.Set<DataEntityMetadataJsonField>()

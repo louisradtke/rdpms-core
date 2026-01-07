@@ -78,7 +78,7 @@ public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParen
             var dict = new Dictionary<string, MetadataJsonField>();
             foreach (var field in MetadataJsonFields)
             {
-                dict[field.MetadataKey] = field.MetadataJsonField;
+                dict[field.MetadataKey] = field.Field;
             }
 
             return dict.AsReadOnly();

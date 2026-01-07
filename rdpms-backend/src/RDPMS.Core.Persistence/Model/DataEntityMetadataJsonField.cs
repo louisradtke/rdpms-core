@@ -22,8 +22,8 @@ public class DataEntityMetadataJsonField
         set => _metadataKey = value.ToLower();
     }
 
-    public Guid MetadataJsonFieldId { get; set; }
-    public required MetadataJsonField MetadataJsonField { get; set; }
+    public Guid FieldId { get; set; }
+    public required MetadataJsonField Field { get; set; }
 
     [NotMapped]
     public IUniqueEntity? DataEntity

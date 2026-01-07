@@ -12,8 +12,5 @@ public class Label : IUniqueEntity, IUniqueEntityWithParent
 
     public string Name { get; init; } = string.Empty;
 
-    /// <summary>
-    /// List of all DataSets that are assigned this label
-    /// </summary>
-    public List<DataSet> AssignedToDataSets { get; set; } = [];
+    // public List<MetaDataCollectionColumn> MetaDataColumns { get; set; } = [];
 }
