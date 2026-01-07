@@ -18,6 +18,7 @@ public class MetaDataController(
     IMetadataService metadataService,
     ISchemaService schemaService,
     IExportMapper<MetadataJsonField, MetaDateDTO> metadataMapper,
+    IExportMapper<JsonSchemaEntity, SchemaDTO> schemaMapper,
     LinkGenerator linkGenerator,
     ILogger<DataSetsController> logger)
     : ControllerBase
@@ -79,13 +80,12 @@ public class MetaDataController(
     /// </summary>
     /// <returns>List of all schemas.</returns>
     [HttpGet("schemas")]
-    [ProducesResponseType<IDictionary<Guid, string>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<IEnumerable<SchemaDTO>>(StatusCodes.Status200OK)]
     public async Task<ActionResult> GetSchemas()
     {
-        return Ok(
-            (await schemaService.GetAllAsync())
-            .ToDictionary(s => s.Id, s => s.SchemaId)
-        );
+        var schemas = await schemaService.GetAllAsync();
+        var dtos = schemas.Select(schemaMapper.Export).AsEnumerable();
+        return Ok(dtos);
     }
 
     /// <summary>

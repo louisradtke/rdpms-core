@@ -9,6 +9,10 @@ public class DataCollectionEntityService(DbContext dbContext)
     : GenericCollectionService<DataCollectionEntity>(dbContext, q => q
         .Include(c => c.ContainedDatasets)
         .Include(c => c.DefaultDataStore)
+        .Include(c => c.MetaDataColumns)
+        .ThenInclude(c => c.DefaultField)
+        .Include(c => c.MetaDataColumns)
+        .ThenInclude(c => c.Schema)
     ), IDataCollectionEntityService
 {
     public Task<Dictionary<Guid, int>> GetDatasetCounts(IEnumerable<Guid> collectionIds)

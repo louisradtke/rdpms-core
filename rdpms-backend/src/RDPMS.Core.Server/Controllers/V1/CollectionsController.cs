@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Services;
@@ -16,6 +17,7 @@ public class CollectionsController(
     IStoreService storeService,
     IProjectService projectService,
     DataCollectionSummaryDTOMapper cMapper,
+    IExportMapper<DataCollectionEntity, CollectionSummaryDTO> cDetailedMapper,
     ILogger<CollectionsController> logger) : ControllerBase
 {
     /// <summary>
@@ -57,14 +59,14 @@ public class CollectionsController(
     /// Get a single collection by id.
     /// </summary>
     [HttpGet("{id:guid}")]
-    [ProducesResponseType<CollectionSummaryDTO>(StatusCodes.Status200OK)]
+    [ProducesResponseType<CollectionDetailedDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<CollectionSummaryDTO>> GetById([FromRoute] Guid id)
+    public async Task<ActionResult<CollectionDetailedDTO>> GetById([FromRoute] Guid id)
     {
         try
         {
             var item = await dataCollectionEntityService.GetByIdAsync(id);
-            return Ok(cMapper.Export(item));
+            return Ok(cDetailedMapper.Export(item));
         }
         catch (InvalidOperationException e)
         {
@@ -100,5 +102,44 @@ public class CollectionsController(
         var project = await projectService.GetGlobalProjectAsync();
         await dataCollectionEntityService.AddAsync(cMapper.Import(dto, store, project));
         return Ok();
+    }
+
+    
+    [HttpPut("{id:guid}/metadata/{key}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> AddMetaDataColumn([FromRoute] Guid id, [FromRoute] string key,
+        [FromBody] Guid schemaId, [FromQuery] Guid? defaultMetadataId = null)
+    {
+        DataCollectionEntity collection;
+        try
+        {
+            collection = await dataCollectionEntityService.GetByIdAsync(id);
+        }
+        catch (InvalidOperationException)
+        {
+            return NotFound();
+        }
+        var existingColumn = collection.MetaDataColumns
+            .SingleOrDefault(c => c.MetadataKey == key);
+        if (existingColumn != null)
+        {
+            existingColumn.SchemaId = schemaId;
+            existingColumn.DefaultFieldId = defaultMetadataId;
+            await dataCollectionEntityService.UpdateAsync(collection);
+            return Ok();
+        }
+
+        var column = new MetaDataCollectionColumn
+        {
+            MetadataKey = key,
+            ParentCollectionId = id,
+            SchemaId = schemaId,
+            DefaultFieldId = defaultMetadataId
+        };
+        collection.MetaDataColumns.Add(column);
+        await dataCollectionEntityService.UpdateAsync(collection); // todo: this crashes
+        return CreatedAtAction(nameof(GetById), new { id }, id);
     }
 }
