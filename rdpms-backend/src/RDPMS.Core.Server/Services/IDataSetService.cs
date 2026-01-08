@@ -21,4 +21,12 @@ public interface IDataSetService : IGenericCollectionService<DataSet>
     /// <param name="slug">slug to check</param>
     /// <returns>true if valid, false otherwise</returns>
     Task<bool> ValidateSlug(string slug);
+
+    /// <summary>
+    /// Get a list of keys, where metadata matches the schemas declared for the collection.
+    /// </summary>
+    /// <param name="datasetIds">The ids of the datasets to check</param>
+    /// <returns>A dictionary mapping the dataset id to the list of keys, of which the values were validated.</returns>
+    /// <exception cref="InvalidOperationException">Thrown, if datasets don't share same parent collection.</exception>
+    Task<IDictionary<Guid, List<string>>> GetValidatedMetadates(List<Guid> datasetIds);
 }

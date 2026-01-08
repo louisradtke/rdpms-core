@@ -15,6 +15,9 @@ public class DataSetService(DbContext context, IS3Service s3Service)
         .ThenInclude(f => f!.FileType)
         .Include(ds => ds.MetadataJsonFields)
         .ThenInclude(f => f.Field)
+        .ThenInclude(f => f.ValidatedSchemas)
+        .Include(ds => ds.MetadataJsonFields)
+        .ThenInclude(f => f.Field)
         .ThenInclude(f => f.Value)
         .ThenInclude(f => f!.References)
         .Include(ds => ds.Files)
@@ -93,5 +96,33 @@ public class DataSetService(DbContext context, IS3Service s3Service)
         }
         
         return SlugUtil.IsValidSlug(slug);
+    }
+
+    public async Task<IDictionary<Guid, List<string>>> GetValidatedMetadates(List<Guid> datasetIds)
+    {
+        var result = Context.Set<DataSet>()
+            .Where(ds => datasetIds.Contains(ds.Id))
+            .Join(Context.Set<DataCollectionEntity>(),
+                ds => ds.ParentCollectionId, collection => collection.Id,
+                (ds, collection) => new { ds, collectionId = collection.Id })
+            .Join(Context.Set<MetaDataCollectionColumn>(),
+                tup => tup.collectionId, col => col.ParentCollectionId,
+                (tup, col) => new { collectionId = tup.collectionId, tup.ds, col })
+            .Join(Context.Set<DataEntityMetadataJsonField>(),
+                tup => tup.ds.Id, f => f.DataSetId,
+                (tup, fRef)
+                    => new { tup.collectionId, tup.ds, tup.col, fRef })
+            .Join(Context.Set<MetadataJsonFieldValidatedSchema>(),
+                tup => tup.fRef.FieldId, rel => rel.MetadataJsonFieldId,
+                (tup, rel)
+                    => new { tup.collectionId, tup.ds, tup.col, tup.fRef, schemaId = rel.JsonSchemaEntityId })
+            .Where(tup => tup.col.MetadataKey == tup.fRef.MetadataKey)
+            .Where(tup => tup.col.SchemaId == tup.schemaId)
+            .GroupBy(tup => tup.ds.Id)
+            .ToDictionary(gr => gr.Key, gr => gr
+                .Select(tup => tup.col.MetadataKey)
+                .ToList());
+
+        return result;
     }
 }

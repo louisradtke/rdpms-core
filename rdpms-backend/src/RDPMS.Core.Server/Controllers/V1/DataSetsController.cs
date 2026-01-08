@@ -1,6 +1,7 @@
 using System.Text;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
@@ -39,25 +40,9 @@ public class DataSetsController(
         [FromQuery] string? deleted = null
     )
     {
-        IQueryable<DataSet> datasets;
-        try
-        {
-            if (collectionId != null)
-            {
-                datasets = (await dataSetService.GetByCollectionAsync(collectionId.Value))
-                    .AsQueryable();
-            }
-            else {
-                datasets = (await dataSetService.GetAllAsync())
-                    .AsQueryable();
-            }
-        }
-        catch (InvalidOperationException e)
-        {
-            logger.LogDebug("Failed to retrieve datasets for collection {CollectionId}, {EMessage}", collectionId, e);
-            return NotFound($"Collection {collectionId} was not found.");
-        }
-
+        var datasetsQuery = dataSetService.Query();
+        
+        // filter for deletion state
         try
         {
             var queriedDeletionStates = deleted?
@@ -68,9 +53,8 @@ public class DataSetsController(
                 .ToArray();
             if (queriedDeletionStates is not null && queriedDeletionStates.Length > 0)
             {
-                datasets = datasets
-                    .Where(ds => queriedDeletionStates.Contains(ds.DeletionState))
-                    .AsQueryable();
+                datasetsQuery = datasetsQuery
+                    .Where(ds => queriedDeletionStates.Contains(ds.DeletionState));
             }
         }
         catch (ArgumentException ae)
@@ -78,7 +62,24 @@ public class DataSetsController(
             return BadRequest(new ErrorMessageDTO() { Message = $"Invalid value for deleted: {ae.Message}" });
         }
 
-        var dtos = datasets.AsEnumerable().Select(dataSetSummaryMapper.Export);
+        var datasets = await datasetsQuery.ToListAsync();
+        var dtos = datasets
+            .Select(dataSetSummaryMapper.Export)
+            .ToList();
+
+        var validatedMetaDates = await dataSetService.GetValidatedMetadates(
+                datasets.Select(ds => ds.Id).ToList());
+
+        foreach (var (dto, domain) in dtos.Zip(datasets))
+        {
+            dto.MetaDates = domain.MetadataJsonFields.Select(f => new AssignedMetaDateDTO
+            {
+                MetadataKey = f.MetadataKey,
+                MetadataId = f.FieldId,
+                CollectionSchemaVerified = validatedMetaDates?[domain.Id].Contains(f.MetadataKey)
+            })
+            .ToList();
+        }
         return Ok(dtos);
     }
 
@@ -89,6 +90,9 @@ public class DataSetsController(
     {
         var domainItem = await dataSetService.GetByIdAsync(id);
         var dto = dataSetDetailedMapper.Export(domainItem);
+
+        if (dto.Files is null) return Ok(dto);
+
         foreach (var file in dto.Files)
         {
             file.DownloadURI = fileService.GetContentApiUri(file.Id!.Value, HttpContext);

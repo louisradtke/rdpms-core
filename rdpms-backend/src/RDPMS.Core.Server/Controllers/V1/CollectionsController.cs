@@ -17,7 +17,7 @@ public class CollectionsController(
     IStoreService storeService,
     IProjectService projectService,
     DataCollectionSummaryDTOMapper cMapper,
-    IExportMapper<DataCollectionEntity, CollectionSummaryDTO> cDetailedMapper,
+    IExportMapper<DataCollectionEntity, CollectionDetailedDTO> cDetailedMapper,
     ILogger<CollectionsController> logger) : ControllerBase
 {
     /// <summary>
@@ -112,34 +112,17 @@ public class CollectionsController(
     public async Task<ActionResult> AddMetaDataColumn([FromRoute] Guid id, [FromRoute] string key,
         [FromBody] Guid schemaId, [FromQuery] Guid? defaultMetadataId = null)
     {
-        DataCollectionEntity collection;
-        try
-        {
-            collection = await dataCollectionEntityService.GetByIdAsync(id);
-        }
-        catch (InvalidOperationException)
+        var collectionExists = await dataCollectionEntityService.CheckForIdAsync(id);
+        if (!collectionExists)
         {
             return NotFound();
         }
-        var existingColumn = collection.MetaDataColumns
-            .SingleOrDefault(c => c.MetadataKey == key);
-        if (existingColumn != null)
-        {
-            existingColumn.SchemaId = schemaId;
-            existingColumn.DefaultFieldId = defaultMetadataId;
-            await dataCollectionEntityService.UpdateAsync(collection);
-            return Ok();
-        }
 
-        var column = new MetaDataCollectionColumn
-        {
-            MetadataKey = key,
-            ParentCollectionId = id,
-            SchemaId = schemaId,
-            DefaultFieldId = defaultMetadataId
-        };
-        collection.MetaDataColumns.Add(column);
-        await dataCollectionEntityService.UpdateAsync(collection); // todo: this crashes
-        return CreatedAtAction(nameof(GetById), new { id }, id);
+        var created = await dataCollectionEntityService.UpsertMetaDataColumnAsync(
+            id, key, schemaId, defaultMetadataId);
+
+        return created
+            ? CreatedAtAction(nameof(GetById), new { id }, id)
+            : Ok();
     }
 }

@@ -9,4 +9,6 @@ public record CollectionSummaryDTO
     public int? DataSetCount { get; set; } = 0;
     public Guid? DefaultDataStoreId { get; set; }
     public Guid? ProjectId { get; set; }
+    
+    // public List<MetaDateCollectionColumnDTO> AssignedMetaDates 
 }

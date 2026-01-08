@@ -85,7 +85,6 @@ public class DataSetSummaryDTOMapper
             LifecycleState = domain.LifecycleState.ToString(),
             DeletionState = (DeletionStateDTO) (int) domain.DeletionState,
             IsTimeSeries = domain.Files.Any(file => file.BeginStamp.HasValue),
-            MetadataFields = domain.MetadataJsonFields.Select(f => f.MetadataKey).ToList(),
             FileCount = domain.Files.Count,
             CollectionId = domain.ParentId
         };

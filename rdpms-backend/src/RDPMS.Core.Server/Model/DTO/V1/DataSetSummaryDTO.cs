@@ -76,8 +76,8 @@ public record DataSetSummaryDTO
     /// Fields, for which metadata exists.
     /// Only to be set by server.
     /// </summary>
-    public List<string>? MetadataFields { get; set; }
-    
+    public List<AssignedMetaDateDTO>? MetaDates { get; set; }
+
     /// <summary>
     /// Amount of files in the dataset.
     /// </summary>

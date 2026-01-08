@@ -11,4 +11,10 @@ public interface IDataCollectionEntityService : IGenericCollectionService<DataCo
     /// <param name="collectionIds">Enumerable of ids</param>
     /// <returns>A dictionary mapping counts to Ids.</returns>
     Task<Dictionary<Guid, int>> GetDatasetCounts(IEnumerable<Guid> collectionIds);
+
+    /// <summary>
+    /// Add or update a metadata column for a collection.
+    /// </summary>
+    /// <returns>True when a new column was created, false when an existing column was updated.</returns>
+    Task<bool> UpsertMetaDataColumnAsync(Guid collectionId, string key, Guid schemaId, Guid? defaultMetadataId);
 }

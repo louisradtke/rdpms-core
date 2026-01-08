@@ -7,5 +7,4 @@ namespace RDPMS.Core.Server.Model.DTO.V1;
 public record DataSetDetailedDTO : DataSetSummaryDTO
 {
     public List<FileSummaryDTO>? Files { get; set; }
-    public List<MetaDateDTO>? MetaDates { get; set; }
 }

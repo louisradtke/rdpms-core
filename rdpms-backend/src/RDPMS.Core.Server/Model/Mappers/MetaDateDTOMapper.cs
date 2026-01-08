@@ -5,7 +5,8 @@ using RDPMS.Core.Server.Model.DTO.V1;
 namespace RDPMS.Core.Server.Model.Mappers;
 
 [AutoRegister(registerFlags: RegisterFlags.ShallowInterfaces | RegisterFlags.Self)]
-public class MetaDateDTOMapper(IExportMapper<ContentType, ContentTypeDTO> contentTypeMapper)
+public class MetaDateDTOMapper(
+    SchemaDTOMapper schemaMapper)
     : IExportMapper<MetadataJsonField, MetaDateDTO>
 {
     public MetaDateDTO Export(MetadataJsonField domain)
@@ -14,9 +15,10 @@ public class MetaDateDTOMapper(IExportMapper<ContentType, ContentTypeDTO> conten
         return new MetaDateDTO
         {
             Id = domain.Id,
-            FileContentType = contentTypeMapper.Export(domain.Value.FileType),
             FileId = domain.ValueId,
-            ValidatedSchemaIds = domain.ValidatedSchemas.Select(s => s.SchemaId).ToList()
+            ValidatedSchemas = domain.ValidatedSchemas
+                .Select(schemaMapper.Export)
+                .ToList()
         };
     }
 }

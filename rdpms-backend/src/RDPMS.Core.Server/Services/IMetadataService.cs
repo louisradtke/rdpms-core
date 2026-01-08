@@ -21,7 +21,7 @@ public interface IMetadataService : IGenericCollectionService<MetadataJsonField>
     /// Checks, whether the given schemaId is valid for the given metadataId and updates the meta dates validated
     /// schemas accordingly. If schema was already valid, returns true.
     /// </summary>
-    /// <throws cref="InvalidOperationException">If ids fail to resolve</throws>
+    /// <exception cref="InvalidOperationException">If ids fail to resolve</exception>
     /// <param name="metadateId">Id of the meta date</param>
     /// <param name="schemaId">Id of the schema</param>
     /// <returns>true, if schema is valid or was valid before, false otherwise</returns>
