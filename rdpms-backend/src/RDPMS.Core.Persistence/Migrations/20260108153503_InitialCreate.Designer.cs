@@ -11,7 +11,7 @@ using RDPMS.Core.Persistence;
 namespace RDPMS.Core.Persistence.Migrations
 {
     [DbContext(typeof(RDPMSPersistenceContext))]
-    [Migration("20260107152622_InitialCreate")]
+    [Migration("20260108153503_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -48,21 +48,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.HasIndex("AssignedToDataSetsId");
 
                     b.ToTable("DataSetTag");
-                });
-
-            modelBuilder.Entity("JsonSchemaEntityMetadataJsonField", b =>
-                {
-                    b.Property<Guid>("MetadataJsonFieldId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ValidatedSchemasId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("MetadataJsonFieldId", "ValidatedSchemasId");
-
-                    b.HasIndex("ValidatedSchemasId");
-
-                    b.ToTable("JsonSchemaEntityMetadataJsonField");
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.ContentType", b =>
@@ -516,6 +501,21 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.ToTable("MetadataJsonFields");
                 });
 
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.MetadataJsonFieldValidatedSchema", b =>
+                {
+                    b.Property<Guid>("JsonSchemaEntityId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MetadataJsonFieldId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("JsonSchemaEntityId", "MetadataJsonFieldId");
+
+                    b.HasIndex("MetadataJsonFieldId");
+
+                    b.ToTable("MetadataJsonFieldValidatedSchema");
+                });
+
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.PipelineInstance", b =>
                 {
                     b.Property<Guid>("Id")
@@ -711,21 +711,6 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.HasOne("RDPMS.Core.Persistence.Model.DataSet", null)
                         .WithMany()
                         .HasForeignKey("AssignedToDataSetsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("JsonSchemaEntityMetadataJsonField", b =>
-                {
-                    b.HasOne("RDPMS.Core.Persistence.Model.MetadataJsonField", null)
-                        .WithMany()
-                        .HasForeignKey("MetadataJsonFieldId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RDPMS.Core.Persistence.Model.JsonSchemaEntity", null)
-                        .WithMany()
-                        .HasForeignKey("ValidatedSchemasId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -940,6 +925,21 @@ namespace RDPMS.Core.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Value");
+                });
+
+            modelBuilder.Entity("RDPMS.Core.Persistence.Model.MetadataJsonFieldValidatedSchema", b =>
+                {
+                    b.HasOne("RDPMS.Core.Persistence.Model.JsonSchemaEntity", null)
+                        .WithMany()
+                        .HasForeignKey("JsonSchemaEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RDPMS.Core.Persistence.Model.MetadataJsonField", null)
+                        .WithMany()
+                        .HasForeignKey("MetadataJsonFieldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("RDPMS.Core.Persistence.Model.Project", b =>

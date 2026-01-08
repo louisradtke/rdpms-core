@@ -121,30 +121,6 @@ namespace RDPMS.Core.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "JsonSchemaEntityMetadataJsonField",
-                columns: table => new
-                {
-                    MetadataJsonFieldId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ValidatedSchemasId = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_JsonSchemaEntityMetadataJsonField", x => new { x.MetadataJsonFieldId, x.ValidatedSchemasId });
-                    table.ForeignKey(
-                        name: "FK_JsonSchemaEntityMetadataJsonField_JsonSchemas_ValidatedSchemasId",
-                        column: x => x.ValidatedSchemasId,
-                        principalTable: "JsonSchemas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_JsonSchemaEntityMetadataJsonField_MetadataJsonFields_MetadataJsonFieldId",
-                        column: x => x.MetadataJsonFieldId,
-                        principalTable: "MetadataJsonFields",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MetaDataCollectionColumn",
                 columns: table => new
                 {
@@ -174,6 +150,30 @@ namespace RDPMS.Core.Persistence.Migrations
                         column: x => x.DefaultFieldId,
                         principalTable: "MetadataJsonFields",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MetadataJsonFieldValidatedSchema",
+                columns: table => new
+                {
+                    MetadataJsonFieldId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    JsonSchemaEntityId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MetadataJsonFieldValidatedSchema", x => new { x.JsonSchemaEntityId, x.MetadataJsonFieldId });
+                    table.ForeignKey(
+                        name: "FK_MetadataJsonFieldValidatedSchema_JsonSchemas_JsonSchemaEntityId",
+                        column: x => x.JsonSchemaEntityId,
+                        principalTable: "JsonSchemas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MetadataJsonFieldValidatedSchema_MetadataJsonFields_MetadataJsonFieldId",
+                        column: x => x.MetadataJsonFieldId,
+                        principalTable: "MetadataJsonFields",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -578,11 +578,6 @@ namespace RDPMS.Core.Persistence.Migrations
                 column: "State");
 
             migrationBuilder.CreateIndex(
-                name: "IX_JsonSchemaEntityMetadataJsonField_ValidatedSchemasId",
-                table: "JsonSchemaEntityMetadataJsonField",
-                column: "ValidatedSchemasId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Labels_DataSetId",
                 table: "Labels",
                 column: "DataSetId");
@@ -631,6 +626,11 @@ namespace RDPMS.Core.Persistence.Migrations
                 name: "IX_MetadataJsonFields_ValueId",
                 table: "MetadataJsonFields",
                 column: "ValueId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MetadataJsonFieldValidatedSchema_MetadataJsonFieldId",
+                table: "MetadataJsonFieldValidatedSchema",
+                column: "MetadataJsonFieldId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PipelineInstances_LocalId",
@@ -771,9 +771,6 @@ namespace RDPMS.Core.Persistence.Migrations
                 name: "FileStorageReferences");
 
             migrationBuilder.DropTable(
-                name: "JsonSchemaEntityMetadataJsonField");
-
-            migrationBuilder.DropTable(
                 name: "LabelSharingPolicies");
 
             migrationBuilder.DropTable(
@@ -781,6 +778,9 @@ namespace RDPMS.Core.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "MetaDataCollectionColumn");
+
+            migrationBuilder.DropTable(
+                name: "MetadataJsonFieldValidatedSchema");
 
             migrationBuilder.DropTable(
                 name: "Slugs");

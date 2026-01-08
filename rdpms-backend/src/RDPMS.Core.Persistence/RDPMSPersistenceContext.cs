@@ -238,7 +238,8 @@ public class RDPMSPersistenceContext : DbContext
         // many-to-many of MetadataJsonField to JsonSchemaEntity
         model.Entity<MetadataJsonField>()
             .HasMany(f => f.ValidatedSchemas)
-            .WithMany();
+            .WithMany()
+            .UsingEntity<MetadataJsonFieldValidatedSchema>();
 
         // set-up and many-to-many of DataEntityMetadataJsonField MetadataJsonField
         model.Entity<DataEntityMetadataJsonField>()
