@@ -17,24 +17,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from uuid import UUID
 from typing import Optional, Set
 from typing_extensions import Self
 
-class CollectionSummaryDTO(BaseModel):
+class SchemaDTO(BaseModel):
     """
-    CollectionSummaryDTO
+    SchemaDTO
     """ # noqa: E501
     id: Optional[UUID] = None
-    slug: Optional[StrictStr] = None
-    name: Optional[StrictStr] = None
-    description: Optional[StrictStr] = None
-    data_set_count: Optional[StrictInt] = Field(default=None, alias="dataSetCount")
-    default_data_store_id: Optional[UUID] = Field(default=None, alias="defaultDataStoreId")
-    project_id: Optional[UUID] = Field(default=None, alias="projectId")
-    __properties: ClassVar[List[str]] = ["id", "slug", "name", "description", "dataSetCount", "defaultDataStoreId", "projectId"]
+    schema_id: Optional[StrictStr] = Field(default=None, alias="schemaId")
+    __properties: ClassVar[List[str]] = ["id", "schemaId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,7 +49,7 @@ class CollectionSummaryDTO(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of CollectionSummaryDTO from a JSON string"""
+        """Create an instance of SchemaDTO from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -80,41 +75,16 @@ class CollectionSummaryDTO(BaseModel):
         if self.id is None and "id" in self.model_fields_set:
             _dict['id'] = None
 
-        # set to None if slug (nullable) is None
+        # set to None if schema_id (nullable) is None
         # and model_fields_set contains the field
-        if self.slug is None and "slug" in self.model_fields_set:
-            _dict['slug'] = None
-
-        # set to None if name (nullable) is None
-        # and model_fields_set contains the field
-        if self.name is None and "name" in self.model_fields_set:
-            _dict['name'] = None
-
-        # set to None if description (nullable) is None
-        # and model_fields_set contains the field
-        if self.description is None and "description" in self.model_fields_set:
-            _dict['description'] = None
-
-        # set to None if data_set_count (nullable) is None
-        # and model_fields_set contains the field
-        if self.data_set_count is None and "data_set_count" in self.model_fields_set:
-            _dict['dataSetCount'] = None
-
-        # set to None if default_data_store_id (nullable) is None
-        # and model_fields_set contains the field
-        if self.default_data_store_id is None and "default_data_store_id" in self.model_fields_set:
-            _dict['defaultDataStoreId'] = None
-
-        # set to None if project_id (nullable) is None
-        # and model_fields_set contains the field
-        if self.project_id is None and "project_id" in self.model_fields_set:
-            _dict['projectId'] = None
+        if self.schema_id is None and "schema_id" in self.model_fields_set:
+            _dict['schemaId'] = None
 
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of CollectionSummaryDTO from a dict"""
+        """Create an instance of SchemaDTO from a dict"""
         if obj is None:
             return None
 
@@ -123,12 +93,7 @@ class CollectionSummaryDTO(BaseModel):
 
         _obj = cls.model_validate({
             "id": obj.get("id"),
-            "slug": obj.get("slug"),
-            "name": obj.get("name"),
-            "description": obj.get("description"),
-            "dataSetCount": obj.get("dataSetCount"),
-            "defaultDataStoreId": obj.get("defaultDataStoreId"),
-            "projectId": obj.get("projectId")
+            "schemaId": obj.get("schemaId")
         })
         return _obj
 

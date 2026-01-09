@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from uuid import UUID
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,7 +27,7 @@ class TagDTO(BaseModel):
     """
     TagDTO
     """ # noqa: E501
-    id: Optional[StrictStr] = None
+    id: Optional[UUID] = None
     name: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["id", "name"]
 

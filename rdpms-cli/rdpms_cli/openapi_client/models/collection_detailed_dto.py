@@ -20,12 +20,13 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from uuid import UUID
+from rdpms_cli.openapi_client.models.meta_date_collection_column_dto import MetaDateCollectionColumnDTO
 from typing import Optional, Set
 from typing_extensions import Self
 
-class CollectionSummaryDTO(BaseModel):
+class CollectionDetailedDTO(BaseModel):
     """
-    CollectionSummaryDTO
+    CollectionDetailedDTO
     """ # noqa: E501
     id: Optional[UUID] = None
     slug: Optional[StrictStr] = None
@@ -34,7 +35,8 @@ class CollectionSummaryDTO(BaseModel):
     data_set_count: Optional[StrictInt] = Field(default=None, alias="dataSetCount")
     default_data_store_id: Optional[UUID] = Field(default=None, alias="defaultDataStoreId")
     project_id: Optional[UUID] = Field(default=None, alias="projectId")
-    __properties: ClassVar[List[str]] = ["id", "slug", "name", "description", "dataSetCount", "defaultDataStoreId", "projectId"]
+    meta_date_columns: Optional[List[MetaDateCollectionColumnDTO]] = Field(default=None, alias="metaDateColumns")
+    __properties: ClassVar[List[str]] = ["id", "slug", "name", "description", "dataSetCount", "defaultDataStoreId", "projectId", "metaDateColumns"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,7 +56,7 @@ class CollectionSummaryDTO(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of CollectionSummaryDTO from a JSON string"""
+        """Create an instance of CollectionDetailedDTO from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -75,6 +77,13 @@ class CollectionSummaryDTO(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in meta_date_columns (list)
+        _items = []
+        if self.meta_date_columns:
+            for _item_meta_date_columns in self.meta_date_columns:
+                if _item_meta_date_columns:
+                    _items.append(_item_meta_date_columns.to_dict())
+            _dict['metaDateColumns'] = _items
         # set to None if id (nullable) is None
         # and model_fields_set contains the field
         if self.id is None and "id" in self.model_fields_set:
@@ -110,11 +119,16 @@ class CollectionSummaryDTO(BaseModel):
         if self.project_id is None and "project_id" in self.model_fields_set:
             _dict['projectId'] = None
 
+        # set to None if meta_date_columns (nullable) is None
+        # and model_fields_set contains the field
+        if self.meta_date_columns is None and "meta_date_columns" in self.model_fields_set:
+            _dict['metaDateColumns'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of CollectionSummaryDTO from a dict"""
+        """Create an instance of CollectionDetailedDTO from a dict"""
         if obj is None:
             return None
 
@@ -128,7 +142,8 @@ class CollectionSummaryDTO(BaseModel):
             "description": obj.get("description"),
             "dataSetCount": obj.get("dataSetCount"),
             "defaultDataStoreId": obj.get("defaultDataStoreId"),
-            "projectId": obj.get("projectId")
+            "projectId": obj.get("projectId"),
+            "metaDateColumns": [MetaDateCollectionColumnDTO.from_dict(_item) for _item in obj["metaDateColumns"]] if obj.get("metaDateColumns") is not None else None
         })
         return _obj
 

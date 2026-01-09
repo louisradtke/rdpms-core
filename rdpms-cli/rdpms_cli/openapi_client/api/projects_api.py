@@ -18,6 +18,7 @@ from typing_extensions import Annotated
 
 from pydantic import StrictStr
 from typing import List, Optional
+from uuid import UUID
 from rdpms_cli.openapi_client.models.project_summary_dto import ProjectSummaryDTO
 
 from rdpms_cli.openapi_client.api_client import ApiClient, RequestSerialized
@@ -253,7 +254,9 @@ class ProjectsApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -301,7 +304,7 @@ class ProjectsApi:
     @validate_call
     def api_v1_projects_id_get(
         self,
-        id: StrictStr,
+        id: UUID,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -319,7 +322,7 @@ class ProjectsApi:
 
 
         :param id: (required)
-        :type id: str
+        :type id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -368,7 +371,7 @@ class ProjectsApi:
     @validate_call
     def api_v1_projects_id_get_with_http_info(
         self,
-        id: StrictStr,
+        id: UUID,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -386,7 +389,7 @@ class ProjectsApi:
 
 
         :param id: (required)
-        :type id: str
+        :type id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -435,7 +438,7 @@ class ProjectsApi:
     @validate_call
     def api_v1_projects_id_get_without_preload_content(
         self,
-        id: StrictStr,
+        id: UUID,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -453,7 +456,7 @@ class ProjectsApi:
 
 
         :param id: (required)
-        :type id: str
+        :type id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -513,7 +516,9 @@ class ProjectsApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -559,7 +564,7 @@ class ProjectsApi:
     @validate_call
     def api_v1_projects_id_put(
         self,
-        id: StrictStr,
+        id: UUID,
         project_summary_dto: Optional[ProjectSummaryDTO] = None,
         _request_timeout: Union[
             None,
@@ -578,7 +583,7 @@ class ProjectsApi:
 
 
         :param id:  (required)
-        :type id: str
+        :type id: UUID
         :param project_summary_dto: 
         :type project_summary_dto: ProjectSummaryDTO
         :param _request_timeout: timeout setting for this request. If one
@@ -630,7 +635,7 @@ class ProjectsApi:
     @validate_call
     def api_v1_projects_id_put_with_http_info(
         self,
-        id: StrictStr,
+        id: UUID,
         project_summary_dto: Optional[ProjectSummaryDTO] = None,
         _request_timeout: Union[
             None,
@@ -649,7 +654,7 @@ class ProjectsApi:
 
 
         :param id:  (required)
-        :type id: str
+        :type id: UUID
         :param project_summary_dto: 
         :type project_summary_dto: ProjectSummaryDTO
         :param _request_timeout: timeout setting for this request. If one
@@ -701,7 +706,7 @@ class ProjectsApi:
     @validate_call
     def api_v1_projects_id_put_without_preload_content(
         self,
-        id: StrictStr,
+        id: UUID,
         project_summary_dto: Optional[ProjectSummaryDTO] = None,
         _request_timeout: Union[
             None,
@@ -720,7 +725,7 @@ class ProjectsApi:
 
 
         :param id:  (required)
-        :type id: str
+        :type id: UUID
         :param project_summary_dto: 
         :type project_summary_dto: ProjectSummaryDTO
         :param _request_timeout: timeout setting for this request. If one
@@ -784,7 +789,9 @@ class ProjectsApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters

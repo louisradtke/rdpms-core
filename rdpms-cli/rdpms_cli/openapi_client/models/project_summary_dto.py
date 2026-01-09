@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from uuid import UUID
 from rdpms_cli.openapi_client.models.collection_summary_dto import CollectionSummaryDTO
 from rdpms_cli.openapi_client.models.data_store_summary_dto import DataStoreSummaryDTO
 from typing import Optional, Set
@@ -28,7 +29,7 @@ class ProjectSummaryDTO(BaseModel):
     """
     ProjectSummaryDTO
     """ # noqa: E501
-    id: Optional[StrictStr] = Field(default=None, description="The id of this project.")
+    id: Optional[UUID] = Field(default=None, description="The id of this project.")
     slug: Optional[StrictStr] = Field(default=None, description="The slug of this project.")
     name: Optional[StrictStr] = Field(default=None, description="The name of this project.")
     description: Optional[StrictStr] = None
@@ -78,16 +79,16 @@ class ProjectSummaryDTO(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of each item in collections (list)
         _items = []
         if self.collections:
-            for _item in self.collections:
-                if _item:
-                    _items.append(_item.to_dict())
+            for _item_collections in self.collections:
+                if _item_collections:
+                    _items.append(_item_collections.to_dict())
             _dict['collections'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in data_stores (list)
         _items = []
         if self.data_stores:
-            for _item in self.data_stores:
-                if _item:
-                    _items.append(_item.to_dict())
+            for _item_data_stores in self.data_stores:
+                if _item_data_stores:
+                    _items.append(_item_data_stores.to_dict())
             _dict['dataStores'] = _items
         # set to None if id (nullable) is None
         # and model_fields_set contains the field

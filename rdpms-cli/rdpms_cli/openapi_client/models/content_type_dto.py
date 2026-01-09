@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from uuid import UUID
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,7 +27,7 @@ class ContentTypeDTO(BaseModel):
     """
     ContentTypeDTO
     """ # noqa: E501
-    id: Optional[StrictStr] = None
+    id: Optional[UUID] = None
     abbreviation: Optional[StrictStr] = None
     display_name: Optional[StrictStr] = Field(default=None, alias="displayName")
     description: Optional[StrictStr] = None

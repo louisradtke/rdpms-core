@@ -20,6 +20,7 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from uuid import UUID
 from rdpms_cli.openapi_client.models.content_type_dto import ContentTypeDTO
 from typing import Optional, Set
 from typing_extensions import Self
@@ -28,7 +29,7 @@ class FileSummaryDTO(BaseModel):
     """
     FileSummaryDTO
     """ # noqa: E501
-    id: Optional[StrictStr] = None
+    id: Optional[UUID] = None
     name: Optional[StrictStr] = None
     download_uri: Optional[StrictStr] = Field(default=None, alias="downloadURI")
     content_type: Optional[ContentTypeDTO] = Field(default=None, alias="contentType")

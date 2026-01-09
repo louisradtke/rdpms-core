@@ -20,16 +20,18 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from uuid import UUID
+from rdpms_cli.openapi_client.models.schema_dto import SchemaDTO
 from typing import Optional, Set
 from typing_extensions import Self
 
-class FileCreateResponseDTO(BaseModel):
+class MetaDateCollectionColumnDTO(BaseModel):
     """
-    FileCreateResponseDTO
+    MetaDateCollectionColumnDTO
     """ # noqa: E501
-    upload_uri: Optional[StrictStr] = Field(default=None, alias="uploadUri")
-    file_id: Optional[UUID] = Field(default=None, alias="fileId")
-    __properties: ClassVar[List[str]] = ["uploadUri", "fileId"]
+    metadata_key: Optional[StrictStr] = Field(default=None, alias="metadataKey")
+    var_schema: Optional[SchemaDTO] = Field(default=None, alias="schema")
+    default_field_id: Optional[UUID] = Field(default=None, alias="defaultFieldId")
+    __properties: ClassVar[List[str]] = ["metadataKey", "schema", "defaultFieldId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +51,7 @@ class FileCreateResponseDTO(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of FileCreateResponseDTO from a JSON string"""
+        """Create an instance of MetaDateCollectionColumnDTO from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,21 +72,24 @@ class FileCreateResponseDTO(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # set to None if upload_uri (nullable) is None
+        # override the default output from pydantic by calling `to_dict()` of var_schema
+        if self.var_schema:
+            _dict['schema'] = self.var_schema.to_dict()
+        # set to None if metadata_key (nullable) is None
         # and model_fields_set contains the field
-        if self.upload_uri is None and "upload_uri" in self.model_fields_set:
-            _dict['uploadUri'] = None
+        if self.metadata_key is None and "metadata_key" in self.model_fields_set:
+            _dict['metadataKey'] = None
 
-        # set to None if file_id (nullable) is None
+        # set to None if default_field_id (nullable) is None
         # and model_fields_set contains the field
-        if self.file_id is None and "file_id" in self.model_fields_set:
-            _dict['fileId'] = None
+        if self.default_field_id is None and "default_field_id" in self.model_fields_set:
+            _dict['defaultFieldId'] = None
 
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of FileCreateResponseDTO from a dict"""
+        """Create an instance of MetaDateCollectionColumnDTO from a dict"""
         if obj is None:
             return None
 
@@ -92,8 +97,9 @@ class FileCreateResponseDTO(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "uploadUri": obj.get("uploadUri"),
-            "fileId": obj.get("fileId")
+            "metadataKey": obj.get("metadataKey"),
+            "schema": SchemaDTO.from_dict(obj["schema"]) if obj.get("schema") is not None else None,
+            "defaultFieldId": obj.get("defaultFieldId")
         })
         return _obj
 

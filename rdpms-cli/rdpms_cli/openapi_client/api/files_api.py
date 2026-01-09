@@ -17,8 +17,9 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictBytes, StrictStr
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 from typing_extensions import Annotated
+from uuid import UUID
 from rdpms_cli.openapi_client.models.file_summary_dto import FileSummaryDTO
 
 from rdpms_cli.openapi_client.api_client import ApiClient, RequestSerialized
@@ -42,7 +43,7 @@ class FilesApi:
     @validate_call
     def api_v1_data_file_refs_get(
         self,
-        store_guid: Optional[StrictStr] = None,
+        store_guid: Optional[UUID] = None,
         type: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -61,7 +62,7 @@ class FilesApi:
 
 
         :param store_guid:
-        :type store_guid: str
+        :type store_guid: UUID
         :param type:
         :type type: str
         :param _request_timeout: timeout setting for this request. If one
@@ -112,7 +113,7 @@ class FilesApi:
     @validate_call
     def api_v1_data_file_refs_get_with_http_info(
         self,
-        store_guid: Optional[StrictStr] = None,
+        store_guid: Optional[UUID] = None,
         type: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -131,7 +132,7 @@ class FilesApi:
 
 
         :param store_guid:
-        :type store_guid: str
+        :type store_guid: UUID
         :param type:
         :type type: str
         :param _request_timeout: timeout setting for this request. If one
@@ -182,7 +183,7 @@ class FilesApi:
     @validate_call
     def api_v1_data_file_refs_get_without_preload_content(
         self,
-        store_guid: Optional[StrictStr] = None,
+        store_guid: Optional[UUID] = None,
         type: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -201,7 +202,7 @@ class FilesApi:
 
 
         :param store_guid:
-        :type store_guid: str
+        :type store_guid: UUID
         :param type:
         :type type: str
         :param _request_timeout: timeout setting for this request. If one
@@ -264,7 +265,9 @@ class FilesApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -512,7 +515,9 @@ class FilesApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -556,7 +561,7 @@ class FilesApi:
     @validate_call
     def api_v1_data_files_id_blob_get(
         self,
-        id: Annotated[StrictStr, Field(description="Id of the file to download.")],
+        id: Annotated[UUID, Field(description="Id of the file to download.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -574,7 +579,7 @@ class FilesApi:
 
 
         :param id: Id of the file to download. (required)
-        :type id: str
+        :type id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -625,7 +630,7 @@ class FilesApi:
     @validate_call
     def api_v1_data_files_id_blob_get_with_http_info(
         self,
-        id: Annotated[StrictStr, Field(description="Id of the file to download.")],
+        id: Annotated[UUID, Field(description="Id of the file to download.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -643,7 +648,7 @@ class FilesApi:
 
 
         :param id: Id of the file to download. (required)
-        :type id: str
+        :type id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -694,7 +699,7 @@ class FilesApi:
     @validate_call
     def api_v1_data_files_id_blob_get_without_preload_content(
         self,
-        id: Annotated[StrictStr, Field(description="Id of the file to download.")],
+        id: Annotated[UUID, Field(description="Id of the file to download.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -712,7 +717,7 @@ class FilesApi:
 
 
         :param id: Id of the file to download. (required)
-        :type id: str
+        :type id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -774,7 +779,9 @@ class FilesApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -790,6 +797,7 @@ class FilesApi:
         if 'Accept' not in _header_params:
             _header_params['Accept'] = self.api_client.select_header_accept(
                 [
+                    'application/octet-stream', 
                     'application/json'
                 ]
             )
@@ -820,7 +828,7 @@ class FilesApi:
     @validate_call
     def api_v1_data_files_id_content_get(
         self,
-        id: Annotated[StrictStr, Field(description="Id of the file to download.")],
+        id: Annotated[UUID, Field(description="Id of the file to download.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -838,7 +846,7 @@ class FilesApi:
 
 
         :param id: Id of the file to download. (required)
-        :type id: str
+        :type id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -887,7 +895,7 @@ class FilesApi:
     @validate_call
     def api_v1_data_files_id_content_get_with_http_info(
         self,
-        id: Annotated[StrictStr, Field(description="Id of the file to download.")],
+        id: Annotated[UUID, Field(description="Id of the file to download.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -905,7 +913,7 @@ class FilesApi:
 
 
         :param id: Id of the file to download. (required)
-        :type id: str
+        :type id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -954,7 +962,7 @@ class FilesApi:
     @validate_call
     def api_v1_data_files_id_content_get_without_preload_content(
         self,
-        id: Annotated[StrictStr, Field(description="Id of the file to download.")],
+        id: Annotated[UUID, Field(description="Id of the file to download.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -972,7 +980,7 @@ class FilesApi:
 
 
         :param id: Id of the file to download. (required)
-        :type id: str
+        :type id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1032,7 +1040,9 @@ class FilesApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -1078,7 +1088,7 @@ class FilesApi:
     @validate_call
     def api_v1_data_files_id_get(
         self,
-        id: Annotated[StrictStr, Field(description="Id of the file.")],
+        id: Annotated[UUID, Field(description="Id of the file.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1096,7 +1106,7 @@ class FilesApi:
 
 
         :param id: Id of the file. (required)
-        :type id: str
+        :type id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1145,7 +1155,7 @@ class FilesApi:
     @validate_call
     def api_v1_data_files_id_get_with_http_info(
         self,
-        id: Annotated[StrictStr, Field(description="Id of the file.")],
+        id: Annotated[UUID, Field(description="Id of the file.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1163,7 +1173,7 @@ class FilesApi:
 
 
         :param id: Id of the file. (required)
-        :type id: str
+        :type id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1212,7 +1222,7 @@ class FilesApi:
     @validate_call
     def api_v1_data_files_id_get_without_preload_content(
         self,
-        id: Annotated[StrictStr, Field(description="Id of the file.")],
+        id: Annotated[UUID, Field(description="Id of the file.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1230,7 +1240,7 @@ class FilesApi:
 
 
         :param id: Id of the file. (required)
-        :type id: str
+        :type id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1290,7 +1300,9 @@ class FilesApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters

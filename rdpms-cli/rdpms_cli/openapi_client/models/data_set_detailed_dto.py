@@ -20,6 +20,9 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from uuid import UUID
+from rdpms_cli.openapi_client.models.assigned_meta_date_dto import AssignedMetaDateDTO
+from rdpms_cli.openapi_client.models.deletion_state_dto import DeletionStateDTO
 from rdpms_cli.openapi_client.models.file_summary_dto import FileSummaryDTO
 from rdpms_cli.openapi_client.models.tag_dto import TagDTO
 from typing import Optional, Set
@@ -29,7 +32,7 @@ class DataSetDetailedDTO(BaseModel):
     """
     Represents a summary of a dataset, including identifying information, timestamps, state, tags, and metadata fields.
     """ # noqa: E501
-    id: Optional[StrictStr] = Field(default=None, description="Uniquely identifies the dataset. Typically server-generated. Should not be manually set by the client.")
+    id: Optional[UUID] = Field(default=None, description="Uniquely identifies the dataset. Typically server-generated. Should not be manually set by the client.")
     slug: Optional[StrictStr] = Field(default=None, description="An optional, human-readable identifier for the dataset.")
     name: Optional[StrictStr] = Field(default=None, description="Non-unique, mandatory descriptive name of the dataset. Must be provided by the client.")
     assigned_tags: Optional[List[TagDTO]] = Field(default=None, description="List of tags associated with the dataset, used for categorization and filtering purposes.", alias="assignedTags")
@@ -37,14 +40,14 @@ class DataSetDetailedDTO(BaseModel):
     deleted_stamp_utc: Optional[datetime] = Field(default=None, description="UTC timestamp that indicates when the dataset was deleted. Null if the dataset has not been deleted yet.", alias="deletedStampUTC")
     begin_stamp_utc: Optional[datetime] = Field(default=None, description="UTC timestamp that marks the period begin of the dataset. Only to be set by server.", alias="beginStampUTC")
     end_stamp_utc: Optional[datetime] = Field(default=None, description="UTC timestamp that marks the period end of the dataset. Only to be set by server.", alias="endStampUTC")
-    state: Optional[StrictStr] = Field(default=None, description="Indicates, whether the dataset (and its files) are immutable. Only to be set by server. Lifecycle is: Uninitialized -> [Sealed ->] Deleted")
+    lifecycle_state: Optional[StrictStr] = Field(default=None, description="Indicates, whether the dataset (and its files) are immutable. Only to be set by server. Lifecycle is: Uninitialized -> Sealed", alias="lifecycleState")
+    deletion_state: Optional[DeletionStateDTO] = Field(default=None, alias="deletionState")
     is_time_series: Optional[StrictBool] = Field(default=None, description="Indicates if the dataset represents time-series data. Only to be set by server.", alias="isTimeSeries")
-    is_deleted: Optional[StrictBool] = Field(default=None, description="Flags whether the dataset has been marked as deleted. Only to be set by server.", alias="isDeleted")
-    metadata_fields: Optional[List[StrictStr]] = Field(default=None, description="Fields, for which metadata exists. Only to be set by server.", alias="metadataFields")
+    meta_dates: Optional[List[AssignedMetaDateDTO]] = Field(default=None, description="Fields, for which metadata exists. Only to be set by server.", alias="metaDates")
     file_count: Optional[StrictInt] = Field(default=None, description="Amount of files in the dataset.", alias="fileCount")
-    collection_id: Optional[StrictStr] = Field(default=None, description="Id of the collection this dataset belongs to.", alias="collectionId")
+    collection_id: Optional[UUID] = Field(default=None, description="Id of the collection this dataset belongs to.", alias="collectionId")
     files: Optional[List[FileSummaryDTO]] = None
-    __properties: ClassVar[List[str]] = ["id", "slug", "name", "assignedTags", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "state", "isTimeSeries", "isDeleted", "metadataFields", "fileCount", "collectionId", "files"]
+    __properties: ClassVar[List[str]] = ["id", "slug", "name", "assignedTags", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "lifecycleState", "deletionState", "isTimeSeries", "metaDates", "fileCount", "collectionId", "files"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -88,16 +91,23 @@ class DataSetDetailedDTO(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of each item in assigned_tags (list)
         _items = []
         if self.assigned_tags:
-            for _item in self.assigned_tags:
-                if _item:
-                    _items.append(_item.to_dict())
+            for _item_assigned_tags in self.assigned_tags:
+                if _item_assigned_tags:
+                    _items.append(_item_assigned_tags.to_dict())
             _dict['assignedTags'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in meta_dates (list)
+        _items = []
+        if self.meta_dates:
+            for _item_meta_dates in self.meta_dates:
+                if _item_meta_dates:
+                    _items.append(_item_meta_dates.to_dict())
+            _dict['metaDates'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in files (list)
         _items = []
         if self.files:
-            for _item in self.files:
-                if _item:
-                    _items.append(_item.to_dict())
+            for _item_files in self.files:
+                if _item_files:
+                    _items.append(_item_files.to_dict())
             _dict['files'] = _items
         # set to None if id (nullable) is None
         # and model_fields_set contains the field
@@ -139,25 +149,20 @@ class DataSetDetailedDTO(BaseModel):
         if self.end_stamp_utc is None and "end_stamp_utc" in self.model_fields_set:
             _dict['endStampUTC'] = None
 
-        # set to None if state (nullable) is None
+        # set to None if lifecycle_state (nullable) is None
         # and model_fields_set contains the field
-        if self.state is None and "state" in self.model_fields_set:
-            _dict['state'] = None
+        if self.lifecycle_state is None and "lifecycle_state" in self.model_fields_set:
+            _dict['lifecycleState'] = None
 
         # set to None if is_time_series (nullable) is None
         # and model_fields_set contains the field
         if self.is_time_series is None and "is_time_series" in self.model_fields_set:
             _dict['isTimeSeries'] = None
 
-        # set to None if is_deleted (nullable) is None
+        # set to None if meta_dates (nullable) is None
         # and model_fields_set contains the field
-        if self.is_deleted is None and "is_deleted" in self.model_fields_set:
-            _dict['isDeleted'] = None
-
-        # set to None if metadata_fields (nullable) is None
-        # and model_fields_set contains the field
-        if self.metadata_fields is None and "metadata_fields" in self.model_fields_set:
-            _dict['metadataFields'] = None
+        if self.meta_dates is None and "meta_dates" in self.model_fields_set:
+            _dict['metaDates'] = None
 
         # set to None if collection_id (nullable) is None
         # and model_fields_set contains the field
@@ -189,10 +194,10 @@ class DataSetDetailedDTO(BaseModel):
             "deletedStampUTC": obj.get("deletedStampUTC"),
             "beginStampUTC": obj.get("beginStampUTC"),
             "endStampUTC": obj.get("endStampUTC"),
-            "state": obj.get("state"),
+            "lifecycleState": obj.get("lifecycleState"),
+            "deletionState": obj.get("deletionState"),
             "isTimeSeries": obj.get("isTimeSeries"),
-            "isDeleted": obj.get("isDeleted"),
-            "metadataFields": obj.get("metadataFields"),
+            "metaDates": [AssignedMetaDateDTO.from_dict(_item) for _item in obj["metaDates"]] if obj.get("metaDates") is not None else None,
             "fileCount": obj.get("fileCount"),
             "collectionId": obj.get("collectionId"),
             "files": [FileSummaryDTO.from_dict(_item) for _item in obj["files"]] if obj.get("files") is not None else None

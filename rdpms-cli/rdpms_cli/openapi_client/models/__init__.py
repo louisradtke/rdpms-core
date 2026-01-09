@@ -12,17 +12,23 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-
 # import models into model package
+from rdpms_cli.openapi_client.models.assigned_meta_date_dto import AssignedMetaDateDTO
+from rdpms_cli.openapi_client.models.collection_detailed_dto import CollectionDetailedDTO
 from rdpms_cli.openapi_client.models.collection_summary_dto import CollectionSummaryDTO
 from rdpms_cli.openapi_client.models.content_type_dto import ContentTypeDTO
 from rdpms_cli.openapi_client.models.data_set_detailed_dto import DataSetDetailedDTO
 from rdpms_cli.openapi_client.models.data_set_summary_dto import DataSetSummaryDTO
 from rdpms_cli.openapi_client.models.data_store_summary_dto import DataStoreSummaryDTO
+from rdpms_cli.openapi_client.models.deletion_state_dto import DeletionStateDTO
 from rdpms_cli.openapi_client.models.error_message_dto import ErrorMessageDTO
 from rdpms_cli.openapi_client.models.file_create_response_dto import FileCreateResponseDTO
 from rdpms_cli.openapi_client.models.file_summary_dto import FileSummaryDTO
+from rdpms_cli.openapi_client.models.meta_date_collection_column_dto import MetaDateCollectionColumnDTO
+from rdpms_cli.openapi_client.models.meta_date_dto import MetaDateDTO
 from rdpms_cli.openapi_client.models.problem_details import ProblemDetails
 from rdpms_cli.openapi_client.models.project_summary_dto import ProjectSummaryDTO
 from rdpms_cli.openapi_client.models.s3_file_create_request_dto import S3FileCreateRequestDTO
+from rdpms_cli.openapi_client.models.schema_dto import SchemaDTO
 from rdpms_cli.openapi_client.models.tag_dto import TagDTO
+

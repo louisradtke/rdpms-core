@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from uuid import UUID
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,13 +27,13 @@ class DataStoreSummaryDTO(BaseModel):
     """
     DataStoreSummaryDTO
     """ # noqa: E501
-    id: Optional[StrictStr] = None
+    id: Optional[UUID] = None
     slug: Optional[StrictStr] = None
     name: Optional[StrictStr] = None
     files_count: Optional[StrictInt] = Field(default=None, alias="filesCount")
     storage_type: Optional[StrictStr] = Field(default=None, alias="storageType")
     properties_json: Optional[StrictStr] = Field(default=None, alias="propertiesJson")
-    project_id: Optional[StrictStr] = Field(default=None, alias="projectId")
+    project_id: Optional[UUID] = Field(default=None, alias="projectId")
     __properties: ClassVar[List[str]] = ["id", "slug", "name", "filesCount", "storageType", "propertiesJson", "projectId"]
 
     model_config = ConfigDict(

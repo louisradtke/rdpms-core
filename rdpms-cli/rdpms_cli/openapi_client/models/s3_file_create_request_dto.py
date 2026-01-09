@@ -20,6 +20,7 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from uuid import UUID
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -28,7 +29,7 @@ class S3FileCreateRequestDTO(BaseModel):
     S3FileCreateRequestDTO
     """ # noqa: E501
     name: Optional[StrictStr] = None
-    content_type_id: Optional[StrictStr] = Field(default=None, alias="contentTypeId")
+    content_type_id: Optional[UUID] = Field(default=None, alias="contentTypeId")
     size_bytes: Optional[StrictInt] = Field(default=None, alias="sizeBytes")
     plain_sha256_hash: Optional[StrictStr] = Field(default=None, alias="plainSHA256Hash")
     created_stamp: Optional[datetime] = Field(default=None, alias="createdStamp")

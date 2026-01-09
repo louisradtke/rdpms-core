@@ -72,7 +72,45 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CollectionSummaryDTO'
+                $ref: '#/components/schemas/CollectionDetailedDTO'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  '/api/v1/data/collections/{id}/metadata/{key}':
+    put:
+      tags:
+        - Collections
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: defaultMetadataId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              format: uuid
+      responses:
+        '200':
+          description: OK
+        '201':
+          description: Created
         '404':
           description: Not Found
           content:
@@ -304,22 +342,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
-  /api/v1/data/datasets/batch:
-    post:
+  '/api/v1/data/datasets/{id}/metadata/{key}':
+    put:
       tags:
         - DataSets
-      summary: Add a batch of item to the system.
+      summary: Adds or sets meta documents for a data set.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the data set
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: key
+          in: path
+          description: Case-insensitive key of the meta date on the data set
+          required: true
+          schema:
+            type: string
       requestBody:
-        description: ''
+        description: JSON meta document
         content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: byte
           application/json:
             schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/DataSetSummaryDTO'
+              type: string
+              format: byte
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
   /api/v1/data/files:
     get:
       tags:
@@ -399,6 +472,10 @@ paths:
         '200':
           description: OK
           content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
             application/json:
               schema:
                 type: string
@@ -406,18 +483,27 @@ paths:
         '400':
           description: Bad Request
           content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
         '404':
           description: Not Found
           content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
         '501':
           description: Not Implemented
           content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
@@ -442,6 +528,146 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FileSummaryDTO'
+  /api/v1/data/metadata:
+    get:
+      tags:
+        - MetaData
+      summary: Get all metadata. Contents can be retrieved via Files API.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MetaDateDTO'
+  '/api/v1/data/metadata/{id}':
+    get:
+      tags:
+        - MetaData
+      summary: Get a single meta date by id. Content can be retrieved via Files API.
+      parameters:
+        - name: id
+          in: path
+          description: Id of the meta date
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetaDateDTO'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+  '/api/v1/data/metadata/{id}/validate/{schemaId}':
+    put:
+      tags:
+        - MetaData
+      summary: "Validate meta date against a schema. On success, the meta date gets updated and true gets returned.\nIf meta date cannot be validated, false gets returned."
+      parameters:
+        - name: id
+          in: path
+          description: ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: schemaId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+  /api/v1/data/schemas:
+    get:
+      tags:
+        - MetaData
+      summary: Get all schemas registered in the system.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SchemaDTO'
+    post:
+      tags:
+        - MetaData
+      summary: Add a new schema to the system.
+      parameters:
+        - name: schemaId
+          in: query
+          description: '(optional) Schema URL, if existing. Keep empty otherwise.'
+          schema:
+            type: string
+      requestBody:
+        description: The JSON document
+        content:
+          application/json:
+            schema:
+              type: string
+              format: byte
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+  '/api/v1/data/schemas/{id}/blob':
+    get:
+      tags:
+        - MetaData
+      summary: Get the raw value of a schema.
+      parameters:
+        - name: id
+          in: path
+          description: Guid of the schema.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
   /api/v1/projects:
     get:
       tags:
@@ -567,6 +793,63 @@ paths:
                 $ref: '#/components/schemas/DataStoreSummaryDTO'
 components:
   schemas:
+    AssignedMetaDateDTO:
+      type: object
+      properties:
+        metadataKey:
+          type: string
+          description: Key linking an entity to a meta date.
+          nullable: true
+        metadataId:
+          type: string
+          description: Id of the meta date.
+          format: uuid
+          nullable: true
+        field:
+          $ref: '#/components/schemas/MetaDateDTO'
+        inherited:
+          type: boolean
+          description: Whether this meta date is inherited from the parent collection.
+          nullable: true
+        collectionSchemaVerified:
+          type: boolean
+          description: 'Whether the schema, the collection declares for this key, has been verified.'
+          nullable: true
+      additionalProperties: false
+    CollectionDetailedDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        slug:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        dataSetCount:
+          type: integer
+          format: int32
+          nullable: true
+        defaultDataStoreId:
+          type: string
+          format: uuid
+          nullable: true
+        projectId:
+          type: string
+          format: uuid
+          nullable: true
+        metaDateColumns:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetaDateCollectionColumnDTO'
+          nullable: true
+      additionalProperties: false
     CollectionSummaryDTO:
       type: object
       properties:
@@ -668,10 +951,10 @@ components:
           type: boolean
           description: "Indicates if the dataset represents time-series data.\nOnly to be set by server."
           nullable: true
-        metadataFields:
+        metaDates:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/AssignedMetaDateDTO'
           description: "Fields, for which metadata exists.\nOnly to be set by server."
           nullable: true
         fileCount:
@@ -742,10 +1025,10 @@ components:
           type: boolean
           description: "Indicates if the dataset represents time-series data.\nOnly to be set by server."
           nullable: true
-        metadataFields:
+        metaDates:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/AssignedMetaDateDTO'
           description: "Fields, for which metadata exists.\nOnly to be set by server."
           nullable: true
         fileCount:
@@ -859,6 +1142,39 @@ components:
           type: boolean
           nullable: true
       additionalProperties: false
+    MetaDateCollectionColumnDTO:
+      type: object
+      properties:
+        metadataKey:
+          type: string
+          nullable: true
+        schema:
+          $ref: '#/components/schemas/SchemaDTO'
+        defaultFieldId:
+          type: string
+          format: uuid
+          nullable: true
+      additionalProperties: false
+    MetaDateDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The id of this meta date.
+          format: uuid
+          nullable: true
+        validatedSchemas:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemaDTO'
+          description: List of schema ids that have been validated against this meta date.
+          nullable: true
+        fileId:
+          type: string
+          description: The id of the file representing the stored meta date. Retrieve content via Files API.
+          format: uuid
+          nullable: true
+      additionalProperties: false
     ProblemDetails:
       type: object
       properties:
@@ -950,6 +1266,17 @@ components:
         compressedSizeBytes:
           type: integer
           format: int64
+          nullable: true
+      additionalProperties: false
+    SchemaDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        schemaId:
+          type: string
           nullable: true
       additionalProperties: false
     TagDTO:

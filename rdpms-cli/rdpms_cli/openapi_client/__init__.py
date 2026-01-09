@@ -16,35 +16,81 @@
 
 __version__ = "1.0.0"
 
+# Define package exports
+__all__ = [
+    "CollectionsApi",
+    "ContentTypesApi",
+    "DataSetsApi",
+    "FilesApi",
+    "MetaDataApi",
+    "ProjectsApi",
+    "StoresApi",
+    "ApiResponse",
+    "ApiClient",
+    "Configuration",
+    "OpenApiException",
+    "ApiTypeError",
+    "ApiValueError",
+    "ApiKeyError",
+    "ApiAttributeError",
+    "ApiException",
+    "AssignedMetaDateDTO",
+    "CollectionDetailedDTO",
+    "CollectionSummaryDTO",
+    "ContentTypeDTO",
+    "DataSetDetailedDTO",
+    "DataSetSummaryDTO",
+    "DataStoreSummaryDTO",
+    "DeletionStateDTO",
+    "ErrorMessageDTO",
+    "FileCreateResponseDTO",
+    "FileSummaryDTO",
+    "MetaDateCollectionColumnDTO",
+    "MetaDateDTO",
+    "ProblemDetails",
+    "ProjectSummaryDTO",
+    "S3FileCreateRequestDTO",
+    "SchemaDTO",
+    "TagDTO",
+]
+
 # import apis into sdk package
-from rdpms_cli.openapi_client.api.collections_api import CollectionsApi
-from rdpms_cli.openapi_client.api.content_types_api import ContentTypesApi
-from rdpms_cli.openapi_client.api.data_sets_api import DataSetsApi
-from rdpms_cli.openapi_client.api.files_api import FilesApi
-from rdpms_cli.openapi_client.api.projects_api import ProjectsApi
-from rdpms_cli.openapi_client.api.stores_api import StoresApi
+from rdpms_cli.openapi_client.api.collections_api import CollectionsApi as CollectionsApi
+from rdpms_cli.openapi_client.api.content_types_api import ContentTypesApi as ContentTypesApi
+from rdpms_cli.openapi_client.api.data_sets_api import DataSetsApi as DataSetsApi
+from rdpms_cli.openapi_client.api.files_api import FilesApi as FilesApi
+from rdpms_cli.openapi_client.api.meta_data_api import MetaDataApi as MetaDataApi
+from rdpms_cli.openapi_client.api.projects_api import ProjectsApi as ProjectsApi
+from rdpms_cli.openapi_client.api.stores_api import StoresApi as StoresApi
 
 # import ApiClient
-from rdpms_cli.openapi_client.api_response import ApiResponse
-from rdpms_cli.openapi_client.api_client import ApiClient
-from rdpms_cli.openapi_client.configuration import Configuration
-from rdpms_cli.openapi_client.exceptions import OpenApiException
-from rdpms_cli.openapi_client.exceptions import ApiTypeError
-from rdpms_cli.openapi_client.exceptions import ApiValueError
-from rdpms_cli.openapi_client.exceptions import ApiKeyError
-from rdpms_cli.openapi_client.exceptions import ApiAttributeError
-from rdpms_cli.openapi_client.exceptions import ApiException
+from rdpms_cli.openapi_client.api_response import ApiResponse as ApiResponse
+from rdpms_cli.openapi_client.api_client import ApiClient as ApiClient
+from rdpms_cli.openapi_client.configuration import Configuration as Configuration
+from rdpms_cli.openapi_client.exceptions import OpenApiException as OpenApiException
+from rdpms_cli.openapi_client.exceptions import ApiTypeError as ApiTypeError
+from rdpms_cli.openapi_client.exceptions import ApiValueError as ApiValueError
+from rdpms_cli.openapi_client.exceptions import ApiKeyError as ApiKeyError
+from rdpms_cli.openapi_client.exceptions import ApiAttributeError as ApiAttributeError
+from rdpms_cli.openapi_client.exceptions import ApiException as ApiException
 
 # import models into sdk package
-from rdpms_cli.openapi_client.models.collection_summary_dto import CollectionSummaryDTO
-from rdpms_cli.openapi_client.models.content_type_dto import ContentTypeDTO
-from rdpms_cli.openapi_client.models.data_set_detailed_dto import DataSetDetailedDTO
-from rdpms_cli.openapi_client.models.data_set_summary_dto import DataSetSummaryDTO
-from rdpms_cli.openapi_client.models.data_store_summary_dto import DataStoreSummaryDTO
-from rdpms_cli.openapi_client.models.error_message_dto import ErrorMessageDTO
-from rdpms_cli.openapi_client.models.file_create_response_dto import FileCreateResponseDTO
-from rdpms_cli.openapi_client.models.file_summary_dto import FileSummaryDTO
-from rdpms_cli.openapi_client.models.problem_details import ProblemDetails
-from rdpms_cli.openapi_client.models.project_summary_dto import ProjectSummaryDTO
-from rdpms_cli.openapi_client.models.s3_file_create_request_dto import S3FileCreateRequestDTO
-from rdpms_cli.openapi_client.models.tag_dto import TagDTO
+from rdpms_cli.openapi_client.models.assigned_meta_date_dto import AssignedMetaDateDTO as AssignedMetaDateDTO
+from rdpms_cli.openapi_client.models.collection_detailed_dto import CollectionDetailedDTO as CollectionDetailedDTO
+from rdpms_cli.openapi_client.models.collection_summary_dto import CollectionSummaryDTO as CollectionSummaryDTO
+from rdpms_cli.openapi_client.models.content_type_dto import ContentTypeDTO as ContentTypeDTO
+from rdpms_cli.openapi_client.models.data_set_detailed_dto import DataSetDetailedDTO as DataSetDetailedDTO
+from rdpms_cli.openapi_client.models.data_set_summary_dto import DataSetSummaryDTO as DataSetSummaryDTO
+from rdpms_cli.openapi_client.models.data_store_summary_dto import DataStoreSummaryDTO as DataStoreSummaryDTO
+from rdpms_cli.openapi_client.models.deletion_state_dto import DeletionStateDTO as DeletionStateDTO
+from rdpms_cli.openapi_client.models.error_message_dto import ErrorMessageDTO as ErrorMessageDTO
+from rdpms_cli.openapi_client.models.file_create_response_dto import FileCreateResponseDTO as FileCreateResponseDTO
+from rdpms_cli.openapi_client.models.file_summary_dto import FileSummaryDTO as FileSummaryDTO
+from rdpms_cli.openapi_client.models.meta_date_collection_column_dto import MetaDateCollectionColumnDTO as MetaDateCollectionColumnDTO
+from rdpms_cli.openapi_client.models.meta_date_dto import MetaDateDTO as MetaDateDTO
+from rdpms_cli.openapi_client.models.problem_details import ProblemDetails as ProblemDetails
+from rdpms_cli.openapi_client.models.project_summary_dto import ProjectSummaryDTO as ProjectSummaryDTO
+from rdpms_cli.openapi_client.models.s3_file_create_request_dto import S3FileCreateRequestDTO as S3FileCreateRequestDTO
+from rdpms_cli.openapi_client.models.schema_dto import SchemaDTO as SchemaDTO
+from rdpms_cli.openapi_client.models.tag_dto import TagDTO as TagDTO
+
