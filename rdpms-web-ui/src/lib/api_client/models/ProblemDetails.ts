@@ -78,10 +78,15 @@ export function ProblemDetailsFromJSONTyped(json: any, ignoreDiscriminator: bool
     };
 }
 
-export function ProblemDetailsToJSON(value?: ProblemDetails | null): any {
+export function ProblemDetailsToJSON(json: any): ProblemDetails {
+    return ProblemDetailsToJSONTyped(json, false);
+}
+
+export function ProblemDetailsToJSONTyped(value?: ProblemDetails | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
             ...value,

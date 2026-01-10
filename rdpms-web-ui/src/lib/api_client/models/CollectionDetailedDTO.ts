@@ -13,68 +13,82 @@
  */
 
 import { mapValues } from '../runtime';
+import type { MetaDateCollectionColumnDTO } from './MetaDateCollectionColumnDTO';
+import {
+    MetaDateCollectionColumnDTOFromJSON,
+    MetaDateCollectionColumnDTOFromJSONTyped,
+    MetaDateCollectionColumnDTOToJSON,
+    MetaDateCollectionColumnDTOToJSONTyped,
+} from './MetaDateCollectionColumnDTO';
+
 /**
  * 
  * @export
- * @interface CollectionSummaryDTO
+ * @interface CollectionDetailedDTO
  */
-export interface CollectionSummaryDTO {
+export interface CollectionDetailedDTO {
     /**
      * 
      * @type {string}
-     * @memberof CollectionSummaryDTO
+     * @memberof CollectionDetailedDTO
      */
     id?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof CollectionSummaryDTO
+     * @memberof CollectionDetailedDTO
      */
     slug?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof CollectionSummaryDTO
+     * @memberof CollectionDetailedDTO
      */
     name?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof CollectionSummaryDTO
+     * @memberof CollectionDetailedDTO
      */
     description?: string | null;
     /**
      * 
      * @type {number}
-     * @memberof CollectionSummaryDTO
+     * @memberof CollectionDetailedDTO
      */
     dataSetCount?: number | null;
     /**
      * 
      * @type {string}
-     * @memberof CollectionSummaryDTO
+     * @memberof CollectionDetailedDTO
      */
     defaultDataStoreId?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof CollectionSummaryDTO
+     * @memberof CollectionDetailedDTO
      */
     projectId?: string | null;
+    /**
+     * 
+     * @type {Array<MetaDateCollectionColumnDTO>}
+     * @memberof CollectionDetailedDTO
+     */
+    metaDateColumns?: Array<MetaDateCollectionColumnDTO> | null;
 }
 
 /**
- * Check if a given object implements the CollectionSummaryDTO interface.
+ * Check if a given object implements the CollectionDetailedDTO interface.
  */
-export function instanceOfCollectionSummaryDTO(value: object): value is CollectionSummaryDTO {
+export function instanceOfCollectionDetailedDTO(value: object): value is CollectionDetailedDTO {
     return true;
 }
 
-export function CollectionSummaryDTOFromJSON(json: any): CollectionSummaryDTO {
-    return CollectionSummaryDTOFromJSONTyped(json, false);
+export function CollectionDetailedDTOFromJSON(json: any): CollectionDetailedDTO {
+    return CollectionDetailedDTOFromJSONTyped(json, false);
 }
 
-export function CollectionSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): CollectionSummaryDTO {
+export function CollectionDetailedDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): CollectionDetailedDTO {
     if (json == null) {
         return json;
     }
@@ -87,14 +101,15 @@ export function CollectionSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator
         'dataSetCount': json['dataSetCount'] == null ? undefined : json['dataSetCount'],
         'defaultDataStoreId': json['defaultDataStoreId'] == null ? undefined : json['defaultDataStoreId'],
         'projectId': json['projectId'] == null ? undefined : json['projectId'],
+        'metaDateColumns': json['metaDateColumns'] == null ? undefined : ((json['metaDateColumns'] as Array<any>).map(MetaDateCollectionColumnDTOFromJSON)),
     };
 }
 
-export function CollectionSummaryDTOToJSON(json: any): CollectionSummaryDTO {
-    return CollectionSummaryDTOToJSONTyped(json, false);
+export function CollectionDetailedDTOToJSON(json: any): CollectionDetailedDTO {
+    return CollectionDetailedDTOToJSONTyped(json, false);
 }
 
-export function CollectionSummaryDTOToJSONTyped(value?: CollectionSummaryDTO | null, ignoreDiscriminator: boolean = false): any {
+export function CollectionDetailedDTOToJSONTyped(value?: CollectionDetailedDTO | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -108,6 +123,7 @@ export function CollectionSummaryDTOToJSONTyped(value?: CollectionSummaryDTO | n
         'dataSetCount': value['dataSetCount'],
         'defaultDataStoreId': value['defaultDataStoreId'],
         'projectId': value['projectId'],
+        'metaDateColumns': value['metaDateColumns'] == null ? undefined : ((value['metaDateColumns'] as Array<any>).map(MetaDateCollectionColumnDTOToJSON)),
     };
 }
 

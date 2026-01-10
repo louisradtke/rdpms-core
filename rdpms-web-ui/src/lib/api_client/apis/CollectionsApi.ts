@@ -15,10 +15,13 @@
 
 import * as runtime from '../runtime';
 import type {
+  CollectionDetailedDTO,
   CollectionSummaryDTO,
   ProblemDetails,
 } from '../models/index';
 import {
+    CollectionDetailedDTOFromJSON,
+    CollectionDetailedDTOToJSON,
     CollectionSummaryDTOFromJSON,
     CollectionSummaryDTOToJSON,
     ProblemDetailsFromJSON,
@@ -33,6 +36,13 @@ export interface ApiV1DataCollectionsGetRequest {
 
 export interface ApiV1DataCollectionsIdGetRequest {
     id: string;
+}
+
+export interface ApiV1DataCollectionsIdMetadataKeyPutRequest {
+    id: string;
+    key: string;
+    defaultMetadataId?: string;
+    body?: string;
 }
 
 export interface ApiV1DataCollectionsPostRequest {
@@ -64,8 +74,11 @@ export class CollectionsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+
+        let urlPath = `/api/v1/data/collections`;
+
         const response = await this.request({
-            path: `/api/v1/data/collections`,
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -85,7 +98,7 @@ export class CollectionsApi extends runtime.BaseAPI {
     /**
      * Get a single collection by id.
      */
-    async apiV1DataCollectionsIdGetRaw(requestParameters: ApiV1DataCollectionsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CollectionSummaryDTO>> {
+    async apiV1DataCollectionsIdGetRaw(requestParameters: ApiV1DataCollectionsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CollectionDetailedDTO>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -97,22 +110,75 @@ export class CollectionsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+
+        let urlPath = `/api/v1/data/collections/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/data/collections/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => CollectionSummaryDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => CollectionDetailedDTOFromJSON(jsonValue));
     }
 
     /**
      * Get a single collection by id.
      */
-    async apiV1DataCollectionsIdGet(requestParameters: ApiV1DataCollectionsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CollectionSummaryDTO> {
+    async apiV1DataCollectionsIdGet(requestParameters: ApiV1DataCollectionsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CollectionDetailedDTO> {
         const response = await this.apiV1DataCollectionsIdGetRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async apiV1DataCollectionsIdMetadataKeyPutRaw(requestParameters: ApiV1DataCollectionsIdMetadataKeyPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataCollectionsIdMetadataKeyPut().'
+            );
+        }
+
+        if (requestParameters['key'] == null) {
+            throw new runtime.RequiredError(
+                'key',
+                'Required parameter "key" was null or undefined when calling apiV1DataCollectionsIdMetadataKeyPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['defaultMetadataId'] != null) {
+            queryParameters['defaultMetadataId'] = requestParameters['defaultMetadataId'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/data/collections/{id}/metadata/{key}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+        urlPath = urlPath.replace(`{${"key"}}`, encodeURIComponent(String(requestParameters['key'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async apiV1DataCollectionsIdMetadataKeyPut(requestParameters: ApiV1DataCollectionsIdMetadataKeyPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.apiV1DataCollectionsIdMetadataKeyPutRaw(requestParameters, initOverrides);
     }
 
     /**
@@ -125,8 +191,11 @@ export class CollectionsApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+
+        let urlPath = `/api/v1/data/collections`;
+
         const response = await this.request({
-            path: `/api/v1/data/collections`,
+            path: urlPath,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,

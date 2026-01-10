@@ -90,10 +90,15 @@ export function DataStoreSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator:
     };
 }
 
-export function DataStoreSummaryDTOToJSON(value?: DataStoreSummaryDTO | null): any {
+export function DataStoreSummaryDTOToJSON(json: any): DataStoreSummaryDTO {
+    return DataStoreSummaryDTOToJSONTyped(json, false);
+}
+
+export function DataStoreSummaryDTOToJSONTyped(value?: DataStoreSummaryDTO | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'id': value['id'],

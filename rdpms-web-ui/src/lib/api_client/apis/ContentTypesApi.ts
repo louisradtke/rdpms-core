@@ -52,8 +52,11 @@ export class ContentTypesApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+
+        let urlPath = `/api/v1/data/content-types/batch`;
+
         const response = await this.request({
-            path: `/api/v1/data/content-types/batch`,
+            path: urlPath,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -77,8 +80,11 @@ export class ContentTypesApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+
+        let urlPath = `/api/v1/data/content-types`;
+
         const response = await this.request({
-            path: `/api/v1/data/content-types`,
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -108,8 +114,12 @@ export class ContentTypesApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+
+        let urlPath = `/api/v1/data/content-types/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/data/content-types/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -135,8 +145,11 @@ export class ContentTypesApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+
+        let urlPath = `/api/v1/data/content-types`;
+
         const response = await this.request({
-            path: `/api/v1/data/content-types`,
+            path: urlPath,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,

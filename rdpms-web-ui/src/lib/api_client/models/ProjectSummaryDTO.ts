@@ -18,12 +18,14 @@ import {
     DataStoreSummaryDTOFromJSON,
     DataStoreSummaryDTOFromJSONTyped,
     DataStoreSummaryDTOToJSON,
+    DataStoreSummaryDTOToJSONTyped,
 } from './DataStoreSummaryDTO';
 import type { CollectionSummaryDTO } from './CollectionSummaryDTO';
 import {
     CollectionSummaryDTOFromJSON,
     CollectionSummaryDTOFromJSONTyped,
     CollectionSummaryDTOToJSON,
+    CollectionSummaryDTOToJSONTyped,
 } from './CollectionSummaryDTO';
 
 /**
@@ -96,10 +98,15 @@ export function ProjectSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: b
     };
 }
 
-export function ProjectSummaryDTOToJSON(value?: ProjectSummaryDTO | null): any {
+export function ProjectSummaryDTOToJSON(json: any): ProjectSummaryDTO {
+    return ProjectSummaryDTOToJSONTyped(json, false);
+}
+
+export function ProjectSummaryDTOToJSONTyped(value?: ProjectSummaryDTO | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'id': value['id'],

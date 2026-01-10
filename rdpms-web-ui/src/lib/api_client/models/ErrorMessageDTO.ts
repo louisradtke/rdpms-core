@@ -56,10 +56,15 @@ export function ErrorMessageDTOFromJSONTyped(json: any, ignoreDiscriminator: boo
     };
 }
 
-export function ErrorMessageDTOToJSON(value?: ErrorMessageDTO | null): any {
+export function ErrorMessageDTOToJSON(json: any): ErrorMessageDTO {
+    return ErrorMessageDTOToJSONTyped(json, false);
+}
+
+export function ErrorMessageDTOToJSONTyped(value?: ErrorMessageDTO | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'message': value['message'],

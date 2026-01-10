@@ -18,6 +18,7 @@ import {
     ContentTypeDTOFromJSON,
     ContentTypeDTOFromJSONTyped,
     ContentTypeDTOToJSON,
+    ContentTypeDTOToJSONTyped,
 } from './ContentTypeDTO';
 
 /**
@@ -125,10 +126,15 @@ export function FileSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
     };
 }
 
-export function FileSummaryDTOToJSON(value?: FileSummaryDTO | null): any {
+export function FileSummaryDTOToJSON(json: any): FileSummaryDTO {
+    return FileSummaryDTOToJSONTyped(json, false);
+}
+
+export function FileSummaryDTOToJSONTyped(value?: FileSummaryDTO | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'id': value['id'],
@@ -136,10 +142,10 @@ export function FileSummaryDTOToJSON(value?: FileSummaryDTO | null): any {
         'downloadURI': value['downloadURI'],
         'contentType': ContentTypeDTOToJSON(value['contentType']),
         'size': value['size'],
-        'createdStampUTC': value['createdStampUTC'] == null ? undefined : ((value['createdStampUTC'] as any).toISOString()),
-        'deletedStampUTC': value['deletedStampUTC'] == null ? undefined : ((value['deletedStampUTC'] as any).toISOString()),
-        'beginStampUTC': value['beginStampUTC'] == null ? undefined : ((value['beginStampUTC'] as any).toISOString()),
-        'endStampUTC': value['endStampUTC'] == null ? undefined : ((value['endStampUTC'] as any).toISOString()),
+        'createdStampUTC': value['createdStampUTC'] == null ? value['createdStampUTC'] : value['createdStampUTC'].toISOString(),
+        'deletedStampUTC': value['deletedStampUTC'] == null ? value['deletedStampUTC'] : value['deletedStampUTC'].toISOString(),
+        'beginStampUTC': value['beginStampUTC'] == null ? value['beginStampUTC'] : value['beginStampUTC'].toISOString(),
+        'endStampUTC': value['endStampUTC'] == null ? value['endStampUTC'] : value['endStampUTC'].toISOString(),
         'isTimeSeries': value['isTimeSeries'],
         'isDeleted': value['isDeleted'],
     };

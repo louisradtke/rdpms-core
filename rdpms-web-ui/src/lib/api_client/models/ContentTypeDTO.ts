@@ -76,10 +76,15 @@ export function ContentTypeDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
     };
 }
 
-export function ContentTypeDTOToJSON(value?: ContentTypeDTO | null): any {
+export function ContentTypeDTOToJSON(json: any): ContentTypeDTO {
+    return ContentTypeDTOToJSONTyped(json, false);
+}
+
+export function ContentTypeDTOToJSONTyped(value?: ContentTypeDTO | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'id': value['id'],

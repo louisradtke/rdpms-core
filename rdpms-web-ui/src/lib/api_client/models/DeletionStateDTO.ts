@@ -28,7 +28,7 @@ export type DeletionStateDTO = typeof DeletionStateDTO[keyof typeof DeletionStat
 export function instanceOfDeletionStateDTO(value: any): boolean {
     for (const key in DeletionStateDTO) {
         if (Object.prototype.hasOwnProperty.call(DeletionStateDTO, key)) {
-            if ((DeletionStateDTO as Record<string, DeletionStateDTO>)[key] === value) {
+            if (DeletionStateDTO[key as keyof typeof DeletionStateDTO] === value) {
                 return true;
             }
         }
@@ -46,5 +46,9 @@ export function DeletionStateDTOFromJSONTyped(json: any, ignoreDiscriminator: bo
 
 export function DeletionStateDTOToJSON(value?: DeletionStateDTO | null): any {
     return value as any;
+}
+
+export function DeletionStateDTOToJSONTyped(value: any, ignoreDiscriminator: boolean): DeletionStateDTO {
+    return value as DeletionStateDTO;
 }
 

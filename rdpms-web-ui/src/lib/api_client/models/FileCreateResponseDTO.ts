@@ -55,10 +55,15 @@ export function FileCreateResponseDTOFromJSONTyped(json: any, ignoreDiscriminato
     };
 }
 
-export function FileCreateResponseDTOToJSON(value?: FileCreateResponseDTO | null): any {
+export function FileCreateResponseDTOToJSON(json: any): FileCreateResponseDTO {
+    return FileCreateResponseDTOToJSONTyped(json, false);
+}
+
+export function FileCreateResponseDTOToJSONTyped(value?: FileCreateResponseDTO | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'uploadUri': value['uploadUri'],

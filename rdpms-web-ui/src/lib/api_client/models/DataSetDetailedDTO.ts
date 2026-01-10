@@ -13,23 +13,33 @@
  */
 
 import { mapValues } from '../runtime';
+import type { AssignedMetaDateDTO } from './AssignedMetaDateDTO';
+import {
+    AssignedMetaDateDTOFromJSON,
+    AssignedMetaDateDTOFromJSONTyped,
+    AssignedMetaDateDTOToJSON,
+    AssignedMetaDateDTOToJSONTyped,
+} from './AssignedMetaDateDTO';
 import type { FileSummaryDTO } from './FileSummaryDTO';
 import {
     FileSummaryDTOFromJSON,
     FileSummaryDTOFromJSONTyped,
     FileSummaryDTOToJSON,
+    FileSummaryDTOToJSONTyped,
 } from './FileSummaryDTO';
 import type { DeletionStateDTO } from './DeletionStateDTO';
 import {
     DeletionStateDTOFromJSON,
     DeletionStateDTOFromJSONTyped,
     DeletionStateDTOToJSON,
+    DeletionStateDTOToJSONTyped,
 } from './DeletionStateDTO';
 import type { TagDTO } from './TagDTO';
 import {
     TagDTOFromJSON,
     TagDTOFromJSONTyped,
     TagDTOToJSON,
+    TagDTOToJSONTyped,
 } from './TagDTO';
 
 /**
@@ -115,10 +125,10 @@ export interface DataSetDetailedDTO {
     /**
      * Fields, for which metadata exists.
      * Only to be set by server.
-     * @type {Array<string>}
+     * @type {Array<AssignedMetaDateDTO>}
      * @memberof DataSetDetailedDTO
      */
-    metadataFields?: Array<string> | null;
+    metaDates?: Array<AssignedMetaDateDTO> | null;
     /**
      * Amount of files in the dataset.
      * @type {number}
@@ -138,6 +148,8 @@ export interface DataSetDetailedDTO {
      */
     files?: Array<FileSummaryDTO> | null;
 }
+
+
 
 /**
  * Check if a given object implements the DataSetDetailedDTO interface.
@@ -167,31 +179,36 @@ export function DataSetDetailedDTOFromJSONTyped(json: any, ignoreDiscriminator: 
         'lifecycleState': json['lifecycleState'] == null ? undefined : json['lifecycleState'],
         'deletionState': json['deletionState'] == null ? undefined : DeletionStateDTOFromJSON(json['deletionState']),
         'isTimeSeries': json['isTimeSeries'] == null ? undefined : json['isTimeSeries'],
-        'metadataFields': json['metadataFields'] == null ? undefined : json['metadataFields'],
+        'metaDates': json['metaDates'] == null ? undefined : ((json['metaDates'] as Array<any>).map(AssignedMetaDateDTOFromJSON)),
         'fileCount': json['fileCount'] == null ? undefined : json['fileCount'],
         'collectionId': json['collectionId'] == null ? undefined : json['collectionId'],
         'files': json['files'] == null ? undefined : ((json['files'] as Array<any>).map(FileSummaryDTOFromJSON)),
     };
 }
 
-export function DataSetDetailedDTOToJSON(value?: DataSetDetailedDTO | null): any {
+export function DataSetDetailedDTOToJSON(json: any): DataSetDetailedDTO {
+    return DataSetDetailedDTOToJSONTyped(json, false);
+}
+
+export function DataSetDetailedDTOToJSONTyped(value?: DataSetDetailedDTO | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'id': value['id'],
         'slug': value['slug'],
         'name': value['name'],
         'assignedTags': value['assignedTags'] == null ? undefined : ((value['assignedTags'] as Array<any>).map(TagDTOToJSON)),
-        'createdStampUTC': value['createdStampUTC'] == null ? undefined : ((value['createdStampUTC'] as any).toISOString()),
-        'deletedStampUTC': value['deletedStampUTC'] == null ? undefined : ((value['deletedStampUTC'] as any).toISOString()),
-        'beginStampUTC': value['beginStampUTC'] == null ? undefined : ((value['beginStampUTC'] as any).toISOString()),
-        'endStampUTC': value['endStampUTC'] == null ? undefined : ((value['endStampUTC'] as any).toISOString()),
+        'createdStampUTC': value['createdStampUTC'] == null ? value['createdStampUTC'] : value['createdStampUTC'].toISOString(),
+        'deletedStampUTC': value['deletedStampUTC'] == null ? value['deletedStampUTC'] : value['deletedStampUTC'].toISOString(),
+        'beginStampUTC': value['beginStampUTC'] == null ? value['beginStampUTC'] : value['beginStampUTC'].toISOString(),
+        'endStampUTC': value['endStampUTC'] == null ? value['endStampUTC'] : value['endStampUTC'].toISOString(),
         'lifecycleState': value['lifecycleState'],
         'deletionState': DeletionStateDTOToJSON(value['deletionState']),
         'isTimeSeries': value['isTimeSeries'],
-        'metadataFields': value['metadataFields'],
+        'metaDates': value['metaDates'] == null ? undefined : ((value['metaDates'] as Array<any>).map(AssignedMetaDateDTOToJSON)),
         'fileCount': value['fileCount'],
         'collectionId': value['collectionId'],
         'files': value['files'] == null ? undefined : ((value['files'] as Array<any>).map(FileSummaryDTOToJSON)),

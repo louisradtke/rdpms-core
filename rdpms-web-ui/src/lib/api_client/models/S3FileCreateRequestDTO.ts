@@ -111,19 +111,24 @@ export function S3FileCreateRequestDTOFromJSONTyped(json: any, ignoreDiscriminat
     };
 }
 
-export function S3FileCreateRequestDTOToJSON(value?: S3FileCreateRequestDTO | null): any {
+export function S3FileCreateRequestDTOToJSON(json: any): S3FileCreateRequestDTO {
+    return S3FileCreateRequestDTOToJSONTyped(json, false);
+}
+
+export function S3FileCreateRequestDTOToJSONTyped(value?: S3FileCreateRequestDTO | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'name': value['name'],
         'contentTypeId': value['contentTypeId'],
         'sizeBytes': value['sizeBytes'],
         'plainSHA256Hash': value['plainSHA256Hash'],
-        'createdStamp': value['createdStamp'] == null ? undefined : ((value['createdStamp'] as any).toISOString()),
-        'beginStamp': value['beginStamp'] == null ? undefined : ((value['beginStamp'] as any).toISOString()),
-        'endStamp': value['endStamp'] == null ? undefined : ((value['endStamp'] as any).toISOString()),
+        'createdStamp': value['createdStamp'] == null ? value['createdStamp'] : value['createdStamp'].toISOString(),
+        'beginStamp': value['beginStamp'] == null ? value['beginStamp'] : value['beginStamp'].toISOString(),
+        'endStamp': value['endStamp'] == null ? value['endStamp'] : value['endStamp'].toISOString(),
         'compressionAlgorithm': value['compressionAlgorithm'],
         'compressedSHA256Hash': value['compressedSHA256Hash'],
         'compressedSizeBytes': value['compressedSizeBytes'],

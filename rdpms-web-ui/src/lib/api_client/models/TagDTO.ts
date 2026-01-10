@@ -55,10 +55,15 @@ export function TagDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): Ta
     };
 }
 
-export function TagDTOToJSON(value?: TagDTO | null): any {
+export function TagDTOToJSON(json: any): TagDTO {
+    return TagDTOToJSONTyped(json, false);
+}
+
+export function TagDTOToJSONTyped(value?: TagDTO | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'id': value['id'],

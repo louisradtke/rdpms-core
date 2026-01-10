@@ -37,10 +37,6 @@ import {
     S3FileCreateRequestDTOToJSON,
 } from '../models/index';
 
-export interface ApiV1DataDatasetsBatchPostRequest {
-    dataSetSummaryDTO?: Array<DataSetSummaryDTO>;
-}
-
 export interface ApiV1DataDatasetsGetRequest {
     collectionId?: string;
     deleted?: string;
@@ -59,6 +55,12 @@ export interface ApiV1DataDatasetsIdGetRequest {
     id: string;
 }
 
+export interface ApiV1DataDatasetsIdMetadataKeyPutRequest {
+    id: string;
+    key: string;
+    body?: string;
+}
+
 export interface ApiV1DataDatasetsIdSealPutRequest {
     id: string;
 }
@@ -71,34 +73,6 @@ export interface ApiV1DataDatasetsPostRequest {
  * 
  */
 export class DataSetsApi extends runtime.BaseAPI {
-
-    /**
-     * Add a batch of item to the system.
-     */
-    async apiV1DataDatasetsBatchPostRaw(requestParameters: ApiV1DataDatasetsBatchPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/api/v1/data/datasets/batch`,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: requestParameters['dataSetSummaryDTO']!.map(DataSetSummaryDTOToJSON),
-        }, initOverrides);
-
-        return new runtime.VoidApiResponse(response);
-    }
-
-    /**
-     * Add a batch of item to the system.
-     */
-    async apiV1DataDatasetsBatchPost(requestParameters: ApiV1DataDatasetsBatchPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.apiV1DataDatasetsBatchPostRaw(requestParameters, initOverrides);
-    }
 
     /**
      * Get data sets.
@@ -116,8 +90,11 @@ export class DataSetsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+
+        let urlPath = `/api/v1/data/datasets`;
+
         const response = await this.request({
-            path: `/api/v1/data/datasets`,
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -151,8 +128,12 @@ export class DataSetsApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+
+        let urlPath = `/api/v1/data/datasets/{id}/add/s3`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/data/datasets/{id}/add/s3`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -184,8 +165,12 @@ export class DataSetsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+
+        let urlPath = `/api/v1/data/datasets/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/data/datasets/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,
@@ -214,8 +199,12 @@ export class DataSetsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+
+        let urlPath = `/api/v1/data/datasets/{id}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/data/datasets/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -228,6 +217,58 @@ export class DataSetsApi extends runtime.BaseAPI {
      */
     async apiV1DataDatasetsIdGet(requestParameters: ApiV1DataDatasetsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DataSetDetailedDTO> {
         const response = await this.apiV1DataDatasetsIdGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Adds or sets meta documents for a data set.
+     */
+    async apiV1DataDatasetsIdMetadataKeyPutRaw(requestParameters: ApiV1DataDatasetsIdMetadataKeyPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataDatasetsIdMetadataKeyPut().'
+            );
+        }
+
+        if (requestParameters['key'] == null) {
+            throw new runtime.RequiredError(
+                'key',
+                'Required parameter "key" was null or undefined when calling apiV1DataDatasetsIdMetadataKeyPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/octet-stream';
+
+
+        let urlPath = `/api/v1/data/datasets/{id}/metadata/{key}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+        urlPath = urlPath.replace(`{${"key"}}`, encodeURIComponent(String(requestParameters['key'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * Adds or sets meta documents for a data set.
+     */
+    async apiV1DataDatasetsIdMetadataKeyPut(requestParameters: ApiV1DataDatasetsIdMetadataKeyPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.apiV1DataDatasetsIdMetadataKeyPutRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -246,8 +287,12 @@ export class DataSetsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+
+        let urlPath = `/api/v1/data/datasets/{id}/seal`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/data/datasets/{id}/seal`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'PUT',
             headers: headerParameters,
             query: queryParameters,
@@ -273,8 +318,11 @@ export class DataSetsApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+
+        let urlPath = `/api/v1/data/datasets`;
+
         const response = await this.request({
-            path: `/api/v1/data/datasets`,
+            path: urlPath,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -293,32 +341,6 @@ export class DataSetsApi extends runtime.BaseAPI {
      */
     async apiV1DataDatasetsPost(requestParameters: ApiV1DataDatasetsPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
         const response = await this.apiV1DataDatasetsPostRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * OData enabled query.
-     */
-    async apiV1DataDatasetsQueryGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<DataSetSummaryDTO>>> {
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/api/v1/data/datasets/query`,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(DataSetSummaryDTOFromJSON));
-    }
-
-    /**
-     * OData enabled query.
-     */
-    async apiV1DataDatasetsQueryGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<DataSetSummaryDTO>> {
-        const response = await this.apiV1DataDatasetsQueryGetRaw(initOverrides);
         return await response.value();
     }
 
