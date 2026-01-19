@@ -1,8 +1,8 @@
 import {
-    type ApiV1DataCollectionsGetRequest,
+    type ApiV1DataCollectionsGetRequest, type CollectionDetailedDTO,
     CollectionsApi,
     type CollectionSummaryDTO,
-    Configuration, type ProjectSummaryDTO
+    Configuration
 } from '$lib/api_client';
 import {isGuid} from "$lib/util/url-helper";
 
@@ -37,7 +37,7 @@ export class CollectionsRepository {
         return api.apiV1DataCollectionsGet(requestParameters);
     }
 
-    public async getCollectionById(id: string): Promise<CollectionSummaryDTO> {
+    public async getCollectionById(id: string): Promise<CollectionDetailedDTO> {
         const api = await this.ensureReady()
         return api.apiV1DataCollectionsIdGet({ id });
     }
@@ -49,7 +49,7 @@ export class CollectionsRepository {
      * @returns The collection.
      */
     public async getCollectionByIdOrSlug(idOrSlug: string, projectIdOrSlug: string | undefined)
-        : Promise<CollectionSummaryDTO> {
+        : Promise<CollectionDetailedDTO> {
         if (isGuid(idOrSlug)) {
             return this.getCollectionById(idOrSlug)
         }
