@@ -77,16 +77,17 @@ generate_web() {
         --additional-properties=
 }
 
-# set termination and verbosity
-set -ex
-
 for target in "${TARGETS[@]}"; do
   case "$target" in
     cli)
+      set -ex  # set termination and verbosity
       generate_cli
+      set +ex  # revert termination
       ;;
     web)
+      set -ex  # set termination and verbosity
       generate_web
+      set +ex  # revert termination
       ;;
     *)
       echo "unknown target: $target (supported: cli, web)" >&2
