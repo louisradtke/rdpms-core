@@ -231,7 +231,7 @@
                                         {#each data.collection.metaDateColumns ?? [] as column (column.metadataKey)}
                                             {@const assigned = findAssignedMeta(dataset, column)}
                                             {@const hasMeta = Boolean(assigned)}
-                                            {@const validated = isMetaValidated(assigned, column)}
+                                            {@const validated = assigned?.collectionSchemaVerified}
                                             <td class="text-center">
                                                 <span
                                                     class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
