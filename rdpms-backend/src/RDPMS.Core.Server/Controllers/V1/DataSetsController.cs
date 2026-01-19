@@ -91,12 +91,24 @@ public class DataSetsController(
         var domainItem = await dataSetService.GetByIdAsync(id);
         var dto = dataSetDetailedMapper.Export(domainItem);
 
-        if (dto.Files is null) return Ok(dto);
-
-        foreach (var file in dto.Files)
+        if (dto.Files is not null)
         {
-            file.DownloadURI = fileService.GetContentApiUri(file.Id!.Value, HttpContext);
+            foreach (var file in dto.Files)
+            {
+                file.DownloadURI = fileService.GetContentApiUri(file.Id!.Value, HttpContext);
+            }
         }
+
+        var validatedMetaDates = await dataSetService
+            .GetValidatedMetadates([domainItem.Id]);
+        dto.MetaDates = domainItem.MetadataJsonFields.Select(f => new AssignedMetaDateDTO
+            {
+                MetadataKey = f.MetadataKey,
+                MetadataId = f.FieldId,
+                CollectionSchemaVerified = validatedMetaDates?[domainItem.Id].Contains(f.MetadataKey)
+            })
+            .ToList();
+
         return Ok(dto);
     }
 
