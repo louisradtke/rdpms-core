@@ -13,11 +13,11 @@
         return repo.getCollections({projectId: projectId});
     });
 
-    let tableAccessors: Array<{visibleTitle: string, accessor: (container: CollectionSummaryDTO) => string}> = [
-        {visibleTitle: 'ID', accessor: (container) => container.id ?? 'null'},
-        {visibleTitle: 'Name', accessor: (container) => container.name ?? 'null'},
-        {visibleTitle: '# Data Sets', accessor: (container) => container.dataSetCount?.toString() ?? '-1'},
-        {visibleTitle: 'Default Data Store', accessor: (container) => container.defaultDataStoreId ?? 'null'},
+    let tableAccessors: Array<{visibleTitle: string, accessor: (collection: CollectionSummaryDTO) => string}> = [
+        {visibleTitle: 'ID', accessor: (collection) => collection.id ?? 'null'},
+        {visibleTitle: 'Name', accessor: (collection) => collection.name ?? 'null'},
+        {visibleTitle: '# Data Sets', accessor: (collection) => collection.dataSetCount?.toString() ?? '-1'},
+        {visibleTitle: 'Default Data Store', accessor: (collection) => collection.defaultDataStoreId ?? 'null'},
     ]
 </script>
 
@@ -36,12 +36,12 @@
         </tr>
         </thead>
         <tbody>
-        {#each collections as container (container.id)}
+        {#each collections as collection (collection.id)}
             <tr class="even:bg-gray-50">
                 <td class="border border-gray-300 px-4 py-2">
-                    <a href={`/projects/${projectId}/c/${container.id}`}>{container.id}</a>
+                    <a href={`/projects/${projectId}/c/${collection.id}`}>{collection.id}</a>
                 </td>
-                {#each tableAccessors.slice(1).map(dct => dct.accessor(container)) as entry (entry)}
+                {#each tableAccessors.slice(1).map(dct => dct.accessor(collection)) as entry (entry)}
                     <td class="border border-gray-300 px-4 py-2">{entry}</td>
                 {/each}
             </tr>
