@@ -26,7 +26,7 @@
         const repo = new CollectionsRepository(getOrFetchConfig().then(toApiConfig));
         return repo.getCollections({projectSlug: projectSlug});
     });
-    
+
     let collectionsSidebarListPromise = $derived.by(async () => {
         const cl = await allCollectionsReq;
         return cl.map(c => ({
