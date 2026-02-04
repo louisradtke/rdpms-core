@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Full Dev-Stack" type="CompoundRunConfigurationType">
     <toRun name="RDPMS.Core.Server (Dev)" type="LaunchSettings" />
-    <toRun name="compose.yaml[static-server, minio]: Compose Deployment" type="docker-deploy" />
+    <toRun name="compose deps" type="docker-deploy" />
     <toRun name="dev JavaScript" type="JavascriptDebugType" />
     <toRun name="dev" type="js.build_tools.npm" />
     <method v="2" />
