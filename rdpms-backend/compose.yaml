@@ -8,7 +8,18 @@
       - "5000:5000"
     volumes:
       - "./develop/confs/dev-postgres.yaml:/app/debug.yaml:ro"
-    entrypoint: ["dotnet", "RDPMS.Core.Server.dll", "-u", "http://0.0.0.0:5000", "--init-db=dev"]
+#    entrypoint: ["dotnet", "RDPMS.Core.Server.dll", "-u", "http://0.0.0.0:5000", "--init-db=dev"]
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    entrypoint:
+      - sh
+      - -c
+      - |
+        dotnet RDPMS.Core.Server.dll seed -c /app/debug.yaml --init-db=dev &&
+        dotnet RDPMS.Core.Server.dll serve -c /app/debug.yaml -u http://0.0.0.0:5000
+#      - cat /app/debug.yaml
     profiles: ["dev"]
 
   static-server:
@@ -18,7 +29,7 @@
       - "./develop/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"
     ports:
       - "5001:80"
-    profiles: ["dev", "dev-nosrv"]
+    profiles: ["dev", "dev-deps-only"]
 
   minio:
     image: quay.io/minio/minio:latest
@@ -31,6 +42,7 @@
     ports:
       - "5002:9000"
       - "5003:5003"
+    profiles: ["dev", "dev-deps-only"]
 
   db:
     image: "postgres:17"
@@ -41,6 +53,12 @@
     volumes:
       - "postgres-data:/var/lib/postgresql/data"
     shm_size: 128mb  # because docker-website tells so
+    healthcheck:
+      # originates from: https://github.com/peter-evans/docker-compose-healthcheck
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
     profiles: ["dev"]
 
 volumes:

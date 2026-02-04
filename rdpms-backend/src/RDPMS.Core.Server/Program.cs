@@ -251,6 +251,7 @@ internal class Program
         catch (Exception e)
         {
             programLogger.LogCritical(e, "Unhandled exception. {EMessage}", e.Message);
+            Environment.Exit(1);
         }
     }
 

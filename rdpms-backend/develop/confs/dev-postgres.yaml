@@ -1,6 +1,9 @@
 allowed_origins:
   - http://localhost:5173
 
+logging:
+  console_log_level: debug
+
 database_configuration:
   type: "postgres"
   host: "db"
