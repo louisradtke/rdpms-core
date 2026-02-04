@@ -4,70 +4,69 @@ RDPMS is a project that follows a twofold approach: (1) it may store and process
 
 The "tracking" may be implemented as "taint": it shall be clearly traceable, which parts (in time) of a dataset were processed to which datasets. Thus, a deletion request may be performed with minimal loss and effort.
 
+## Repository layout
 
-## Conventions
+- `rdpms-backend/` .NET 9 API (ASP.NET Core + EF Core)
+  - `RDPMS.Core.Contracts`: Shared contract types to describe file/container metadata and related structures, enabling reasoning over metadata across components.
+  - `RDPMS.Core.Infra`: Cross-cutting infra
+  - `RDPMS.Core.Persistence`: EF Core entities, DbContext, migrations
+  - `RDPMS.Core.Server`: ASP.NET Core API
+- `rdpms-cli/` Python CLI client
+- `rdpms-web-ui/` Svelte 5 + Vite 6 web UI
 
-- All timestamps are UTC. Only on the visualization "layer", they may be converted to local time.
+## Quick start (dev)
 
+### Dependencies
 
-## Roadmap
+- .NET 9 SDK
+- Node.js + npm
+- Docker or Podman (plus a Podman VM if using Podman)
 
-### Phase 1: Backend setup (core)
+### Rider dev setup
 
-1. create ASP.NET solution and EF data context (Sqlite vs. Postgres)
-2. establish basic data model containing at least:
-   - data files (immutable)
-   - data sets (immutable after creation, needs some kind of state)
-   - data stores
-   - metadata for data sets
-     - tags
-     - json
-   - pipeline instances
-   - pipeline job instances
-   - job queue (not for dispatchment or scheduling)
-   - artifacts (redundant to data files/sets? UI may accept data of specific type (PNG vs. MCAP) instead of artifact in general.)
-   - taint of data (files and sets)
-   - Q: what, if some data was just uploaded to an S3 bucket and now has to be indexed, just like in RBB? can a job alter the metadata of its source, but not create an artifact?
-3. create interfaces and mockups for:
-   - general system configuration
-   - data stores
-   - pipelines
-4. create REST ASP.NET API and basic types
-5. build debugging system (eval docker)
+The JetBrains Rider project is in `rdpms-backend/`. The "Full Dev-Stack" profile runs dependencies via the compose `deps` profile and runs the backend and web UI. If using a Podman VM, set the Engine API URL (unix socket path) in the IDE/plugin settings.
 
-### Phase 2: Web UI setup
+### CLI dev setup
 
-1. decide on UI framework and JS vs. TS (e.g. Svelte switched back to annotated JS, still supporting TS)
-2. build auto generation of JS REST client
-3. create basic dialogues
-   - data sets
-   - pipelines viewer and job viewer
+#### Backend
 
-### Phase 3: Setting up base security infrastructure
+Local run (seed DB and serve separately):
 
-1. permission system/user ids (a lot depends on this and it will be horror to retrofit)
-   - users
-   - abstraction for ownership entities (user/group/organizations)
-   - username + password auth
-2. Embedding of auth into Web UI
+```bash
+dotnet run --project rdpms-backend/src/RDPMS.Core.Server -- seed --init-db=dev
+dotnet run --project rdpms-backend/src/RDPMS.Core.Server -- serve
+```
 
-### Phase 4: Setting up pipeline system
+Docker compose (dependencies or full stack):
 
-1. decide on pipeline backend (Snakemake vs. ..., see below)
-2. create microservice for pipeline tool
-   - trigger pipelines by core
-   - add core as target for dispatching jobs
+```bash
+docker compose -f rdpms-backend/compose.yaml --profile deps up
+docker compose -f rdpms-backend/compose.yaml --profile full up
+```
 
-What speaks against Snakemake and other DAG-workflow tools:
-- pipelines are demand-triggered instead of being triggered by new content. But maybe this is not necessary, since inputs of a specific form come in, we want to transform them into a standardized format. Still, we won't need the DAG-features, unless we want to aggregate multiple data sets (like multiple traces we want to process using [STARS](https://github.com/tudo-aqua/stars)).
-- When using especially Snakemake, we'd have to contain the user input to avoid remote code execution.
+Note: `dev` only contains a static webserver and minio instance. `full` additionally spins up the .NET solution and a PostgreSQL-instance. `full` is WIP and still needs the UI started separately.
 
-### Phase 5: Build distributed worker system
+#### Web UI
 
-1. determine requirements to work dispatchment system
-2. decide on worker engine (sth. existing vs. abusing GitLab vs. self-made)
-3. implementation (either directly into backend or as microservice)
+```bash
+cd rdpms-web-ui
+npm install
+npm run dev
+```
 
+UI default port: `http://localhost:5173`
+
+#### CLI
+
+The CLI is installed/run on the host (not in compose). Prefer a venv inside `rdpms-cli/`.
+
+```bash
+cd rdpms-cli
+python -m venv .venv
+source .venv/bin/activate
+pip install --editable .
+rdpms --help
+```
 
 ## List of requirements and potentially planned features
 
@@ -147,6 +146,11 @@ Remarks:
 
 
 ## Developer Section
+
+### Conventions
+
+- All timestamps are UTC. Only on the visualization "layer", they may be converted to local time.
+
 
 ### Ambiguity of the Term Collection
 

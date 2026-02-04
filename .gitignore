@@ -1,3 +1,13 @@
+# RDPMS gitignore
+# this file contains gitinore entries for the following subprojects
+# - rdpms-cli/
+# the entries for the rdpms-backend project (.NET) can be found at rdpms-backend/.gitignore
+
+
+################################################################################
+# Python
+################################################################################
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
