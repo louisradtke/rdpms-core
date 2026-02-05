@@ -21,6 +21,7 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 - `plugins/` plugin-related code
 - `config/`, `docs/`, `scripts/` misc support
 - `swagger.yaml` API spec snapshot
+- `schemas/` JSON Schemas for shared contracts (see `schemas/README.md`)
 
 ## Backend Notes (.NET)
 - Solution: `rdpms-backend/rdpms-backend.sln`

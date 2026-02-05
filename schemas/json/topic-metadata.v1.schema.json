@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:topic-metadata:v1",
+  "title": "TopicMetadata",
+  "type": "object",
+  "description": "Meta-information about a topic, that might accelerate queries.",
+  "properties": {
+    "messageCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of messages in the topic."
+    },
+    "firstMessageTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the first message in the topic."
+    },
+    "lastMessageTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the first message in the topic."
+    }
+  },
+  "required": []
+}

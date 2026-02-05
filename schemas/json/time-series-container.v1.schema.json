@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:time-series-container:v1",
+  "title": "TimeSeriesContainer",
+  "type": "object",
+  "description": "Container for information about multiple topics (data streams).",
+  "properties": {
+    "topics": {
+      "type": "array",
+      "items": {
+        "$ref": "topic.v1.schema.json"
+      },
+      "description": "List of topics (data streams) in this container."
+    }
+  },
+  "required": [
+    "topics"
+  ],
+  "additionalProperties": false
+}

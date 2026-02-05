@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:message-type:v1",
+  "title": "MessageType",
+  "type": "object",
+  "description": "Type of messages in a topic.",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable name of the type."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the type."
+    },
+    "reference": {
+      "type": "string",
+      "description": "Reference to the definition, e.g. https://docs.ros2.org/foxy/api/nav_msgs/msg/Odometry.html."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "$ref": "field-definition.v1.schema.json"
+      },
+      "description": "List of field definitions (name + type)."
+    }
+  },
+  "required": [
+    "name",
+    "reference",
+    "fields"
+  ],
+  "additionalProperties": false
+}

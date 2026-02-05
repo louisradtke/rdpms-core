@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:contained-file-information:v1",
+  "title": "ContainedFileInformation",
+  "type": "object",
+  "description": "Information about a single file inside a container.",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Unix-style path relative to the root of the container."
+    },
+    "file": {
+      "$ref": "file-information.v1.schema.json",
+      "description": "Meta-information about the file."
+    }
+  },
+  "required": [
+    "path",
+    "file"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:compressed-content:v1",
+  "title": "CompressedContent",
+  "type": "object",
+  "description": "The file is a compressed variant of another file.",
+  "properties": {
+    "compressionType": {
+      "type": "string",
+      "description": "Information about the compression algorithm used. Can be left empty for zip, but fill out FileMetadata."
+    },
+    "compressedFile": {
+      "$ref": "file-information.v1.schema.json",
+      "description": "The contained file that this file represents in compressed form."
+    }
+  },
+  "required": [
+    "compressedFile"
+  ],
+  "additionalProperties": false
+}

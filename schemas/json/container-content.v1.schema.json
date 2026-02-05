@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:container-content:v1",
+  "title": "ContainerContent",
+  "type": "object",
+  "description": "The file is a container for other information.",
+  "properties": {
+    "filesContainer": {
+      "$ref": "file-container.v1.schema.json",
+      "description": "If this file is an archive (containing multiple files), put the metadata of the contained files here."
+    },
+    "timeSeriesContainer": {
+      "$ref": "time-series-container.v1.schema.json",
+      "description": "If this file contains time series data, put the metadata of the contained topics here."
+    },
+    "otherInformation": {
+      "type": "object",
+      "description": "If this file contains other structured information (e.g. CSV headers or JSON schema), store it here.",
+      "additionalProperties": true
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

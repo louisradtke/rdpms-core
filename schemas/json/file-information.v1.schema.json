@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:file-information:v1",
+  "title": "FileInformation",
+  "type": "object",
+  "description": "Meta-information about a file. If it is a container in some way, it features special fields for this.",
+  "properties": {
+    "sizeBytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "metadata": {
+      "$ref": "file-metadata.v1.schema.json"
+    },
+    "content": {
+      "$ref": "file-content.v1.schema.json"
+    }
+  },
+  "required": [
+    "sizeBytes"
+  ],
+  "additionalProperties": false
+}

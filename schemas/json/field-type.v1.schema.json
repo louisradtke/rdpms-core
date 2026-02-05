@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:field-type:v1",
+  "title": "FieldType",
+  "type": "object",
+  "description": "Type of a field in a message.",
+  "properties": {
+    "descriptor": {
+      "type": "string",
+      "description": "Human-readable description of the field."
+    },
+    "vocabularyReference": {
+      "type": "string",
+      "description": "Vocabulary, used for the Descriptor."
+    },
+    "type": {
+      "type": "string",
+      "description": "Type-primitive, e.g. int, float, string, byte[]."
+    },
+    "format": {
+      "type": "string",
+      "description": "Information on the usage of e.g. a string. E.g. a string can be JSON, or a byte-array can be a pointcloud."
+    }
+  },
+  "required": [
+    "descriptor",
+    "type"
+  ],
+  "additionalProperties": false
+}

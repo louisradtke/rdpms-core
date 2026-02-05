@@ -13,6 +13,7 @@ The "tracking" may be implemented as "taint": it shall be clearly traceable, whi
   - `RDPMS.Core.Server`: ASP.NET Core API
 - `rdpms-cli/` Python CLI client
 - `rdpms-web-ui/` Svelte 5 + Vite 6 web UI
+- `schemas/` JSON Schemas for shared contracts (see `schemas/README.md`)
 
 ## Quick start (dev)
 

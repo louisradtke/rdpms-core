@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:file-container:v1",
+  "title": "FileContainer",
+  "type": "object",
+  "description": "If a file itself contains other files, this is the container for them.",
+  "properties": {
+    "containerType": {
+      "type": "string",
+      "description": "e.g. 'zip', 'tar', '7z'"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "$ref": "contained-file-information.v1.schema.json"
+      },
+      "description": "List of files/paths in this container."
+    }
+  },
+  "required": [
+    "containerType",
+    "files"
+  ],
+  "additionalProperties": false
+}

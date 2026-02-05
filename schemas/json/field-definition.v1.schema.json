@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:field-definition:v1",
+  "title": "FieldDefinition",
+  "type": "object",
+  "description": "Definition of a named field in a message type.",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Field name."
+    },
+    "type": {
+      "oneOf": [
+        {
+          "$ref": "field-type.v1.schema.json"
+        },
+        {
+          "$ref": "message-type.v1.schema.json"
+        }
+      ],
+      "description": "Either a primitive FieldType or a nested MessageType."
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ],
+  "additionalProperties": false
+}

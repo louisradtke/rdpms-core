@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:topic:v1",
+  "title": "Topic",
+  "type": "object",
+  "description": "Information about a typed single topic (data stream) in a time series.",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name/path of the topic."
+    },
+    "metadata": {
+      "$ref": "topic-metadata.v1.schema.json",
+      "description": "Meta-information about the topic, that might accelerate queries."
+    },
+    "messageType": {
+      "$ref": "message-type.v1.schema.json",
+      "description": "Type of the messages inside the topic."
+    }
+  },
+  "required": [
+    "name",
+    "metadata",
+    "messageType"
+  ],
+  "additionalProperties": false
+}

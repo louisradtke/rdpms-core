@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:file-content:v1",
+  "title": "FileContent",
+  "description": "Content-related information about a file (as opposed to file metadata).",
+  "oneOf": [
+    {
+      "$ref": "compressed-content.v1.schema.json"
+    },
+    {
+      "$ref": "container-content.v1.schema.json"
+    }
+  ]
+}
