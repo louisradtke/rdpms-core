@@ -9,13 +9,13 @@ public record FileInformation
     public ulong? SizeBytes { get; set; }
     public FileMetadata? Metadata { get; set; }
     
+    // below are several fields related to subordinated contents
+
     /// <summary>
     /// Information about the compression algorithm used.
     /// Can be left empty for zip, but fill out <see cref="FileMetadata"/>.
     /// </summary>
     public string? CompressionType { get; set; }
-
-    // below are several container formats
 
     /// <summary>
     /// If this file is just the compressed variant of some file, put the metadata of the contained file here.
@@ -140,6 +140,7 @@ public record MessageType
     /// Maps a field, identified by a dot-separated path, to a <see cref="FieldType"/>."/>
     /// </summary>
     // TODO: this should be recursively MessageType or a primitive
+    // TODO: Essentially, I am mimicking JSON schema ...
     public Dictionary<string, FieldType>? Fields { get; set; }
 }
 
