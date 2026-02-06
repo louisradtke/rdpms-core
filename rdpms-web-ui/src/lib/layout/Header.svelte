@@ -1,9 +1,10 @@
 <script lang="ts">
     // Manage the state for the burger menu
-    let showMenu = false;
+    let showMenu = $state(false);
 
     const links = [
         {name: 'Projects', href: '/projects'},
+        {name: 'Schemas', href: '/schemas'},
         {name: 'Admin', href: '/admin'},
     ];
 </script>
@@ -33,7 +34,7 @@
             <!-- Right: User Icon + Burger Menu -->
             <div class="flex items-center space-x-6">
                 <button
-                        on:click={() => { showMenu = !showMenu;}}
+                        onclick={() => { showMenu = !showMenu;}}
                         class="md:hidden text-gray-800 hover:text-gray-600"
                 >
                     <!-- Burger Icon -->

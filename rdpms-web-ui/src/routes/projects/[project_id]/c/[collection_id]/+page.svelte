@@ -88,6 +88,14 @@
                 <LoadingCircle/>
             {:then collection}
                 <EntityHeader type="COLLECTION" entity={collection} />
+                <div class="mt-2">
+                    <a
+                        class="inline-flex rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50"
+                        href="/projects/{projectSlug}/c/{collectionSlug}/-"
+                    >
+                        Settings
+                    </a>
+                </div>
 <!--                <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">-->
 <!--                    {collection.dataSetCount + " dataset" + (collection.dataSetCount === 1 ? "" : "s")}-->
 <!--                </span>-->

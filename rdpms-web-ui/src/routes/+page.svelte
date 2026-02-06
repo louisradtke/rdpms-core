@@ -7,13 +7,12 @@
 
     <ul>
         <li>
-            <a href="/collections">Collections</a><br/>
-            <p class="text-tiny text-gray-400">Collections are basically a list of data sets.</p>
+            <a href="/projects">Projects</a><br/>
+            <p class="text-tiny text-gray-400">Projects contain collections and datasets.</p>
         </li>
         <li>
-            <a href="/data-stores">Data Stores</a><br/>
-            <p class="text-tiny text-gray-400">Data Stores are representations of the physical location of individual
-                files</p>
+            <a href="/schemas">Schemas</a><br/>
+            <p class="text-tiny text-gray-400">Manage registered JSON schemas used for metadata validation.</p>
         </li>
     </ul>
 </main>

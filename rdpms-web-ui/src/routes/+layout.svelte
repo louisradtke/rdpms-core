@@ -14,7 +14,7 @@
 <Header/>
 
 <!-- Body below header: sidebar + main -->
-<div class="flex h-[calc(100vh-4rem)]">
+<div class="flex h-[calc(100vh-4rem)] overflow-y-auto">
 
     {@render children()}
 

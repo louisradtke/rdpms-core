@@ -70,4 +70,18 @@ export class CollectionsRepository {
         const api = await this.ensureReady();
         return api.apiV1DataCollectionsPost({ collectionSummaryDTO: dto as CollectionSummaryDTO });
     }
+
+    public async upsertMetadataColumn(
+        collectionId: string,
+        key: string,
+        options: { schemaId: string; defaultMetadataId?: string }
+    ): Promise<void> {
+        const api = await this.ensureReady();
+        return api.apiV1DataCollectionsIdMetadataKeyPut({
+            id: collectionId,
+            key,
+            schemaId: options.schemaId,
+            defaultMetadataId: options?.defaultMetadataId,
+        });
+    }
 }
