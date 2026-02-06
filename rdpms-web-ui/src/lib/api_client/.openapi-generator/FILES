@@ -1,3 +1,4 @@
+.openapi-generator-ignore
 apis/CollectionsApi.ts
 apis/ContentTypesApi.ts
 apis/DataSetsApi.ts

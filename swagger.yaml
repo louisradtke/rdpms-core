@@ -629,9 +629,7 @@ paths:
         description: The JSON document
         content:
           application/json:
-            schema:
-              type: string
-              format: byte
+            schema: { }
       responses:
         '201':
           description: Created

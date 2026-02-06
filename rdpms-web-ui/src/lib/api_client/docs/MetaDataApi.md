@@ -350,8 +350,8 @@ async function example() {
   const body = {
     // string | (optional) Schema URL, if existing. Keep empty otherwise. (optional)
     schemaId: schemaId_example,
-    // string | The JSON document (optional)
-    body: BYTE_ARRAY_DATA_HERE,
+    // any | The JSON document (optional)
+    body: ...,
   } satisfies ApiV1DataSchemasPostRequest;
 
   try {
@@ -372,7 +372,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **schemaId** | `string` | (optional) Schema URL, if existing. Keep empty otherwise. | [Optional] [Defaults to `undefined`] |
-| **body** | `string` | The JSON document | [Optional] |
+| **body** | `any` | The JSON document | [Optional] |
 
 ### Return type
 

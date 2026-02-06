@@ -43,7 +43,7 @@ export interface ApiV1DataSchemasIdBlobGetRequest {
 
 export interface ApiV1DataSchemasPostRequest {
     schemaId?: string;
-    body?: string;
+    body?: any | null;
 }
 
 /**

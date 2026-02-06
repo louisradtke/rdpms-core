@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,9 +19,7 @@ public class MetaDataController(
     IMetadataService metadataService,
     ISchemaService schemaService,
     IExportMapper<MetadataJsonField, MetaDateDTO> metadataMapper,
-    IExportMapper<JsonSchemaEntity, SchemaDTO> schemaMapper,
-    LinkGenerator linkGenerator,
-    ILogger<DataSetsController> logger)
+    IExportMapper<JsonSchemaEntity, SchemaDTO> schemaMapper)
     : ControllerBase
 {
     /// <summary>
@@ -99,7 +98,7 @@ public class MetaDataController(
     [HttpPost("schemas")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> AddSchema([FromQuery] string? schemaId, [FromBody] byte[] value)
+    public async Task<ActionResult> AddSchema([FromQuery] string? schemaId, [FromBody] JsonElement value)
     {
         if (schemaId != null)
         {
@@ -119,23 +118,22 @@ public class MetaDataController(
         var schemaGuid = Guid.NewGuid();
         if (schemaId == null)
         {
-            var version = HttpContext.Request.RouteValues["version"]; // hack required for ominous reasons
-            schemaId = linkGenerator.GetUriByAction(
-                HttpContext, nameof(GetRawSchema), "MetaData",
-                new { id = schemaGuid, version });
+            schemaId = $"urn:rdpms:3rd-party:schema:{schemaGuid.ToString().ToLowerInvariant()}";
         }
 
-        if (schemaId == null)
+        if (!TryValidateSchemaPayload(value, out var schemaString))
         {
-            logger.LogError("Failed to generate schemaId link.");
-            throw new InvalidOperationException("Failed to generate schemaId link.");
+            return BadRequest(new ErrorMessageDTO
+            {
+                Message = "Schema payload must be a valid JSON object or array."
+            });
         }
 
         var schema = new JsonSchemaEntity()
         {
             Id = schemaGuid,
             SchemaId = schemaId,
-            SchemaString = Encoding.UTF8.GetString(value)
+            SchemaString = schemaString
         };
         await schemaService.AddAsync(schema);
         return CreatedAtAction(nameof(GetRawSchema), new { id = schema.Id }, schema.Id);
@@ -162,5 +160,17 @@ public class MetaDataController(
         {
             return NotFound($"Metadata with id {id} was not found.");
         }
+    }
+
+    private static bool TryValidateSchemaPayload(JsonElement payload, out string schemaString)
+    {
+        schemaString = string.Empty;
+        if (payload.ValueKind is not (JsonValueKind.Object or JsonValueKind.Array))
+        {
+            return false;
+        }
+
+        schemaString = payload.GetRawText();
+        return true;
     }
 }
