@@ -17,13 +17,15 @@ GEN_OPTIONAL_AS_NULLABLE="NullOrUndefined"
 GEN_ASSERT_FORMAT="True"
 
 # copy-interface
-SCHEMA_DIR="/work/json"
-SCHEMA_TMP_DIR="/work/json_tmp"
+SCHEMA_DIR="/work/schemas"
 TARGET_DIR="/work/out"
 
+SCHEMA_TMP_DIR="/work/json_tmp"
+UNIFIED_MAP_NAME="index.json"
+SCHEMA_MAPS_DIR="/tmp/schema-maps"
+
 rm -rf "$SCHEMA_TMP_DIR"
-mkdir -p "$SCHEMA_TMP_DIR"
-cp "$SCHEMA_DIR"/*.schema.json "$SCHEMA_TMP_DIR"/
+cp -r "$SCHEMA_DIR"/json/ "$SCHEMA_TMP_DIR"/
 
 # rewrite $id to file URIs so relative refs resolve on disk
 for schema in "$SCHEMA_TMP_DIR"/*.schema.json; do
@@ -60,6 +62,10 @@ with open(path, "w", encoding="utf-8") as f:
 PY
 done
 
+# copy source-of-truth schemas to output for embedding/packaging
+cp -r "${SCHEMA_DIR}/json" "$TARGET_DIR"
+
+mkdir "$SCHEMA_MAPS_DIR"
 for schema in "${BASE_TYPES[@]}"; do
   generatejsonschematypes \
     "$SCHEMA_TMP_DIR/$schema" \
@@ -68,6 +74,72 @@ for schema in "${BASE_TYPES[@]}"; do
     --useSchema "$GEN_SCHEMA_VERSION" \
     --assertFormat "$GEN_ASSERT_FORMAT" \
     --optionalAsNullable "$GEN_OPTIONAL_AS_NULLABLE" \
-    --outputMapFile "$TARGET_DIR/${schema}${MAP_FILE_SUFFIX}" \
+    --outputMapFile "$SCHEMA_MAPS_DIR/${schema%.schema.json}${MAP_FILE_SUFFIX}" \
     --useUnixLineEndings
 done
+
+# generate one unified schema -> type map and enrich schema_uuids.json with typenames (if present)
+
+UUID_FILE="$SCHEMA_DIR/schema_uuids.json"
+
+python3 - "$TARGET_DIR" "$SCHEMA_MAPS_DIR" "$MAP_FILE_SUFFIX" "$SCHEMA_DIR/json" "$UNIFIED_MAP_NAME" "$UUID_FILE" <<'PY'
+import glob
+import json
+import os
+import re
+import sys
+from pathlib import Path
+
+target_dir = Path(sys.argv[1])
+schema_maps_dir = Path(sys.argv[2])
+map_suffix = sys.argv[3]
+schema_dir = Path(sys.argv[4])
+unified_map_name = sys.argv[5]
+uuid_file = Path(sys.argv[6]) if sys.argv[6] else None
+
+map_files = sorted(schema_maps_dir.glob(f"*{map_suffix}"))
+all_entries = []
+for map_file in map_files:
+    with map_file.open("r", encoding="utf-8") as f:
+        all_entries.extend(json.load(f))
+
+# key example: /work/json_tmp/visualization-manifest.v1.schema.json
+root_key_pattern = re.compile(r"^.*/([^/]+\.schema\.json)$")
+schema_to_type = {}
+for entry in all_entries:
+    key = entry.get("key", "")
+    if "#" in key:
+        continue
+    m = root_key_pattern.match(key)
+    if not m:
+        continue
+    schema_file = m.group(1)
+    class_name = entry.get("class")
+    if not class_name:
+        continue
+    schema_to_type[schema_file] = {
+        "typeName": class_name.split(".")[-1],
+        "className": class_name,
+    }
+
+if uuid_file and uuid_file.exists():
+    with uuid_file.open("r", encoding="utf-8") as f:
+        uuid_entries = json.load(f)
+
+    enriched = []
+    for item in uuid_entries:
+        schema_ref = item.get("schema", "")
+        schema_name = os.path.basename(schema_ref)
+        type_info = schema_to_type.get(schema_name, {})
+        enriched.append(
+            {
+                **item,
+                "typeName": type_info.get("typeName"),
+                "className": type_info.get("className"),
+            }
+        )
+
+    with (target_dir / unified_map_name).open("w", encoding="utf-8") as f:
+        json.dump(enriched, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+PY

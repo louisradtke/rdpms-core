@@ -11,10 +11,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Schemas\file-information.v1.schema.json.map.json" />
-      <Resource Include="Schemas\file-information.v1.schema.json.map.json" />
-      <None Remove="Schemas\visualization-manifest.v1.schema.json.map.json" />
-      <Resource Include="Schemas\visualization-manifest.v1.schema.json.map.json" />
+      <EmbeddedResource Include="Schemas\json\**\*.json" />
+      <EmbeddedResource Include="Schemas\index.json" />
     </ItemGroup>
 
 </Project>

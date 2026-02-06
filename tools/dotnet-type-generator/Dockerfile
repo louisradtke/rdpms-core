@@ -7,7 +7,7 @@ RUN dotnet tool install --global Corvus.Json.JsonSchema.TypeGeneratorTool \
     --version 4.5.2
 
 RUN mkdir -p /app
-RUN mkdir -p /work/{json,out}
+RUN mkdir -p /work/{schemas/json,out}
 
 COPY entrypoint.sh /app
 

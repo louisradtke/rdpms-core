@@ -1,0 +1,74 @@
+[
+  {
+    "schema": "json/file-information.v1.schema.json",
+    "id": "0acc94b7-5728-493f-af24-a5e9e3773304"
+  },
+  {
+    "schema": "json/file-metadata.v1.schema.json",
+    "id": "13562d2d-ca7f-4782-8802-495f066c16cc"
+  },
+  {
+    "schema": "json/file-container.v1.schema.json",
+    "id": "12ecea15-9fb9-4f49-87fc-049c29cb9f98"
+  },
+  {
+    "schema": "json/contained-file-information.v1.schema.json",
+    "id": "d73eecf9-f497-41ac-a407-f040cdcf1a96"
+  },
+  {
+    "schema": "json/time-series-container.v1.schema.json",
+    "id": "cdc6724d-87d6-45c3-8d26-7b45b4eea35f"
+  },
+  {
+    "schema": "json/topic.v1.schema.json",
+    "id": "373c6783-56b1-4671-9723-49cd37d7175e"
+  },
+  {
+    "schema": "json/message-type.v1.schema.json",
+    "id": "6fa32a3e-a3dc-408b-a914-f8b9c53166f1"
+  },
+  {
+    "schema": "json/field-type.v1.schema.json",
+    "id": "6cf6476f-f4f6-4656-8fa1-b44c8fcb34ee"
+  },
+  {
+    "schema": "json/topic-metadata.v1.schema.json",
+    "id": "e0d05105-64a9-4302-9cd7-4dc1bbb60e94"
+  },
+  {
+    "schema": "json/file-content.v1.schema.json",
+    "id": "a308a5bf-d4d6-4ded-98ff-8d585e1202b9"
+  },
+  {
+    "schema": "json/field-definition.v1.schema.json",
+    "id": "58f550e9-d52a-4aa4-80fb-013089d9d374"
+  },
+  {
+    "schema": "json/compressed-content.v1.schema.json",
+    "id": "57f57dce-e074-4f4e-8ee2-f1f094af9427"
+  },
+  {
+    "schema": "json/container-content.v1.schema.json",
+    "id": "38c9afb4-355d-456e-90ea-224db51462fa"
+  },
+  {
+    "schema": "json/file-source.v1.schema.json",
+    "id": "d938a421-a2bd-4005-81e2-108ce767a7fa"
+  },
+  {
+    "schema": "json/visualization-renderer.v1.schema.json",
+    "id": "89a4e292-e97b-49c1-aeb8-cdd4f2bf0814"
+  },
+  {
+    "schema": "json/visualization-item.v1.schema.json",
+    "id": "38b8e138-c2d4-4fd9-8b1d-61373542544d"
+  },
+  {
+    "schema": "json/visualization-view.v1.schema.json",
+    "id": "e4284ad8-0adc-4c00-a995-03932d12869e"
+  },
+  {
+    "schema": "json/visualization-manifest.v1.schema.json",
+    "id": "17612b6b-ef7b-4e0d-a0b1-f329867385ac"
+  }
+]
