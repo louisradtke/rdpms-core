@@ -11,6 +11,15 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "commandLineArgs": "serve -u http://localhost:5000"
+    },
+    "seeding": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "seed --init-db=dev"
     }
   }
 }
