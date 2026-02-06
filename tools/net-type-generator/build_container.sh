@@ -2,7 +2,7 @@
 
 # general settings
 
-IMAGE_NAME="rdpms/generatejsonschematypes"
+IMAGE_NAME="rdpms/net-type-generator"
 
 # gen variables
 
