@@ -2,7 +2,7 @@
 
 # general settings
 
-IMAGE_NAME="rdpms/net-type-generator"
+IMAGE_NAME="rdpms/dotnet-type-generator"
 
 # gen variables
 
