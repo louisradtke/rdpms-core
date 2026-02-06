@@ -4,6 +4,9 @@
     import {FileSize} from "$lib/data/FileSize";
     import CodeCopyField from "$lib/layout/CodeCopyField.svelte";
     import TablePlugin from "$lib/layout/displayPlugins/TablePlugin.svelte";
+    import PdfPlugin from "$lib/layout/displayPlugins/PdfPlugin.svelte";
+    import CodePlugin from "$lib/layout/displayPlugins/CodePlugin.svelte";
+    import {autoPluginCandidates, CORE_PLUGIN_IDS, isSupportedCorePluginId, type CorePluginId} from "$lib/layout/displayPlugins/plugin-registry";
 
     function downloadName(file: FileSummaryDTO): string {
         if (file.name) return file.name;
@@ -36,17 +39,36 @@
         }
     }
 
-    export let title: string;
-    export let fileSlug: string;
-    export let file: FileSummaryDTO;
+    let {
+        title,
+        fileSlug,
+        file,
+        preferredPluginIds = []
+    }: {
+        title: string;
+        fileSlug: string;
+        file: FileSummaryDTO;
+        preferredPluginIds?: string[];
+    } = $props();
 
-    let size = !Number.isNaN(file?.size) ? new FileSize(file.size || 0) : undefined;
+    let size = $derived(!Number.isNaN(file?.size) ? new FileSize(file.size || 0) : undefined);
+    
+    const resolvePreferredPlugin = (preferredIds: string[], fallbackFile: FileSummaryDTO): CorePluginId | null => {
+        const normalized = preferredIds
+            .map((id) => id.trim())
+            .filter((id) => id.length > 0);
 
-    let fileType: string | undefined = undefined;
-    if (["png", "jpg", "jpeg"].includes(file?.contentType?.abbreviation ?? '')) fileType = 'image';
-    else if (["mp4", "avi", "mov"].includes(file?.contentType?.abbreviation ?? '')) fileType = 'video';
-    else if (["pdf"].includes(file?.contentType?.abbreviation ?? '')) fileType = 'pdf';
-    else if (["csv"].includes(file?.contentType?.abbreviation ?? '')) fileType = 'csv';
+        for (const pluginId of normalized) {
+            if (isSupportedCorePluginId(pluginId)) {
+                return pluginId;
+            }
+        }
+
+        const autoCandidates = autoPluginCandidates(fallbackFile);
+        return autoCandidates.length > 0 ? autoCandidates[0] : null;
+    };
+
+    let selectedPluginId = $derived.by(() => resolvePreferredPlugin(preferredPluginIds, file));
 </script>
 
 <div id="{fileSlug}">
@@ -56,7 +78,7 @@
             <h2 class="font-medium text-gray-800">{title}</h2>
             <div class="flex items-center gap-4">
                 <span class="text-xs text-gray-500">{size !== undefined ? size.getString('*B', true, 1) : 'undefined'}</span>
-                <button on:click={(e) => handleDownload(e, file)}
+                <button onclick={(e) => handleDownload(e, file)}
                    class="text-gray-500 hover:text-gray-700 cursor-pointer" aria-label="Download">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                          stroke="currentColor">
@@ -68,19 +90,17 @@
             </div>
         </header>
         <div class="p-4">
-            {#if fileType === 'image'}
+            {#if selectedPluginId === CORE_PLUGIN_IDS.image}
                 <ImagePlugin uri={file.downloadURI ?? ''} />
-            {:else if fileType === 'csv'}
-                <TablePlugin dataUri="{file.downloadURI ?? ''}" />
-            <!--{:else if fileType === 'video'}-->
-            <!--    <video controls>-->
-            <!--        <source src={file.downloadURI ?? ''} type="video/mp4" />-->
-            <!--        Your browser does not support the video tag.-->
-            <!--    </video>-->
+            {:else if selectedPluginId === CORE_PLUGIN_IDS.table}
+                <TablePlugin dataUri={file.downloadURI ?? ''} />
+            {:else if selectedPluginId === CORE_PLUGIN_IDS.pdf}
+                <PdfPlugin uri={file.downloadURI ?? ''} />
+            {:else if selectedPluginId === CORE_PLUGIN_IDS.code}
+                <CodePlugin dataUri={file.downloadURI ?? ''} />
             {:else}
                 <p class="text-center text-sm text-gray-500">File type not supported</p>
             {/if}
-            <!-- ... -->
         </div>
     </section>
 
