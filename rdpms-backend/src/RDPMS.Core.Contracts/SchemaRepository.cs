@@ -87,8 +87,10 @@ public sealed class EmbeddedSchemaRepository : ISchemaRepository
                                     $"Could not open embedded schema index resource '{indexResourceName}'.");
         using var reader = new StreamReader(indexStream);
         var json = reader.ReadToEnd();
-        var entries = JsonSerializer.Deserialize<List<SchemaIndexEntry>>(json)
-                      ?? throw new InvalidOperationException("Failed to deserialize schema index.");
+
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var entries = JsonSerializer.Deserialize<List<SchemaIndexEntry>>(json, options)
+                                ?? throw new InvalidOperationException("Failed to deserialize schema index.");
 
         var descriptors = new Dictionary<Guid, SchemaDescriptor>();
         var resourceNames = new Dictionary<Guid, string>();

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
+using RDPMS.Core.Contracts;
 using RDPMS.Core.Infra;
 using RDPMS.Core.Infra.Configuration;
 using RDPMS.Core.Infra.Configuration.Database;
@@ -287,6 +288,8 @@ public class RDPMSPersistenceContext : DbContext
             }
         }
 
+        await SeedSchemasAsync(context, token);
+
         if (_dbInitMode != LaunchConfiguration.DatabaseInitMode.Development) return;
 
         if (await context.Set<DataStore>()
@@ -319,6 +322,8 @@ public class RDPMSPersistenceContext : DbContext
             }
         }
 
+        SeedSchemas(context);
+
         if (_dbInitMode != LaunchConfiguration.DatabaseInitMode.Development) return;
 
         if (context.Set<DataStore>().Find(RDPMSConstants.DummyS3StoreId) is not { } store)
@@ -336,5 +341,77 @@ public class RDPMSPersistenceContext : DbContext
         }
         
         SaveChanges();
+    }
+
+    private static async Task SeedSchemasAsync(DbContext context, CancellationToken token)
+    {
+        var schemaRepo = new EmbeddedSchemaRepository();
+        foreach (var descriptor in schemaRepo.GetAll())
+        {
+            var schemaString = schemaRepo.GetSchemaString(descriptor.Id);
+            var schemaId = ResolveSchemaId(schemaString, descriptor.SchemaPath);
+
+            var existing = await context.Set<JsonSchemaEntity>().FindAsync([descriptor.Id], token);
+            if (existing is null)
+            {
+                await context.Set<JsonSchemaEntity>().AddAsync(new JsonSchemaEntity
+                {
+                    Id = descriptor.Id,
+                    SchemaId = schemaId,
+                    SchemaString = schemaString
+                }, token);
+                continue;
+            }
+
+            existing.SchemaId = schemaId;
+            existing.SchemaString = schemaString;
+            context.Set<JsonSchemaEntity>().Update(existing);
+        }
+    }
+
+    private static void SeedSchemas(DbContext context)
+    {
+        var schemaRepo = new EmbeddedSchemaRepository();
+        foreach (var descriptor in schemaRepo.GetAll())
+        {
+            var schemaString = schemaRepo.GetSchemaString(descriptor.Id);
+            var schemaId = ResolveSchemaId(schemaString, descriptor.SchemaPath);
+
+            var existing = context.Set<JsonSchemaEntity>().Find(descriptor.Id);
+            if (existing is null)
+            {
+                context.Set<JsonSchemaEntity>().Add(new JsonSchemaEntity
+                {
+                    Id = descriptor.Id,
+                    SchemaId = schemaId,
+                    SchemaString = schemaString
+                });
+                continue;
+            }
+
+            existing.SchemaId = schemaId;
+            existing.SchemaString = schemaString;
+            context.Set<JsonSchemaEntity>().Update(existing);
+        }
+    }
+
+    private static string ResolveSchemaId(string schemaString, string fallbackPath)
+    {
+        try
+        {
+            using var document = System.Text.Json.JsonDocument.Parse(schemaString);
+            if (document.RootElement.TryGetProperty("$id", out var schemaIdElement)
+                && schemaIdElement.ValueKind == System.Text.Json.JsonValueKind.String
+                && !string.IsNullOrWhiteSpace(schemaIdElement.GetString()))
+            {
+                return schemaIdElement.GetString()!;
+            }
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            // Keep fallback when schema itself is malformed JSON.
+        }
+
+        return fallbackPath;
     }
 }

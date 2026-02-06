@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\RDPMS.Core.Contracts\RDPMS.Core.Contracts.csproj" />
       <ProjectReference Include="..\RDPMS.Core.Infra\RDPMS.Core.Infra.csproj" />
     </ItemGroup>
 
