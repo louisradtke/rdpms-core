@@ -60,6 +60,18 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 - Scripts in `rdpms-web-ui/package.json` (`dev`, `build`, `check`, `lint`)
 - Package manager preference: `npm`
 
+### Web UI Layout Guardrails
+- App shell scrolling:
+  - `body` is configured as fixed-height with hidden overflow.
+  - Therefore, route content must remain scrollable via the post-header container in `rdpms-web-ui/src/routes/+layout.svelte` (keep `overflow-y-auto` on the `h-[calc(100vh-4rem)]` wrapper).
+- Page width consistency:
+  - Full-page route content should use the same centered container pattern as the header for stable responsive behavior:
+    - `mx-auto w-full max-w-screen-xl px-4 sm:px-6 lg:px-8`
+  - Avoid bare margin-only wrappers (`m-*`) for primary pages, as these can appear off-center and cause width jumps during loading.
+- Async refresh pattern:
+  - When using `$derived.by(async () => ...)` for data loads, a no-op read like `reloadTick;` is used intentionally to track a manual refresh dependency.
+  - Do not remove this line unless replacing it with another explicit dependency trigger.
+
 ### Web UI Structure (current)
 - Runtime config:
   - Loads `/config.json` at runtime via `getOrFetchConfig` and converts to OpenAPI client config (`rdpms-web-ui/src/lib/util/config-helper.ts`).
