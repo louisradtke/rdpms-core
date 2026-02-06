@@ -41,8 +41,8 @@ export interface ApiV1DataCollectionsIdGetRequest {
 export interface ApiV1DataCollectionsIdMetadataKeyPutRequest {
     id: string;
     key: string;
+    schemaId?: string;
     defaultMetadataId?: string;
-    body?: string;
 }
 
 export interface ApiV1DataCollectionsPostRequest {
@@ -151,13 +151,15 @@ export class CollectionsApi extends runtime.BaseAPI {
 
         const queryParameters: any = {};
 
+        if (requestParameters['schemaId'] != null) {
+            queryParameters['schemaId'] = requestParameters['schemaId'];
+        }
+
         if (requestParameters['defaultMetadataId'] != null) {
             queryParameters['defaultMetadataId'] = requestParameters['defaultMetadataId'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
 
 
         let urlPath = `/api/v1/data/collections/{id}/metadata/{key}`;
@@ -169,7 +171,6 @@ export class CollectionsApi extends runtime.BaseAPI {
             method: 'PUT',
             headers: headerParameters,
             query: queryParameters,
-            body: requestParameters['body'] as any,
         }, initOverrides);
 
         return new runtime.VoidApiResponse(response);

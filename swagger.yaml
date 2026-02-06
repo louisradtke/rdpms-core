@@ -95,17 +95,16 @@ paths:
           required: true
           schema:
             type: string
+        - name: schemaId
+          in: query
+          schema:
+            type: string
+            format: uuid
         - name: defaultMetadataId
           in: query
           schema:
             type: string
             format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: string
-              format: uuid
       responses:
         '200':
           description: OK

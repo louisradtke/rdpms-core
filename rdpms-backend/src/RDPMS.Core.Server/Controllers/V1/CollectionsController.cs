@@ -110,7 +110,7 @@ public class CollectionsController(
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> AddMetaDataColumn([FromRoute] Guid id, [FromRoute] string key,
-        [FromBody] Guid schemaId, [FromQuery] Guid? defaultMetadataId = null)
+        [FromQuery] Guid schemaId, [FromQuery] Guid? defaultMetadataId = null)
     {
         var collectionExists = await dataCollectionEntityService.CheckForIdAsync(id);
         if (!collectionExists)
