@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:visualization-item:v1",
+  "title": "VisualizationItem",
+  "type": "object",
+  "description": "A single item in a visualization view.",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Display title for the item."
+    },
+    "source": {
+      "$ref": "file-source.v1.schema.json"
+    },
+    "renderer": {
+      "$ref": "visualization-renderer.v1.schema.json"
+    },
+    "collapsible": {
+      "type": "boolean",
+      "description": "Whether the item can be collapsed."
+    },
+    "collapsedByDefault": {
+      "type": "boolean",
+      "description": "Initial collapsed state when collapsible."
+    }
+  },
+  "required": [
+    "source"
+  ],
+  "additionalProperties": false
+}

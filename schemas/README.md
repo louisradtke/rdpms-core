@@ -22,6 +22,8 @@ This directory contains JSON Schemas that describe the shared contracts used acr
 - `message-type` holds an array of `field-definition` entries.
 - Each `field-definition` names a field and its `type`, which is either a `field-type` (primitive) or another `message-type` (recursive).
 - `topic-metadata` stores optional aggregates about topic data (timestamps, message counts).
+- `visualization-manifest` defines dataset visualizations made up of views and items.
+- Each `visualization-view` holds `visualization-item` entries that reference a file via `file-source` and optional renderer config via `visualization-renderer`.
 
 ## Generation
 - The generation pipeline will be added later.

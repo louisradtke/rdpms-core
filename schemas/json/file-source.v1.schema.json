@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:file-source:v1",
+  "title": "FileSource",
+  "type": "object",
+  "description": "Reference to a file by UUID.",
+  "properties": {
+    "fileId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID of the file."
+    }
+  },
+  "required": [
+    "fileId"
+  ],
+  "additionalProperties": false
+}

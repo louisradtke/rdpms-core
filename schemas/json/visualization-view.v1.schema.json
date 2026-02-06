@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:visualization-view:v1",
+  "title": "VisualizationView",
+  "type": "object",
+  "description": "A view in a visualization manifest.",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Display title for the view."
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "visualization-item.v1.schema.json"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "items"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rdpms:schema:visualization-renderer:v1",
+  "title": "VisualizationRenderer",
+  "type": "object",
+  "description": "Renderer configuration for a visualization item.",
+  "properties": {
+    "kind": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Renderer id (namespaced). 'rdpms.*' is reserved for built-ins."
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "default": {
+      "type": "string",
+      "description": "Default renderer id (must be one of kind)."
+    },
+    "options": {
+      "type": "object",
+      "description": "Renderer-specific options.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "kind"
+  ],
+  "additionalProperties": false
+}
