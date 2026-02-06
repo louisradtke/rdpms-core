@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:rdpms:schema:time-series-container:v1",
+  "$id": "urn:rdpms:core:schema:time-series-container:v1",
   "title": "TimeSeriesContainer",
   "type": "object",
   "description": "Container for information about multiple topics (data streams).",

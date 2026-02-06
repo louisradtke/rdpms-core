@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:rdpms:schema:container-content:v1",
+  "$id": "urn:rdpms:core:schema:container-content:v1",
   "title": "ContainerContent",
   "type": "object",
   "description": "The file is a container for other information.",

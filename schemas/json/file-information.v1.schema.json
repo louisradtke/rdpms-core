@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:rdpms:schema:file-information:v1",
+  "$id": "urn:rdpms:core:schema:file-information:v1",
   "title": "FileInformation",
   "type": "object",
   "description": "Meta-information about a file. If it is a container in some way, it features special fields for this.",

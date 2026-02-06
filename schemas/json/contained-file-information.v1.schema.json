@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:rdpms:schema:contained-file-information:v1",
+  "$id": "urn:rdpms:core:schema:contained-file-information:v1",
   "title": "ContainedFileInformation",
   "type": "object",
   "description": "Information about a single file inside a container.",

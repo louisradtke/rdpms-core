@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:rdpms:schema:topic-metadata:v1",
+  "$id": "urn:rdpms:core:schema:topic-metadata:v1",
   "title": "TopicMetadata",
   "type": "object",
   "description": "Meta-information about a topic, that might accelerate queries.",

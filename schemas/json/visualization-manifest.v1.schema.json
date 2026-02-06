@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:rdpms:schema:visualization-manifest:v1",
+  "$id": "urn:rdpms:core:schema:visualization-manifest:v1",
   "title": "VisualizationManifest",
   "type": "object",
   "description": "Visualization manifest for dataset content. The dataset linkage is managed by RDPMS.",

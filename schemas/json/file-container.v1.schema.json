@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:rdpms:schema:file-container:v1",
+  "$id": "urn:rdpms:core:schema:file-container:v1",
   "title": "FileContainer",
   "type": "object",
   "description": "If a file itself contains other files, this is the container for them.",

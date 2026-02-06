@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:rdpms:schema:message-type:v1",
+  "$id": "urn:rdpms:core:schema:message-type:v1",
   "title": "MessageType",
   "type": "object",
   "description": "Type of messages in a topic.",

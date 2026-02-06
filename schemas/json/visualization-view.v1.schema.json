@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:rdpms:schema:visualization-view:v1",
+  "$id": "urn:rdpms:core:schema:visualization-view:v1",
   "title": "VisualizationView",
   "type": "object",
   "description": "A view in a visualization manifest.",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:rdpms:schema:file-metadata:v1",
+  "$id": "urn:rdpms:core:schema:file-metadata:v1",
   "title": "FileMetadata",
   "type": "object",
   "description": "Meta-information about a file.",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:rdpms:schema:file-source:v1",
+  "$id": "urn:rdpms:core:schema:file-source:v1",
   "title": "FileSource",
   "type": "object",
   "description": "Reference to a file by UUID.",
