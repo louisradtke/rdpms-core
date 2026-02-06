@@ -9,6 +9,7 @@ BASE_TYPES=(
   "visualization-manifest.v1.schema.json"
   "file-information.v1.schema.json"
 )
+MAP_FILE_SUFFIX=".map.json"
   
 # generator-specific config, ensuring reproducibility in future versions
 GEN_SCHEMA_VERSION="Draft202012"
@@ -67,5 +68,6 @@ for schema in "${BASE_TYPES[@]}"; do
     --useSchema "$GEN_SCHEMA_VERSION" \
     --assertFormat "$GEN_ASSERT_FORMAT" \
     --optionalAsNullable "$GEN_OPTIONAL_AS_NULLABLE" \
+    --outputMapFile "$TARGET_DIR/${schema}${MAP_FILE_SUFFIX}" \
     --useUnixLineEndings
 done
