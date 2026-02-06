@@ -1,3 +1,7 @@
+# specific
+src/RDPMS.Core.Contracts/Schemas/*
+
+# generic
 *.sln.DotSettings.user
 bin/
 obj/
