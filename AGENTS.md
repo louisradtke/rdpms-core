@@ -7,6 +7,12 @@ This repository hosts the core system for RDPMS (Research Data and Pipeline Mana
 - A Svelte-based web UI
 - Supporting configs, docs, and plugins
 
+### The `docs` folder
+- Documentation can be found in the `docs/` directory. The file `docs/src/SUMMARY.md` contains a table of contents for all subpages.
+- The documentation splits into a user and a developer guide.
+- The SUMMARY-file also contains comments for each reference, helping you to navigate the documentation.
+- If you add or modify content, consider updating the SUMMARY-file and the corresponding comments.
+
 ## Domain Context (current understanding)
 RDPMS centers on a data store and catalog for research/robotics datasets. The backend manages data files, data sets, collections, metadata, and pipelines. Storage can be backed by PostgreSQL and S3-compatible object storage (MinIO in dev).
 
@@ -95,7 +101,7 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
   - File previews use display plugins for image/CSV (`rdpms-web-ui/src/lib/layout/displayPlugins`).
 
 ## Conventions
-- All timestamps are UTC.
+- All timestamps are UTC, if not specified otherwise.
 - Avoid the ambiguous term “Collection” in .NET entity naming; prefer `...CollectionEntity` when ambiguity might arise.
 
 ## Secrets and Dev Defaults
