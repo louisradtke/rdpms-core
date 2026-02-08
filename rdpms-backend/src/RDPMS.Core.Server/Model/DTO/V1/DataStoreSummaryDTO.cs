@@ -9,4 +9,9 @@ public record DataStoreSummaryDTO
     public string? StorageType { get; set; }
     public string? PropertiesJson { get; set; }
     public Guid? ProjectId { get; set; }
+    
+    /// <summary>
+    /// Whether the store accepts new data, or is read-only.
+    /// </summary>
+    public bool CanWrite { get; set; }
 }

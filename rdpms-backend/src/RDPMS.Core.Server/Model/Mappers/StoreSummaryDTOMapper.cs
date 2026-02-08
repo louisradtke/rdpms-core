@@ -18,7 +18,8 @@ public class StoreSummaryDTOMapper
             Name = domain.Name,
             StorageType = domain.StorageType.ToString().ToLower(),
             PropertiesJson = domain.GetPublicInfoContentJson(),
-            ProjectId = domain.ParentId
+            ProjectId = domain.ParentId,
+            CanWrite = domain.StorageType is StorageType.S3 or StorageType.Db
         };
     }
 }

@@ -61,6 +61,8 @@ public class DataSetsController(
         {
             return BadRequest(new ErrorMessageDTO() { Message = $"Invalid value for deleted: {ae.Message}" });
         }
+        
+        datasetsQuery = datasetsQuery.Where(ds => ds.ParentCollectionId == collectionId);
 
         var datasets = await datasetsQuery.ToListAsync();
         var dtos = datasets
@@ -88,6 +90,12 @@ public class DataSetsController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<DataSetDetailedDTO>> GetById([FromRoute] Guid id)
     {
+        var dto = await QueryDataSetDetailedDTO(id);
+        return Ok(dto);
+    }
+
+    private async Task<DataSetDetailedDTO> QueryDataSetDetailedDTO(Guid id)
+    {
         var domainItem = await dataSetService.GetByIdAsync(id);
         var dto = dataSetDetailedMapper.Export(domainItem);
 
@@ -101,15 +109,15 @@ public class DataSetsController(
 
         var validatedMetaDates = await dataSetService
             .GetValidatedMetadates([domainItem.Id]);
-        dto.MetaDates = domainItem.MetadataJsonFields.Select(f => new AssignedMetaDateDTO
+        dto.MetaDates = domainItem.MetadataJsonFields
+            .Select(f => new AssignedMetaDateDTO
             {
                 MetadataKey = f.MetadataKey,
                 MetadataId = f.FieldId,
                 CollectionSchemaVerified = validatedMetaDates?[domainItem.Id].Contains(f.MetadataKey)
             })
             .ToList();
-
-        return Ok(dto);
+        return dto;
     }
 
     [HttpDelete("{id:guid}")]
@@ -136,7 +144,7 @@ public class DataSetsController(
     /// <returns>On success, responds with the guid of the new data set.</returns>
     [HttpPost]
     [Consumes("application/json")]
-    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
+    [ProducesResponseType<DataSetDetailedDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> Post([FromBody] DataSetSummaryDTO dto)
     {
@@ -163,7 +171,9 @@ public class DataSetsController(
         }
 
         await dataSetService.AddAsync(domainItem);
-        return Ok(domainItem.Id);
+
+        var responseDto = await QueryDataSetDetailedDTO(domainItem.Id);
+        return Ok(responseDto);
     }
 
     /// <summary>

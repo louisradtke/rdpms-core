@@ -599,8 +599,8 @@ class CollectionsApi:
         self,
         id: UUID,
         key: StrictStr,
+        schema_id: Optional[UUID] = None,
         default_metadata_id: Optional[UUID] = None,
-        body: Optional[UUID] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -621,10 +621,10 @@ class CollectionsApi:
         :type id: UUID
         :param key: (required)
         :type key: str
+        :param schema_id:
+        :type schema_id: UUID
         :param default_metadata_id:
         :type default_metadata_id: UUID
-        :param body:
-        :type body: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -650,8 +650,8 @@ class CollectionsApi:
         _param = self._api_v1_data_collections_id_metadata_key_put_serialize(
             id=id,
             key=key,
+            schema_id=schema_id,
             default_metadata_id=default_metadata_id,
-            body=body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -679,8 +679,8 @@ class CollectionsApi:
         self,
         id: UUID,
         key: StrictStr,
+        schema_id: Optional[UUID] = None,
         default_metadata_id: Optional[UUID] = None,
-        body: Optional[UUID] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -701,10 +701,10 @@ class CollectionsApi:
         :type id: UUID
         :param key: (required)
         :type key: str
+        :param schema_id:
+        :type schema_id: UUID
         :param default_metadata_id:
         :type default_metadata_id: UUID
-        :param body:
-        :type body: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -730,8 +730,8 @@ class CollectionsApi:
         _param = self._api_v1_data_collections_id_metadata_key_put_serialize(
             id=id,
             key=key,
+            schema_id=schema_id,
             default_metadata_id=default_metadata_id,
-            body=body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -759,8 +759,8 @@ class CollectionsApi:
         self,
         id: UUID,
         key: StrictStr,
+        schema_id: Optional[UUID] = None,
         default_metadata_id: Optional[UUID] = None,
-        body: Optional[UUID] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -781,10 +781,10 @@ class CollectionsApi:
         :type id: UUID
         :param key: (required)
         :type key: str
+        :param schema_id:
+        :type schema_id: UUID
         :param default_metadata_id:
         :type default_metadata_id: UUID
-        :param body:
-        :type body: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -810,8 +810,8 @@ class CollectionsApi:
         _param = self._api_v1_data_collections_id_metadata_key_put_serialize(
             id=id,
             key=key,
+            schema_id=schema_id,
             default_metadata_id=default_metadata_id,
-            body=body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -834,8 +834,8 @@ class CollectionsApi:
         self,
         id,
         key,
+        schema_id,
         default_metadata_id,
-        body,
         _request_auth,
         _content_type,
         _headers,
@@ -862,6 +862,10 @@ class CollectionsApi:
         if key is not None:
             _path_params['key'] = key
         # process the query parameters
+        if schema_id is not None:
+            
+            _query_params.append(('schemaId', schema_id))
+            
         if default_metadata_id is not None:
             
             _query_params.append(('defaultMetadataId', default_metadata_id))
@@ -869,8 +873,6 @@ class CollectionsApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if body is not None:
-            _body_params = body
 
 
         # set the HTTP header `Accept`
@@ -881,19 +883,6 @@ class CollectionsApi:
                 ]
             )
 
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params['Content-Type'] = _content_type
-        else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
-            if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
         _auth_settings: List[str] = [

@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictBool, StrictBytes, StrictStr
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 from uuid import UUID
 from rdpms_cli.openapi_client.models.meta_date_dto import MetaDateDTO
@@ -1324,7 +1324,7 @@ class MetaDataApi:
     def api_v1_data_schemas_post(
         self,
         schema_id: Annotated[Optional[StrictStr], Field(description="(optional) Schema URL, if existing. Keep empty otherwise.")] = None,
-        body: Annotated[Optional[Union[StrictBytes, StrictStr]], Field(description="The JSON document")] = None,
+        body: Annotated[Optional[Any], Field(description="The JSON document")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1344,7 +1344,7 @@ class MetaDataApi:
         :param schema_id: (optional) Schema URL, if existing. Keep empty otherwise.
         :type schema_id: str
         :param body: The JSON document
-        :type body: bytearray
+        :type body: object
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1395,7 +1395,7 @@ class MetaDataApi:
     def api_v1_data_schemas_post_with_http_info(
         self,
         schema_id: Annotated[Optional[StrictStr], Field(description="(optional) Schema URL, if existing. Keep empty otherwise.")] = None,
-        body: Annotated[Optional[Union[StrictBytes, StrictStr]], Field(description="The JSON document")] = None,
+        body: Annotated[Optional[Any], Field(description="The JSON document")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1415,7 +1415,7 @@ class MetaDataApi:
         :param schema_id: (optional) Schema URL, if existing. Keep empty otherwise.
         :type schema_id: str
         :param body: The JSON document
-        :type body: bytearray
+        :type body: object
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1466,7 +1466,7 @@ class MetaDataApi:
     def api_v1_data_schemas_post_without_preload_content(
         self,
         schema_id: Annotated[Optional[StrictStr], Field(description="(optional) Schema URL, if existing. Keep empty otherwise.")] = None,
-        body: Annotated[Optional[Union[StrictBytes, StrictStr]], Field(description="The JSON document")] = None,
+        body: Annotated[Optional[Any], Field(description="The JSON document")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1486,7 +1486,7 @@ class MetaDataApi:
         :param schema_id: (optional) Schema URL, if existing. Keep empty otherwise.
         :type schema_id: str
         :param body: The JSON document
-        :type body: bytearray
+        :type body: object
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of

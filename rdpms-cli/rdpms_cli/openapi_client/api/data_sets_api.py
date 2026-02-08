@@ -1716,7 +1716,7 @@ class DataSetsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> UUID:
+    ) -> DataSetDetailedDTO:
         """Add a single item to the system.
 
 
@@ -1753,7 +1753,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UUID",
+            '200': "DataSetDetailedDTO",
             '400': "ProblemDetails",
         }
         response_data = self.api_client.call_api(
@@ -1783,7 +1783,7 @@ class DataSetsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[UUID]:
+    ) -> ApiResponse[DataSetDetailedDTO]:
         """Add a single item to the system.
 
 
@@ -1820,7 +1820,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UUID",
+            '200': "DataSetDetailedDTO",
             '400': "ProblemDetails",
         }
         response_data = self.api_client.call_api(
@@ -1887,7 +1887,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UUID",
+            '200': "DataSetDetailedDTO",
             '400': "ProblemDetails",
         }
         response_data = self.api_client.call_api(

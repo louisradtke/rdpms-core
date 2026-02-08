@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from uuid import UUID
 from typing import Optional, Set
@@ -34,7 +34,8 @@ class DataStoreSummaryDTO(BaseModel):
     storage_type: Optional[StrictStr] = Field(default=None, alias="storageType")
     properties_json: Optional[StrictStr] = Field(default=None, alias="propertiesJson")
     project_id: Optional[UUID] = Field(default=None, alias="projectId")
-    __properties: ClassVar[List[str]] = ["id", "slug", "name", "filesCount", "storageType", "propertiesJson", "projectId"]
+    can_write: Optional[StrictBool] = Field(default=None, description="Whether the store accepts new data, or is read-only.", alias="canWrite")
+    __properties: ClassVar[List[str]] = ["id", "slug", "name", "filesCount", "storageType", "propertiesJson", "projectId", "canWrite"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -128,7 +129,8 @@ class DataStoreSummaryDTO(BaseModel):
             "filesCount": obj.get("filesCount"),
             "storageType": obj.get("storageType"),
             "propertiesJson": obj.get("propertiesJson"),
-            "projectId": obj.get("projectId")
+            "projectId": obj.get("projectId"),
+            "canWrite": obj.get("canWrite")
         })
         return _obj
 

@@ -224,8 +224,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                format: uuid
+                $ref: '#/components/schemas/DataSetDetailedDTO'
         '400':
           description: Bad Request
           content:
@@ -751,6 +750,11 @@ paths:
           in: query
           schema:
             type: string
+        - name: parentProjectId
+          in: query
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: OK
@@ -1066,6 +1070,9 @@ components:
           type: string
           format: uuid
           nullable: true
+        canWrite:
+          type: boolean
+          description: 'Whether the store accepts new data, or is read-only.'
       additionalProperties: false
     DeletionStateDTO:
       enum:

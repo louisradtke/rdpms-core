@@ -11,7 +11,7 @@ All URIs are relative to *http://localhost*
 
 ## apiV1DataStoresGet
 
-> Array&lt;DataStoreSummaryDTO&gt; apiV1DataStoresGet(type)
+> Array&lt;DataStoreSummaryDTO&gt; apiV1DataStoresGet(type, parentProjectId)
 
 Get all data stores.
 
@@ -31,6 +31,8 @@ async function example() {
   const body = {
     // string (optional)
     type: type_example,
+    // string (optional)
+    parentProjectId: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
   } satisfies ApiV1DataStoresGetRequest;
 
   try {
@@ -51,6 +53,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **type** | `string` |  | [Optional] [Defaults to `undefined`] |
+| **parentProjectId** | `string` |  | [Optional] [Defaults to `undefined`] |
 
 ### Return type
 

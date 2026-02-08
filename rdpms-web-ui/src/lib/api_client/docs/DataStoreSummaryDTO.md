@@ -13,6 +13,7 @@ Name | Type
 `storageType` | string
 `propertiesJson` | string
 `projectId` | string
+`canWrite` | boolean
 
 ## Example
 
@@ -28,6 +29,7 @@ const example = {
   "storageType": null,
   "propertiesJson": null,
   "projectId": null,
+  "canWrite": null,
 } satisfies DataStoreSummaryDTO
 
 console.log(example)

@@ -61,6 +61,12 @@ export interface DataStoreSummaryDTO {
      * @memberof DataStoreSummaryDTO
      */
     projectId?: string | null;
+    /**
+     * Whether the store accepts new data, or is read-only.
+     * @type {boolean}
+     * @memberof DataStoreSummaryDTO
+     */
+    canWrite?: boolean;
 }
 
 /**
@@ -87,6 +93,7 @@ export function DataStoreSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator:
         'storageType': json['storageType'] == null ? undefined : json['storageType'],
         'propertiesJson': json['propertiesJson'] == null ? undefined : json['propertiesJson'],
         'projectId': json['projectId'] == null ? undefined : json['projectId'],
+        'canWrite': json['canWrite'] == null ? undefined : json['canWrite'],
     };
 }
 
@@ -108,6 +115,7 @@ export function DataStoreSummaryDTOToJSONTyped(value?: DataStoreSummaryDTO | nul
         'storageType': value['storageType'],
         'propertiesJson': value['propertiesJson'],
         'projectId': value['projectId'],
+        'canWrite': value['canWrite'],
     };
 }
 

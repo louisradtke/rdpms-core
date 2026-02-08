@@ -27,6 +27,7 @@ import {
 
 export interface ApiV1DataStoresGetRequest {
     type?: string;
+    parentProjectId?: string;
 }
 
 export interface ApiV1DataStoresIdGetRequest {
@@ -46,6 +47,10 @@ export class StoresApi extends runtime.BaseAPI {
 
         if (requestParameters['type'] != null) {
             queryParameters['type'] = requestParameters['type'];
+        }
+
+        if (requestParameters['parentProjectId'] != null) {
+            queryParameters['parentProjectId'] = requestParameters['parentProjectId'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

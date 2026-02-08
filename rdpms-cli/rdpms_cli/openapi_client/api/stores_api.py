@@ -43,6 +43,7 @@ class StoresApi:
     def api_v1_data_stores_get(
         self,
         type: Optional[StrictStr] = None,
+        parent_project_id: Optional[UUID] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -61,6 +62,8 @@ class StoresApi:
 
         :param type:
         :type type: str
+        :param parent_project_id:
+        :type parent_project_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -85,6 +88,7 @@ class StoresApi:
 
         _param = self._api_v1_data_stores_get_serialize(
             type=type,
+            parent_project_id=parent_project_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -110,6 +114,7 @@ class StoresApi:
     def api_v1_data_stores_get_with_http_info(
         self,
         type: Optional[StrictStr] = None,
+        parent_project_id: Optional[UUID] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -128,6 +133,8 @@ class StoresApi:
 
         :param type:
         :type type: str
+        :param parent_project_id:
+        :type parent_project_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -152,6 +159,7 @@ class StoresApi:
 
         _param = self._api_v1_data_stores_get_serialize(
             type=type,
+            parent_project_id=parent_project_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -177,6 +185,7 @@ class StoresApi:
     def api_v1_data_stores_get_without_preload_content(
         self,
         type: Optional[StrictStr] = None,
+        parent_project_id: Optional[UUID] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -195,6 +204,8 @@ class StoresApi:
 
         :param type:
         :type type: str
+        :param parent_project_id:
+        :type parent_project_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -219,6 +230,7 @@ class StoresApi:
 
         _param = self._api_v1_data_stores_get_serialize(
             type=type,
+            parent_project_id=parent_project_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -239,6 +251,7 @@ class StoresApi:
     def _api_v1_data_stores_get_serialize(
         self,
         type,
+        parent_project_id,
         _request_auth,
         _content_type,
         _headers,
@@ -264,6 +277,10 @@ class StoresApi:
         if type is not None:
             
             _query_params.append(('type', type))
+            
+        if parent_project_id is not None:
+            
+            _query_params.append(('parentProjectId', parent_project_id))
             
         # process the header parameters
         # process the form parameters

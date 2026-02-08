@@ -21,7 +21,8 @@ public class StoresController(IStoreService storeService, StoreSummaryDTOMapper 
     [HttpGet]
     [ProducesResponseType<IEnumerable<DataStoreSummaryDTO>>(StatusCodes.Status200OK)]
     [ProducesResponseType<IEnumerable<ErrorMessageDTO>>(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<IEnumerable<DataStoreSummaryDTO>>> Get([FromQuery] string? type)
+    public async Task<ActionResult<IEnumerable<DataStoreSummaryDTO>>> Get([FromQuery] string? type = null,
+        [FromQuery] Guid? parentProjectId = null)
     {
         var query = (await storeService.GetAllAsync())
             .AsQueryable();
@@ -32,6 +33,15 @@ public class StoresController(IStoreService storeService, StoreSummaryDTOMapper 
                 return BadRequest(new ErrorMessageDTO { Message = $"Unknown storage type: '{type}'" });
             }
             query = query.Where(s => s.StorageType == result);
+        }
+
+        if (parentProjectId is not null)
+        {
+            if (parentProjectId == Guid.Empty)
+            {
+                return BadRequest(new ErrorMessageDTO { Message = "ParentProjectId cannot be empty." });
+            }
+            query = query.Where(s => s.ParentProjectId == parentProjectId);
         }
         
         return Ok(query.AsEnumerable().Select(storeMapper.Export));
