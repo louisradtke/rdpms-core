@@ -5,7 +5,6 @@
 
     let reloadTick = $state(0);
 
-    let schemaIdInput = $state('');
     let schemaJsonInput = $state('');
 
     let createPending = $state(false);
@@ -26,7 +25,6 @@
 
     async function createSchema(): Promise<void> {
         const raw = schemaJsonInput.trim();
-        const schemaId = schemaIdInput.trim();
 
         if (!raw) {
             createError = 'Schema JSON is required.';
@@ -48,11 +46,10 @@
 
         try {
             const repo = new SchemasRepository(getOrFetchConfig().then(toApiConfig));
-            await repo.addSchema(raw, schemaId || undefined);
+            await repo.addSchema(raw);
 
             createSuccess = 'Schema has been added.';
             reloadTick += 1;
-            schemaIdInput = '';
         } catch (err) {
             createError = err instanceof Error ? err.message : 'Failed to add schema.';
         } finally {
@@ -98,18 +95,6 @@
         {/if}
 
         <label class="flex flex-col gap-1">
-            <span class="text-sm font-medium">Schema ID (optional)</span>
-            <input
-                class="rounded-md border border-gray-300 px-3 py-2"
-                placeholder="urn:rdpms:..."
-                bind:value={schemaIdInput}
-            />
-            <span class="text-xs text-gray-500">
-                Public schema identifier (URI/URN). Leave empty to let the backend generate one.
-            </span>
-        </label>
-
-        <label class="flex flex-col gap-1">
             <span class="text-sm font-medium">Schema JSON</span>
             <textarea
                 class="min-h-48 rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
@@ -117,7 +102,7 @@
                 bind:value={schemaJsonInput}
             ></textarea>
             <span class="text-xs text-gray-500">
-                Raw JSON schema document. Must be valid JSON object/array and is stored as the schema content.
+                Raw JSON schema document. Must be a valid JSON object. If `$id` is missing, the backend generates and injects one.
             </span>
         </label>
 

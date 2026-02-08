@@ -12,6 +12,7 @@
     import {MetaDataRepository} from "$lib/data/MetaDataRepository";
     import type {DataSetDetailedDTO, FileSummaryDTO} from "$lib/api_client";
     import type {VisualizationManifest} from "$lib/contracts/schemas/visualization-manifest.v1";
+    import {FilesRepository} from "$lib/data/FilesRepository";
 
     const VISUALIZATION_SCHEMA_ID = "urn:rdpms:core:schema:visualization-manifest:v1";
     const VISUALIZATION_KEY = "viz";
@@ -80,12 +81,14 @@
         return candidate;
     };
 
-    const findFileById = (files: FileSummaryDTO[] | null | undefined, fileId: string): FileSummaryDTO | null => {
-        if (!files || !fileId) return null;
-        return files.find((f) => f.id === fileId) ?? null;
+    const findFileById = (fileId: string): Promise<FileSummaryDTO> | null => {
+        const fielsRepo = new FilesRepository(getOrFetchConfig().then(toApiConfig));
+        return fielsRepo.getById(fileId)
     };
 
-    const mapManifestToDisplayItems = (dataset: DataSetDetailedDTO, manifest: VisualizationManifest): VisualizationViewState => {
+    const mapManifestToDisplayItems = async (dataset: DataSetDetailedDTO, manifest: VisualizationManifest):
+        Promise<VisualizationViewState> => 
+    {
         const firstView = manifest.views?.[0];
         if (!firstView || !Array.isArray(firstView.items)) {
             return null;
@@ -93,7 +96,8 @@
 
         const items: DisplayItem[] = [];
         for (const item of firstView.items) {
-            const file = findFileById(dataset.files, item.source?.fileId ?? "");
+            if (!item.source?.fileId) continue;
+            const file = await findFileById(item.source?.fileId);
             if (!file) continue;
             items.push({
                 itemId: `${item.source.fileId}-${items.length}`,
