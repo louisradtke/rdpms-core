@@ -52,7 +52,7 @@ export interface CollectionDetailedDTO {
      */
     description?: string | null;
     /**
-     * 
+     * Count of active (deletion neither pending nor completed) datasets in this collection.
      * @type {number}
      * @memberof CollectionDetailedDTO
      */

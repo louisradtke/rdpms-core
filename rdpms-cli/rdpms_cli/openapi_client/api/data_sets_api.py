@@ -23,6 +23,7 @@ from uuid import UUID
 from rdpms_cli.openapi_client.models.data_set_detailed_dto import DataSetDetailedDTO
 from rdpms_cli.openapi_client.models.data_set_summary_dto import DataSetSummaryDTO
 from rdpms_cli.openapi_client.models.file_create_response_dto import FileCreateResponseDTO
+from rdpms_cli.openapi_client.models.meta_date_dto import MetaDateDTO
 from rdpms_cli.openapi_client.models.s3_file_create_request_dto import S3FileCreateRequestDTO
 
 from rdpms_cli.openapi_client.api_client import ApiClient, RequestSerialized
@@ -47,7 +48,7 @@ class DataSetsApi:
     def api_v1_data_datasets_get(
         self,
         collection_id: Optional[UUID] = None,
-        deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Valid values can be found in RDPMS.Core.Server.Model.DTO.V1.DataSetSummaryDTO")] = None,
+        deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -66,7 +67,7 @@ class DataSetsApi:
 
         :param collection_id: 
         :type collection_id: UUID
-        :param deleted: comma-separated list of strings, case-insensitive.             Valid values can be found in RDPMS.Core.Server.Model.DTO.V1.DataSetSummaryDTO
+        :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -117,7 +118,7 @@ class DataSetsApi:
     def api_v1_data_datasets_get_with_http_info(
         self,
         collection_id: Optional[UUID] = None,
-        deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Valid values can be found in RDPMS.Core.Server.Model.DTO.V1.DataSetSummaryDTO")] = None,
+        deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -136,7 +137,7 @@ class DataSetsApi:
 
         :param collection_id: 
         :type collection_id: UUID
-        :param deleted: comma-separated list of strings, case-insensitive.             Valid values can be found in RDPMS.Core.Server.Model.DTO.V1.DataSetSummaryDTO
+        :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -187,7 +188,7 @@ class DataSetsApi:
     def api_v1_data_datasets_get_without_preload_content(
         self,
         collection_id: Optional[UUID] = None,
-        deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Valid values can be found in RDPMS.Core.Server.Model.DTO.V1.DataSetSummaryDTO")] = None,
+        deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -206,7 +207,7 @@ class DataSetsApi:
 
         :param collection_id: 
         :type collection_id: UUID
-        :param deleted: comma-separated list of strings, case-insensitive.             Valid values can be found in RDPMS.Core.Server.Model.DTO.V1.DataSetSummaryDTO
+        :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1148,7 +1149,7 @@ class DataSetsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> UUID:
+    ) -> MetaDateDTO:
         """Adds or sets meta documents for a data set.
 
 
@@ -1191,8 +1192,8 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UUID",
-            '201': "UUID",
+            '200': "MetaDateDTO",
+            '201': "MetaDateDTO",
             '400': "ErrorMessageDTO",
         }
         response_data = self.api_client.call_api(
@@ -1224,7 +1225,7 @@ class DataSetsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[UUID]:
+    ) -> ApiResponse[MetaDateDTO]:
         """Adds or sets meta documents for a data set.
 
 
@@ -1267,8 +1268,8 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UUID",
-            '201': "UUID",
+            '200': "MetaDateDTO",
+            '201': "MetaDateDTO",
             '400': "ErrorMessageDTO",
         }
         response_data = self.api_client.call_api(
@@ -1343,8 +1344,8 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UUID",
-            '201': "UUID",
+            '200': "MetaDateDTO",
+            '201': "MetaDateDTO",
             '400': "ErrorMessageDTO",
         }
         response_data = self.api_client.call_api(

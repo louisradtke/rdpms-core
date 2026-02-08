@@ -330,7 +330,7 @@ No authorization required
 
 ## apiV1DataSchemasPost
 
-> apiV1DataSchemasPost(schemaId, body)
+> apiV1DataSchemasPost(body)
 
 Add a new schema to the system.
 
@@ -348,8 +348,6 @@ async function example() {
   const api = new MetaDataApi();
 
   const body = {
-    // string | (optional) Schema URL, if existing. Keep empty otherwise. (optional)
-    schemaId: schemaId_example,
     // any | The JSON document (optional)
     body: ...,
   } satisfies ApiV1DataSchemasPostRequest;
@@ -371,7 +369,6 @@ example().catch(console.error);
 
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **schemaId** | `string` | (optional) Schema URL, if existing. Keep empty otherwise. | [Optional] [Defaults to `undefined`] |
 | **body** | `any` | The JSON document | [Optional] |
 
 ### Return type

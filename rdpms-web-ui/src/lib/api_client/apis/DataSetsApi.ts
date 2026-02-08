@@ -19,6 +19,7 @@ import type {
   DataSetSummaryDTO,
   ErrorMessageDTO,
   FileCreateResponseDTO,
+  MetaDateDTO,
   ProblemDetails,
   S3FileCreateRequestDTO,
 } from '../models/index';
@@ -31,6 +32,8 @@ import {
     ErrorMessageDTOToJSON,
     FileCreateResponseDTOFromJSON,
     FileCreateResponseDTOToJSON,
+    MetaDateDTOFromJSON,
+    MetaDateDTOToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
     S3FileCreateRequestDTOFromJSON,
@@ -223,7 +226,7 @@ export class DataSetsApi extends runtime.BaseAPI {
     /**
      * Adds or sets meta documents for a data set.
      */
-    async apiV1DataDatasetsIdMetadataKeyPutRaw(requestParameters: ApiV1DataDatasetsIdMetadataKeyPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+    async apiV1DataDatasetsIdMetadataKeyPutRaw(requestParameters: ApiV1DataDatasetsIdMetadataKeyPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<MetaDateDTO>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -257,17 +260,13 @@ export class DataSetsApi extends runtime.BaseAPI {
             body: requestParameters['body'] as any,
         }, initOverrides);
 
-        if (this.isJsonMime(response.headers.get('content-type'))) {
-            return new runtime.JSONApiResponse<string>(response);
-        } else {
-            return new runtime.TextApiResponse(response) as any;
-        }
+        return new runtime.JSONApiResponse(response, (jsonValue) => MetaDateDTOFromJSON(jsonValue));
     }
 
     /**
      * Adds or sets meta documents for a data set.
      */
-    async apiV1DataDatasetsIdMetadataKeyPut(requestParameters: ApiV1DataDatasetsIdMetadataKeyPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+    async apiV1DataDatasetsIdMetadataKeyPut(requestParameters: ApiV1DataDatasetsIdMetadataKeyPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<MetaDateDTO> {
         const response = await this.apiV1DataDatasetsIdMetadataKeyPutRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -311,7 +310,7 @@ export class DataSetsApi extends runtime.BaseAPI {
     /**
      * Add a single item to the system.
      */
-    async apiV1DataDatasetsPostRaw(requestParameters: ApiV1DataDatasetsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+    async apiV1DataDatasetsPostRaw(requestParameters: ApiV1DataDatasetsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DataSetDetailedDTO>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -329,17 +328,13 @@ export class DataSetsApi extends runtime.BaseAPI {
             body: DataSetSummaryDTOToJSON(requestParameters['dataSetSummaryDTO']),
         }, initOverrides);
 
-        if (this.isJsonMime(response.headers.get('content-type'))) {
-            return new runtime.JSONApiResponse<string>(response);
-        } else {
-            return new runtime.TextApiResponse(response) as any;
-        }
+        return new runtime.JSONApiResponse(response, (jsonValue) => DataSetDetailedDTOFromJSON(jsonValue));
     }
 
     /**
      * Add a single item to the system.
      */
-    async apiV1DataDatasetsPost(requestParameters: ApiV1DataDatasetsPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+    async apiV1DataDatasetsPost(requestParameters: ApiV1DataDatasetsPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DataSetDetailedDTO> {
         const response = await this.apiV1DataDatasetsPostRaw(requestParameters, initOverrides);
         return await response.value();
     }

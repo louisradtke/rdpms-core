@@ -36,7 +36,7 @@ async function example() {
   const body = {
     // string |  (optional)
     collectionId: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
-    // string | comma-separated list of strings, case-insensitive.             Valid values can be found in RDPMS.Core.Server.Model.DTO.V1.DataSetSummaryDTO (optional)
+    // string | comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState. (optional)
     deleted: deleted_example,
   } satisfies ApiV1DataDatasetsGetRequest;
 
@@ -58,7 +58,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **collectionId** | `string` |  | [Optional] [Defaults to `undefined`] |
-| **deleted** | `string` | comma-separated list of strings, case-insensitive.             Valid values can be found in RDPMS.Core.Server.Model.DTO.V1.DataSetSummaryDTO | [Optional] [Defaults to `undefined`] |
+| **deleted** | `string` | comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState. | [Optional] [Defaults to `undefined`] |
 
 ### Return type
 
@@ -286,7 +286,7 @@ No authorization required
 
 ## apiV1DataDatasetsIdMetadataKeyPut
 
-> string apiV1DataDatasetsIdMetadataKeyPut(id, key, body)
+> MetaDateDTO apiV1DataDatasetsIdMetadataKeyPut(id, key, body)
 
 Adds or sets meta documents for a data set.
 
@@ -335,7 +335,7 @@ example().catch(console.error);
 
 ### Return type
 
-**string**
+[**MetaDateDTO**](MetaDateDTO.md)
 
 ### Authorization
 
@@ -426,7 +426,7 @@ No authorization required
 
 ## apiV1DataDatasetsPost
 
-> string apiV1DataDatasetsPost(dataSetSummaryDTO)
+> DataSetDetailedDTO apiV1DataDatasetsPost(dataSetSummaryDTO)
 
 Add a single item to the system.
 
@@ -469,7 +469,7 @@ example().catch(console.error);
 
 ### Return type
 
-**string**
+[**DataSetDetailedDTO**](DataSetDetailedDTO.md)
 
 ### Authorization
 

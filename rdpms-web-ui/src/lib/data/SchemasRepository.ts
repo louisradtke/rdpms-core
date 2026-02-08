@@ -29,12 +29,11 @@ export class SchemasRepository {
         return api.apiV1DataSchemasGet();
     }
 
-    public async addSchema(schemaJson: string, schemaId?: string): Promise<void> {
+    public async addSchema(schemaJson: string, _schemaId?: string): Promise<void> {
         const parsed = JSON.parse(schemaJson);
         const api = await this.ensureReady();
         await api.apiV1DataSchemasPost({
-            schemaId,
-            body: parsed as unknown as string
+            body: parsed
         });
     }
 

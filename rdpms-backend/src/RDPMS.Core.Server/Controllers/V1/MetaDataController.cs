@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -90,7 +91,6 @@ public class MetaDataController(
     /// <summary>
     /// Add a new schema to the system.
     /// </summary>
-    /// <param name="schemaId">(optional) Schema URL, if existing. Keep empty otherwise.</param>
     /// <param name="value">The JSON document</param>
     /// <returns>HTTP 201, if schema was successfully created.
     /// HTTP 400, if URL is invalid or schema with ID (URL) already exists.</returns>
@@ -98,41 +98,50 @@ public class MetaDataController(
     [HttpPost("schemas")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> AddSchema([FromQuery] string? schemaId, [FromBody] JsonElement value)
+    public async Task<ActionResult> AddSchema([FromBody] JsonElement value)
     {
-        if (schemaId != null)
-        {
-            if (!Uri.IsWellFormedUriString(schemaId, UriKind.Absolute))
-            {
-                return BadRequest(new ErrorMessageDTO { Message = "Invalid schemaId: must be a valid URL." });
-            }
-
-            var exists = await schemaService.Query()
-                .AnyAsync(s => s.SchemaId == schemaId);
-            if (exists)
-            {
-                return BadRequest(new ErrorMessageDTO { Message = "Schema with that id already exists." });
-            }
-        }
-
-        var schemaGuid = Guid.NewGuid();
-        if (schemaId == null)
-        {
-            schemaId = $"urn:rdpms:3rd-party:schema:{schemaGuid.ToString().ToLowerInvariant()}";
-        }
-
         if (!TryValidateSchemaPayload(value, out var schemaString))
         {
             return BadRequest(new ErrorMessageDTO
             {
-                Message = "Schema payload must be a valid JSON object or array."
+                Message = "Schema payload must be a valid JSON object."
             });
+        }
+
+        if (!TryReadSchemaId(value, out var schemaIdFromDocument, out var schemaIdReadError))
+        {
+            return BadRequest(new ErrorMessageDTO { Message = schemaIdReadError });
+        }
+
+        var schemaGuid = Guid.NewGuid();
+        var effectiveSchemaId = schemaIdFromDocument;
+        if (effectiveSchemaId != null && !Uri.IsWellFormedUriString(effectiveSchemaId, UriKind.Absolute))
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "Invalid schemaId: must be a valid URL." });
+        }
+
+        if (effectiveSchemaId == null)
+        {
+            effectiveSchemaId = $"urn:rdpms:3rdparty:schema:{schemaGuid.ToString().ToLowerInvariant()}";
+            if (!TryInjectSchemaId(value, effectiveSchemaId, out var schemaWithId))
+            {
+                return BadRequest(new ErrorMessageDTO { Message = "Schema payload must be a valid JSON object." });
+            }
+
+            schemaString = schemaWithId;
+        }
+
+        var exists = await schemaService.Query()
+            .AnyAsync(s => s.SchemaId == effectiveSchemaId);
+        if (exists)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "Schema with that id already exists." });
         }
 
         var schema = new JsonSchemaEntity()
         {
             Id = schemaGuid,
-            SchemaId = schemaId,
+            SchemaId = effectiveSchemaId,
             SchemaString = schemaString
         };
         await schemaService.AddAsync(schema);
@@ -165,12 +174,56 @@ public class MetaDataController(
     private static bool TryValidateSchemaPayload(JsonElement payload, out string schemaString)
     {
         schemaString = string.Empty;
-        if (payload.ValueKind is not (JsonValueKind.Object or JsonValueKind.Array))
+        if (payload.ValueKind is not JsonValueKind.Object)
         {
             return false;
         }
 
         schemaString = payload.GetRawText();
+        return true;
+    }
+
+    private static bool TryReadSchemaId(JsonElement payload, out string? schemaId, out string? error)
+    {
+        schemaId = null;
+        error = null;
+
+        if (payload.ValueKind != JsonValueKind.Object)
+        {
+            error = "Schema payload must be a valid JSON object.";
+            return false;
+        }
+
+        if (!payload.TryGetProperty("$id", out var idElement))
+        {
+            return true;
+        }
+
+        if (idElement.ValueKind != JsonValueKind.String)
+        {
+            error = "Schema `$id` must be a string.";
+            return false;
+        }
+
+        var id = idElement.GetString();
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            error = "Schema `$id` must not be empty.";
+            return false;
+        }
+
+        schemaId = id;
+        return true;
+    }
+
+    private static bool TryInjectSchemaId(JsonElement payload, string schemaId, out string schemaWithId)
+    {
+        schemaWithId = string.Empty;
+        var node = JsonNode.Parse(payload.GetRawText());
+        if (node is not JsonObject obj) return false;
+
+        obj["$id"] = schemaId;
+        schemaWithId = obj.ToJsonString();
         return true;
     }
 }

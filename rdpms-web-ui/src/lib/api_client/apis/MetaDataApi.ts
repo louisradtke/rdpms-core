@@ -42,7 +42,6 @@ export interface ApiV1DataSchemasIdBlobGetRequest {
 }
 
 export interface ApiV1DataSchemasPostRequest {
-    schemaId?: string;
     body?: any | null;
 }
 
@@ -237,10 +236,6 @@ export class MetaDataApi extends runtime.BaseAPI {
      */
     async apiV1DataSchemasPostRaw(requestParameters: ApiV1DataSchemasPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
         const queryParameters: any = {};
-
-        if (requestParameters['schemaId'] != null) {
-            queryParameters['schemaId'] = requestParameters['schemaId'];
-        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 

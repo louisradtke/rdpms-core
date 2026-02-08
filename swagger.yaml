@@ -196,7 +196,7 @@ paths:
             format: uuid
         - name: deleted
           in: query
-          description: "comma-separated list of strings, case-insensitive.\n            Valid values can be found in RDPMS.Core.Server.Model.DTO.V1.DataSetSummaryDTO"
+          description: "comma-separated list of strings, case-insensitive.\n            Default is RDPMS.Core.Persistence.Model.DeletionState.Active\n            Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState."
           schema:
             type: string
       responses:
@@ -376,15 +376,13 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                format: uuid
+                $ref: '#/components/schemas/MetaDateDTO'
         '201':
           description: Created
           content:
             application/json:
               schema:
-                type: string
-                format: uuid
+                $ref: '#/components/schemas/MetaDateDTO'
         '400':
           description: Bad Request
           content:
@@ -617,12 +615,6 @@ paths:
       tags:
         - MetaData
       summary: Add a new schema to the system.
-      parameters:
-        - name: schemaId
-          in: query
-          description: '(optional) Schema URL, if existing. Keep empty otherwise.'
-          schema:
-            type: string
       requestBody:
         description: The JSON document
         content:
@@ -835,6 +827,7 @@ components:
           nullable: true
         dataSetCount:
           type: integer
+          description: Count of active (deletion neither pending nor completed) datasets in this collection.
           format: int32
           nullable: true
         defaultDataStoreId:
@@ -869,6 +862,7 @@ components:
           nullable: true
         dataSetCount:
           type: integer
+          description: Count of active (deletion neither pending nor completed) datasets in this collection.
           format: int32
           nullable: true
         defaultDataStoreId:

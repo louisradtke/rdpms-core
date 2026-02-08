@@ -32,7 +32,7 @@ class CollectionDetailedDTO(BaseModel):
     slug: Optional[StrictStr] = None
     name: Optional[StrictStr] = None
     description: Optional[StrictStr] = None
-    data_set_count: Optional[StrictInt] = Field(default=None, alias="dataSetCount")
+    data_set_count: Optional[StrictInt] = Field(default=None, description="Count of active (deletion neither pending nor completed) datasets in this collection.", alias="dataSetCount")
     default_data_store_id: Optional[UUID] = Field(default=None, alias="defaultDataStoreId")
     project_id: Optional[UUID] = Field(default=None, alias="projectId")
     meta_date_columns: Optional[List[MetaDateCollectionColumnDTO]] = Field(default=None, alias="metaDateColumns")

@@ -1323,7 +1323,6 @@ class MetaDataApi:
     @validate_call
     def api_v1_data_schemas_post(
         self,
-        schema_id: Annotated[Optional[StrictStr], Field(description="(optional) Schema URL, if existing. Keep empty otherwise.")] = None,
         body: Annotated[Optional[Any], Field(description="The JSON document")] = None,
         _request_timeout: Union[
             None,
@@ -1341,8 +1340,6 @@ class MetaDataApi:
         """Add a new schema to the system.
 
 
-        :param schema_id: (optional) Schema URL, if existing. Keep empty otherwise.
-        :type schema_id: str
         :param body: The JSON document
         :type body: object
         :param _request_timeout: timeout setting for this request. If one
@@ -1368,7 +1365,6 @@ class MetaDataApi:
         """ # noqa: E501
 
         _param = self._api_v1_data_schemas_post_serialize(
-            schema_id=schema_id,
             body=body,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1394,7 +1390,6 @@ class MetaDataApi:
     @validate_call
     def api_v1_data_schemas_post_with_http_info(
         self,
-        schema_id: Annotated[Optional[StrictStr], Field(description="(optional) Schema URL, if existing. Keep empty otherwise.")] = None,
         body: Annotated[Optional[Any], Field(description="The JSON document")] = None,
         _request_timeout: Union[
             None,
@@ -1412,8 +1407,6 @@ class MetaDataApi:
         """Add a new schema to the system.
 
 
-        :param schema_id: (optional) Schema URL, if existing. Keep empty otherwise.
-        :type schema_id: str
         :param body: The JSON document
         :type body: object
         :param _request_timeout: timeout setting for this request. If one
@@ -1439,7 +1432,6 @@ class MetaDataApi:
         """ # noqa: E501
 
         _param = self._api_v1_data_schemas_post_serialize(
-            schema_id=schema_id,
             body=body,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1465,7 +1457,6 @@ class MetaDataApi:
     @validate_call
     def api_v1_data_schemas_post_without_preload_content(
         self,
-        schema_id: Annotated[Optional[StrictStr], Field(description="(optional) Schema URL, if existing. Keep empty otherwise.")] = None,
         body: Annotated[Optional[Any], Field(description="The JSON document")] = None,
         _request_timeout: Union[
             None,
@@ -1483,8 +1474,6 @@ class MetaDataApi:
         """Add a new schema to the system.
 
 
-        :param schema_id: (optional) Schema URL, if existing. Keep empty otherwise.
-        :type schema_id: str
         :param body: The JSON document
         :type body: object
         :param _request_timeout: timeout setting for this request. If one
@@ -1510,7 +1499,6 @@ class MetaDataApi:
         """ # noqa: E501
 
         _param = self._api_v1_data_schemas_post_serialize(
-            schema_id=schema_id,
             body=body,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1531,7 +1519,6 @@ class MetaDataApi:
 
     def _api_v1_data_schemas_post_serialize(
         self,
-        schema_id,
         body,
         _request_auth,
         _content_type,
@@ -1555,10 +1542,6 @@ class MetaDataApi:
 
         # process the path parameters
         # process the query parameters
-        if schema_id is not None:
-            
-            _query_params.append(('schemaId', schema_id))
-            
         # process the header parameters
         # process the form parameters
         # process the body parameter

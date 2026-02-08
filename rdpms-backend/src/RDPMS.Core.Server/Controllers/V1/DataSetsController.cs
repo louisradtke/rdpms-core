@@ -23,6 +23,7 @@ public class DataSetsController(
     IMetadataService metadataService,
     IContentTypeService contentTypeService,
     IImportMapper<DataFile, S3FileCreateRequestDTO, ContentType> s3dfCreateReqMapper,
+    IExportMapper<MetadataJsonField, MetaDateDTO> metadataMapper,
     ILogger<DataSetsController> logger)
     : ControllerBase
 {
@@ -322,14 +323,23 @@ public class DataSetsController(
     /// HTTP 201, if a new meta date was created.
     /// HTTP 400, if an input-related problem occurs.</returns>
     [HttpPut("{id:guid}/metadata/{key}")]
-    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
-    [ProducesResponseType<Guid>(StatusCodes.Status201Created)]
+    [ProducesResponseType<MetaDateDTO>(StatusCodes.Status200OK)]
+    [ProducesResponseType<MetaDateDTO>(StatusCodes.Status201Created)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
     [Consumes("application/octet-stream", "application/json")]
     public async Task<ActionResult> AssignMetadate([FromRoute] Guid id, [FromRoute] string key,
         [FromBody] byte[] value)
     {
-        var dataSet = await dataSetService.GetByIdAsync(id);
+        DataSet dataSet;
+        try
+        {
+            dataSet = await dataSetService.GetByIdAsync(id);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = ex.Message });
+        }
+
         var contentType = await contentTypeService.GetByMimeType(
             "application/json",
             dataSet.ParentCollection?.ParentId
@@ -341,11 +351,14 @@ public class DataSetsController(
         var modified = dataSet.MetadataJsonFields.Any(f =>
             f.MetadataKey.Equals(key, StringComparison.CurrentCultureIgnoreCase));
         
+        
         await metadataService.AssignMetadate(dataSet, key, field);
         
+        var returnDto = metadataMapper.Export(await metadataService.GetByIdAsync(field.Id));
+        
         if (!modified) return CreatedAtAction(nameof(MetaDataController.GetMetadate), "MetaData",
-            new { field.Id }, field.Id);
-        return Ok(field.Id);
+            new { field.Id }, returnDto);
+        return Ok(returnDto);
     }
 
     // /// <summary>

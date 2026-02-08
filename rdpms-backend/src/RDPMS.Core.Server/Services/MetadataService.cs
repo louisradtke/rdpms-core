@@ -11,7 +11,8 @@ namespace RDPMS.Core.Server.Services;
 public class MetadataService(
     DbContext context,
     IFileService fileService,
-    ISchemaService schemaService)
+    ISchemaService schemaService,
+    ILogger<MetadataService> logger)
     : GenericCollectionService<MetadataJsonField>(context, q => q
         .Include(f => f.Value)
         .ThenInclude(f => f!.FileType)
@@ -107,11 +108,43 @@ public class MetadataService(
         }
         
         var metadateString = Encoding.UTF8.GetString(metadateRef.Data);
-        var metadateJson = JsonDocument.Parse(metadateString).RootElement;
-        var schemaJson = JsonDocument.Parse(schemaEntity.SchemaString).RootElement;
-        var schema = JsonSchema.Build(schemaJson); // optionally include build options
-        var evaluationResults = schema.Evaluate(metadateJson);
+        using var metadateDocument = JsonDocument.Parse(metadateString);
+        using var schemaDocument = JsonDocument.Parse(schemaEntity.SchemaString);
 
+        // register all local schemas in registry
+        // TODO: this is ok for pre-production, but questions remain open:
+        // TODO: 1. how do this on-demand? (fetching from db, what about caching?)
+        // TODO: 2. What about remote schemas?
+        var allSchemas = await Context.Set<JsonSchemaEntity>().ToDictionaryAsync(
+            s => s.SchemaId);
+
+        IBaseDocument? FetchFunc(Uri uri, SchemaRegistry registry)
+        {
+            logger.LogDebug("Fetching schema {SchemaId} from registry.", uri);
+            if (!allSchemas.TryGetValue(uri.ToString(), out var schema))
+            {
+                logger.LogWarning("Schema {SchemaId} not found in registry.", uri);
+                return null;
+            }
+
+            logger.LogDebug("Schema {SchemaId} found in registry.", uri);
+
+            var doc = JsonDocument.Parse(schema.SchemaString);
+            return new JsonElementBaseDocument(doc.RootElement, uri);
+        }
+
+        // use a local schema registry to avoid global duplicate registration collisions
+        // when validating the same $id schema multiple times.
+        var buildOptions = new BuildOptions
+        {
+            SchemaRegistry = new SchemaRegistry()
+            {
+                Fetch = FetchFunc
+            }
+        };
+        var schema = JsonSchema.Build(schemaDocument.RootElement, buildOptions);
+        var evaluationResults = schema.Evaluate(metadateDocument.RootElement);
+        
         if (!evaluationResults.IsValid) return false;
         metadate.ValidatedSchemas.Add(schemaEntity);
         Context.Update(metadate);

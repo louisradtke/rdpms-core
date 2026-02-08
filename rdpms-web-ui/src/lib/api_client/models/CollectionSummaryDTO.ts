@@ -44,7 +44,7 @@ export interface CollectionSummaryDTO {
      */
     description?: string | null;
     /**
-     * 
+     * Count of active (deletion neither pending nor completed) datasets in this collection.
      * @type {number}
      * @memberof CollectionSummaryDTO
      */
