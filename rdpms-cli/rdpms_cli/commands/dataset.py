@@ -3,6 +3,7 @@ from pstats import Stats
 
 from tabulate import tabulate
 import hashlib
+import uuid
 
 import requests
 
@@ -137,10 +138,10 @@ def cmd_dataset_list(args):
 
     cid = None
     if args.collection:
-        cid = args.collection
+        cid = uuid.UUID(args.collection)
 
-    ds_list = ds_api.api_v1_data_datasets_get()
-    
+    ds_list = ds_api.api_v1_data_datasets_get(collection_id=cid)
+
     if not ds_list:
         print('no datasets found')
         return
