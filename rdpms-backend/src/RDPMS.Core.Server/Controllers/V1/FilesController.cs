@@ -91,7 +91,9 @@ public class FilesController(
         try
         {
             var file = await fileService.GetByIdAsync(id);
-            return Ok(fileMapper.Export(file));
+            var fileDto = fileMapper.Export(file);
+            fileDto.DownloadURI = fileService.GetContentApiUri(id, HttpContext);
+            return Ok(fileDto);
         }
         catch (InvalidOperationException e)
         {

@@ -38,9 +38,10 @@ public class DataFileService(
                 return new Uri(uriStr);
             case StaticFileStorageReference staticLocation:
                 return new Uri(staticLocation.URL);
-            // case InternalFileStorageReference:
-            //     var uri = linkGenerator.GetUriByAction(context, nameof(FilesController.GetContent));
-            //     return new Uri(uri);
+            case DbFileStorageReference dbLocation:
+                var uri = linkGenerator.GetUriByAction(context, nameof(FilesController.GetBlob), "Files", new { id });
+                if (uri is null) throw new IllegalStateException("Uri generation has failed.");
+                return new Uri(uri);
             default:
                 throw new IllegalStateException("Invalid file location type");
         }
