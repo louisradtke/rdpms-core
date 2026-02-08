@@ -65,6 +65,47 @@ done
 # copy source-of-truth schemas to output for embedding/packaging
 cp -r "${SCHEMA_DIR}/json" "$TARGET_DIR"
 
+# rewrite copied schema refs to URNs so runtime resolution can use schema IDs
+python3 - "$TARGET_DIR/json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+json_dir = Path(sys.argv[1])
+schema_files = sorted(json_dir.glob("*.schema.json"))
+
+filename_to_id = {}
+for schema_file in schema_files:
+    with schema_file.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+    schema_id = data.get("$id")
+    if isinstance(schema_id, str) and schema_id:
+        filename_to_id[schema_file.name] = schema_id
+
+def rewrite_refs(value):
+    if isinstance(value, dict):
+        for k, v in value.items():
+            if k == "$ref" and isinstance(v, str):
+                ref_value, frag = (v.split("#", 1) + [""])[:2]
+                if ref_value.endswith(".schema.json") and "://" not in ref_value and not ref_value.startswith("/"):
+                    schema_id = filename_to_id.get(ref_value)
+                    if schema_id:
+                        value[k] = f"{schema_id}#{frag}" if frag else schema_id
+            else:
+                rewrite_refs(v)
+    elif isinstance(value, list):
+        for item in value:
+            rewrite_refs(item)
+
+for schema_file in schema_files:
+    with schema_file.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+    rewrite_refs(data)
+    with schema_file.open("w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+PY
+
 mkdir "$SCHEMA_MAPS_DIR"
 for schema in "${BASE_TYPES[@]}"; do
   generatejsonschematypes \
