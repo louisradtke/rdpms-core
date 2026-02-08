@@ -67,8 +67,11 @@ public class DataSetsController(
         {
             return BadRequest(new ErrorMessageDTO() { Message = $"Invalid value for deleted: {ae.Message}" });
         }
-        
-        datasetsQuery = datasetsQuery.Where(ds => ds.ParentCollectionId == collectionId);
+
+        if (collectionId is not null)
+        {
+            datasetsQuery = datasetsQuery.Where(ds => ds.ParentCollectionId == collectionId);
+        }
 
         var datasets = await datasetsQuery.ToListAsync();
         var dtos = datasets
@@ -80,11 +83,14 @@ public class DataSetsController(
 
         foreach (var (dto, domain) in dtos.Zip(datasets))
         {
+            List<string>? list = null;
+            validatedMetaDates?.TryGetValue(domain.Id, out list);
+
             dto.MetaDates = domain.MetadataJsonFields.Select(f => new AssignedMetaDateDTO
             {
                 MetadataKey = f.MetadataKey,
                 MetadataId = f.FieldId,
-                CollectionSchemaVerified = validatedMetaDates?[domain.Id].Contains(f.MetadataKey)
+                CollectionSchemaVerified = list?.Contains(f.MetadataKey) ?? false
             })
             .ToList();
         }
@@ -115,12 +121,15 @@ public class DataSetsController(
 
         var validatedMetaDates = await dataSetService
             .GetValidatedMetadates([domainItem.Id]);
-        dto.MetaDates = domainItem.MetadataJsonFields
-            .Select(f => new AssignedMetaDateDTO
+
+        List<string>? list = null;
+        validatedMetaDates?.TryGetValue(domainItem.Id, out list);
+
+        dto.MetaDates = domainItem.MetadataJsonFields.Select(f => new AssignedMetaDateDTO
             {
                 MetadataKey = f.MetadataKey,
                 MetadataId = f.FieldId,
-                CollectionSchemaVerified = validatedMetaDates?[domainItem.Id].Contains(f.MetadataKey)
+                CollectionSchemaVerified = list?.Contains(f.MetadataKey) ?? false
             })
             .ToList();
         return dto;
