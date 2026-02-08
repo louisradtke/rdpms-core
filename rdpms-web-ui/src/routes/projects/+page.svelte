@@ -4,16 +4,23 @@
     import LoadingCircle from "$lib/layout/LoadingCircle.svelte";
     import type {ProjectSummaryDTO} from "$lib/api_client";
 
-    let projectsRepo = new ProjectsRepository(getOrFetchConfig().then(toApiConfig));
-    let projectsPromise = projectsRepo.getProjects();
+    const configPromise = getOrFetchConfig().then(toApiConfig);
+    let projectsRepo = new ProjectsRepository(configPromise);
+    let projectsPromise = $state(projectsRepo.getProjects());
 
 
     // Modal state
-    let isEditOpen = false;
-    let editingProject: { id: string; name: string; slug?: string } | null = null;
-    let form = { name: "", slug: "" };
-    let saving = false;
-    let errorMsg = "";
+    let isEditOpen = $state(false);
+    let editingProject = $state<{ id: string; name: string; slug?: string } | null>(null);
+    let form = $state({ name: "", slug: "" });
+    let saving = $state(false);
+    let errorMsg = $state("");
+
+    function toErrorMessage(e: unknown, fallback: string): string {
+        if (typeof e === "string") return e.toUpperCase();
+        if (e instanceof Error) return e.message ?? fallback;
+        return fallback;
+    }
 
     async function openEdit(project: ProjectSummaryDTO) {
         editingProject = { id: project.id ?? "", name: project.name ?? "", slug: project.slug ?? "" };
@@ -42,15 +49,12 @@
             projectsPromise = projectsRepo.getProjects();
             closeEdit();
         } catch (e) {
-            if (typeof e === "string") {
-                errorMsg = e.toUpperCase() // works, `e` narrowed to string
-            } else if (e instanceof Error) {
-                errorMsg = e?.message ?? "Failed to save"; // works, `e` narrowed to Error
-            }
+            errorMsg = toErrorMessage(e, "Failed to save");
         } finally {
             saving = false;
         }
     }
+
 </script>
 
 <svelte:head>
@@ -73,7 +77,7 @@
             <tbody>
             {#await projectsPromise}
                 <tr>
-                    <td colspan="2" class="py-8 text-center">
+                    <td colspan="3" class="py-8 text-center">
                         <LoadingCircle/>
                     </td>
                 </tr>
@@ -84,11 +88,12 @@
                             <a href="/projects/{project.slug ?? project.id}" class="text-blue-500 hover:underline">
                                 {project.name}
                             </a>
+                        </td>
                         <td>etc.</td>
                         <td class="text-right">
                             <button
                                     class="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
-                                    on:click={() => openEdit(project)}
+                                    onclick={() => openEdit(project)}
                                     aria-label="Edit project"
                             >
                                 Edit
@@ -98,7 +103,7 @@
                 {/each}
             {:catch error}
                 <tr>
-                    <td colspan="2" class="text-center">Error: {error.message}</td>
+                    <td colspan="3" class="text-center">Error: {error.message}</td>
                 </tr>
             {/await}
             </tbody>
@@ -107,19 +112,19 @@
 
     {#if isEditOpen}
         <!-- Backdrop -->
-        <div class="fixed inset-0 bg-black/50 z-40" on:click={closeEdit}></div>
+        <button class="fixed inset-0 bg-black/50 z-40" type="button" onclick={closeEdit} aria-label="Close edit dialog"></button>
 
         <!-- Modal -->
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="w-full max-w-md rounded-lg bg-white shadow-lg">
                 <div class="flex items-center justify-between border-b px-4 py-3">
                     <h2 class="text-lg font-semibold">Edit Project</h2>
-                    <button class="text-gray-500 hover:text-gray-700" on:click={closeEdit} aria-label="Close">
+                    <button class="text-gray-500 hover:text-gray-700" type="button" onclick={closeEdit} aria-label="Close">
                         ✕
                     </button>
                 </div>
 
-                <form class="px-4 py-4" on:submit|preventDefault={saveEdit}>
+                <form class="px-4 py-4" onsubmit={(evt) => { evt.preventDefault(); saveEdit(); }}>
                     <div class="mb-4">
                         <label class="block text-sm font-medium mb-1" for="project-name">Name</label>
                         <input
@@ -149,7 +154,7 @@
                         <button
                                 type="button"
                                 class="px-4 py-2 rounded border hover:bg-gray-50"
-                                on:click={closeEdit}
+                                onclick={closeEdit}
                                 disabled={saving}
                         >
                             Cancel

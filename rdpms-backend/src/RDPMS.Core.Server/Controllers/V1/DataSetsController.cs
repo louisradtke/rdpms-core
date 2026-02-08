@@ -31,7 +31,8 @@ public class DataSetsController(
     /// </summary>
     /// <param name="collectionId"></param>
     /// <param name="deleted">comma-separated list of strings, case-insensitive.
-    /// Valid values can be found in <see cref="DataSetSummaryDTO"/></param>
+    /// Default is <see cref="DeletionState.Active"/>
+    /// Valid values can be found in <see cref="DeletionState"/>.</param>
     /// <returns></returns>
     [HttpGet]
     [ProducesResponseType<IEnumerable<DataSetSummaryDTO>>(StatusCodes.Status200OK)]
@@ -55,6 +56,11 @@ public class DataSetsController(
             {
                 datasetsQuery = datasetsQuery
                     .Where(ds => queriedDeletionStates.Contains(ds.DeletionState));
+            }
+            else
+            {
+                datasetsQuery = datasetsQuery
+                    .Where(ds => ds.DeletionState == DeletionState.Active);
             }
         }
         catch (ArgumentException ae)

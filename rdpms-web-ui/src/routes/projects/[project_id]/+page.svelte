@@ -2,25 +2,109 @@
     import { page } from '$app/state';
     import {getOrFetchConfig, toApiConfig} from "$lib/util/config-helper";
     import {ProjectsRepository} from "$lib/data/ProjectsRepo";
+    import {CollectionsRepository} from "$lib/data/CollectionsRepository";
+    import {StoresRepository} from "$lib/data/StoresRepository";
     import LoadingCircle from "$lib/layout/LoadingCircle.svelte";
-    import {isGuid} from "$lib/util/url-helper";
     import EntityHeader from "$lib/layout/EntityHeader.svelte";
+    import type { DataStoreSummaryDTO, ProjectSummaryDTO } from "$lib/api_client";
 
 
     let projectId: string = page.params.project_id ?? '';
     if (!projectId) throw new Error('Collection ID is required');
 
-    let projectsRepo = new ProjectsRepository(getOrFetchConfig().then(toApiConfig));
+    const configPromise = getOrFetchConfig().then(toApiConfig);
+    let projectsRepo = new ProjectsRepository(configPromise);
+    let collectionsRepo = new CollectionsRepository(configPromise);
+    let storesRepo = new StoresRepository(configPromise);
 
-    let projectPromise = projectsRepo.getProjectByIdOrSlug(projectId);
+    let projectPromise = $state(projectsRepo.getProjectByIdOrSlug(projectId));
 
-    let title = 'RDPMS';
-    projectPromise.then(project => {
-        let slug = project.name ?? project.id ?? 'none';
-        if (slug) {
-            title = `${slug} - RDPMS`;
-        }
+    const title = 'RDPMS';
+
+    // Create collection modal state
+    let isCreateOpen = $state(false);
+    let creatingForProject = $state<{ id: string; name: string } | null>(null);
+    let collectionForm = $state({
+        name: "",
+        slug: "",
+        description: "",
+        defaultDataStoreId: ""
     });
+    let storesLoading = $state(false);
+    let writableStores = $state<DataStoreSummaryDTO[]>([]);
+    let createSaving = $state(false);
+    let createErrorMsg = $state("");
+
+    function toErrorMessage(e: unknown, fallback: string): string {
+        if (typeof e === "string") return e.toUpperCase();
+        if (e instanceof Error) return e.message ?? fallback;
+        return fallback;
+    }
+
+    async function openCreate(project: ProjectSummaryDTO) {
+        const currentProjectId = project.id ?? "";
+        if (!currentProjectId) {
+            createErrorMsg = "Project id is missing.";
+            return;
+        }
+
+        creatingForProject = { id: currentProjectId, name: project.name ?? project.slug ?? currentProjectId };
+        collectionForm = {
+            name: "",
+            slug: "",
+            description: "",
+            defaultDataStoreId: ""
+        };
+        createErrorMsg = "";
+        storesLoading = true;
+        writableStores = [];
+        isCreateOpen = true;
+
+        try {
+            writableStores = await storesRepo.listWritableByProject(currentProjectId);
+        } catch (e) {
+            createErrorMsg = toErrorMessage(e, "Failed to load writable stores.");
+        } finally {
+            storesLoading = false;
+        }
+    }
+
+    function closeCreate() {
+        isCreateOpen = false;
+        creatingForProject = null;
+        writableStores = [];
+        createSaving = false;
+        storesLoading = false;
+        createErrorMsg = "";
+    }
+
+    async function saveCreateCollection() {
+        if (!creatingForProject) return;
+        if (!collectionForm.name.trim()) {
+            createErrorMsg = "Collection name is required.";
+            return;
+        }
+
+        createSaving = true;
+        createErrorMsg = "";
+
+        try {
+            await collectionsRepo.createCollection({
+                name: collectionForm.name.trim(),
+                slug: collectionForm.slug.trim() || null,
+                description: collectionForm.description.trim() || null,
+                defaultDataStoreId: collectionForm.defaultDataStoreId || null,
+                projectId: creatingForProject.id
+            });
+
+            projectPromise = projectsRepo.getProjectByIdOrSlug(projectId);
+            closeCreate();
+        } catch (e) {
+            createErrorMsg = toErrorMessage(e, "Failed to create collection.");
+        } finally {
+            createSaving = false;
+        }
+    }
 </script>
 
 <svelte:head>
@@ -40,7 +124,7 @@
         <section class="mt-2 lg:col-span-2">
             <div class="mb-3 flex items-center justify-between">
                 <h2 class="text-lg font-semibold">Collections</h2>
-                <button class="rounded-md bg-gray-800 px-3 py-1.5 text-sm text-white hover:bg-black/90">
+                <button class="rounded-md bg-gray-800 px-3 py-1.5 text-sm text-white hover:bg-black/90" onclick={() => openCreate(project)}>
                     New collection
                 </button>
             </div>
@@ -138,5 +222,105 @@
 {:catch error}
     <p class="text-red-500">Error: {error.message}</p>
 {/await}
+
+{#if isCreateOpen}
+    <!-- Backdrop -->
+    <button class="fixed inset-0 bg-black/50 z-40" type="button" onclick={closeCreate} aria-label="Close create collection dialog"></button>
+
+    <!-- Modal -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl rounded-lg bg-white shadow-lg">
+            <div class="flex items-center justify-between border-b px-4 py-3">
+                <h2 class="text-lg font-semibold">Create Collection</h2>
+                <button class="text-gray-500 hover:text-gray-700" type="button" onclick={closeCreate} aria-label="Close">
+                    ✕
+                </button>
+            </div>
+
+            <form class="px-4 py-4" onsubmit={(evt) => { evt.preventDefault(); saveCreateCollection(); }}>
+                <p class="mb-4 text-sm text-gray-600">
+                    Project: <span class="font-medium">{creatingForProject?.name}</span>
+                </p>
+
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="block text-sm font-medium mb-1" for="collection-name">Name</label>
+                        <input
+                                id="collection-name"
+                                class="w-full rounded border px-3 py-2"
+                                type="text"
+                                bind:value={collectionForm.name}
+                                required
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1" for="collection-slug">Slug</label>
+                        <input
+                                id="collection-slug"
+                                class="w-full rounded border px-3 py-2"
+                                type="text"
+                                bind:value={collectionForm.slug}
+                        />
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1" for="collection-description">Description</label>
+                        <textarea
+                                id="collection-description"
+                                class="w-full min-h-24 rounded border px-3 py-2"
+                                bind:value={collectionForm.description}
+                        ></textarea>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1" for="collection-default-store">Default Data Store</label>
+                        {#if storesLoading}
+                            <div class="py-2"><LoadingCircle/></div>
+                        {:else}
+                            <select
+                                    id="collection-default-store"
+                                    class="w-full rounded border px-3 py-2"
+                                    bind:value={collectionForm.defaultDataStoreId}
+                            >
+                                <option value="">None</option>
+                                {#each writableStores as store (store.id)}
+                                    <option value={store.id ?? ''}>
+                                        {store.name ?? store.slug ?? store.id} ({store.slug ?? "no-slug"})
+                                    </option>
+                                {/each}
+                            </select>
+                            {#if writableStores.length === 0}
+                                <p class="mt-1 text-sm text-amber-700">No writable stores found for this project.</p>
+                            {/if}
+                        {/if}
+                    </div>
+                </div>
+
+                {#if createErrorMsg}
+                    <p class="mt-4 text-sm text-red-600">{createErrorMsg}</p>
+                {/if}
+
+                <div class="mt-4 flex justify-end gap-2">
+                    <button
+                            type="button"
+                            class="px-4 py-2 rounded border hover:bg-gray-50"
+                            onclick={closeCreate}
+                            disabled={createSaving}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                            type="submit"
+                            class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                            disabled={createSaving || storesLoading}
+                    >
+                        {createSaving ? "Creating..." : "Create Collection"}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{/if}
 
 </main>

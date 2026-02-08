@@ -15,6 +15,7 @@
     // Reactive params
     let collectionSlug = $derived(page.params.collection_id ?? '');
     let projectSlug = $derived(page.params.project_id ?? '');
+    let reloadTick = $state(0);
 
     // Validate required params
     $effect(() => {
@@ -47,6 +48,7 @@
     });
 
     let datasetsReq = $derived.by(async () => {
+        void reloadTick; // make $derived.by read it as dependency
         const repo = new DataSetsRepository(getOrFetchConfig().then(toApiConfig));
         let c = await collectionReq;
         return await repo.listByCollection(c.id ?? '');
@@ -66,6 +68,10 @@
         const url = new URL(page.url);
         url.searchParams.set('view', view);
         await goto(url, { replaceState: true, keepFocus: true, noScroll: true });
+    };
+
+    const onDatasetDeleted = () => {
+        reloadTick += 1;
     };
 </script>
 
@@ -122,6 +128,7 @@
                     collectionSlug={collectionSlug}
                     showMetaTable={showMetaTable}
                     onViewChange={setViewParam}
+                    onDelete={onDatasetDeleted}
                 />
                 {:catch error}
                         <p class="text-center">Error: {error.message}</p>

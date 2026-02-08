@@ -6,6 +6,10 @@ public record CollectionSummaryDTO
     public string? Slug { get; set; }
     public string? Name { get; set; }
     public string? Description { get; set; }
+    
+    /// <summary>
+    /// Count of active (deletion neither pending nor completed) datasets in this collection.
+    /// </summary>
     public int? DataSetCount { get; set; } = 0;
     public Guid? DefaultDataStoreId { get; set; }
     public Guid? ProjectId { get; set; }

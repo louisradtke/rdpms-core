@@ -4,13 +4,14 @@
     import DataSetBasicTable from "$lib/components/collections/DataSetBasicTable.svelte";
     import DataSetMetaCoverageTable from "$lib/components/collections/DataSetMetaCoverageTable.svelte";
 
-    let { datasets, columns, projectSlug, collectionSlug, showMetaTable, onViewChange } = $props<{
+    let { datasets, columns, projectSlug, collectionSlug, showMetaTable, onViewChange, onDelete } = $props<{
         datasets: DataSetSummaryDTO[];
         columns: MetaDateCollectionColumnDTO[];
         projectSlug: string;
         collectionSlug: string;
         showMetaTable: boolean;
         onViewChange: (view: 'basic' | 'meta') => void;
+        onDelete: () => void;
     }>();
 </script>
 
@@ -21,6 +22,7 @@
         datasets={datasets}
         projectSlug={projectSlug}
         collectionSlug={collectionSlug}
+        onDelete={onDelete}
     />
 {:else}
     <DataSetMetaCoverageTable

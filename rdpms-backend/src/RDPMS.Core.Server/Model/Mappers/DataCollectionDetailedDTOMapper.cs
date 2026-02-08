@@ -21,7 +21,7 @@ public class DataCollectionDetailedDTOMapper(
             Slug = domain.Slug,
             Name = domain.Name,
             Description = domain.Description,
-            DataSetCount = domain.ContainedDatasets?.Count ?? 0,
+            DataSetCount = domain.ContainedDatasets?.Count(ds => ds.DeletionState == DeletionState.Active) ?? 0,
             DefaultDataStoreId = domain.DefaultDataStore?.Id,
             ProjectId = domain.ParentId,
             MetaDateColumns = domain.MetaDataColumns.Select(columnMapper.Export).ToList()

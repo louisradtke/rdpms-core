@@ -45,4 +45,9 @@ export class DataSetsRepository {
         const api = await this.ensureReady();
         return api.apiV1DataDatasetsPost({ dataSetSummaryDTO: dto as DataSetSummaryDTO });
     }
+
+    public async deleteById(id: string): Promise<void> {
+        const api = await this.ensureReady();
+        return api.apiV1DataDatasetsIdDelete({ id });
+    }
 }
