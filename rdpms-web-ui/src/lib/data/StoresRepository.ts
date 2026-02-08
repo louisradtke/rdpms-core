@@ -1,4 +1,9 @@
-import { StoresApi, type DataStoreSummaryDTO, Configuration } from '$lib/api_client';
+import {
+    StoresApi,
+    type DataStoreSummaryDTO,
+    type ApiV1DataStoresGetRequest,
+    Configuration
+} from '$lib/api_client';
 
 export class StoresRepository {
     private readonly ready: Promise<void>;
@@ -24,9 +29,14 @@ export class StoresRepository {
         return this.api;
     }
 
-    public async listAll(): Promise<DataStoreSummaryDTO[]> {
+    public async listAll(requestParameters?: ApiV1DataStoresGetRequest): Promise<DataStoreSummaryDTO[]> {
         const api = await this.ensureReady();
-        return api.apiV1DataStoresGet();
+        return api.apiV1DataStoresGet(requestParameters);
+    }
+
+    public async listWritableByProject(projectId: string): Promise<DataStoreSummaryDTO[]> {
+        const stores = await this.listAll({ parentProjectId: projectId });
+        return stores.filter((store) => store.canWrite === true);
     }
 
     public async getById(id: string): Promise<DataStoreSummaryDTO> {

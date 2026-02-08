@@ -21,6 +21,7 @@
         title: string;
         file: FileSummaryDTO;
         preferredPluginIds: string[];
+        preferredDefaultPluginId?: string;
         collapsible: boolean;
         collapsedByDefault: boolean;
     };
@@ -99,6 +100,7 @@
                 title: item.title ?? file.name ?? file.id ?? "file",
                 file,
                 preferredPluginIds: item.renderer?.kind ?? [],
+                preferredDefaultPluginId: item.renderer?.default,
                 collapsible: item.collapsible ?? false,
                 collapsedByDefault: item.collapsedByDefault ?? false
             });
@@ -195,6 +197,7 @@
                                         fileSlug={"file" + item.file.id}
                                         file={item.file}
                                         preferredPluginIds={item.preferredPluginIds}
+                                        preferredDefaultPluginId={item.preferredDefaultPluginId}
                                     />
                                 </div>
                             </details>
@@ -204,6 +207,7 @@
                                 fileSlug={"file" + item.file.id}
                                 file={item.file}
                                 preferredPluginIds={item.preferredPluginIds}
+                                preferredDefaultPluginId={item.preferredDefaultPluginId}
                             />
                         {/if}
                     {/each}

@@ -43,32 +43,84 @@
         title,
         fileSlug,
         file,
-        preferredPluginIds = []
+        preferredPluginIds = [],
+        preferredDefaultPluginId
     }: {
         title: string;
         fileSlug: string;
         file: FileSummaryDTO;
         preferredPluginIds?: string[];
+        preferredDefaultPluginId?: string;
     } = $props();
 
     let size = $derived(!Number.isNaN(file?.size) ? new FileSize(file.size || 0) : undefined);
-    
-    const resolvePreferredPlugin = (preferredIds: string[], fallbackFile: FileSummaryDTO): CorePluginId | null => {
+
+    const pluginLabels: Record<CorePluginId, string> = {
+        [CORE_PLUGIN_IDS.image]: 'Image',
+        [CORE_PLUGIN_IDS.table]: 'Table',
+        [CORE_PLUGIN_IDS.pdf]: 'PDF',
+        [CORE_PLUGIN_IDS.code]: 'Code'
+    };
+
+    const collectSelectablePlugins = (preferredIds: string[], fallbackFile: FileSummaryDTO): CorePluginId[] => {
         const normalized = preferredIds
             .map((id) => id.trim())
             .filter((id) => id.length > 0);
 
+        const result: CorePluginId[] = [];
         for (const pluginId of normalized) {
-            if (isSupportedCorePluginId(pluginId)) {
-                return pluginId;
+            if (isSupportedCorePluginId(pluginId) && !result.includes(pluginId)) {
+                result.push(pluginId);
             }
         }
 
+        if (result.length > 0) {
+            return result;
+        }
+
         const autoCandidates = autoPluginCandidates(fallbackFile);
-        return autoCandidates.length > 0 ? autoCandidates[0] : null;
+        for (const pluginId of autoCandidates) {
+            if (!result.includes(pluginId)) {
+                result.push(pluginId);
+            }
+        }
+
+        return result;
     };
 
-    let selectedPluginId = $derived.by(() => resolvePreferredPlugin(preferredPluginIds, file));
+    const resolveInitialPlugin = (pluginIds: CorePluginId[], defaultPluginId?: string): CorePluginId | null => {
+        if (defaultPluginId && isSupportedCorePluginId(defaultPluginId) && pluginIds.includes(defaultPluginId)) {
+            return defaultPluginId;
+        }
+
+        return pluginIds[0] ?? null;
+    };
+
+    let selectablePluginIds = $derived.by(() => collectSelectablePlugins(preferredPluginIds, file));
+    let userSelectedPluginId = $state<CorePluginId | null>(null);
+    let visitedPluginIds = $state<CorePluginId[]>([]);
+    let selectedPluginId = $derived.by(() => {
+        if (userSelectedPluginId && selectablePluginIds.includes(userSelectedPluginId)) {
+            return userSelectedPluginId;
+        }
+
+        return resolveInitialPlugin(selectablePluginIds, preferredDefaultPluginId);
+    });
+
+    const isSelected = (pluginId: CorePluginId): boolean => selectedPluginId === pluginId;
+    const isMounted = (pluginId: CorePluginId): boolean => isSelected(pluginId) || visitedPluginIds.includes(pluginId);
+
+    const selectPlugin = (pluginId: CorePluginId): void => {
+        const nextVisited = [...visitedPluginIds];
+        if (selectedPluginId && !nextVisited.includes(selectedPluginId)) {
+            nextVisited.push(selectedPluginId);
+        }
+        if (!nextVisited.includes(pluginId)) {
+            nextVisited.push(pluginId);
+        }
+        visitedPluginIds = nextVisited;
+        userSelectedPluginId = pluginId;
+    };
 </script>
 
 <div id="{fileSlug}">
@@ -77,6 +129,19 @@
         <header class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-2">
             <h2 class="font-medium text-gray-800">{title}</h2>
             <div class="flex items-center gap-4">
+                {#if selectablePluginIds.length > 0}
+                    <div class="inline-flex overflow-hidden rounded-md border border-gray-300 bg-white">
+                        {#each selectablePluginIds as pluginId (pluginId)}
+                            <button
+                                type="button"
+                                class={`cursor-pointer px-2 py-1 text-xs ${isSelected(pluginId) ? 'bg-gray-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'} ${pluginId !== selectablePluginIds[0] ? 'border-l border-gray-300' : ''}`}
+                                onclick={() => selectPlugin(pluginId)}
+                            >
+                                {pluginLabels[pluginId]}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
                 <span class="text-xs text-gray-500">{size !== undefined ? size.getString('*B', true, 1) : 'undefined'}</span>
                 <button onclick={(e) => handleDownload(e, file)}
                    class="text-gray-500 hover:text-gray-700 cursor-pointer" aria-label="Download">
@@ -90,15 +155,27 @@
             </div>
         </header>
         <div class="p-4">
-            {#if selectedPluginId === CORE_PLUGIN_IDS.image}
-                <ImagePlugin uri={file.downloadURI ?? ''} />
-            {:else if selectedPluginId === CORE_PLUGIN_IDS.table}
-                <TablePlugin dataUri={file.downloadURI ?? ''} />
-            {:else if selectedPluginId === CORE_PLUGIN_IDS.pdf}
-                <PdfPlugin uri={file.downloadURI ?? ''} />
-            {:else if selectedPluginId === CORE_PLUGIN_IDS.code}
-                <CodePlugin dataUri={file.downloadURI ?? ''} />
-            {:else}
+            {#if selectablePluginIds.includes(CORE_PLUGIN_IDS.image) && isMounted(CORE_PLUGIN_IDS.image)}
+                <div class={isSelected(CORE_PLUGIN_IDS.image) ? 'block' : 'hidden'}>
+                    <ImagePlugin uri={file.downloadURI ?? ''} />
+                </div>
+            {/if}
+            {#if selectablePluginIds.includes(CORE_PLUGIN_IDS.table) && isMounted(CORE_PLUGIN_IDS.table)}
+                <div class={isSelected(CORE_PLUGIN_IDS.table) ? 'block' : 'hidden'}>
+                    <TablePlugin dataUri={file.downloadURI ?? ''} />
+                </div>
+            {/if}
+            {#if selectablePluginIds.includes(CORE_PLUGIN_IDS.pdf) && isMounted(CORE_PLUGIN_IDS.pdf)}
+                <div class={isSelected(CORE_PLUGIN_IDS.pdf) ? 'block' : 'hidden'}>
+                    <PdfPlugin uri={file.downloadURI ?? ''} />
+                </div>
+            {/if}
+            {#if selectablePluginIds.includes(CORE_PLUGIN_IDS.code) && isMounted(CORE_PLUGIN_IDS.code)}
+                <div class={isSelected(CORE_PLUGIN_IDS.code) ? 'block' : 'hidden'}>
+                    <CodePlugin dataUri={file.downloadURI ?? ''} />
+                </div>
+            {/if}
+            {#if !selectedPluginId}
                 <p class="text-center text-sm text-gray-500">File type not supported</p>
             {/if}
         </div>
