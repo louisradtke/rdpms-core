@@ -45,9 +45,4 @@ export class DataSetsRepository {
         const api = await this.ensureReady();
         return api.apiV1DataDatasetsPost({ dataSetSummaryDTO: dto as DataSetSummaryDTO });
     }
-
-    public async createBatch(dtos: Partial<DataSetSummaryDTO>[]): Promise<void> {
-        const api = await this.ensureReady();
-        return api.apiV1DataDatasetsBatchPost({ dataSetSummaryDTO: dtos as DataSetSummaryDTO[] });
-    }
 }
