@@ -47,7 +47,7 @@ def cmd_dataset_upload(args):
         collectionId=args.collection
     )
     try:
-        ds_id = ds_api.api_v1_data_datasets_post(ds_req_dto)
+        dataset = ds_api.api_v1_data_datasets_post(ds_req_dto)
     except ApiException as api_Ex:
         print(f'encountered HTTP 400', file=sys.stderr)
         print(f'Reason: {api_Ex.reason}')
@@ -56,7 +56,7 @@ def cmd_dataset_upload(args):
 
     types = get_types('', client)
 
-    def upload_file(ds_id: str, base_path: Path, file_path: Path, type_store: TypeStore):
+    def upload_file(ds_id: uuid.UUID, base_path: Path, file_path: Path, type_store: TypeStore):
         stats = (base_path / file_path).stat()
         sha256 = hashlib.new('sha256')
         with open(base_path / file_path, 'rb') as f:
@@ -94,13 +94,13 @@ def cmd_dataset_upload(args):
             for child in filenames:
                 relative_file = (dirpath / child).relative_to(pth)
                 print(f'uploading file: {child} (in {dirpath}) -> {relative_file}')
-                upload_file(ds_id, pth, relative_file, types)
+                upload_file(dataset, pth, relative_file, types)
     else:
-        upload_file(ds_id, Path('.'), pth, types)
+        upload_file(dataset.id, Path('.'), pth, types)
 
     # seal dataset
     try:
-        ds_api.api_v1_data_datasets_id_seal_put(ds_id)
+        ds_api.api_v1_data_datasets_id_seal_put(dataset.id)
     except ApiException as api_ex:
         print(f'encountered HTTP {api_ex.status}', file=sys.stderr)
         print(f'Reason: {api_ex.reason}')
