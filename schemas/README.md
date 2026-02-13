@@ -35,6 +35,11 @@ This directory contains JSON Schemas that describe the shared contracts used acr
 - `visualization-renderer.kind` is a list of renderer IDs; `visualization-renderer.default` should be one of them (not enforceable in plain JSON Schema).
 - Plugin/renderer IDs are namespaced; `rdpms.*` is reserved for built-ins.
 
+### Query Model
+- `object-query-dsl.v1.schema.json` defines the metadata query language used to match JSON documents.
+- Schema URN: `urn:rdpms:core:schema:object-query-dsl:v1`.
+- It supports logical operators (`$and`, `$or`, `$not`), scalar/comparison operators (e.g. `$eq`, `$gte`), and array operators (`$elemMatch`, `$allElemMatch`, `$containsAll`).
+
 ## Technical Design Notes
 - Optional fields are represented as absent (no `null` unless explicitly added in the future).
 
