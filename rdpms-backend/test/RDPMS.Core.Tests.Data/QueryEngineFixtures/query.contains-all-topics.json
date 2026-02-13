@@ -1,0 +1,5 @@
+{
+  "content.filesContainer.files.file.content.timeSeriesContainer.topics.name": {
+    "$containsAll": ["/odom", "/image"]
+  }
+}

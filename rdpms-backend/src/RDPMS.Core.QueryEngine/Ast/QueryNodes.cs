@@ -39,3 +39,7 @@ public sealed record GteSizeConstraintNode(int MinimumLength) : ConstraintNode;
 public sealed record LteSizeConstraintNode(int MaximumLength) : ConstraintNode;
 
 public sealed record ElemMatchConstraintNode(QueryNode ElementQuery) : ConstraintNode;
+
+public sealed record AllElemMatchConstraintNode(QueryNode ElementQuery) : ConstraintNode;
+
+public sealed record ContainsAllConstraintNode(IReadOnlyList<ScalarValue> Values) : ConstraintNode;

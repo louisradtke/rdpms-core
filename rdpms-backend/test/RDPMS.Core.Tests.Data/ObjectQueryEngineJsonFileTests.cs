@@ -9,12 +9,25 @@ namespace RDPMS.Core.Tests.Data;
 public class ObjectQueryEngineJsonFileTests
 {
     private const string QueryFixture = "query.strict-odom-and-image.json";
+    private const string ContainsAllQueryFixture = "query.contains-all-topics.json";
+    private const string AllElemMatchQueryFixture = "query.all-elem-match-topics.json";
 
     private static readonly (string FileName, bool ShouldMatch)[] MatchCases =
     [
         ("file-information.match.json", true),
         ("file-information.missing-image.json", false),
         ("file-information.no-timeseries.json", false),
+    ];
+
+    private static readonly (string QueryFileName, string FileName, bool ShouldMatch)[] ExtendedOperatorCases =
+    [
+        (ContainsAllQueryFixture, "file-information.match.json", true),
+        (ContainsAllQueryFixture, "file-information.missing-image.json", false),
+        (ContainsAllQueryFixture, "file-information.no-timeseries.json", false),
+
+        (AllElemMatchQueryFixture, "file-information.match.json", true),
+        (AllElemMatchQueryFixture, "file-information.missing-image.json", false),
+        (AllElemMatchQueryFixture, "file-information.no-timeseries.json", false),
     ];
 
     [Test]
@@ -30,6 +43,19 @@ public class ObjectQueryEngineJsonFileTests
     public void StrictQueryFixture_ParsesIntoAst()
     {
         using var queryDoc = LoadFixture(QueryFixture);
+        var query = new ObjectQueryDslV1Schema(queryDoc.RootElement);
+        var engine = ObjectQueryEngine.CreateDefault();
+
+        var ast = engine.ParseToAst(query);
+
+        Assert.That(ast, Is.Not.Null);
+    }
+
+    [TestCase(ContainsAllQueryFixture)]
+    [TestCase(AllElemMatchQueryFixture)]
+    public void ExtendedOperatorFixtures_ParseIntoAst(string queryFileName)
+    {
+        using var queryDoc = LoadFixture(queryFileName);
         var query = new ObjectQueryDslV1Schema(queryDoc.RootElement);
         var engine = ObjectQueryEngine.CreateDefault();
 
@@ -55,6 +81,25 @@ public class ObjectQueryEngineJsonFileTests
 
         Assert.That(isMatch, Is.EqualTo(testCase.ShouldMatch),
             $"Unexpected match result for fixture '{testCase.FileName}'.");
+    }
+
+    [TestCaseSource(nameof(ExtendedOperatorCases))]
+    public void ExtendedOperatorFixtures_MatchExpectedDocuments((string QueryFileName, string FileName, bool ShouldMatch) testCase)
+    {
+        using var queryDoc = LoadFixture(testCase.QueryFileName);
+        var query = new ObjectQueryDslV1Schema(queryDoc.RootElement);
+
+        using var document = LoadFixture(testCase.FileName);
+        var fileInformation = new FileInformationV1Schema(document.RootElement);
+
+        Assert.That(fileInformation.IsValid(), Is.True,
+            $"Fixture '{testCase.FileName}' must validate against FileInformationV1Schema.");
+
+        var engine = ObjectQueryEngine.CreateDefault();
+        var isMatch = engine.IsMatch(query, document.RootElement);
+
+        Assert.That(isMatch, Is.EqualTo(testCase.ShouldMatch),
+            $"Unexpected match result for query '{testCase.QueryFileName}' and fixture '{testCase.FileName}'.");
     }
 
     private static JsonDocument LoadFixture(string fileName)

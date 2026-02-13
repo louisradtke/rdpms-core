@@ -123,6 +123,16 @@
         "$elemMatch": {
           "$ref": "#/$defs/ElementQuery",
           "description": "Match at least one element in an array against the provided query (element becomes the root for paths)."
+        },
+        "$allElemMatch": {
+          "$ref": "#/$defs/ElementQuery",
+          "description": "Match all elements in an array against the provided query (element becomes the root for paths)."
+        },
+        "$containsAll": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Scalar" },
+          "description": "For arrays (or flattened path results), require that all listed scalar values are present."
         }
       },
       "minProperties": 1,
@@ -139,7 +149,9 @@
         { "required": ["$size"] },
         { "required": ["$gteSize"] },
         { "required": ["$lteSize"] },
-        { "required": ["$elemMatch"] }
+        { "required": ["$elemMatch"] },
+        { "required": ["$allElemMatch"] },
+        { "required": ["$containsAll"] }
       ]
     },
 

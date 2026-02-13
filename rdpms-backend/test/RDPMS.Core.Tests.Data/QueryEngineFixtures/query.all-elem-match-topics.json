@@ -1,0 +1,31 @@
+{
+  "$and": [
+    {
+      "content.filesContainer.files": {
+        "$elemMatch": {
+          "file.content.timeSeriesContainer.topics": {
+            "$exists": true
+          }
+        }
+      }
+    },
+    {
+      "content.filesContainer.files": {
+        "$allElemMatch": {
+          "$or": [
+            {
+              "file.content.timeSeriesContainer.topics": {
+                "$exists": false
+              }
+            },
+            {
+              "file.content.timeSeriesContainer.topics.name": {
+                "$containsAll": ["/odom", "/image"]
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

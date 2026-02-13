@@ -1,5 +1,4 @@
 {
-  "$schema": "urn:rdpms:core:schema:file-information:v1",
   "sizeBytes": 2048,
   "content": {
     "filesContainer": {

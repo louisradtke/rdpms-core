@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Corvus.Json;
 using RDPMS.Core.Contracts.Schemas;
 using RDPMS.Core.QueryEngine.Ast;
 
@@ -22,193 +21,226 @@ public sealed class ObjectQueryAstParser : IObjectQueryAstParser
 
     public QueryNode Parse(JsonElement queryJson)
     {
-        var root = new ObjectQueryDslV1Schema(queryJson);
-        return Parse(root);
+        return ParseQueryJson(queryJson, isElementContext: false, allowSchemaProperty: true);
     }
 
     public QueryNode Parse(ObjectQueryDslV1Schema query)
     {
-        if (!query.IsValid())
-        {
-            throw new QueryParseException("Query does not match ObjectQueryDslV1 schema.");
-        }
-
-        var rootQuery = query.AsAllOf0Entity;
-        if (rootQuery.TryGetAsLogicalQuery(out var logicalQuery))
-        {
-            return ParseLogicalQuery(logicalQuery);
-        }
-
-        if (rootQuery.TryGetAsFieldQuery(out var fieldQuery))
-        {
-            return ParseFieldQuery(fieldQuery);
-        }
-
-        throw new QueryParseException("Root query is neither logical nor field query.");
+        return Parse(query.AsJsonElement);
     }
 
-    private static QueryNode ParseQuery(ObjectQueryDslV1Schema.Query query)
+    private static QueryNode ParseQueryJson(JsonElement queryJson, bool isElementContext, bool allowSchemaProperty)
     {
-        if (query.TryGetAsLogicalQuery(out var logicalQuery))
+        if (queryJson.ValueKind != JsonValueKind.Object)
         {
-            return ParseLogicalQuery(logicalQuery);
+            throw new QueryParseException("Query node must be a JSON object.");
         }
 
-        if (query.TryGetAsFieldQuery(out var fieldQuery))
+        var logicalKeys = new List<string>();
+        if (queryJson.TryGetProperty("$and", out _)) logicalKeys.Add("$and");
+        if (queryJson.TryGetProperty("$or", out _)) logicalKeys.Add("$or");
+        if (queryJson.TryGetProperty("$not", out _)) logicalKeys.Add("$not");
+
+        if (logicalKeys.Count > 1)
         {
-            return ParseFieldQuery(fieldQuery);
+            throw new QueryParseException("Query node may only contain one of $and, $or, or $not.");
         }
 
-        throw new QueryParseException("Query is neither logical nor field query.");
-    }
-
-    private static QueryNode ParseElementQuery(ObjectQueryDslV1Schema.ElementQuery query)
-    {
-        if (query.TryGetAsLogicalElementQuery(out var logicalQuery))
+        if (logicalKeys.Count == 1)
         {
-            return ParseLogicalElementQuery(logicalQuery);
+            var key = logicalKeys[0];
+            if (key == "$and")
+            {
+                var andArray = queryJson.GetProperty("$and");
+                if (andArray.ValueKind != JsonValueKind.Array)
+                {
+                    throw new QueryParseException("$and must be an array.");
+                }
+
+                var children = andArray.EnumerateArray()
+                    .Select(item => ParseQueryJson(item, isElementContext, allowSchemaProperty: false))
+                    .ToArray();
+                if (children.Length == 0)
+                {
+                    throw new QueryParseException("$and array must not be empty.");
+                }
+
+                return new AndQueryNode(children);
+            }
+
+            if (key == "$or")
+            {
+                var orArray = queryJson.GetProperty("$or");
+                if (orArray.ValueKind != JsonValueKind.Array)
+                {
+                    throw new QueryParseException("$or must be an array.");
+                }
+
+                var children = orArray.EnumerateArray()
+                    .Select(item => ParseQueryJson(item, isElementContext, allowSchemaProperty: false))
+                    .ToArray();
+                if (children.Length == 0)
+                {
+                    throw new QueryParseException("$or array must not be empty.");
+                }
+
+                return new OrQueryNode(children);
+            }
+
+            var notQuery = queryJson.GetProperty("$not");
+            return new NotQueryNode(ParseQueryJson(notQuery, isElementContext, allowSchemaProperty: false));
         }
 
-        if (query.TryGetAsFieldElementQuery(out var fieldQuery))
-        {
-            return ParseFieldElementQuery(fieldQuery);
-        }
-
-        throw new QueryParseException("Element query is neither logical nor field query.");
-    }
-
-    private static QueryNode ParseLogicalQuery(ObjectQueryDslV1Schema.LogicalQuery logical)
-    {
-        if (logical.And is { } and)
-        {
-            return new AndQueryNode(and.Select(ParseQuery).ToArray());
-        }
-
-        if (logical.Or is { } or)
-        {
-            return new OrQueryNode(or.Select(ParseQuery).ToArray());
-        }
-
-        if (logical.Not is { } not)
-        {
-            return new NotQueryNode(ParseQuery(not));
-        }
-
-        throw new QueryParseException("Logical query has no supported operator.");
-    }
-
-    private static QueryNode ParseLogicalElementQuery(ObjectQueryDslV1Schema.LogicalElementQuery logical)
-    {
-        if (logical.And is { } and)
-        {
-            return new AndQueryNode(and.Select(ParseElementQuery).ToArray());
-        }
-
-        if (logical.Or is { } or)
-        {
-            return new OrQueryNode(or.Select(ParseElementQuery).ToArray());
-        }
-
-        if (logical.Not is { } not)
-        {
-            return new NotQueryNode(ParseElementQuery(not));
-        }
-
-        throw new QueryParseException("Logical element query has no supported operator.");
-    }
-
-    private static QueryNode ParseFieldQuery(ObjectQueryDslV1Schema.FieldQuery fieldQuery)
-    {
         var predicates = new List<FieldPredicateNode>();
-        foreach (var property in fieldQuery.EnumerateObject())
+        foreach (var property in queryJson.EnumerateObject())
         {
-            var path = property.Name.GetString() ?? string.Empty;
-            var fieldConstraint = property.Value.As<ObjectQueryDslV1Schema.FieldConstraint>();
-            predicates.Add(new FieldPredicateNode(path, ParseFieldConstraint(fieldConstraint)));
+            if (allowSchemaProperty && property.NameEquals("$schema"))
+            {
+                continue;
+            }
+
+            if (property.Name.StartsWith('$'))
+            {
+                throw new QueryParseException($"Unsupported operator '{property.Name}' in query node.");
+            }
+
+            var constraint = ParseFieldConstraintJson(property.Value, isElementContext);
+            predicates.Add(new FieldPredicateNode(property.Name, constraint));
+        }
+
+        if (predicates.Count == 0)
+        {
+            throw new QueryParseException("Field query must contain at least one field constraint.");
         }
 
         return new FieldQueryNode(predicates);
     }
 
-    private static QueryNode ParseFieldElementQuery(ObjectQueryDslV1Schema.FieldElementQuery fieldQuery)
+    private static ConstraintNode ParseFieldConstraintJson(JsonElement constraintJson, bool isElementContext)
     {
-        var predicates = new List<FieldPredicateNode>();
-        foreach (var property in fieldQuery.EnumerateObject())
+        if (IsScalar(constraintJson))
         {
-            var path = property.Name.GetString() ?? string.Empty;
-            var fieldConstraint = property.Value.As<ObjectQueryDslV1Schema.FieldConstraint>();
-            predicates.Add(new FieldPredicateNode(path, ParseFieldConstraint(fieldConstraint)));
+            return new EqConstraintNode(ScalarValue.FromJsonElement(constraintJson));
         }
 
-        return new FieldQueryNode(predicates);
+        if (constraintJson.ValueKind != JsonValueKind.Object)
+        {
+            throw new QueryParseException("Field constraint must be either a scalar or an object.");
+        }
+
+        var operators = new[]
+        {
+            "$eq", "$ne", "$in", "$exists", "$gt", "$gte", "$lt", "$lte", "$regex", "$size", "$gteSize",
+            "$lteSize", "$elemMatch", "$allElemMatch", "$containsAll"
+        };
+
+        var presentOperators = operators.Where(op => constraintJson.TryGetProperty(op, out _)).ToArray();
+        if (presentOperators.Length != 1)
+        {
+            throw new QueryParseException("Constraint object must contain exactly one supported operator.");
+        }
+
+        var op = presentOperators[0];
+        var value = constraintJson.GetProperty(op);
+
+        return op switch
+        {
+            "$eq" => new EqConstraintNode(ParseScalar(value)),
+            "$ne" => new NeConstraintNode(ParseScalar(value)),
+            "$in" => new InConstraintNode(ParseScalarArray(value, "$in")),
+            "$exists" => ParseExists(value),
+            "$gt" => new GtConstraintNode(ParseScalar(value)),
+            "$gte" => new GteConstraintNode(ParseScalar(value)),
+            "$lt" => new LtConstraintNode(ParseScalar(value)),
+            "$lte" => new LteConstraintNode(ParseScalar(value)),
+            "$regex" => ParseRegex(value),
+            "$size" => new SizeConstraintNode(ParseNonNegativeInt(value, "$size")),
+            "$gteSize" => new GteSizeConstraintNode(ParseNonNegativeInt(value, "$gteSize")),
+            "$lteSize" => new LteSizeConstraintNode(ParseNonNegativeInt(value, "$lteSize")),
+            "$elemMatch" => new ElemMatchConstraintNode(ParseQueryJson(value, isElementContext: true, allowSchemaProperty: false)),
+            "$allElemMatch" => new AllElemMatchConstraintNode(ParseQueryJson(value, isElementContext: true, allowSchemaProperty: false)),
+            "$containsAll" => new ContainsAllConstraintNode(ParseScalarArray(value, "$containsAll")),
+            _ => throw new QueryParseException($"Unsupported operator '{op}'."),
+        };
     }
 
-    private static ConstraintNode ParseFieldConstraint(ObjectQueryDslV1Schema.FieldConstraint constraint)
+    private static ScalarValue ParseScalar(JsonElement value)
     {
-        if (constraint.TryGetAsScalar(out var scalar))
+        if (!IsScalar(value))
         {
-            return new EqConstraintNode(ParseScalar(scalar));
+            throw new QueryParseException("Expected scalar value.");
         }
 
-        if (constraint.TryGetAsConstraintObject(out var constraintObject))
-        {
-            return ParseConstraintObject(constraintObject);
-        }
-
-        throw new QueryParseException("Field constraint is neither scalar nor object.");
+        return ScalarValue.FromJsonElement(value);
     }
 
-    private static ConstraintNode ParseConstraintObject(ObjectQueryDslV1Schema.ConstraintObject constraint)
+    private static IReadOnlyList<ScalarValue> ParseScalarArray(JsonElement value, string operatorName)
     {
-        if (constraint.Eq is { } eq) return new EqConstraintNode(ParseScalar(eq));
-        if (constraint.Ne is { } ne) return new NeConstraintNode(ParseScalar(ne));
-
-        if (constraint.In is { } inValues)
+        if (value.ValueKind != JsonValueKind.Array)
         {
-            var values = inValues.Select(ParseScalar).ToArray();
-            return new InConstraintNode(values);
+            throw new QueryParseException($"{operatorName} must be an array.");
         }
 
-        if (constraint.Exists is { } exists)
+        var result = new List<ScalarValue>();
+        foreach (var item in value.EnumerateArray())
         {
-            return new ExistsConstraintNode(exists.AsJsonElement.GetBoolean());
+            if (!IsScalar(item))
+            {
+                throw new QueryParseException($"{operatorName} array must only contain scalar values.");
+            }
+
+            result.Add(ScalarValue.FromJsonElement(item));
         }
 
-        if (constraint.Gt is { } gt) return new GtConstraintNode(ParseScalar(gt));
-        if (constraint.Gte is { } gte) return new GteConstraintNode(ParseScalar(gte));
-        if (constraint.Lt is { } lt) return new LtConstraintNode(ParseScalar(lt));
-        if (constraint.Lte is { } lte) return new LteConstraintNode(ParseScalar(lte));
-
-        if (constraint.Regex is { } regex)
+        if (result.Count == 0)
         {
-            return new RegexConstraintNode(regex.AsJsonElement.GetString() ?? string.Empty);
+            throw new QueryParseException($"{operatorName} array must not be empty.");
         }
 
-        if (constraint.Size is { } size)
-        {
-            return new SizeConstraintNode(size.AsJsonElement.GetInt32());
-        }
-
-        if (constraint.GteSize is { } gteSize)
-        {
-            return new GteSizeConstraintNode(gteSize.AsJsonElement.GetInt32());
-        }
-
-        if (constraint.LteSize is { } lteSize)
-        {
-            return new LteSizeConstraintNode(lteSize.AsJsonElement.GetInt32());
-        }
-
-        if (constraint.ElemMatch is { } elemMatch)
-        {
-            return new ElemMatchConstraintNode(ParseElementQuery(elemMatch));
-        }
-
-        throw new QueryParseException("Constraint object has no supported operator.");
+        return result;
     }
 
-    private static ScalarValue ParseScalar(ObjectQueryDslV1Schema.Scalar scalar)
+    private static ExistsConstraintNode ParseExists(JsonElement value)
     {
-        return ScalarValue.FromJsonElement(scalar.AsJsonElement);
+        if (value.ValueKind is JsonValueKind.True)
+        {
+            return new ExistsConstraintNode(true);
+        }
+
+        if (value.ValueKind is JsonValueKind.False)
+        {
+            return new ExistsConstraintNode(false);
+        }
+
+        throw new QueryParseException("$exists must be a boolean.");
+    }
+
+    private static RegexConstraintNode ParseRegex(JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.String)
+        {
+            throw new QueryParseException("$regex must be a string.");
+        }
+
+        return new RegexConstraintNode(value.GetString() ?? string.Empty);
+    }
+
+    private static int ParseNonNegativeInt(JsonElement value, string operatorName)
+    {
+        if (value.ValueKind != JsonValueKind.Number || !value.TryGetInt32(out var intValue) || intValue < 0)
+        {
+            throw new QueryParseException($"{operatorName} must be a non-negative integer.");
+        }
+
+        return intValue;
+    }
+
+    private static bool IsScalar(JsonElement value)
+    {
+        return value.ValueKind is JsonValueKind.String
+            or JsonValueKind.Number
+            or JsonValueKind.True
+            or JsonValueKind.False
+            or JsonValueKind.Null;
     }
 }

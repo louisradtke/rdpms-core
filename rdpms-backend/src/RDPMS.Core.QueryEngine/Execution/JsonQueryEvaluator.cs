@@ -27,6 +27,11 @@ public sealed class JsonQueryEvaluator : IJsonQueryEvaluator
 
     private static bool EvaluatePredicate(FieldPredicateNode predicate, JsonElement root)
     {
+        if (predicate.Constraint is ContainsAllConstraintNode containsAll)
+        {
+            return EvaluateContainsAllPredicate(predicate.FieldPath, containsAll, root);
+        }
+
         var exists = TryResolvePath(root, predicate.FieldPath, out var value);
 
         if (predicate.Constraint is ExistsConstraintNode existsConstraint)
@@ -59,9 +64,45 @@ public sealed class JsonQueryEvaluator : IJsonQueryEvaluator
             GteSizeConstraintNode gteSize => MatchArraySize(value, length => length >= gteSize.MinimumLength),
             LteSizeConstraintNode lteSize => MatchArraySize(value, length => length <= lteSize.MaximumLength),
             ElemMatchConstraintNode elemMatch => MatchElemMatch(value, elemMatch.ElementQuery),
+            AllElemMatchConstraintNode allElemMatch => MatchAllElemMatch(value, allElemMatch.ElementQuery),
+            ContainsAllConstraintNode => throw new InvalidOperationException("$containsAll is handled in predicate evaluation."),
             ExistsConstraintNode => throw new InvalidOperationException("$exists is handled before constraint evaluation."),
             _ => throw new InvalidOperationException($"Unsupported constraint type {constraint.GetType().Name}"),
         };
+    }
+
+    private static bool EvaluateContainsAllPredicate(string path, ContainsAllConstraintNode containsAll, JsonElement root)
+    {
+        var resolved = ResolvePathValues(root, path);
+        if (resolved.Count == 0)
+        {
+            return false;
+        }
+
+        if (resolved.Count == 1 && resolved[0].ValueKind == JsonValueKind.Array)
+        {
+            var arrayValues = resolved[0].EnumerateArray()
+                .Where(TryReadScalar)
+                .Select(ScalarValue.FromJsonElement)
+                .ToArray();
+            return ContainsAll(arrayValues, containsAll.Values);
+        }
+
+        var flattened = resolved.Where(TryReadScalar).Select(ScalarValue.FromJsonElement).ToArray();
+        return ContainsAll(flattened, containsAll.Values);
+    }
+
+    private static bool ContainsAll(IReadOnlyList<ScalarValue> haystack, IReadOnlyList<ScalarValue> needles)
+    {
+        foreach (var needle in needles)
+        {
+            if (!haystack.Any(candidate => candidate.EqualsByDslSemantics(needle)))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static bool CompareScalars(JsonElement documentValue, ScalarValue queryValue, Func<int, bool> predicate)
@@ -141,6 +182,24 @@ public sealed class JsonQueryEvaluator : IJsonQueryEvaluator
         return false;
     }
 
+    private static bool MatchAllElemMatch(JsonElement value, QueryNode elementQuery)
+    {
+        if (value.ValueKind != JsonValueKind.Array)
+        {
+            return false;
+        }
+
+        foreach (var item in value.EnumerateArray())
+        {
+            if (!EvaluateQuery(elementQuery, item))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private static bool TryResolvePath(JsonElement root, string path, out JsonElement value)
     {
         value = root;
@@ -170,6 +229,52 @@ public sealed class JsonQueryEvaluator : IJsonQueryEvaluator
         return true;
     }
 
+    private static List<JsonElement> ResolvePathValues(JsonElement root, string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return [];
+        }
+
+        var current = new List<JsonElement> { root };
+
+        foreach (var segment in path.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var next = new List<JsonElement>();
+            foreach (var node in current)
+            {
+                if (node.ValueKind == JsonValueKind.Object)
+                {
+                    if (node.TryGetProperty(segment, out var child))
+                    {
+                        next.Add(child);
+                    }
+
+                    continue;
+                }
+
+                if (node.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var item in node.EnumerateArray())
+                    {
+                        if (item.ValueKind == JsonValueKind.Object && item.TryGetProperty(segment, out var child))
+                        {
+                            next.Add(child);
+                        }
+                    }
+                }
+            }
+
+            current = next;
+            if (current.Count == 0)
+            {
+                return [];
+            }
+        }
+
+        return current;
+    }
+
     private static bool TryReadScalar(JsonElement value, out ScalarValue scalar)
     {
         switch (value.ValueKind)
@@ -185,5 +290,10 @@ public sealed class JsonQueryEvaluator : IJsonQueryEvaluator
                 scalar = default;
                 return false;
         }
+    }
+
+    private static bool TryReadScalar(JsonElement value)
+    {
+        return TryReadScalar(value, out _);
     }
 }
