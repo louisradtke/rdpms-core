@@ -1,0 +1,48 @@
+{
+  "$schema": "urn:rdpms:core:schema:file-information:v1",
+  "sizeBytes": 2048,
+  "content": {
+    "filesContainer": {
+      "containerType": "zip",
+      "files": [
+        {
+          "path": "recording/rosbag_0.db3",
+          "file": {
+            "sizeBytes": 1024,
+            "content": {
+              "timeSeriesContainer": {
+                "topics": [
+                  {
+                    "name": "/odom",
+                    "metadata": {},
+                    "messageType": {
+                      "name": "nav_msgs/msg/Odometry",
+                      "reference": "https://docs.ros2.org/latest/api/nav_msgs/msg/Odometry.html",
+                      "fields": []
+                    }
+                  },
+                  {
+                    "name": "/image",
+                    "metadata": {},
+                    "messageType": {
+                      "name": "sensor_msgs/msg/Image",
+                      "reference": "https://docs.ros2.org/latest/api/sensor_msgs/msg/Image.html",
+                      "fields": []
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "path": "notes/readme.txt",
+          "file": {
+            "sizeBytes": 64,
+            "content": {}
+          }
+        }
+      ]
+    }
+  }
+}

@@ -24,8 +24,14 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\RDPMS.Core.Contracts\RDPMS.Core.Contracts.csproj" />
       <ProjectReference Include="..\..\src\RDPMS.Core.Persistence\RDPMS.Core.Persistence.csproj" />
+      <ProjectReference Include="..\..\src\RDPMS.Core.QueryEngine\RDPMS.Core.QueryEngine.csproj" />
       <ProjectReference Include="..\..\src\RDPMS.Core.Server\RDPMS.Core.Server.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="QueryEngineFixtures\**\*.json" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>

@@ -4,12 +4,13 @@
 BASE_TYPES=(
   "visualization-manifest.v1.schema.json"
   "file-information.v1.schema.json"
+  "object-query-dsl.v1.schema.json"
 )
 OUTPUT_SUFFIX=".d.ts"
 # copy-interface
 SCHEMA_DIR="/work/json"
 TARGET_DIR="/work/out"
-  
+
 set -ex
 
 for schema in "${BASE_TYPES[@]}"; do

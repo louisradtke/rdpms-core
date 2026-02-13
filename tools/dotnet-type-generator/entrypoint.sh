@@ -8,6 +8,7 @@ ROOT_NAMESPACE="RDPMS.Core.Contracts.Schemas"
 BASE_TYPES=(
   "visualization-manifest.v1.schema.json"
   "file-information.v1.schema.json"
+  "object-query-dsl.v1.schema.json"
 )
 MAP_FILE_SUFFIX=".map.json"
   

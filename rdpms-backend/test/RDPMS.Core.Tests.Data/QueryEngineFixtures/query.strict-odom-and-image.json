@@ -1,0 +1,51 @@
+{
+  "$schema": "urn:rdpms:core:schema:object-query-dsl:v1",
+  "$and": [
+    {
+      "content.filesContainer.files": {
+        "$elemMatch": {
+          "file.content.timeSeriesContainer.topics": {
+            "$exists": true
+          }
+        }
+      }
+    },
+    {
+      "$not": {
+        "content.filesContainer.files": {
+          "$elemMatch": {
+            "$and": [
+              {
+                "file.content.timeSeriesContainer.topics": {
+                  "$exists": true
+                }
+              },
+              {
+                "$or": [
+                  {
+                    "$not": {
+                      "file.content.timeSeriesContainer.topics": {
+                        "$elemMatch": {
+                          "name": "/odom"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "$not": {
+                      "file.content.timeSeriesContainer.topics": {
+                        "$elemMatch": {
+                          "name": "/image"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "sizeBytes": 4096,
+  "content": {
+    "filesContainer": {
+      "containerType": "zip",
+      "files": [
+        {
+          "path": "recording/rosbag_0.db3",
+          "file": {
+            "sizeBytes": 3072,
+            "content": {
+              "timeSeriesContainer": {
+                "topics": [
+                  {
+                    "name": "/odom",
+                    "metadata": {},
+                    "messageType": {
+                      "name": "nav_msgs/msg/Odometry",
+                      "reference": "https://docs.ros2.org/latest/api/nav_msgs/msg/Odometry.html",
+                      "fields": []
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

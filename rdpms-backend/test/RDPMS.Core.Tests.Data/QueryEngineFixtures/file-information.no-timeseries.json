@@ -1,0 +1,23 @@
+{
+  "sizeBytes": 1024,
+  "content": {
+    "filesContainer": {
+      "containerType": "tar",
+      "files": [
+        {
+          "path": "archive/data.bin.zst",
+          "file": {
+            "sizeBytes": 900,
+            "content": {
+              "compressionType": "zstd",
+              "compressedFile": {
+                "sizeBytes": 2000,
+                "content": {}
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

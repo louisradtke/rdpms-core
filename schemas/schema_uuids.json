@@ -70,5 +70,9 @@
   {
     "schema": "json/visualization-manifest.v1.schema.json",
     "id": "17612b6b-ef7b-4e0d-a0b1-f329867385ac"
+  },
+  {
+    "schema": "json/object-query-dsl.v1.schema.json",
+    "id": "f77dd7a5-d826-4e8d-aaf1-82573fe22e4b"
   }
 ]
