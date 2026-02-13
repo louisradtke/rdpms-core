@@ -3,6 +3,7 @@
 # User Manual
 
 - [Index](./user_section/index.md)
+- [Metadata Query Engine](./user_section/query-engine.md) <!-- User-facing overview of the JSON query DSL, supported operators, and example queries. -->
 
 # Developer Section
 

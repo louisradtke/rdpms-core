@@ -4,6 +4,11 @@ using RDPMS.Core.QueryEngine.Ast;
 
 namespace RDPMS.Core.QueryEngine.Execution;
 
+/// <summary>
+/// In-memory interpreter for the query AST.
+/// Supports logical nodes, scalar constraints, and array operators including <c>$elemMatch</c>,
+/// <c>$allElemMatch</c>, and <c>$containsAll</c>.
+/// </summary>
 public sealed class JsonQueryEvaluator : IJsonQueryEvaluator
 {
     private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(250);

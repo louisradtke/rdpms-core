@@ -4,6 +4,10 @@ using RDPMS.Core.QueryEngine.Ast;
 
 namespace RDPMS.Core.QueryEngine.Parsing;
 
+/// <summary>
+/// JSON-to-AST parser for the object query DSL.
+/// The parser enforces query shape and operator contracts and emits a compact normalized AST.
+/// </summary>
 public sealed class ObjectQueryAstParser : IObjectQueryAstParser
 {
     public QueryNode Parse(string queryJson)

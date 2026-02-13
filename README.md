@@ -11,6 +11,7 @@ The "tracking" may be implemented as "taint": it shall be clearly traceable, whi
   - `RDPMS.Core.Infra`: Cross-cutting infra
   - `RDPMS.Core.Persistence`: EF Core entities, DbContext, migrations
   - `RDPMS.Core.Server`: ASP.NET Core API
+  - `RDPMS.Core.QueryEngine`: Metadata query DSL parser (JSON -> AST) and evaluator (AST -> JSON match)
 - `rdpms-cli/` Python CLI client
 - `rdpms-web-ui/` Svelte 5 + Vite 6 web UI
 - `schemas/` JSON Schemas for shared contracts (see `schemas/README.md`)

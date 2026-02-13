@@ -3,6 +3,9 @@ using System.Text.Json;
 
 namespace RDPMS.Core.QueryEngine.Ast;
 
+/// <summary>
+/// Normalized scalar categories supported by the query DSL.
+/// </summary>
 public enum ScalarValueKind
 {
     String,
@@ -11,6 +14,9 @@ public enum ScalarValueKind
     Null,
 }
 
+/// <summary>
+/// Type-safe scalar wrapper used by AST constraints and evaluator comparisons.
+/// </summary>
 public readonly record struct ScalarValue(ScalarValueKind Kind, string? StringValue, double? NumberValue, bool? BoolValue)
 {
     public static ScalarValue FromString(string value) => new(ScalarValueKind.String, value, null, null);

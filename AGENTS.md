@@ -32,6 +32,7 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 ## Backend Notes (.NET)
 - Solution: `rdpms-backend/rdpms-backend.sln`
 - Server project: `rdpms-backend/src/RDPMS.Core.Server`
+- Query engine project: `rdpms-backend/src/RDPMS.Core.QueryEngine`
 - Target framework: .NET 9 (`net9.0`)
 - API versioning and Swagger UI enabled
 - Default config file: `rdpms-backend/src/RDPMS.Core.Server/debug.yaml` for local dev
@@ -128,6 +129,7 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 - `RDPMS.Core.Infra`: Cross-cutting infra (config, CLI options, constants, helpers, exceptions).
 - `RDPMS.Core.Persistence`: EF Core entities, DbContext, migrations, default seed values, slug helpers.
 - `RDPMS.Core.Server`: Web API (controllers), services, repositories, DTOs/mappers, utilities.
+- `RDPMS.Core.QueryEngine`: Query DSL parser and interpreter for metadata JSON document matching.
 - `RDPMS.MockJsonValidation`: Experimental UI for JSON/schema validation (not part of runtime API).
 - `RDPMS.MockS3Interaction`: Minimal server for S3 interaction tests (dev helper).
 
