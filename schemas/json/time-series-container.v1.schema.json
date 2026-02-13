@@ -5,6 +5,10 @@
   "type": "object",
   "description": "Container for information about multiple topics (data streams).",
   "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional: JSON Schema association hint for editors (e.g., VS Code)."
+    },
     "topics": {
       "type": "array",
       "items": {
