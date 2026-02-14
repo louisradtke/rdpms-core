@@ -15,6 +15,10 @@ public interface IDataCollectionEntityService : IGenericCollectionService<DataCo
     /// <summary>
     /// Add or update a metadata column for a collection.
     /// </summary>
+    /// <param name="collectionId">Id of the collection</param>
+    /// <param name="key">Key of the column</param>
+    /// <param name="schemaId">Id of the schema</param>
+    /// <param name="defaultMetadataId">Optional id of the default metadata</param>
     /// <returns>True when a new column was created, false when an existing column was updated.</returns>
     Task<bool> UpsertMetaDataColumnAsync(Guid collectionId, string key, Guid schemaId, Guid? defaultMetadataId);
 
