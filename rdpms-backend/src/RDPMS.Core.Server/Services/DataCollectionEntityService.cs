@@ -52,4 +52,18 @@ public class DataCollectionEntityService(DbContext dbContext)
         await Context.SaveChangesAsync();
         return true;
     }
+
+    public async Task RenameColumnAsync(Guid collectionId, string oldKey, string newKey)
+    {
+        var normalizedOldKey = oldKey.ToLowerInvariant();
+        var normalizedNewKey = newKey.ToLowerInvariant();
+        var updated = await Context.Set<MetaDataCollectionColumn>()
+            .Where(c => c.ParentCollectionId == collectionId && c.MetadataKey == normalizedOldKey)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(c => c.MetadataKey, normalizedNewKey));
+        if (updated == 0)
+        {
+            throw new InvalidOperationException("No such column.");
+        }
+    }
 }

@@ -338,7 +338,7 @@ public class DataSetsController(
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new ErrorMessageDTO { Message = ex.Message });
+            return NotFound(new ErrorMessageDTO { Message = "No dataset with that id." });
         }
         
         if (!SlugUtil.IsValidSlug(key)) return BadRequest(new ErrorMessageDTO { Message = "Invalid slug." });
@@ -352,7 +352,7 @@ public class DataSetsController(
         var valueStr = Encoding.UTF8.GetString(value);
         var field = await metadataService.MakeFieldFromValue(valueStr, contentType);
         var modified = dataSet.MetadataJsonFields.Any(f =>
-            f.MetadataKey.Equals(key, StringComparison.CurrentCultureIgnoreCase));
+            f.MetadataKey.Equals(key, StringComparison.OrdinalIgnoreCase));
 
         await metadataService.AssignMetadate(dataSet, key, field);
 
@@ -363,11 +363,58 @@ public class DataSetsController(
         return Ok(returnDto);
     }
 
+    /// <summary>
+    /// Rename key for metadate relation.
+    /// </summary>
+    /// <param name="id">The dataset ID.</param>
+    /// <param name="key">The old key.</param>
+    /// <param name="newKey">The new key.</param>
+    /// <returns></returns>
     [HttpPost("{id:guid}/metadata/{key}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> RenameMetadate([FromRoute] Guid id, [FromRoute] string key,
-        [FromQuery] string newName)
+        [FromQuery] string newKey)
+    {
+        DataSet dataSet;
+        try
+        {
+            dataSet = await dataSetService.GetByIdAsync(id);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new ErrorMessageDTO { Message = ex.Message });
+        }
+
+        if (!SlugUtil.IsValidSlug(key)) return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for key."});
+        if (!SlugUtil.IsValidSlug(newKey))
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for newName."});
+        }
+
+        var normalizedKey = key.ToLowerInvariant();
+        var normalizedNewKey = newKey.ToLowerInvariant();
+        var field = dataSet.MetadataJsonFields
+            .SingleOrDefault(f =>
+                f.MetadataKey.Equals(normalizedKey, StringComparison.OrdinalIgnoreCase));
+        if (field == null) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
+
+        field.MetadataKey = normalizedNewKey;
+        await dataSetService.UpdateAsync(dataSet);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Removes metadate relation with resp. key.
+    /// </summary>
+    /// <param name="id">ID of the dataset.</param>
+    /// <param name="key">Key to remove the relation for</param>
+    /// <returns></returns>
+    [HttpDelete("{id:guid}/metadata/{key}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> RemoveMetadate([FromRoute] Guid id, [FromRoute] string key)
     {
         DataSet dataSet;
         try
@@ -380,63 +427,11 @@ public class DataSetsController(
         }
 
         if (!SlugUtil.IsValidSlug(key)) return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for key."});
-        if (!SlugUtil.IsValidSlug(newName)) {
-            return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for newName."});
-        }
 
-        var field = dataSet.MetadataJsonFields
-            .SingleOrDefault(f =>
-                f.MetadataKey.Equals(key, StringComparison.CurrentCultureIgnoreCase));
-        if (field == null) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
-
-        field.MetadataKey = newName;
+        var removed = dataSet.MetadataJsonFields.RemoveAll(f =>
+            f.MetadataKey.Equals(key, StringComparison.OrdinalIgnoreCase));
+        if (removed == 0) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
         await dataSetService.UpdateAsync(dataSet);
         return Ok();
     }
-
-    // /// <summary>
-    // /// 
-    // /// </summary>
-    // /// <param name="dataSetId"></param>
-    // /// <param name="requestDto"></param>
-    // /// <returns></returns>
-    // [HttpPost("{dataSetId:guid}/add/static")]
-    // [ProducesResponseType(StatusCodes.Status204NoContent)]
-    // [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
-    // [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status500InternalServerError)]
-    // public async Task<ActionResult> PostAddStatic(Guid dataSetId, [FromBody] FileCreateRequestDTO requestDto)
-    // {
-    //
-    // }
-    //
-    // /// <summary>
-    // /// 
-    // /// </summary>
-    // /// <param name="dataSetId"></param>
-    // /// <returns></returns>
-    // [HttpPost("{dataSetId:guid}/finalize")]
-    // public async Task<ActionResult> PostFinalize(Guid dataSetId)
-    // {
-    //     
-    // }
-
-    // /// <summary>
-    // /// Add a batch of item to the system.
-    // /// </summary>
-    // /// <param name="dtos"></param>
-    // /// <returns></returns>
-    // [HttpPost("batch")]
-    // [ProducesResponseType(StatusCodes.Status200OK)]
-    // [RequestSizeLimit(10_000_000)]
-    // public async Task<ActionResult> PostBatch([FromBody] IEnumerable<DataSetSummaryDTO> dtos)
-    // {
-    //     var dtosList = dtos.ToList();
-    //     if (dtosList.Any(d => d.Id != null))
-    //     {
-    //         return BadRequest("Id is not allowed to be set.");
-    //     }
-    //
-    //     await dataSetService.AddRangeAsync(dtosList.Select(dataSetSummaryMapper.Import));
-    //     return Ok();
-    // }
 }

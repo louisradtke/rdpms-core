@@ -83,39 +83,44 @@ public class CollectionsController(
     /// <returns></returns>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> Post([FromBody] CollectionSummaryDTO dto)
     {
         if (dto.Id != null)
         {
-            return BadRequest("Id is not allowed to be set.");
+            return BadRequest(new ErrorMessageDTO { Message = "Id is not allowed to be set." });
         }
 
         if (dto.DefaultDataStoreId == null)
-            return BadRequest("Default data store id may not be null.");;
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "Default data store id may not be null." });
+        };
 
         var exists = await storeService.CheckForIdAsync(dto.DefaultDataStoreId.Value);
         if (!exists)
-            return BadRequest("Could not look up id for default data store. Id does not exist.");
+        {
+            return NotFound(
+                new ErrorMessageDTO { Message = "Could not look up id for default data store. Id does not exist." });
+        }
 
         var store = await storeService.GetByIdAsync(dto.DefaultDataStoreId.Value);
         var project = await projectService.GetGlobalProjectAsync();
         await dataCollectionEntityService.AddAsync(cMapper.Import(dto, store, project));
         return Ok();
     }
-
     
     [HttpPut("{id:guid}/metadata/{key}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> AddMetaDataColumn([FromRoute] Guid id, [FromRoute] string key,
         [FromQuery] Guid schemaId, [FromQuery] Guid? defaultMetadataId = null)
     {
         var collectionExists = await dataCollectionEntityService.CheckForIdAsync(id);
         if (!collectionExists)
         {
-            return NotFound();
+            return NotFound(new ErrorMessageDTO { Message = "No collection with that id." });
         }
 
         var created = await dataCollectionEntityService.UpsertMetaDataColumnAsync(
@@ -124,5 +129,22 @@ public class CollectionsController(
         return created
             ? CreatedAtAction(nameof(GetById), new { id }, id)
             : Ok();
+    }
+
+    [HttpPost("{id:guid}/metadata/{key}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> RenameMetadataColumn([FromRoute] Guid id, [FromRoute] string key,
+        [FromQuery] string newKey)
+    {
+        try
+        {
+            await dataCollectionEntityService.RenameColumnAsync(id, key, newKey);
+            return Ok();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new ErrorMessageDTO { Message = "Tuple of id and key not found." });
+        }
     }
 }

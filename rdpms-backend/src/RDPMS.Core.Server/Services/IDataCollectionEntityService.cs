@@ -17,4 +17,15 @@ public interface IDataCollectionEntityService : IGenericCollectionService<DataCo
     /// </summary>
     /// <returns>True when a new column was created, false when an existing column was updated.</returns>
     Task<bool> UpsertMetaDataColumnAsync(Guid collectionId, string key, Guid schemaId, Guid? defaultMetadataId);
+
+    /// <summary>
+    /// Rename a metadata column.
+    /// </summary>
+    /// <param name="collectionId">Id of the collection</param>
+    /// <param name="oldKey">The old key</param>
+    /// <param name="newKey">The new key</param>
+    /// <exception cref="InvalidOperationException">If the column does not exist.</exception>
+    /// <returns></returns>
+    Task RenameColumnAsync(Guid collectionId, string oldKey, string newKey);
+
 }
