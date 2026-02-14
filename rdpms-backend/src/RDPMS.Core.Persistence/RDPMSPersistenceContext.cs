@@ -117,8 +117,7 @@ public class RDPMSPersistenceContext : DbContext
             .WithOne()
             .HasForeignKey(r => r.FileFid);
         model.Entity<DataFile>()
-            .Ignore(e => e.IsTimeSeries) // computed
-            .Ignore(e => e.IsDeleted);
+            .Ignore(e => e.IsTimeSeries); // computed
 
         model.Entity<DataSet>()
             .HasOne(e => e.CreateJob);

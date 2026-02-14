@@ -11,7 +11,7 @@ using RDPMS.Core.Persistence;
 namespace RDPMS.Core.Persistence.Migrations
 {
     [DbContext(typeof(RDPMSPersistenceContext))]
-    [Migration("20260108153503_InitialCreate")]
+    [Migration("20260213224135_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -159,6 +159,9 @@ namespace RDPMS.Core.Persistence.Migrations
 
                     b.Property<DateTime?>("DeletedStamp")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("DeletionState")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("EndStamp")
                         .HasColumnType("TEXT");

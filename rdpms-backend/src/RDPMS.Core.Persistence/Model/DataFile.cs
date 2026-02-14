@@ -33,8 +33,8 @@ public class DataFile(string name) : IUniqueEntity, IUniqueEntityWithParent
     public DateTime CreatedStamp { get; init; } = DateTime.UtcNow;
 
     /// <summary>
-    /// Respective stamp in <b>UTC</b>. If this file was deleted, the value represents the deletion stamp.
-    /// false otherwise.
+    /// Stamp in <b>UTC</b>, where the file was selected for deletion
+    /// (leaving <see cref="Model.DeletionState.Active"/>).
     /// </summary>
     public DateTime? DeletedStamp { get; set; }
     
@@ -56,9 +56,9 @@ public class DataFile(string name) : IUniqueEntity, IUniqueEntityWithParent
     public bool IsTimeSeries => BeginStamp != null;
 
     /// <summary>
-    /// Read-only property indicating, whether this file was deleted. true if <see cref="DeletedStamp"/> != null
+    /// State indicating, whether the data set was deleted.
     /// </summary>
-    public bool IsDeleted => DeletedStamp != null;
+    public DeletionState DeletionState { get; set; } = DeletionState.Active;
 
     /// <summary>
     /// References to the storage location(s) of this file.

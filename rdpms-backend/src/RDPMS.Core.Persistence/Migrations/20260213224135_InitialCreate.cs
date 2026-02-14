@@ -95,7 +95,8 @@ namespace RDPMS.Core.Persistence.Migrations
                     CreatedStamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     DeletedStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
                     BeginStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    EndStamp = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    EndStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    DeletionState = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

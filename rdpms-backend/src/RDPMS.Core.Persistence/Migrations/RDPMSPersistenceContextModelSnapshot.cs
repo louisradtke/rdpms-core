@@ -157,6 +157,9 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<DateTime?>("DeletedStamp")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("DeletionState")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime?>("EndStamp")
                         .HasColumnType("TEXT");
 

@@ -12,5 +12,11 @@ public record FileSummaryDTO
     public DateTime? BeginStampUTC { get; set; }
     public DateTime? EndStampUTC { get; set; }
     public bool? IsTimeSeries { get; set; }
-    public bool? IsDeleted { get; set; }
+
+    /// <summary>
+    /// Indicates, whether the dataset (and its files) are deleted or whether deletion is pending.
+    /// Only to be set by server.
+    /// Lifecycle is: None -> [DeletionPending ->] Deleted
+    /// </summary>
+    public DeletionStateDTO? DeletionState { get; set; }
 }

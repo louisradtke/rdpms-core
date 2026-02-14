@@ -23,7 +23,7 @@ public class FileSummaryDTOMapper(ContentTypeDTOMapper ctMapper)
             BeginStampUTC = domain.BeginStamp,
             EndStampUTC = domain.EndStamp,
             IsTimeSeries = domain.IsTimeSeries,
-            IsDeleted = domain.IsDeleted
+            DeletionState = (DeletionStateDTO) (int) domain.DeletionState
         };
     }
 }
