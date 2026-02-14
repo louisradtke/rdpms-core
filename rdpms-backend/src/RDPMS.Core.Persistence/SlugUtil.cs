@@ -8,7 +8,9 @@ public static class SlugUtil
     /// <summary>
     /// DO NOT USE THIS FOR VALIDATION. <see cref="IsValidSlug"/> is the single source of truth for that."/>
     /// </summary>
-    public static Regex SlugRegex { get; } = new(@"^[A-Za-z0-9\.\+\-_]{1,64}$", RegexOptions.Compiled);
+    public static Regex SlugRegex { get; } = new(@"^[A-Za-z0-9\.\+\-_]{1,64}$",
+        RegexOptions.Compiled,
+        TimeSpan.FromMilliseconds(250));
 
     /// <summary>
     /// Checks if the slug is valid.
