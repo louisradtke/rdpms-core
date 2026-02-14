@@ -2,6 +2,7 @@ using System.Text;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
@@ -339,6 +340,8 @@ public class DataSetsController(
         {
             return BadRequest(new ErrorMessageDTO { Message = ex.Message });
         }
+        
+        if (!SlugUtil.IsValidSlug(key)) return BadRequest(new ErrorMessageDTO { Message = "Invalid slug." });
 
         var contentType = await contentTypeService.GetByMimeType(
             "application/json",
@@ -350,15 +353,45 @@ public class DataSetsController(
         var field = await metadataService.MakeFieldFromValue(valueStr, contentType);
         var modified = dataSet.MetadataJsonFields.Any(f =>
             f.MetadataKey.Equals(key, StringComparison.CurrentCultureIgnoreCase));
-        
-        
+
         await metadataService.AssignMetadate(dataSet, key, field);
-        
+
         var returnDto = metadataMapper.Export(await metadataService.GetByIdAsync(field.Id));
-        
+
         if (!modified) return CreatedAtAction(nameof(MetaDataController.GetMetadate), "MetaData",
             new { field.Id }, returnDto);
         return Ok(returnDto);
+    }
+
+    [HttpPost("{id:guid}/metadata/{key}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> RenameMetadate([FromRoute] Guid id, [FromRoute] string key,
+        [FromQuery] string newName)
+    {
+        DataSet dataSet;
+        try
+        {
+            dataSet = await dataSetService.GetByIdAsync(id);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = ex.Message });
+        }
+
+        if (!SlugUtil.IsValidSlug(key)) return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for key."});
+        if (!SlugUtil.IsValidSlug(newName)) {
+            return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for newName."});
+        }
+
+        var field = dataSet.MetadataJsonFields
+            .SingleOrDefault(f =>
+                f.MetadataKey.Equals(key, StringComparison.CurrentCultureIgnoreCase));
+        if (field == null) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
+
+        field.MetadataKey = newName;
+        await dataSetService.UpdateAsync(dataSet);
+        return Ok();
     }
 
     // /// <summary>
