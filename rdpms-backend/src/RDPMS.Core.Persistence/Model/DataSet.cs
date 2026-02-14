@@ -71,17 +71,8 @@ public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParen
     /// </summary>
     public List<DataEntityMetadataJsonField> MetadataJsonFields { get; set; } = [];
 
-    public IReadOnlyDictionary<string, MetadataJsonField> Metadata 
-    {
-        get {
-            // todo: not very efficient, return value calculated on every access
-            var dict = new Dictionary<string, MetadataJsonField>();
-            foreach (var field in MetadataJsonFields)
-            {
-                dict[field.MetadataKey] = field.Field;
-            }
-
-            return dict.AsReadOnly();
-        }
-    }
+    // TODO: not very efficient, return value calculated on every access
+    public IReadOnlyDictionary<string, MetadataJsonField> Metadata => MetadataJsonFields
+        .ToDictionary(f => f.MetadataKey, f => f.Field)
+        .AsReadOnly();
 }

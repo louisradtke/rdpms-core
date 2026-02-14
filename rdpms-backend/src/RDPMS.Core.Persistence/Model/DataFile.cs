@@ -70,17 +70,8 @@ public class DataFile(string name) : IUniqueEntity, IUniqueEntityWithParent
     /// </summary>
     public List<DataEntityMetadataJsonField> MetadataJsonFields { get; set; } = [];
 
-    public IReadOnlyDictionary<string, MetadataJsonField> Metadata
-    {
-        get
-        {
-            var dict = new Dictionary<string, MetadataJsonField>();
-            foreach (var field in MetadataJsonFields)
-            {
-                dict[field.MetadataKey] = field.Field;
-            }
-
-            return dict.AsReadOnly();
-        }
-    }
+    // TODO: not very efficient, return value calculated on every access
+    public IReadOnlyDictionary<string, MetadataJsonField> Metadata => MetadataJsonFields
+        .ToDictionary(f => f.MetadataKey, f => f.Field)
+        .AsReadOnly();
 }
