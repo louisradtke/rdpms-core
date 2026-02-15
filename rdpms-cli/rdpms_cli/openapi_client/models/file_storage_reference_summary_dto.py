@@ -17,23 +17,22 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from uuid import UUID
-from rdpms_cli.openapi_client.models.metadata_column_target import MetadataColumnTarget
-from rdpms_cli.openapi_client.models.schema_dto import SchemaDTO
 from typing import Optional, Set
 from typing_extensions import Self
 
-class MetaDateCollectionColumnDTO(BaseModel):
+class FileStorageReferenceSummaryDTO(BaseModel):
     """
-    MetaDateCollectionColumnDTO
+    FileStorageReferenceSummaryDTO
     """ # noqa: E501
-    metadata_key: Optional[StrictStr] = Field(default=None, alias="metadataKey")
-    var_schema: Optional[SchemaDTO] = Field(default=None, alias="schema")
-    default_field_id: Optional[UUID] = Field(default=None, alias="defaultFieldId")
-    target: Optional[MetadataColumnTarget] = None
-    __properties: ClassVar[List[str]] = ["metadataKey", "schema", "defaultFieldId", "target"]
+    id: Optional[UUID] = None
+    compression_algorithm: Optional[StrictStr] = Field(default=None, alias="compressionAlgorithm")
+    size_bytes: Optional[StrictInt] = Field(default=None, alias="sizeBytes")
+    sh_a256_hash: Optional[StrictStr] = Field(default=None, alias="shA256Hash")
+    storage_type: Optional[StrictStr] = Field(default=None, alias="storageType")
+    __properties: ClassVar[List[str]] = ["id", "compressionAlgorithm", "sizeBytes", "shA256Hash", "storageType"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -53,7 +52,7 @@ class MetaDateCollectionColumnDTO(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of MetaDateCollectionColumnDTO from a JSON string"""
+        """Create an instance of FileStorageReferenceSummaryDTO from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,24 +73,36 @@ class MetaDateCollectionColumnDTO(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of var_schema
-        if self.var_schema:
-            _dict['schema'] = self.var_schema.to_dict()
-        # set to None if metadata_key (nullable) is None
+        # set to None if id (nullable) is None
         # and model_fields_set contains the field
-        if self.metadata_key is None and "metadata_key" in self.model_fields_set:
-            _dict['metadataKey'] = None
+        if self.id is None and "id" in self.model_fields_set:
+            _dict['id'] = None
 
-        # set to None if default_field_id (nullable) is None
+        # set to None if compression_algorithm (nullable) is None
         # and model_fields_set contains the field
-        if self.default_field_id is None and "default_field_id" in self.model_fields_set:
-            _dict['defaultFieldId'] = None
+        if self.compression_algorithm is None and "compression_algorithm" in self.model_fields_set:
+            _dict['compressionAlgorithm'] = None
+
+        # set to None if size_bytes (nullable) is None
+        # and model_fields_set contains the field
+        if self.size_bytes is None and "size_bytes" in self.model_fields_set:
+            _dict['sizeBytes'] = None
+
+        # set to None if sh_a256_hash (nullable) is None
+        # and model_fields_set contains the field
+        if self.sh_a256_hash is None and "sh_a256_hash" in self.model_fields_set:
+            _dict['shA256Hash'] = None
+
+        # set to None if storage_type (nullable) is None
+        # and model_fields_set contains the field
+        if self.storage_type is None and "storage_type" in self.model_fields_set:
+            _dict['storageType'] = None
 
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of MetaDateCollectionColumnDTO from a dict"""
+        """Create an instance of FileStorageReferenceSummaryDTO from a dict"""
         if obj is None:
             return None
 
@@ -99,10 +110,11 @@ class MetaDateCollectionColumnDTO(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "metadataKey": obj.get("metadataKey"),
-            "schema": SchemaDTO.from_dict(obj["schema"]) if obj.get("schema") is not None else None,
-            "defaultFieldId": obj.get("defaultFieldId"),
-            "target": obj.get("target")
+            "id": obj.get("id"),
+            "compressionAlgorithm": obj.get("compressionAlgorithm"),
+            "sizeBytes": obj.get("sizeBytes"),
+            "shA256Hash": obj.get("shA256Hash"),
+            "storageType": obj.get("storageType")
         })
         return _obj
 

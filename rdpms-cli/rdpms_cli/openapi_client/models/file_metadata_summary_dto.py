@@ -18,21 +18,19 @@ import re  # noqa: F401
 import json
 
 from pydantic import ConfigDict
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from rdpms_cli.openapi_client.models.assigned_meta_date_dto import AssignedMetaDateDTO
-from rdpms_cli.openapi_client.models.data_set_detailed_dto_all_of_files import DataSetDetailedDTOAllOfFiles
-from rdpms_cli.openapi_client.models.data_set_summary_dto import DataSetSummaryDTO
+from rdpms_cli.openapi_client.models.content_type_dto import ContentTypeDTO
 from rdpms_cli.openapi_client.models.deletion_state_dto import DeletionStateDTO
-from rdpms_cli.openapi_client.models.tag_dto import TagDTO
+from rdpms_cli.openapi_client.models.file_summary_dto import FileSummaryDTO
 from typing import Optional, Set
 from typing_extensions import Self
 
-class DataSetDetailedDTO(DataSetSummaryDTO):
+class FileMetadataSummaryDTO(FileSummaryDTO):
     """
-    Represents a summary of a dataset, including identifying information, timestamps, state, tags, and metadata fields.
+    FileMetadataSummaryDTO
     """ # noqa: E501
-    files: Optional[List[DataSetDetailedDTOAllOfFiles]] = None
-    __properties: ClassVar[List[str]] = ["kind", "id", "slug", "name", "assignedTags", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "lifecycleState", "deletionState", "isTimeSeries", "metaDates", "fileCount", "collectionId", "files"]
+    __properties: ClassVar[List[str]] = ["kind", "id", "name", "downloadURI", "contentType", "size", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "isTimeSeries", "metaDates", "deletionState"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,7 +50,7 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of DataSetDetailedDTO from a JSON string"""
+        """Create an instance of FileMetadataSummaryDTO from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,13 +71,9 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in assigned_tags (list)
-        _items = []
-        if self.assigned_tags:
-            for _item_assigned_tags in self.assigned_tags:
-                if _item_assigned_tags:
-                    _items.append(_item_assigned_tags.to_dict())
-            _dict['assignedTags'] = _items
+        # override the default output from pydantic by calling `to_dict()` of content_type
+        if self.content_type:
+            _dict['contentType'] = self.content_type.to_dict()
         # override the default output from pydantic by calling `to_dict()` of each item in meta_dates (list)
         _items = []
         if self.meta_dates:
@@ -87,32 +81,25 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
                 if _item_meta_dates:
                     _items.append(_item_meta_dates.to_dict())
             _dict['metaDates'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in files (list)
-        _items = []
-        if self.files:
-            for _item_files in self.files:
-                if _item_files:
-                    _items.append(_item_files.to_dict())
-            _dict['files'] = _items
         # set to None if id (nullable) is None
         # and model_fields_set contains the field
         if self.id is None and "id" in self.model_fields_set:
             _dict['id'] = None
-
-        # set to None if slug (nullable) is None
-        # and model_fields_set contains the field
-        if self.slug is None and "slug" in self.model_fields_set:
-            _dict['slug'] = None
 
         # set to None if name (nullable) is None
         # and model_fields_set contains the field
         if self.name is None and "name" in self.model_fields_set:
             _dict['name'] = None
 
-        # set to None if assigned_tags (nullable) is None
+        # set to None if download_uri (nullable) is None
         # and model_fields_set contains the field
-        if self.assigned_tags is None and "assigned_tags" in self.model_fields_set:
-            _dict['assignedTags'] = None
+        if self.download_uri is None and "download_uri" in self.model_fields_set:
+            _dict['downloadURI'] = None
+
+        # set to None if size (nullable) is None
+        # and model_fields_set contains the field
+        if self.size is None and "size" in self.model_fields_set:
+            _dict['size'] = None
 
         # set to None if created_stamp_utc (nullable) is None
         # and model_fields_set contains the field
@@ -134,11 +121,6 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
         if self.end_stamp_utc is None and "end_stamp_utc" in self.model_fields_set:
             _dict['endStampUTC'] = None
 
-        # set to None if lifecycle_state (nullable) is None
-        # and model_fields_set contains the field
-        if self.lifecycle_state is None and "lifecycle_state" in self.model_fields_set:
-            _dict['lifecycleState'] = None
-
         # set to None if is_time_series (nullable) is None
         # and model_fields_set contains the field
         if self.is_time_series is None and "is_time_series" in self.model_fields_set:
@@ -149,21 +131,11 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
         if self.meta_dates is None and "meta_dates" in self.model_fields_set:
             _dict['metaDates'] = None
 
-        # set to None if collection_id (nullable) is None
-        # and model_fields_set contains the field
-        if self.collection_id is None and "collection_id" in self.model_fields_set:
-            _dict['collectionId'] = None
-
-        # set to None if files (nullable) is None
-        # and model_fields_set contains the field
-        if self.files is None and "files" in self.model_fields_set:
-            _dict['files'] = None
-
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of DataSetDetailedDTO from a dict"""
+        """Create an instance of FileMetadataSummaryDTO from a dict"""
         if obj is None:
             return None
 
@@ -173,20 +145,17 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
         _obj = cls.model_validate({
             "kind": obj.get("kind"),
             "id": obj.get("id"),
-            "slug": obj.get("slug"),
             "name": obj.get("name"),
-            "assignedTags": [TagDTO.from_dict(_item) for _item in obj["assignedTags"]] if obj.get("assignedTags") is not None else None,
+            "downloadURI": obj.get("downloadURI"),
+            "contentType": ContentTypeDTO.from_dict(obj["contentType"]) if obj.get("contentType") is not None else None,
+            "size": obj.get("size"),
             "createdStampUTC": obj.get("createdStampUTC"),
             "deletedStampUTC": obj.get("deletedStampUTC"),
             "beginStampUTC": obj.get("beginStampUTC"),
             "endStampUTC": obj.get("endStampUTC"),
-            "lifecycleState": obj.get("lifecycleState"),
-            "deletionState": obj.get("deletionState"),
             "isTimeSeries": obj.get("isTimeSeries"),
             "metaDates": [AssignedMetaDateDTO.from_dict(_item) for _item in obj["metaDates"]] if obj.get("metaDates") is not None else None,
-            "fileCount": obj.get("fileCount"),
-            "collectionId": obj.get("collectionId"),
-            "files": [DataSetDetailedDTOAllOfFiles.from_dict(_item) for _item in obj["files"]] if obj.get("files") is not None else None
+            "deletionState": obj.get("deletionState")
         })
         return _obj
 

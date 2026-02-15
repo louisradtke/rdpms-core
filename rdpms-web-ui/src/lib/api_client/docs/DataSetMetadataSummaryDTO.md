@@ -1,23 +1,20 @@
 
-# DataSetDetailedDTO
+# DataSetMetadataSummaryDTO
 
-Represents a summary of a dataset, including identifying information, timestamps, state, tags, and metadata fields.
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`files` | [Array&lt;DataSetDetailedDTOAllOfFiles&gt;](DataSetDetailedDTOAllOfFiles.md)
 
 ## Example
 
 ```typescript
-import type { DataSetDetailedDTO } from ''
+import type { DataSetMetadataSummaryDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "files": null,
-} satisfies DataSetDetailedDTO
+} satisfies DataSetMetadataSummaryDTO
 
 console.log(example)
 
@@ -26,7 +23,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as DataSetDetailedDTO
+const exampleParsed = JSON.parse(exampleJSON) as DataSetMetadataSummaryDTO
 console.log(exampleParsed)
 ```
 

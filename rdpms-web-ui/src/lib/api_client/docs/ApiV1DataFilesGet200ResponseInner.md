@@ -1,5 +1,5 @@
 
-# FileSummaryDTO
+# ApiV1DataFilesGet200ResponseInner
 
 
 ## Properties
@@ -19,11 +19,12 @@ Name | Type
 `isTimeSeries` | boolean
 `metaDates` | [Array&lt;AssignedMetaDateDTO&gt;](AssignedMetaDateDTO.md)
 `deletionState` | [DeletionStateDTO](DeletionStateDTO.md)
+`references` | [Array&lt;FileStorageReferenceSummaryDTO&gt;](FileStorageReferenceSummaryDTO.md)
 
 ## Example
 
 ```typescript
-import type { FileSummaryDTO } from ''
+import type { ApiV1DataFilesGet200ResponseInner } from ''
 
 // TODO: Update the object below with actual values
 const example = {
@@ -40,7 +41,8 @@ const example = {
   "isTimeSeries": null,
   "metaDates": null,
   "deletionState": null,
-} satisfies FileSummaryDTO
+  "references": null,
+} satisfies ApiV1DataFilesGet200ResponseInner
 
 console.log(example)
 
@@ -49,7 +51,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as FileSummaryDTO
+const exampleParsed = JSON.parse(exampleJSON) as ApiV1DataFilesGet200ResponseInner
 console.log(exampleParsed)
 ```
 

@@ -18,8 +18,9 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
+from importlib import import_module
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from uuid import UUID
 from rdpms_cli.openapi_client.models.assigned_meta_date_dto import AssignedMetaDateDTO
 from rdpms_cli.openapi_client.models.deletion_state_dto import DeletionStateDTO
@@ -27,10 +28,18 @@ from rdpms_cli.openapi_client.models.tag_dto import TagDTO
 from typing import Optional, Set
 from typing_extensions import Self
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from rdpms_cli.openapi_client.models.data_set_detailed_dto import DataSetDetailedDTO
+    from rdpms_cli.openapi_client.models.data_set_metadata_summary_dto import DataSetMetadataSummaryDTO
+    from rdpms_cli.openapi_client.models.data_set_file_metadata_summary_dto import DataSetFileMetadataSummaryDTO
+    from rdpms_cli.openapi_client.models.data_set_summary_dto import DataSetSummaryDTO
+
 class DataSetSummaryDTO(BaseModel):
     """
     Represents a summary of a dataset, including identifying information, timestamps, state, tags, and metadata fields.
     """ # noqa: E501
+    kind: StrictStr
     id: Optional[UUID] = Field(default=None, description="Uniquely identifies the dataset. Typically server-generated. Should not be manually set by the client.")
     slug: Optional[StrictStr] = Field(default=None, description="An optional, human-readable identifier for the dataset.")
     name: Optional[StrictStr] = Field(default=None, description="Non-unique, mandatory descriptive name of the dataset. Must be provided by the client.")
@@ -45,7 +54,7 @@ class DataSetSummaryDTO(BaseModel):
     meta_dates: Optional[List[AssignedMetaDateDTO]] = Field(default=None, description="Fields, for which metadata exists. Only to be set by server.", alias="metaDates")
     file_count: Optional[StrictInt] = Field(default=None, description="Amount of files in the dataset.", alias="fileCount")
     collection_id: Optional[UUID] = Field(default=None, description="Id of the collection this dataset belongs to.", alias="collectionId")
-    __properties: ClassVar[List[str]] = ["id", "slug", "name", "assignedTags", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "lifecycleState", "deletionState", "isTimeSeries", "metaDates", "fileCount", "collectionId"]
+    __properties: ClassVar[List[str]] = ["kind", "id", "slug", "name", "assignedTags", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "lifecycleState", "deletionState", "isTimeSeries", "metaDates", "fileCount", "collectionId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -53,6 +62,23 @@ class DataSetSummaryDTO(BaseModel):
         protected_namespaces=(),
     )
 
+
+    # JSON field name that stores the object type
+    __discriminator_property_name: ClassVar[str] = 'kind'
+
+    # discriminator mappings
+    __discriminator_value_class_map: ClassVar[Dict[str, str]] = {
+        'detailed': 'DataSetDetailedDTO','metadata-dataset': 'DataSetMetadataSummaryDTO','metadata-file': 'DataSetFileMetadataSummaryDTO','summary': 'DataSetSummaryDTO'
+    }
+
+    @classmethod
+    def get_discriminator_value(cls, obj: Dict[str, Any]) -> Optional[str]:
+        """Returns the discriminator value (object type) of the data"""
+        discriminator_value = obj[cls.__discriminator_property_name]
+        if discriminator_value:
+            return cls.__discriminator_value_class_map.get(discriminator_value)
+        else:
+            return None
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -64,7 +90,7 @@ class DataSetSummaryDTO(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Optional[Union[DataSetDetailedDTO, DataSetMetadataSummaryDTO, DataSetFileMetadataSummaryDTO, DataSetSummaryDTO]]:
         """Create an instance of DataSetSummaryDTO from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
@@ -163,30 +189,21 @@ class DataSetSummaryDTO(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: Dict[str, Any]) -> Optional[Union[DataSetDetailedDTO, DataSetMetadataSummaryDTO, DataSetFileMetadataSummaryDTO, DataSetSummaryDTO]]:
         """Create an instance of DataSetSummaryDTO from a dict"""
-        if obj is None:
-            return None
+        # look up the object type based on discriminator mapping
+        object_type = cls.get_discriminator_value(obj)
+        if object_type ==  'DataSetDetailedDTO':
+            return import_module("rdpms_cli.openapi_client.models.data_set_detailed_dto").DataSetDetailedDTO.from_dict(obj)
+        if object_type ==  'DataSetMetadataSummaryDTO':
+            return import_module("rdpms_cli.openapi_client.models.data_set_metadata_summary_dto").DataSetMetadataSummaryDTO.from_dict(obj)
+        if object_type ==  'DataSetFileMetadataSummaryDTO':
+            return import_module("rdpms_cli.openapi_client.models.data_set_file_metadata_summary_dto").DataSetFileMetadataSummaryDTO.from_dict(obj)
+        if object_type ==  'DataSetSummaryDTO':
+            return import_module("rdpms_cli.openapi_client.models.data_set_summary_dto").DataSetSummaryDTO.from_dict(obj)
 
-        if not isinstance(obj, dict):
-            return cls.model_validate(obj)
-
-        _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "slug": obj.get("slug"),
-            "name": obj.get("name"),
-            "assignedTags": [TagDTO.from_dict(_item) for _item in obj["assignedTags"]] if obj.get("assignedTags") is not None else None,
-            "createdStampUTC": obj.get("createdStampUTC"),
-            "deletedStampUTC": obj.get("deletedStampUTC"),
-            "beginStampUTC": obj.get("beginStampUTC"),
-            "endStampUTC": obj.get("endStampUTC"),
-            "lifecycleState": obj.get("lifecycleState"),
-            "deletionState": obj.get("deletionState"),
-            "isTimeSeries": obj.get("isTimeSeries"),
-            "metaDates": [AssignedMetaDateDTO.from_dict(_item) for _item in obj["metaDates"]] if obj.get("metaDates") is not None else None,
-            "fileCount": obj.get("fileCount"),
-            "collectionId": obj.get("collectionId")
-        })
-        return _obj
+        raise ValueError("DataSetSummaryDTO failed to lookup discriminator value from " +
+                            json.dumps(obj) + ". Discriminator property name: " + cls.__discriminator_property_name +
+                            ", mapping: " + json.dumps(cls.__discriminator_value_class_map))
 
 

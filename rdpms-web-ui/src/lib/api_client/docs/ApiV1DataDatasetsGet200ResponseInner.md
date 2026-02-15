@@ -1,6 +1,7 @@
 
-# FileSummaryDTO
+# ApiV1DataDatasetsGet200ResponseInner
 
+Represents a summary of a dataset, including identifying information, timestamps, state, tags, and metadata fields.
 
 ## Properties
 
@@ -8,39 +9,45 @@ Name | Type
 ------------ | -------------
 `kind` | string
 `id` | string
+`slug` | string
 `name` | string
-`downloadURI` | string
-`contentType` | [ContentTypeDTO](ContentTypeDTO.md)
-`size` | number
+`assignedTags` | [Array&lt;TagDTO&gt;](TagDTO.md)
 `createdStampUTC` | Date
 `deletedStampUTC` | Date
 `beginStampUTC` | Date
 `endStampUTC` | Date
+`lifecycleState` | string
+`deletionState` | [DeletionStateDTO](DeletionStateDTO.md)
 `isTimeSeries` | boolean
 `metaDates` | [Array&lt;AssignedMetaDateDTO&gt;](AssignedMetaDateDTO.md)
-`deletionState` | [DeletionStateDTO](DeletionStateDTO.md)
+`fileCount` | number
+`collectionId` | string
+`files` | [Array&lt;FileMetadataSummaryDTO&gt;](FileMetadataSummaryDTO.md)
 
 ## Example
 
 ```typescript
-import type { FileSummaryDTO } from ''
+import type { ApiV1DataDatasetsGet200ResponseInner } from ''
 
 // TODO: Update the object below with actual values
 const example = {
   "kind": null,
   "id": null,
+  "slug": null,
   "name": null,
-  "downloadURI": null,
-  "contentType": null,
-  "size": null,
+  "assignedTags": null,
   "createdStampUTC": null,
   "deletedStampUTC": null,
   "beginStampUTC": null,
   "endStampUTC": null,
+  "lifecycleState": null,
+  "deletionState": null,
   "isTimeSeries": null,
   "metaDates": null,
-  "deletionState": null,
-} satisfies FileSummaryDTO
+  "fileCount": null,
+  "collectionId": null,
+  "files": null,
+} satisfies ApiV1DataDatasetsGet200ResponseInner
 
 console.log(example)
 
@@ -49,7 +56,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as FileSummaryDTO
+const exampleParsed = JSON.parse(exampleJSON) as ApiV1DataDatasetsGet200ResponseInner
 console.log(exampleParsed)
 ```
 

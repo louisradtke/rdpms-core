@@ -9,6 +9,7 @@ Name | Type
 `metadataKey` | string
 `schema` | [SchemaDTO](SchemaDTO.md)
 `defaultFieldId` | string
+`target` | [MetadataColumnTarget](MetadataColumnTarget.md)
 
 ## Example
 
@@ -20,6 +21,7 @@ const example = {
   "metadataKey": null,
   "schema": null,
   "defaultFieldId": null,
+  "target": null,
 } satisfies MetaDateCollectionColumnDTO
 
 console.log(example)

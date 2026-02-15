@@ -1,23 +1,22 @@
 
-# DataSetDetailedDTO
+# FileDetailedDTO
 
-Represents a summary of a dataset, including identifying information, timestamps, state, tags, and metadata fields.
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`files` | [Array&lt;DataSetDetailedDTOAllOfFiles&gt;](DataSetDetailedDTOAllOfFiles.md)
+`references` | [Array&lt;FileStorageReferenceSummaryDTO&gt;](FileStorageReferenceSummaryDTO.md)
 
 ## Example
 
 ```typescript
-import type { DataSetDetailedDTO } from ''
+import type { FileDetailedDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "files": null,
-} satisfies DataSetDetailedDTO
+  "references": null,
+} satisfies FileDetailedDTO
 
 console.log(example)
 
@@ -26,7 +25,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as DataSetDetailedDTO
+const exampleParsed = JSON.parse(exampleJSON) as FileDetailedDTO
 console.log(exampleParsed)
 ```
 

@@ -18,21 +18,19 @@ import re  # noqa: F401
 import json
 
 from pydantic import ConfigDict
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from rdpms_cli.openapi_client.models.assigned_meta_date_dto import AssignedMetaDateDTO
-from rdpms_cli.openapi_client.models.data_set_detailed_dto_all_of_files import DataSetDetailedDTOAllOfFiles
 from rdpms_cli.openapi_client.models.data_set_summary_dto import DataSetSummaryDTO
 from rdpms_cli.openapi_client.models.deletion_state_dto import DeletionStateDTO
 from rdpms_cli.openapi_client.models.tag_dto import TagDTO
 from typing import Optional, Set
 from typing_extensions import Self
 
-class DataSetDetailedDTO(DataSetSummaryDTO):
+class DataSetMetadataSummaryDTO(DataSetSummaryDTO):
     """
-    Represents a summary of a dataset, including identifying information, timestamps, state, tags, and metadata fields.
+    DataSetMetadataSummaryDTO
     """ # noqa: E501
-    files: Optional[List[DataSetDetailedDTOAllOfFiles]] = None
-    __properties: ClassVar[List[str]] = ["kind", "id", "slug", "name", "assignedTags", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "lifecycleState", "deletionState", "isTimeSeries", "metaDates", "fileCount", "collectionId", "files"]
+    __properties: ClassVar[List[str]] = ["kind", "id", "slug", "name", "assignedTags", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "lifecycleState", "deletionState", "isTimeSeries", "metaDates", "fileCount", "collectionId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,7 +50,7 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of DataSetDetailedDTO from a JSON string"""
+        """Create an instance of DataSetMetadataSummaryDTO from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -87,13 +85,6 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
                 if _item_meta_dates:
                     _items.append(_item_meta_dates.to_dict())
             _dict['metaDates'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in files (list)
-        _items = []
-        if self.files:
-            for _item_files in self.files:
-                if _item_files:
-                    _items.append(_item_files.to_dict())
-            _dict['files'] = _items
         # set to None if id (nullable) is None
         # and model_fields_set contains the field
         if self.id is None and "id" in self.model_fields_set:
@@ -154,16 +145,11 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
         if self.collection_id is None and "collection_id" in self.model_fields_set:
             _dict['collectionId'] = None
 
-        # set to None if files (nullable) is None
-        # and model_fields_set contains the field
-        if self.files is None and "files" in self.model_fields_set:
-            _dict['files'] = None
-
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of DataSetDetailedDTO from a dict"""
+        """Create an instance of DataSetMetadataSummaryDTO from a dict"""
         if obj is None:
             return None
 
@@ -185,8 +171,7 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
             "isTimeSeries": obj.get("isTimeSeries"),
             "metaDates": [AssignedMetaDateDTO.from_dict(_item) for _item in obj["metaDates"]] if obj.get("metaDates") is not None else None,
             "fileCount": obj.get("fileCount"),
-            "collectionId": obj.get("collectionId"),
-            "files": [DataSetDetailedDTOAllOfFiles.from_dict(_item) for _item in obj["files"]] if obj.get("files") is not None else None
+            "collectionId": obj.get("collectionId")
         })
         return _obj
 

@@ -7,6 +7,7 @@ Represents a summary of a dataset, including identifying information, timestamps
 
 Name | Type
 ------------ | -------------
+`kind` | string
 `id` | string
 `slug` | string
 `name` | string
@@ -29,6 +30,7 @@ import type { DataSetSummaryDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
+  "kind": null,
   "id": null,
   "slug": null,
   "name": null,

@@ -48,12 +48,18 @@ paths:
       responses:
         '200':
           description: OK
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
         '400':
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemDetails'
+                $ref: '#/components/schemas/ErrorMessageDTO'
   '/api/v1/data/collections/{id}':
     get:
       tags:
@@ -105,6 +111,10 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: target
+          in: query
+          schema:
+            $ref: '#/components/schemas/MetadataColumnTarget'
       responses:
         '200':
           description: OK
@@ -115,7 +125,67 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemDetails'
+                $ref: '#/components/schemas/ErrorMessageDTO'
+    post:
+      tags:
+        - Collections
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: newKey
+          in: query
+          schema:
+            type: string
+        - name: target
+          in: query
+          schema:
+            $ref: '#/components/schemas/MetadataColumnTarget'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+    delete:
+      tags:
+        - Collections
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: target
+          in: query
+          schema:
+            $ref: '#/components/schemas/MetadataColumnTarget'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
   /api/v1/data/content-types:
     get:
       tags:
@@ -199,6 +269,14 @@ paths:
           description: "comma-separated list of strings, case-insensitive.\n            Default is RDPMS.Core.Persistence.Model.DeletionState.Active\n            Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState."
           schema:
             type: string
+        - name: view
+          in: query
+          schema:
+            $ref: '#/components/schemas/DataSetListViewMode'
+        - name: metadataTarget
+          in: query
+          schema:
+            $ref: '#/components/schemas/MetadataColumnTarget'
       responses:
         '200':
           description: OK
@@ -207,7 +285,12 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DataSetSummaryDTO'
+                  oneOf:
+                    - $ref: '#/components/schemas/DataSetSummaryDTO'
+                    - $ref: '#/components/schemas/DataSetDetailedDTO'
+                    - $ref: '#/components/schemas/DataSetMetadataSummaryDTO'
+                    - $ref: '#/components/schemas/DataSetFileMetadataSummaryDTO'
+                  description: "Represents a summary of a dataset, including identifying information, timestamps, state, tags,\nand metadata fields."
     post:
       tags:
         - DataSets
@@ -217,7 +300,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DataSetSummaryDTO'
+              oneOf:
+                - $ref: '#/components/schemas/DataSetSummaryDTO'
+                - $ref: '#/components/schemas/DataSetDetailedDTO'
+                - $ref: '#/components/schemas/DataSetMetadataSummaryDTO'
+                - $ref: '#/components/schemas/DataSetFileMetadataSummaryDTO'
+              description: "Represents a summary of a dataset, including identifying information, timestamps, state, tags,\nand metadata fields."
       responses:
         '200':
           description: OK
@@ -389,11 +477,81 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessageDTO'
+    post:
+      tags:
+        - DataSets
+      summary: Rename key for metadate relation.
+      parameters:
+        - name: id
+          in: path
+          description: The dataset ID.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: key
+          in: path
+          description: The old key.
+          required: true
+          schema:
+            type: string
+        - name: newKey
+          in: query
+          description: The new key.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+    delete:
+      tags:
+        - DataSets
+      summary: Removes metadate relation with resp. key.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the dataset.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: key
+          in: path
+          description: Key to remove the relation for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
   /api/v1/data/files:
     get:
       tags:
         - Files
-      summary: Get summaries of all files.
+      summary: Get files.
+      parameters:
+        - name: view
+          in: query
+          schema:
+            $ref: '#/components/schemas/FileListViewMode'
       responses:
         '200':
           description: OK
@@ -402,12 +560,15 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FileSummaryDTO'
+                  oneOf:
+                    - $ref: '#/components/schemas/FileSummaryDTO'
+                    - $ref: '#/components/schemas/FileMetadataSummaryDTO'
+                    - $ref: '#/components/schemas/FileDetailedDTO'
   '/api/v1/data/files/{id}':
     get:
       tags:
         - Files
-      summary: Get summary of a single file.
+      summary: Get details of a single file.
       parameters:
         - name: id
           in: path
@@ -422,7 +583,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileSummaryDTO'
+                $ref: '#/components/schemas/FileDetailedDTO'
         '404':
           description: Not Found
           content:
@@ -523,7 +684,160 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileSummaryDTO'
+                oneOf:
+                  - $ref: '#/components/schemas/FileSummaryDTO'
+                  - $ref: '#/components/schemas/FileMetadataSummaryDTO'
+                  - $ref: '#/components/schemas/FileDetailedDTO'
+  '/api/v1/data/files/{id}/metadata/{key}':
+    put:
+      tags:
+        - Files
+      summary: Adds or sets meta documents for a file.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the file
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: key
+          in: path
+          description: Case-insensitive key of the meta date on the file
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: JSON meta document
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: byte
+          application/json:
+            schema:
+              type: string
+              format: byte
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/MetaDateDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetaDateDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/MetaDateDTO'
+        '201':
+          description: Created
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/MetaDateDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetaDateDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/MetaDateDTO'
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+    post:
+      tags:
+        - Files
+      summary: Rename key for metadate relation.
+      parameters:
+        - name: id
+          in: path
+          description: The file ID.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: key
+          in: path
+          description: The old key.
+          required: true
+          schema:
+            type: string
+        - name: newKey
+          in: query
+          description: The new key.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+    delete:
+      tags:
+        - Files
+      summary: Removes metadate relation with resp. key.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the file.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: key
+          in: path
+          description: Key to remove the relation for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
   /api/v1/data/metadata:
     get:
       tags:
@@ -895,82 +1209,48 @@ components:
           nullable: true
       additionalProperties: false
     DataSetDetailedDTO:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Uniquely identifies the dataset. Typically server-generated. Should not be manually set by the client.
-          format: uuid
-          nullable: true
-        slug:
-          type: string
-          description: 'An optional, human-readable identifier for the dataset.'
-          nullable: true
-        name:
-          type: string
-          description: 'Non-unique, mandatory descriptive name of the dataset. Must be provided by the client.'
-          nullable: true
-        assignedTags:
-          type: array
-          items:
-            $ref: '#/components/schemas/TagDTO'
-          description: 'List of tags associated with the dataset, used for categorization and filtering purposes.'
-          nullable: true
-        createdStampUTC:
-          type: string
-          description: "UTC timestamp when the dataset was originally created.\nMandatory property, should be provided by the client."
-          format: date-time
-          nullable: true
-        deletedStampUTC:
-          type: string
-          description: "UTC timestamp that indicates when the dataset was deleted.\nNull if the dataset has not been deleted yet."
-          format: date-time
-          nullable: true
-        beginStampUTC:
-          type: string
-          description: "UTC timestamp that marks the period begin of the dataset.\nOnly to be set by server."
-          format: date-time
-          nullable: true
-        endStampUTC:
-          type: string
-          description: "UTC timestamp that marks the period end of the dataset.\nOnly to be set by server."
-          format: date-time
-          nullable: true
-        lifecycleState:
-          type: string
-          description: "Indicates, whether the dataset (and its files) are immutable.\nOnly to be set by server.\nLifecycle is: Uninitialized -> Sealed"
-          nullable: true
-        deletionState:
-          $ref: '#/components/schemas/DeletionStateDTO'
-        isTimeSeries:
-          type: boolean
-          description: "Indicates if the dataset represents time-series data.\nOnly to be set by server."
-          nullable: true
-        metaDates:
-          type: array
-          items:
-            $ref: '#/components/schemas/AssignedMetaDateDTO'
-          description: "Fields, for which metadata exists.\nOnly to be set by server."
-          nullable: true
-        fileCount:
-          type: integer
-          description: Amount of files in the dataset.
-          format: int32
-        collectionId:
-          type: string
-          description: Id of the collection this dataset belongs to.
-          format: uuid
-          nullable: true
-        files:
-          type: array
-          items:
-            $ref: '#/components/schemas/FileSummaryDTO'
-          nullable: true
-      additionalProperties: false
+      allOf:
+        - $ref: '#/components/schemas/DataSetSummaryDTO'
+        - type: object
+          properties:
+            files:
+              type: array
+              items:
+                oneOf:
+                  - $ref: '#/components/schemas/FileSummaryDTO'
+                  - $ref: '#/components/schemas/FileMetadataSummaryDTO'
+                  - $ref: '#/components/schemas/FileDetailedDTO'
+              nullable: true
+          additionalProperties: false
       description: "Represents a summary of a dataset, including identifying information, timestamps, state, tags,\nand metadata fields."
+    DataSetFileMetadataSummaryDTO:
+      allOf:
+        - $ref: '#/components/schemas/DataSetSummaryDTO'
+        - type: object
+          properties:
+            files:
+              type: array
+              items:
+                $ref: '#/components/schemas/FileMetadataSummaryDTO'
+              nullable: true
+          additionalProperties: false
+    DataSetListViewMode:
+      enum:
+        - Summary
+        - Metadata
+      type: string
+    DataSetMetadataSummaryDTO:
+      allOf:
+        - $ref: '#/components/schemas/DataSetSummaryDTO'
+        - type: object
+          additionalProperties: false
     DataSetSummaryDTO:
+      required:
+        - kind
       type: object
       properties:
+        kind:
+          type: string
         id:
           type: string
           description: Uniquely identifies the dataset. Typically server-generated. Should not be manually set by the client.
@@ -1037,6 +1317,13 @@ components:
           nullable: true
       additionalProperties: false
       description: "Represents a summary of a dataset, including identifying information, timestamps, state, tags,\nand metadata fields."
+      discriminator:
+        propertyName: kind
+        mapping:
+          summary: '#/components/schemas/DataSetSummaryDTO'
+          detailed: '#/components/schemas/DataSetDetailedDTO'
+          metadata-dataset: '#/components/schemas/DataSetMetadataSummaryDTO'
+          metadata-file: '#/components/schemas/DataSetFileMetadataSummaryDTO'
     DataStoreSummaryDTO:
       type: object
       properties:
@@ -1098,9 +1385,55 @@ components:
           format: uuid
           nullable: true
       additionalProperties: false
-    FileSummaryDTO:
+    FileDetailedDTO:
+      allOf:
+        - $ref: '#/components/schemas/FileSummaryDTO'
+        - type: object
+          properties:
+            references:
+              type: array
+              items:
+                $ref: '#/components/schemas/FileStorageReferenceSummaryDTO'
+              nullable: true
+          additionalProperties: false
+    FileListViewMode:
+      enum:
+        - Summary
+        - Metadata
+      type: string
+    FileMetadataSummaryDTO:
+      allOf:
+        - $ref: '#/components/schemas/FileSummaryDTO'
+        - type: object
+          additionalProperties: false
+    FileStorageReferenceSummaryDTO:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        compressionAlgorithm:
+          type: string
+          nullable: true
+        sizeBytes:
+          type: integer
+          format: int64
+          nullable: true
+        shA256Hash:
+          type: string
+          nullable: true
+        storageType:
+          type: string
+          nullable: true
+      additionalProperties: false
+    FileSummaryDTO:
+      required:
+        - kind
+      type: object
+      properties:
+        kind:
+          type: string
         id:
           type: string
           format: uuid
@@ -1136,10 +1469,21 @@ components:
         isTimeSeries:
           type: boolean
           nullable: true
-        isDeleted:
-          type: boolean
+        metaDates:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedMetaDateDTO'
+          description: "Fields, for which metadata exists.\nOnly to be set by server."
           nullable: true
+        deletionState:
+          $ref: '#/components/schemas/DeletionStateDTO'
       additionalProperties: false
+      discriminator:
+        propertyName: kind
+        mapping:
+          summary: '#/components/schemas/FileSummaryDTO'
+          metadata: '#/components/schemas/FileMetadataSummaryDTO'
+          detailed: '#/components/schemas/FileDetailedDTO'
     MetaDateCollectionColumnDTO:
       type: object
       properties:
@@ -1152,6 +1496,8 @@ components:
           type: string
           format: uuid
           nullable: true
+        target:
+          $ref: '#/components/schemas/MetadataColumnTarget'
       additionalProperties: false
     MetaDateDTO:
       type: object
@@ -1173,6 +1519,11 @@ components:
           format: uuid
           nullable: true
       additionalProperties: false
+    MetadataColumnTarget:
+      enum:
+        - Dataset
+        - File
+      type: string
     ProblemDetails:
       type: object
       properties:

@@ -20,18 +20,18 @@ import json
 from pydantic import ConfigDict
 from typing import Any, ClassVar, Dict, List, Optional
 from rdpms_cli.openapi_client.models.assigned_meta_date_dto import AssignedMetaDateDTO
-from rdpms_cli.openapi_client.models.data_set_detailed_dto_all_of_files import DataSetDetailedDTOAllOfFiles
 from rdpms_cli.openapi_client.models.data_set_summary_dto import DataSetSummaryDTO
 from rdpms_cli.openapi_client.models.deletion_state_dto import DeletionStateDTO
+from rdpms_cli.openapi_client.models.file_metadata_summary_dto import FileMetadataSummaryDTO
 from rdpms_cli.openapi_client.models.tag_dto import TagDTO
 from typing import Optional, Set
 from typing_extensions import Self
 
-class DataSetDetailedDTO(DataSetSummaryDTO):
+class DataSetFileMetadataSummaryDTO(DataSetSummaryDTO):
     """
-    Represents a summary of a dataset, including identifying information, timestamps, state, tags, and metadata fields.
+    DataSetFileMetadataSummaryDTO
     """ # noqa: E501
-    files: Optional[List[DataSetDetailedDTOAllOfFiles]] = None
+    files: Optional[List[FileMetadataSummaryDTO]] = None
     __properties: ClassVar[List[str]] = ["kind", "id", "slug", "name", "assignedTags", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "lifecycleState", "deletionState", "isTimeSeries", "metaDates", "fileCount", "collectionId", "files"]
 
     model_config = ConfigDict(
@@ -52,7 +52,7 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of DataSetDetailedDTO from a JSON string"""
+        """Create an instance of DataSetFileMetadataSummaryDTO from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -163,7 +163,7 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of DataSetDetailedDTO from a dict"""
+        """Create an instance of DataSetFileMetadataSummaryDTO from a dict"""
         if obj is None:
             return None
 
@@ -186,7 +186,7 @@ class DataSetDetailedDTO(DataSetSummaryDTO):
             "metaDates": [AssignedMetaDateDTO.from_dict(_item) for _item in obj["metaDates"]] if obj.get("metaDates") is not None else None,
             "fileCount": obj.get("fileCount"),
             "collectionId": obj.get("collectionId"),
-            "files": [DataSetDetailedDTOAllOfFiles.from_dict(_item) for _item in obj["files"]] if obj.get("files") is not None else None
+            "files": [FileMetadataSummaryDTO.from_dict(_item) for _item in obj["files"]] if obj.get("files") is not None else None
         })
         return _obj
 

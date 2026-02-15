@@ -20,13 +20,13 @@ import {
     AssignedMetaDateDTOToJSON,
     AssignedMetaDateDTOToJSONTyped,
 } from './AssignedMetaDateDTO';
-import type { FileSummaryDTO } from './FileSummaryDTO';
+import type { DataSetDetailedDTOAllOfFiles } from './DataSetDetailedDTOAllOfFiles';
 import {
-    FileSummaryDTOFromJSON,
-    FileSummaryDTOFromJSONTyped,
-    FileSummaryDTOToJSON,
-    FileSummaryDTOToJSONTyped,
-} from './FileSummaryDTO';
+    DataSetDetailedDTOAllOfFilesFromJSON,
+    DataSetDetailedDTOAllOfFilesFromJSONTyped,
+    DataSetDetailedDTOAllOfFilesToJSON,
+    DataSetDetailedDTOAllOfFilesToJSONTyped,
+} from './DataSetDetailedDTOAllOfFiles';
 import type { DeletionStateDTO } from './DeletionStateDTO';
 import {
     DeletionStateDTOFromJSON,
@@ -41,6 +41,13 @@ import {
     TagDTOToJSON,
     TagDTOToJSONTyped,
 } from './TagDTO';
+import type { DataSetSummaryDTO } from './DataSetSummaryDTO';
+import {
+    DataSetSummaryDTOFromJSON,
+    DataSetSummaryDTOFromJSONTyped,
+    DataSetSummaryDTOToJSON,
+    DataSetSummaryDTOToJSONTyped,
+} from './DataSetSummaryDTO';
 
 /**
  * Represents a summary of a dataset, including identifying information, timestamps, state, tags,
@@ -48,105 +55,13 @@ import {
  * @export
  * @interface DataSetDetailedDTO
  */
-export interface DataSetDetailedDTO {
-    /**
-     * Uniquely identifies the dataset. Typically server-generated. Should not be manually set by the client.
-     * @type {string}
-     * @memberof DataSetDetailedDTO
-     */
-    id?: string | null;
-    /**
-     * An optional, human-readable identifier for the dataset.
-     * @type {string}
-     * @memberof DataSetDetailedDTO
-     */
-    slug?: string | null;
-    /**
-     * Non-unique, mandatory descriptive name of the dataset. Must be provided by the client.
-     * @type {string}
-     * @memberof DataSetDetailedDTO
-     */
-    name?: string | null;
-    /**
-     * List of tags associated with the dataset, used for categorization and filtering purposes.
-     * @type {Array<TagDTO>}
-     * @memberof DataSetDetailedDTO
-     */
-    assignedTags?: Array<TagDTO> | null;
-    /**
-     * UTC timestamp when the dataset was originally created.
-     * Mandatory property, should be provided by the client.
-     * @type {Date}
-     * @memberof DataSetDetailedDTO
-     */
-    createdStampUTC?: Date | null;
-    /**
-     * UTC timestamp that indicates when the dataset was deleted.
-     * Null if the dataset has not been deleted yet.
-     * @type {Date}
-     * @memberof DataSetDetailedDTO
-     */
-    deletedStampUTC?: Date | null;
-    /**
-     * UTC timestamp that marks the period begin of the dataset.
-     * Only to be set by server.
-     * @type {Date}
-     * @memberof DataSetDetailedDTO
-     */
-    beginStampUTC?: Date | null;
-    /**
-     * UTC timestamp that marks the period end of the dataset.
-     * Only to be set by server.
-     * @type {Date}
-     * @memberof DataSetDetailedDTO
-     */
-    endStampUTC?: Date | null;
-    /**
-     * Indicates, whether the dataset (and its files) are immutable.
-     * Only to be set by server.
-     * Lifecycle is: Uninitialized -> Sealed
-     * @type {string}
-     * @memberof DataSetDetailedDTO
-     */
-    lifecycleState?: string | null;
+export interface DataSetDetailedDTO extends DataSetSummaryDTO {
     /**
      * 
-     * @type {DeletionStateDTO}
+     * @type {Array<DataSetDetailedDTOAllOfFiles>}
      * @memberof DataSetDetailedDTO
      */
-    deletionState?: DeletionStateDTO;
-    /**
-     * Indicates if the dataset represents time-series data.
-     * Only to be set by server.
-     * @type {boolean}
-     * @memberof DataSetDetailedDTO
-     */
-    isTimeSeries?: boolean | null;
-    /**
-     * Fields, for which metadata exists.
-     * Only to be set by server.
-     * @type {Array<AssignedMetaDateDTO>}
-     * @memberof DataSetDetailedDTO
-     */
-    metaDates?: Array<AssignedMetaDateDTO> | null;
-    /**
-     * Amount of files in the dataset.
-     * @type {number}
-     * @memberof DataSetDetailedDTO
-     */
-    fileCount?: number;
-    /**
-     * Id of the collection this dataset belongs to.
-     * @type {string}
-     * @memberof DataSetDetailedDTO
-     */
-    collectionId?: string | null;
-    /**
-     * 
-     * @type {Array<FileSummaryDTO>}
-     * @memberof DataSetDetailedDTO
-     */
-    files?: Array<FileSummaryDTO> | null;
+    files?: Array<DataSetDetailedDTOAllOfFiles> | null;
 }
 
 
@@ -167,22 +82,8 @@ export function DataSetDetailedDTOFromJSONTyped(json: any, ignoreDiscriminator: 
         return json;
     }
     return {
-        
-        'id': json['id'] == null ? undefined : json['id'],
-        'slug': json['slug'] == null ? undefined : json['slug'],
-        'name': json['name'] == null ? undefined : json['name'],
-        'assignedTags': json['assignedTags'] == null ? undefined : ((json['assignedTags'] as Array<any>).map(TagDTOFromJSON)),
-        'createdStampUTC': json['createdStampUTC'] == null ? undefined : (new Date(json['createdStampUTC'])),
-        'deletedStampUTC': json['deletedStampUTC'] == null ? undefined : (new Date(json['deletedStampUTC'])),
-        'beginStampUTC': json['beginStampUTC'] == null ? undefined : (new Date(json['beginStampUTC'])),
-        'endStampUTC': json['endStampUTC'] == null ? undefined : (new Date(json['endStampUTC'])),
-        'lifecycleState': json['lifecycleState'] == null ? undefined : json['lifecycleState'],
-        'deletionState': json['deletionState'] == null ? undefined : DeletionStateDTOFromJSON(json['deletionState']),
-        'isTimeSeries': json['isTimeSeries'] == null ? undefined : json['isTimeSeries'],
-        'metaDates': json['metaDates'] == null ? undefined : ((json['metaDates'] as Array<any>).map(AssignedMetaDateDTOFromJSON)),
-        'fileCount': json['fileCount'] == null ? undefined : json['fileCount'],
-        'collectionId': json['collectionId'] == null ? undefined : json['collectionId'],
-        'files': json['files'] == null ? undefined : ((json['files'] as Array<any>).map(FileSummaryDTOFromJSON)),
+        ...DataSetSummaryDTOFromJSONTyped(json, true),
+        'files': json['files'] == null ? undefined : ((json['files'] as Array<any>).map(DataSetDetailedDTOAllOfFilesFromJSON)),
     };
 }
 
@@ -196,22 +97,8 @@ export function DataSetDetailedDTOToJSONTyped(value?: DataSetDetailedDTO | null,
     }
 
     return {
-        
-        'id': value['id'],
-        'slug': value['slug'],
-        'name': value['name'],
-        'assignedTags': value['assignedTags'] == null ? undefined : ((value['assignedTags'] as Array<any>).map(TagDTOToJSON)),
-        'createdStampUTC': value['createdStampUTC'] == null ? value['createdStampUTC'] : value['createdStampUTC'].toISOString(),
-        'deletedStampUTC': value['deletedStampUTC'] == null ? value['deletedStampUTC'] : value['deletedStampUTC'].toISOString(),
-        'beginStampUTC': value['beginStampUTC'] == null ? value['beginStampUTC'] : value['beginStampUTC'].toISOString(),
-        'endStampUTC': value['endStampUTC'] == null ? value['endStampUTC'] : value['endStampUTC'].toISOString(),
-        'lifecycleState': value['lifecycleState'],
-        'deletionState': DeletionStateDTOToJSON(value['deletionState']),
-        'isTimeSeries': value['isTimeSeries'],
-        'metaDates': value['metaDates'] == null ? undefined : ((value['metaDates'] as Array<any>).map(AssignedMetaDateDTOToJSON)),
-        'fileCount': value['fileCount'],
-        'collectionId': value['collectionId'],
-        'files': value['files'] == null ? undefined : ((value['files'] as Array<any>).map(FileSummaryDTOToJSON)),
+        ...DataSetSummaryDTOToJSONTyped(value, true),
+        'files': value['files'] == null ? undefined : ((value['files'] as Array<any>).map(DataSetDetailedDTOAllOfFilesToJSON)),
     };
 }
 

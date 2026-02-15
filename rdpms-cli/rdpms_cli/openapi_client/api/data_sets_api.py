@@ -20,10 +20,12 @@ from pydantic import Field, StrictBytes, StrictStr
 from typing import List, Optional, Union
 from typing_extensions import Annotated
 from uuid import UUID
+from rdpms_cli.openapi_client.models.api_v1_data_datasets_get200_response_inner import ApiV1DataDatasetsGet200ResponseInner
 from rdpms_cli.openapi_client.models.data_set_detailed_dto import DataSetDetailedDTO
-from rdpms_cli.openapi_client.models.data_set_summary_dto import DataSetSummaryDTO
+from rdpms_cli.openapi_client.models.data_set_list_view_mode import DataSetListViewMode
 from rdpms_cli.openapi_client.models.file_create_response_dto import FileCreateResponseDTO
 from rdpms_cli.openapi_client.models.meta_date_dto import MetaDateDTO
+from rdpms_cli.openapi_client.models.metadata_column_target import MetadataColumnTarget
 from rdpms_cli.openapi_client.models.s3_file_create_request_dto import S3FileCreateRequestDTO
 
 from rdpms_cli.openapi_client.api_client import ApiClient, RequestSerialized
@@ -49,6 +51,8 @@ class DataSetsApi:
         self,
         collection_id: Optional[UUID] = None,
         deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
+        view: Optional[DataSetListViewMode] = None,
+        metadata_target: Optional[MetadataColumnTarget] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -61,7 +65,7 @@ class DataSetsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[DataSetSummaryDTO]:
+    ) -> List[ApiV1DataDatasetsGet200ResponseInner]:
         """Get data sets.
 
 
@@ -69,6 +73,10 @@ class DataSetsApi:
         :type collection_id: UUID
         :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
+        :param view:
+        :type view: DataSetListViewMode
+        :param metadata_target:
+        :type metadata_target: MetadataColumnTarget
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -94,6 +102,8 @@ class DataSetsApi:
         _param = self._api_v1_data_datasets_get_serialize(
             collection_id=collection_id,
             deleted=deleted,
+            view=view,
+            metadata_target=metadata_target,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -101,7 +111,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[DataSetSummaryDTO]",
+            '200': "List[ApiV1DataDatasetsGet200ResponseInner]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -119,6 +129,8 @@ class DataSetsApi:
         self,
         collection_id: Optional[UUID] = None,
         deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
+        view: Optional[DataSetListViewMode] = None,
+        metadata_target: Optional[MetadataColumnTarget] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -131,7 +143,7 @@ class DataSetsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[DataSetSummaryDTO]]:
+    ) -> ApiResponse[List[ApiV1DataDatasetsGet200ResponseInner]]:
         """Get data sets.
 
 
@@ -139,6 +151,10 @@ class DataSetsApi:
         :type collection_id: UUID
         :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
+        :param view:
+        :type view: DataSetListViewMode
+        :param metadata_target:
+        :type metadata_target: MetadataColumnTarget
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -164,6 +180,8 @@ class DataSetsApi:
         _param = self._api_v1_data_datasets_get_serialize(
             collection_id=collection_id,
             deleted=deleted,
+            view=view,
+            metadata_target=metadata_target,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -171,7 +189,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[DataSetSummaryDTO]",
+            '200': "List[ApiV1DataDatasetsGet200ResponseInner]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -189,6 +207,8 @@ class DataSetsApi:
         self,
         collection_id: Optional[UUID] = None,
         deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
+        view: Optional[DataSetListViewMode] = None,
+        metadata_target: Optional[MetadataColumnTarget] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -209,6 +229,10 @@ class DataSetsApi:
         :type collection_id: UUID
         :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
+        :param view:
+        :type view: DataSetListViewMode
+        :param metadata_target:
+        :type metadata_target: MetadataColumnTarget
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -234,6 +258,8 @@ class DataSetsApi:
         _param = self._api_v1_data_datasets_get_serialize(
             collection_id=collection_id,
             deleted=deleted,
+            view=view,
+            metadata_target=metadata_target,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -241,7 +267,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[DataSetSummaryDTO]",
+            '200': "List[ApiV1DataDatasetsGet200ResponseInner]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -254,6 +280,8 @@ class DataSetsApi:
         self,
         collection_id,
         deleted,
+        view,
+        metadata_target,
         _request_auth,
         _content_type,
         _headers,
@@ -283,6 +311,14 @@ class DataSetsApi:
         if deleted is not None:
             
             _query_params.append(('deleted', deleted))
+            
+        if view is not None:
+            
+            _query_params.append(('view', view.value))
+            
+        if metadata_target is not None:
+            
+            _query_params.append(('metadataTarget', metadata_target.value))
             
         # process the header parameters
         # process the form parameters
@@ -1132,6 +1168,576 @@ class DataSetsApi:
 
 
     @validate_call
+    def api_v1_data_datasets_id_metadata_key_delete(
+        self,
+        id: Annotated[UUID, Field(description="ID of the dataset.")],
+        key: Annotated[StrictStr, Field(description="Key to remove the relation for")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> None:
+        """Removes metadate relation with resp. key.
+
+
+        :param id: ID of the dataset. (required)
+        :type id: UUID
+        :param key: Key to remove the relation for (required)
+        :type key: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._api_v1_data_datasets_id_metadata_key_delete_serialize(
+            id=id,
+            key=key,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': None,
+            '400': "ErrorMessageDTO",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def api_v1_data_datasets_id_metadata_key_delete_with_http_info(
+        self,
+        id: Annotated[UUID, Field(description="ID of the dataset.")],
+        key: Annotated[StrictStr, Field(description="Key to remove the relation for")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[None]:
+        """Removes metadate relation with resp. key.
+
+
+        :param id: ID of the dataset. (required)
+        :type id: UUID
+        :param key: Key to remove the relation for (required)
+        :type key: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._api_v1_data_datasets_id_metadata_key_delete_serialize(
+            id=id,
+            key=key,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': None,
+            '400': "ErrorMessageDTO",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def api_v1_data_datasets_id_metadata_key_delete_without_preload_content(
+        self,
+        id: Annotated[UUID, Field(description="ID of the dataset.")],
+        key: Annotated[StrictStr, Field(description="Key to remove the relation for")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Removes metadate relation with resp. key.
+
+
+        :param id: ID of the dataset. (required)
+        :type id: UUID
+        :param key: Key to remove the relation for (required)
+        :type key: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._api_v1_data_datasets_id_metadata_key_delete_serialize(
+            id=id,
+            key=key,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': None,
+            '400': "ErrorMessageDTO",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _api_v1_data_datasets_id_metadata_key_delete_serialize(
+        self,
+        id,
+        key,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if id is not None:
+            _path_params['id'] = id
+        if key is not None:
+            _path_params['key'] = key
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+        ]
+
+        return self.api_client.param_serialize(
+            method='DELETE',
+            resource_path='/api/v1/data/datasets/{id}/metadata/{key}',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def api_v1_data_datasets_id_metadata_key_post(
+        self,
+        id: Annotated[UUID, Field(description="The dataset ID.")],
+        key: Annotated[StrictStr, Field(description="The old key.")],
+        new_key: Annotated[Optional[StrictStr], Field(description="The new key.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> None:
+        """Rename key for metadate relation.
+
+
+        :param id: The dataset ID. (required)
+        :type id: UUID
+        :param key: The old key. (required)
+        :type key: str
+        :param new_key: The new key.
+        :type new_key: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._api_v1_data_datasets_id_metadata_key_post_serialize(
+            id=id,
+            key=key,
+            new_key=new_key,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': None,
+            '400': "ErrorMessageDTO",
+            '404': "ErrorMessageDTO",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def api_v1_data_datasets_id_metadata_key_post_with_http_info(
+        self,
+        id: Annotated[UUID, Field(description="The dataset ID.")],
+        key: Annotated[StrictStr, Field(description="The old key.")],
+        new_key: Annotated[Optional[StrictStr], Field(description="The new key.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[None]:
+        """Rename key for metadate relation.
+
+
+        :param id: The dataset ID. (required)
+        :type id: UUID
+        :param key: The old key. (required)
+        :type key: str
+        :param new_key: The new key.
+        :type new_key: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._api_v1_data_datasets_id_metadata_key_post_serialize(
+            id=id,
+            key=key,
+            new_key=new_key,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': None,
+            '400': "ErrorMessageDTO",
+            '404': "ErrorMessageDTO",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def api_v1_data_datasets_id_metadata_key_post_without_preload_content(
+        self,
+        id: Annotated[UUID, Field(description="The dataset ID.")],
+        key: Annotated[StrictStr, Field(description="The old key.")],
+        new_key: Annotated[Optional[StrictStr], Field(description="The new key.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Rename key for metadate relation.
+
+
+        :param id: The dataset ID. (required)
+        :type id: UUID
+        :param key: The old key. (required)
+        :type key: str
+        :param new_key: The new key.
+        :type new_key: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._api_v1_data_datasets_id_metadata_key_post_serialize(
+            id=id,
+            key=key,
+            new_key=new_key,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': None,
+            '400': "ErrorMessageDTO",
+            '404': "ErrorMessageDTO",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _api_v1_data_datasets_id_metadata_key_post_serialize(
+        self,
+        id,
+        key,
+        new_key,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if id is not None:
+            _path_params['id'] = id
+        if key is not None:
+            _path_params['key'] = key
+        # process the query parameters
+        if new_key is not None:
+            
+            _query_params.append(('newKey', new_key))
+            
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/api/v1/data/datasets/{id}/metadata/{key}',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
     def api_v1_data_datasets_id_metadata_key_put(
         self,
         id: Annotated[UUID, Field(description="ID of the data set")],
@@ -1704,7 +2310,7 @@ class DataSetsApi:
     @validate_call
     def api_v1_data_datasets_post(
         self,
-        data_set_summary_dto: Optional[DataSetSummaryDTO] = None,
+        api_v1_data_datasets_get200_response_inner: Optional[ApiV1DataDatasetsGet200ResponseInner] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1721,8 +2327,8 @@ class DataSetsApi:
         """Add a single item to the system.
 
 
-        :param data_set_summary_dto: 
-        :type data_set_summary_dto: DataSetSummaryDTO
+        :param api_v1_data_datasets_get200_response_inner: 
+        :type api_v1_data_datasets_get200_response_inner: ApiV1DataDatasetsGet200ResponseInner
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1746,7 +2352,7 @@ class DataSetsApi:
         """ # noqa: E501
 
         _param = self._api_v1_data_datasets_post_serialize(
-            data_set_summary_dto=data_set_summary_dto,
+            api_v1_data_datasets_get200_response_inner=api_v1_data_datasets_get200_response_inner,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1771,7 +2377,7 @@ class DataSetsApi:
     @validate_call
     def api_v1_data_datasets_post_with_http_info(
         self,
-        data_set_summary_dto: Optional[DataSetSummaryDTO] = None,
+        api_v1_data_datasets_get200_response_inner: Optional[ApiV1DataDatasetsGet200ResponseInner] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1788,8 +2394,8 @@ class DataSetsApi:
         """Add a single item to the system.
 
 
-        :param data_set_summary_dto: 
-        :type data_set_summary_dto: DataSetSummaryDTO
+        :param api_v1_data_datasets_get200_response_inner: 
+        :type api_v1_data_datasets_get200_response_inner: ApiV1DataDatasetsGet200ResponseInner
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1813,7 +2419,7 @@ class DataSetsApi:
         """ # noqa: E501
 
         _param = self._api_v1_data_datasets_post_serialize(
-            data_set_summary_dto=data_set_summary_dto,
+            api_v1_data_datasets_get200_response_inner=api_v1_data_datasets_get200_response_inner,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1838,7 +2444,7 @@ class DataSetsApi:
     @validate_call
     def api_v1_data_datasets_post_without_preload_content(
         self,
-        data_set_summary_dto: Optional[DataSetSummaryDTO] = None,
+        api_v1_data_datasets_get200_response_inner: Optional[ApiV1DataDatasetsGet200ResponseInner] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1855,8 +2461,8 @@ class DataSetsApi:
         """Add a single item to the system.
 
 
-        :param data_set_summary_dto: 
-        :type data_set_summary_dto: DataSetSummaryDTO
+        :param api_v1_data_datasets_get200_response_inner: 
+        :type api_v1_data_datasets_get200_response_inner: ApiV1DataDatasetsGet200ResponseInner
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1880,7 +2486,7 @@ class DataSetsApi:
         """ # noqa: E501
 
         _param = self._api_v1_data_datasets_post_serialize(
-            data_set_summary_dto=data_set_summary_dto,
+            api_v1_data_datasets_get200_response_inner=api_v1_data_datasets_get200_response_inner,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1900,7 +2506,7 @@ class DataSetsApi:
 
     def _api_v1_data_datasets_post_serialize(
         self,
-        data_set_summary_dto,
+        api_v1_data_datasets_get200_response_inner,
         _request_auth,
         _content_type,
         _headers,
@@ -1926,8 +2532,8 @@ class DataSetsApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if data_set_summary_dto is not None:
-            _body_params = data_set_summary_dto
+        if api_v1_data_datasets_get200_response_inner is not None:
+            _body_params = api_v1_data_datasets_get200_response_inner
 
 
         # set the HTTP header `Accept`

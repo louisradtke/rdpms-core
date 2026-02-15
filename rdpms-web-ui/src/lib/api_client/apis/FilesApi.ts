@@ -15,15 +15,24 @@
 
 import * as runtime from '../runtime';
 import type {
+  ApiV1DataFilesGet200ResponseInner,
   ErrorMessageDTO,
-  FileSummaryDTO,
+  FileDetailedDTO,
+  FileListViewMode,
+  MetaDateDTO,
   ProblemDetails,
 } from '../models/index';
 import {
+    ApiV1DataFilesGet200ResponseInnerFromJSON,
+    ApiV1DataFilesGet200ResponseInnerToJSON,
     ErrorMessageDTOFromJSON,
     ErrorMessageDTOToJSON,
-    FileSummaryDTOFromJSON,
-    FileSummaryDTOToJSON,
+    FileDetailedDTOFromJSON,
+    FileDetailedDTOToJSON,
+    FileListViewModeFromJSON,
+    FileListViewModeToJSON,
+    MetaDateDTOFromJSON,
+    MetaDateDTOToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
 } from '../models/index';
@@ -31,6 +40,10 @@ import {
 export interface ApiV1DataFileRefsGetRequest {
     storeGuid?: string;
     type?: string;
+}
+
+export interface ApiV1DataFilesGetRequest {
+    view?: FileListViewMode;
 }
 
 export interface ApiV1DataFilesIdBlobGetRequest {
@@ -45,6 +58,23 @@ export interface ApiV1DataFilesIdGetRequest {
     id: string;
 }
 
+export interface ApiV1DataFilesIdMetadataKeyDeleteRequest {
+    id: string;
+    key: string;
+}
+
+export interface ApiV1DataFilesIdMetadataKeyPostRequest {
+    id: string;
+    key: string;
+    newKey?: string;
+}
+
+export interface ApiV1DataFilesIdMetadataKeyPutRequest {
+    id: string;
+    key: string;
+    body?: string;
+}
+
 /**
  * 
  */
@@ -52,7 +82,7 @@ export class FilesApi extends runtime.BaseAPI {
 
     /**
      */
-    async apiV1DataFileRefsGetRaw(requestParameters: ApiV1DataFileRefsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FileSummaryDTO>> {
+    async apiV1DataFileRefsGetRaw(requestParameters: ApiV1DataFileRefsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiV1DataFilesGet200ResponseInner>> {
         const queryParameters: any = {};
 
         if (requestParameters['storeGuid'] != null) {
@@ -75,21 +105,25 @@ export class FilesApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => FileSummaryDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiV1DataFilesGet200ResponseInnerFromJSON(jsonValue));
     }
 
     /**
      */
-    async apiV1DataFileRefsGet(requestParameters: ApiV1DataFileRefsGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileSummaryDTO> {
+    async apiV1DataFileRefsGet(requestParameters: ApiV1DataFileRefsGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiV1DataFilesGet200ResponseInner> {
         const response = await this.apiV1DataFileRefsGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
-     * Get summaries of all files.
+     * Get files.
      */
-    async apiV1DataFilesGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<FileSummaryDTO>>> {
+    async apiV1DataFilesGetRaw(requestParameters: ApiV1DataFilesGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ApiV1DataFilesGet200ResponseInner>>> {
         const queryParameters: any = {};
+
+        if (requestParameters['view'] != null) {
+            queryParameters['view'] = requestParameters['view'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -103,14 +137,14 @@ export class FilesApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(FileSummaryDTOFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ApiV1DataFilesGet200ResponseInnerFromJSON));
     }
 
     /**
-     * Get summaries of all files.
+     * Get files.
      */
-    async apiV1DataFilesGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<FileSummaryDTO>> {
-        const response = await this.apiV1DataFilesGetRaw(initOverrides);
+    async apiV1DataFilesGet(requestParameters: ApiV1DataFilesGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ApiV1DataFilesGet200ResponseInner>> {
+        const response = await this.apiV1DataFilesGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -188,9 +222,9 @@ export class FilesApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get summary of a single file.
+     * Get details of a single file.
      */
-    async apiV1DataFilesIdGetRaw(requestParameters: ApiV1DataFilesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FileSummaryDTO>> {
+    async apiV1DataFilesIdGetRaw(requestParameters: ApiV1DataFilesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FileDetailedDTO>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -213,14 +247,154 @@ export class FilesApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => FileSummaryDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => FileDetailedDTOFromJSON(jsonValue));
     }
 
     /**
-     * Get summary of a single file.
+     * Get details of a single file.
      */
-    async apiV1DataFilesIdGet(requestParameters: ApiV1DataFilesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileSummaryDTO> {
+    async apiV1DataFilesIdGet(requestParameters: ApiV1DataFilesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileDetailedDTO> {
         const response = await this.apiV1DataFilesIdGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Removes metadate relation with resp. key.
+     */
+    async apiV1DataFilesIdMetadataKeyDeleteRaw(requestParameters: ApiV1DataFilesIdMetadataKeyDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataFilesIdMetadataKeyDelete().'
+            );
+        }
+
+        if (requestParameters['key'] == null) {
+            throw new runtime.RequiredError(
+                'key',
+                'Required parameter "key" was null or undefined when calling apiV1DataFilesIdMetadataKeyDelete().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/data/files/{id}/metadata/{key}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+        urlPath = urlPath.replace(`{${"key"}}`, encodeURIComponent(String(requestParameters['key'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Removes metadate relation with resp. key.
+     */
+    async apiV1DataFilesIdMetadataKeyDelete(requestParameters: ApiV1DataFilesIdMetadataKeyDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.apiV1DataFilesIdMetadataKeyDeleteRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Rename key for metadate relation.
+     */
+    async apiV1DataFilesIdMetadataKeyPostRaw(requestParameters: ApiV1DataFilesIdMetadataKeyPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataFilesIdMetadataKeyPost().'
+            );
+        }
+
+        if (requestParameters['key'] == null) {
+            throw new runtime.RequiredError(
+                'key',
+                'Required parameter "key" was null or undefined when calling apiV1DataFilesIdMetadataKeyPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['newKey'] != null) {
+            queryParameters['newKey'] = requestParameters['newKey'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/data/files/{id}/metadata/{key}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+        urlPath = urlPath.replace(`{${"key"}}`, encodeURIComponent(String(requestParameters['key'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Rename key for metadate relation.
+     */
+    async apiV1DataFilesIdMetadataKeyPost(requestParameters: ApiV1DataFilesIdMetadataKeyPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.apiV1DataFilesIdMetadataKeyPostRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Adds or sets meta documents for a file.
+     */
+    async apiV1DataFilesIdMetadataKeyPutRaw(requestParameters: ApiV1DataFilesIdMetadataKeyPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<MetaDateDTO>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataFilesIdMetadataKeyPut().'
+            );
+        }
+
+        if (requestParameters['key'] == null) {
+            throw new runtime.RequiredError(
+                'key',
+                'Required parameter "key" was null or undefined when calling apiV1DataFilesIdMetadataKeyPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/octet-stream';
+
+
+        let urlPath = `/api/v1/data/files/{id}/metadata/{key}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+        urlPath = urlPath.replace(`{${"key"}}`, encodeURIComponent(String(requestParameters['key'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => MetaDateDTOFromJSON(jsonValue));
+    }
+
+    /**
+     * Adds or sets meta documents for a file.
+     */
+    async apiV1DataFilesIdMetadataKeyPut(requestParameters: ApiV1DataFilesIdMetadataKeyPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<MetaDateDTO> {
+        const response = await this.apiV1DataFilesIdMetadataKeyPutRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

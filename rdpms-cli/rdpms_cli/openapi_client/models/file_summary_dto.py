@@ -18,17 +18,27 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
+from importlib import import_module
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from uuid import UUID
+from rdpms_cli.openapi_client.models.assigned_meta_date_dto import AssignedMetaDateDTO
 from rdpms_cli.openapi_client.models.content_type_dto import ContentTypeDTO
+from rdpms_cli.openapi_client.models.deletion_state_dto import DeletionStateDTO
 from typing import Optional, Set
 from typing_extensions import Self
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from rdpms_cli.openapi_client.models.file_detailed_dto import FileDetailedDTO
+    from rdpms_cli.openapi_client.models.file_metadata_summary_dto import FileMetadataSummaryDTO
+    from rdpms_cli.openapi_client.models.file_summary_dto import FileSummaryDTO
 
 class FileSummaryDTO(BaseModel):
     """
     FileSummaryDTO
     """ # noqa: E501
+    kind: StrictStr
     id: Optional[UUID] = None
     name: Optional[StrictStr] = None
     download_uri: Optional[StrictStr] = Field(default=None, alias="downloadURI")
@@ -39,8 +49,9 @@ class FileSummaryDTO(BaseModel):
     begin_stamp_utc: Optional[datetime] = Field(default=None, alias="beginStampUTC")
     end_stamp_utc: Optional[datetime] = Field(default=None, alias="endStampUTC")
     is_time_series: Optional[StrictBool] = Field(default=None, alias="isTimeSeries")
-    is_deleted: Optional[StrictBool] = Field(default=None, alias="isDeleted")
-    __properties: ClassVar[List[str]] = ["id", "name", "downloadURI", "contentType", "size", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "isTimeSeries", "isDeleted"]
+    meta_dates: Optional[List[AssignedMetaDateDTO]] = Field(default=None, description="Fields, for which metadata exists. Only to be set by server.", alias="metaDates")
+    deletion_state: Optional[DeletionStateDTO] = Field(default=None, alias="deletionState")
+    __properties: ClassVar[List[str]] = ["kind", "id", "name", "downloadURI", "contentType", "size", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "isTimeSeries", "metaDates", "deletionState"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -48,6 +59,23 @@ class FileSummaryDTO(BaseModel):
         protected_namespaces=(),
     )
 
+
+    # JSON field name that stores the object type
+    __discriminator_property_name: ClassVar[str] = 'kind'
+
+    # discriminator mappings
+    __discriminator_value_class_map: ClassVar[Dict[str, str]] = {
+        'detailed': 'FileDetailedDTO','metadata': 'FileMetadataSummaryDTO','summary': 'FileSummaryDTO'
+    }
+
+    @classmethod
+    def get_discriminator_value(cls, obj: Dict[str, Any]) -> Optional[str]:
+        """Returns the discriminator value (object type) of the data"""
+        discriminator_value = obj[cls.__discriminator_property_name]
+        if discriminator_value:
+            return cls.__discriminator_value_class_map.get(discriminator_value)
+        else:
+            return None
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -59,7 +87,7 @@ class FileSummaryDTO(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Optional[Union[FileDetailedDTO, FileMetadataSummaryDTO, FileSummaryDTO]]:
         """Create an instance of FileSummaryDTO from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
@@ -84,6 +112,13 @@ class FileSummaryDTO(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of content_type
         if self.content_type:
             _dict['contentType'] = self.content_type.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in meta_dates (list)
+        _items = []
+        if self.meta_dates:
+            for _item_meta_dates in self.meta_dates:
+                if _item_meta_dates:
+                    _items.append(_item_meta_dates.to_dict())
+            _dict['metaDates'] = _items
         # set to None if id (nullable) is None
         # and model_fields_set contains the field
         if self.id is None and "id" in self.model_fields_set:
@@ -129,35 +164,27 @@ class FileSummaryDTO(BaseModel):
         if self.is_time_series is None and "is_time_series" in self.model_fields_set:
             _dict['isTimeSeries'] = None
 
-        # set to None if is_deleted (nullable) is None
+        # set to None if meta_dates (nullable) is None
         # and model_fields_set contains the field
-        if self.is_deleted is None and "is_deleted" in self.model_fields_set:
-            _dict['isDeleted'] = None
+        if self.meta_dates is None and "meta_dates" in self.model_fields_set:
+            _dict['metaDates'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: Dict[str, Any]) -> Optional[Union[FileDetailedDTO, FileMetadataSummaryDTO, FileSummaryDTO]]:
         """Create an instance of FileSummaryDTO from a dict"""
-        if obj is None:
-            return None
+        # look up the object type based on discriminator mapping
+        object_type = cls.get_discriminator_value(obj)
+        if object_type ==  'FileDetailedDTO':
+            return import_module("rdpms_cli.openapi_client.models.file_detailed_dto").FileDetailedDTO.from_dict(obj)
+        if object_type ==  'FileMetadataSummaryDTO':
+            return import_module("rdpms_cli.openapi_client.models.file_metadata_summary_dto").FileMetadataSummaryDTO.from_dict(obj)
+        if object_type ==  'FileSummaryDTO':
+            return import_module("rdpms_cli.openapi_client.models.file_summary_dto").FileSummaryDTO.from_dict(obj)
 
-        if not isinstance(obj, dict):
-            return cls.model_validate(obj)
-
-        _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name"),
-            "downloadURI": obj.get("downloadURI"),
-            "contentType": ContentTypeDTO.from_dict(obj["contentType"]) if obj.get("contentType") is not None else None,
-            "size": obj.get("size"),
-            "createdStampUTC": obj.get("createdStampUTC"),
-            "deletedStampUTC": obj.get("deletedStampUTC"),
-            "beginStampUTC": obj.get("beginStampUTC"),
-            "endStampUTC": obj.get("endStampUTC"),
-            "isTimeSeries": obj.get("isTimeSeries"),
-            "isDeleted": obj.get("isDeleted")
-        })
-        return _obj
+        raise ValueError("FileSummaryDTO failed to lookup discriminator value from " +
+                            json.dumps(obj) + ". Discriminator property name: " + cls.__discriminator_property_name +
+                            ", mapping: " + json.dumps(cls.__discriminator_value_class_map))
 
 

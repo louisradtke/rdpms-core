@@ -17,6 +17,8 @@ import * as runtime from '../runtime';
 import type {
   CollectionDetailedDTO,
   CollectionSummaryDTO,
+  ErrorMessageDTO,
+  MetadataColumnTarget,
   ProblemDetails,
 } from '../models/index';
 import {
@@ -24,6 +26,10 @@ import {
     CollectionDetailedDTOToJSON,
     CollectionSummaryDTOFromJSON,
     CollectionSummaryDTOToJSON,
+    ErrorMessageDTOFromJSON,
+    ErrorMessageDTOToJSON,
+    MetadataColumnTargetFromJSON,
+    MetadataColumnTargetToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
 } from '../models/index';
@@ -38,11 +44,25 @@ export interface ApiV1DataCollectionsIdGetRequest {
     id: string;
 }
 
+export interface ApiV1DataCollectionsIdMetadataKeyDeleteRequest {
+    id: string;
+    key: string;
+    target?: MetadataColumnTarget;
+}
+
+export interface ApiV1DataCollectionsIdMetadataKeyPostRequest {
+    id: string;
+    key: string;
+    newKey?: string;
+    target?: MetadataColumnTarget;
+}
+
 export interface ApiV1DataCollectionsIdMetadataKeyPutRequest {
     id: string;
     key: string;
     schemaId?: string;
     defaultMetadataId?: string;
+    target?: MetadataColumnTarget;
 }
 
 export interface ApiV1DataCollectionsPostRequest {
@@ -134,6 +154,102 @@ export class CollectionsApi extends runtime.BaseAPI {
 
     /**
      */
+    async apiV1DataCollectionsIdMetadataKeyDeleteRaw(requestParameters: ApiV1DataCollectionsIdMetadataKeyDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataCollectionsIdMetadataKeyDelete().'
+            );
+        }
+
+        if (requestParameters['key'] == null) {
+            throw new runtime.RequiredError(
+                'key',
+                'Required parameter "key" was null or undefined when calling apiV1DataCollectionsIdMetadataKeyDelete().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['target'] != null) {
+            queryParameters['target'] = requestParameters['target'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/data/collections/{id}/metadata/{key}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+        urlPath = urlPath.replace(`{${"key"}}`, encodeURIComponent(String(requestParameters['key'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async apiV1DataCollectionsIdMetadataKeyDelete(requestParameters: ApiV1DataCollectionsIdMetadataKeyDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.apiV1DataCollectionsIdMetadataKeyDeleteRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     */
+    async apiV1DataCollectionsIdMetadataKeyPostRaw(requestParameters: ApiV1DataCollectionsIdMetadataKeyPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1DataCollectionsIdMetadataKeyPost().'
+            );
+        }
+
+        if (requestParameters['key'] == null) {
+            throw new runtime.RequiredError(
+                'key',
+                'Required parameter "key" was null or undefined when calling apiV1DataCollectionsIdMetadataKeyPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['newKey'] != null) {
+            queryParameters['newKey'] = requestParameters['newKey'];
+        }
+
+        if (requestParameters['target'] != null) {
+            queryParameters['target'] = requestParameters['target'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/data/collections/{id}/metadata/{key}`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+        urlPath = urlPath.replace(`{${"key"}}`, encodeURIComponent(String(requestParameters['key'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async apiV1DataCollectionsIdMetadataKeyPost(requestParameters: ApiV1DataCollectionsIdMetadataKeyPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.apiV1DataCollectionsIdMetadataKeyPostRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     */
     async apiV1DataCollectionsIdMetadataKeyPutRaw(requestParameters: ApiV1DataCollectionsIdMetadataKeyPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
@@ -157,6 +273,10 @@ export class CollectionsApi extends runtime.BaseAPI {
 
         if (requestParameters['defaultMetadataId'] != null) {
             queryParameters['defaultMetadataId'] = requestParameters['defaultMetadataId'];
+        }
+
+        if (requestParameters['target'] != null) {
+            queryParameters['target'] = requestParameters['target'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { MetadataColumnTarget } from './MetadataColumnTarget';
+import {
+    MetadataColumnTargetFromJSON,
+    MetadataColumnTargetFromJSONTyped,
+    MetadataColumnTargetToJSON,
+    MetadataColumnTargetToJSONTyped,
+} from './MetadataColumnTarget';
 import type { SchemaDTO } from './SchemaDTO';
 import {
     SchemaDTOFromJSON,
@@ -45,7 +52,15 @@ export interface MetaDateCollectionColumnDTO {
      * @memberof MetaDateCollectionColumnDTO
      */
     defaultFieldId?: string | null;
+    /**
+     * 
+     * @type {MetadataColumnTarget}
+     * @memberof MetaDateCollectionColumnDTO
+     */
+    target?: MetadataColumnTarget;
 }
+
+
 
 /**
  * Check if a given object implements the MetaDateCollectionColumnDTO interface.
@@ -67,6 +82,7 @@ export function MetaDateCollectionColumnDTOFromJSONTyped(json: any, ignoreDiscri
         'metadataKey': json['metadataKey'] == null ? undefined : json['metadataKey'],
         'schema': json['schema'] == null ? undefined : SchemaDTOFromJSON(json['schema']),
         'defaultFieldId': json['defaultFieldId'] == null ? undefined : json['defaultFieldId'],
+        'target': json['target'] == null ? undefined : MetadataColumnTargetFromJSON(json['target']),
     };
 }
 
@@ -84,6 +100,7 @@ export function MetaDateCollectionColumnDTOToJSONTyped(value?: MetaDateCollectio
         'metadataKey': value['metadataKey'],
         'schema': SchemaDTOToJSON(value['schema']),
         'defaultFieldId': value['defaultFieldId'],
+        'target': MetadataColumnTargetToJSON(value['target']),
     };
 }
 

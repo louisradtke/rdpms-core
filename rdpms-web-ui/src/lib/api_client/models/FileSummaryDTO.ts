@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { AssignedMetaDateDTO } from './AssignedMetaDateDTO';
+import {
+    AssignedMetaDateDTOFromJSON,
+    AssignedMetaDateDTOFromJSONTyped,
+    AssignedMetaDateDTOToJSON,
+    AssignedMetaDateDTOToJSONTyped,
+} from './AssignedMetaDateDTO';
 import type { ContentTypeDTO } from './ContentTypeDTO';
 import {
     ContentTypeDTOFromJSON,
@@ -20,13 +27,28 @@ import {
     ContentTypeDTOToJSON,
     ContentTypeDTOToJSONTyped,
 } from './ContentTypeDTO';
+import type { DeletionStateDTO } from './DeletionStateDTO';
+import {
+    DeletionStateDTOFromJSON,
+    DeletionStateDTOFromJSONTyped,
+    DeletionStateDTOToJSON,
+    DeletionStateDTOToJSONTyped,
+} from './DeletionStateDTO';
 
+import { type FileDetailedDTO, FileDetailedDTOFromJSONTyped, FileDetailedDTOToJSON, FileDetailedDTOToJSONTyped } from './FileDetailedDTO';
+import { type FileMetadataSummaryDTO, FileMetadataSummaryDTOFromJSONTyped, FileMetadataSummaryDTOToJSON, FileMetadataSummaryDTOToJSONTyped } from './FileMetadataSummaryDTO';
 /**
  * 
  * @export
  * @interface FileSummaryDTO
  */
 export interface FileSummaryDTO {
+    /**
+     * 
+     * @type {string}
+     * @memberof FileSummaryDTO
+     */
+    kind: string;
     /**
      * 
      * @type {string}
@@ -88,17 +110,27 @@ export interface FileSummaryDTO {
      */
     isTimeSeries?: boolean | null;
     /**
-     * 
-     * @type {boolean}
+     * Fields, for which metadata exists.
+     * Only to be set by server.
+     * @type {Array<AssignedMetaDateDTO>}
      * @memberof FileSummaryDTO
      */
-    isDeleted?: boolean | null;
+    metaDates?: Array<AssignedMetaDateDTO> | null;
+    /**
+     * 
+     * @type {DeletionStateDTO}
+     * @memberof FileSummaryDTO
+     */
+    deletionState?: DeletionStateDTO;
 }
+
+
 
 /**
  * Check if a given object implements the FileSummaryDTO interface.
  */
 export function instanceOfFileSummaryDTO(value: object): value is FileSummaryDTO {
+    if (!('kind' in value) || value['kind'] === undefined) return false;
     return true;
 }
 
@@ -110,8 +142,21 @@ export function FileSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
     if (json == null) {
         return json;
     }
+    if (!ignoreDiscriminator) {
+        if (json['kind'] === 'detailed') {
+            return FileDetailedDTOFromJSONTyped(json, ignoreDiscriminator);
+        }
+        if (json['kind'] === 'metadata') {
+            return FileMetadataSummaryDTOFromJSONTyped(json, ignoreDiscriminator);
+        }
+        if (json['kind'] === 'summary') {
+            return FileSummaryDTOFromJSONTyped(json, true);
+        }
+
+    }
     return {
         
+        'kind': json['kind'],
         'id': json['id'] == null ? undefined : json['id'],
         'name': json['name'] == null ? undefined : json['name'],
         'downloadURI': json['downloadURI'] == null ? undefined : json['downloadURI'],
@@ -122,7 +167,8 @@ export function FileSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
         'beginStampUTC': json['beginStampUTC'] == null ? undefined : (new Date(json['beginStampUTC'])),
         'endStampUTC': json['endStampUTC'] == null ? undefined : (new Date(json['endStampUTC'])),
         'isTimeSeries': json['isTimeSeries'] == null ? undefined : json['isTimeSeries'],
-        'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
+        'metaDates': json['metaDates'] == null ? undefined : ((json['metaDates'] as Array<any>).map(AssignedMetaDateDTOFromJSON)),
+        'deletionState': json['deletionState'] == null ? undefined : DeletionStateDTOFromJSON(json['deletionState']),
     };
 }
 
@@ -135,8 +181,20 @@ export function FileSummaryDTOToJSONTyped(value?: FileSummaryDTO | null, ignoreD
         return value;
     }
 
+    if (!ignoreDiscriminator) {
+        switch (value['kind']) {
+            case 'detailed':
+                return FileDetailedDTOToJSONTyped(value as FileDetailedDTO, ignoreDiscriminator);
+            case 'metadata':
+                return FileMetadataSummaryDTOToJSONTyped(value as FileMetadataSummaryDTO, ignoreDiscriminator);
+            default:
+                return value;
+        }
+    }
+
     return {
         
+        'kind': value['kind'],
         'id': value['id'],
         'name': value['name'],
         'downloadURI': value['downloadURI'],
@@ -147,7 +205,8 @@ export function FileSummaryDTOToJSONTyped(value?: FileSummaryDTO | null, ignoreD
         'beginStampUTC': value['beginStampUTC'] == null ? value['beginStampUTC'] : value['beginStampUTC'].toISOString(),
         'endStampUTC': value['endStampUTC'] == null ? value['endStampUTC'] : value['endStampUTC'].toISOString(),
         'isTimeSeries': value['isTimeSeries'],
-        'isDeleted': value['isDeleted'],
+        'metaDates': value['metaDates'] == null ? undefined : ((value['metaDates'] as Array<any>).map(AssignedMetaDateDTOToJSON)),
+        'deletionState': DeletionStateDTOToJSON(value['deletionState']),
     };
 }
 
