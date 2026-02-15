@@ -25,12 +25,19 @@ public class DataCollectionEntityService(DbContext dbContext)
             .ToDictionaryAsync(x => x.Id, x => x.Count);
     }
 
-    public async Task<bool> UpsertMetaDataColumnAsync(Guid collectionId, string key, Guid schemaId,
-        Guid? defaultMetadataId)
+    public async Task<bool> UpsertMetaDataColumnAsync(
+        Guid collectionId,
+        string key,
+        Guid schemaId,
+        Guid? defaultMetadataId,
+        MetadataColumnTarget target = MetadataColumnTarget.Dataset)
     {
         var normalizedKey = key.ToLowerInvariant();
         var updated = await Context.Set<MetaDataCollectionColumn>()
-            .Where(c => c.ParentCollectionId == collectionId && c.MetadataKey == normalizedKey)
+            .Where(c =>
+                c.ParentCollectionId == collectionId &&
+                c.MetadataKey == normalizedKey &&
+                c.Target == target)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(c => c.SchemaId, schemaId)
                 .SetProperty(c => c.DefaultFieldId, defaultMetadataId));
@@ -45,7 +52,8 @@ public class DataCollectionEntityService(DbContext dbContext)
             ParentCollectionId = collectionId,
             MetadataKey = normalizedKey,
             SchemaId = schemaId,
-            DefaultFieldId = defaultMetadataId
+            DefaultFieldId = defaultMetadataId,
+            Target = target
         };
 
         Context.Set<MetaDataCollectionColumn>().Add(column);
@@ -53,15 +61,41 @@ public class DataCollectionEntityService(DbContext dbContext)
         return true;
     }
 
-    public async Task RenameColumnAsync(Guid collectionId, string oldKey, string newKey)
+    public async Task RenameColumnAsync(
+        Guid collectionId,
+        string oldKey,
+        string newKey,
+        MetadataColumnTarget target = MetadataColumnTarget.Dataset)
     {
         var normalizedOldKey = oldKey.ToLowerInvariant();
         var normalizedNewKey = newKey.ToLowerInvariant();
         var updated = await Context.Set<MetaDataCollectionColumn>()
-            .Where(c => c.ParentCollectionId == collectionId && c.MetadataKey == normalizedOldKey)
+            .Where(c =>
+                c.ParentCollectionId == collectionId &&
+                c.MetadataKey == normalizedOldKey &&
+                c.Target == target)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(c => c.MetadataKey, normalizedNewKey));
         if (updated == 0)
+        {
+            throw new InvalidOperationException("No such column.");
+        }
+    }
+
+    public async Task DeleteColumnAsync(
+        Guid collectionId,
+        string key,
+        MetadataColumnTarget target = MetadataColumnTarget.Dataset)
+    {
+        var normalizedKey = key.ToLowerInvariant();
+        var deleted = await Context.Set<MetaDataCollectionColumn>()
+            .Where(c =>
+                c.ParentCollectionId == collectionId &&
+                c.MetadataKey == normalizedKey &&
+                c.Target == target)
+            .ExecuteDeleteAsync();
+        
+        if (deleted == 0)
         {
             throw new InvalidOperationException("No such column.");
         }

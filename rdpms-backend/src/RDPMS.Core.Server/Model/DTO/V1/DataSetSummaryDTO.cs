@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using RDPMS.Core.Persistence.Model;
 
 namespace RDPMS.Core.Server.Model.DTO.V1;
@@ -6,6 +7,11 @@ namespace RDPMS.Core.Server.Model.DTO.V1;
 /// Represents a summary of a dataset, including identifying information, timestamps, state, tags,
 /// and metadata fields.
 /// </summary>
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
+[JsonDerivedType(typeof(DataSetSummaryDTO), "summary")]
+[JsonDerivedType(typeof(DataSetDetailedDTO), "detailed")]
+[JsonDerivedType(typeof(DataSetMetadataSummaryDTO), "metadata-dataset")]
+[JsonDerivedType(typeof(DataSetFileMetadataSummaryDTO), "metadata-file")]
 public record DataSetSummaryDTO
 {
     /// <summary>

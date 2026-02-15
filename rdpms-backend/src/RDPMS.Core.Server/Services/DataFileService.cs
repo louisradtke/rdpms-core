@@ -18,6 +18,9 @@ public class DataFileService(
     : GenericCollectionService<DataFile>(dbContext, files => files
         .Include(f => f.References)
         .Include(f => f.FileType)
+        .Include(f => f.MetadataJsonFields)
+        .Include(f => f.ParentDataSet)
+        .ThenInclude(ds => ds!.ParentCollection)
     ), IFileService
 {
 
@@ -150,4 +153,37 @@ public class DataFileService(
 
         await Context.SaveChangesAsync();
     }
+    
+    public async Task<IDictionary<Guid, List<string>>> GetValidatedMetadates(List<Guid> fileIds)
+    {
+        var result = await Context.Set<DataFile>()
+            .Where(file => fileIds.Contains(file.Id))
+            .Join(Context.Set<DataSet>(),
+                file => file.ParentDataSetId, ds => ds.Id,
+                (file, ds) => new { file, ds })
+            .Join(Context.Set<DataCollectionEntity>(),
+                tup => tup.ds.ParentCollectionId, collection => collection.Id,
+                (tup, collection) => new { tup.file, tup.ds, collectionId = collection.Id })
+            .Join(Context.Set<MetaDataCollectionColumn>(),
+                tup => tup.collectionId, col => col.ParentCollectionId,
+                (tup, col) => new { tup.collectionId, tup.file, tup.ds, col })
+            .Join(Context.Set<DataEntityMetadataJsonField>(),
+                tup => tup.file.Id, f => f.DataFileId,
+                (tup, fRef)
+                    => new { tup.collectionId, tup.file, tup.ds, tup.col, fRef })
+            .Join(Context.Set<MetadataJsonFieldValidatedSchema>(),
+                tup => tup.fRef.FieldId, rel => rel.MetadataJsonFieldId,
+                (tup, rel)
+                    => new { tup.collectionId, tup.file, tup.ds, tup.col, tup.fRef, schemaId = rel.JsonSchemaEntityId })
+            .Where(tup => tup.col.Target == MetadataColumnTarget.File)
+            .Where(tup => tup.col.MetadataKey == tup.fRef.MetadataKey)
+            .Where(tup => tup.col.SchemaId == tup.schemaId)
+            .GroupBy(tup => tup.file.Id)
+            .ToDictionaryAsync(gr => gr.Key, gr => gr
+                .Select(tup => tup.col.MetadataKey)
+                .ToList());
+
+        return result;
+    }
+
 }

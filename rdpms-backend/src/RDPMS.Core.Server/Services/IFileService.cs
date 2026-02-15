@@ -64,4 +64,12 @@ public interface IFileService : IGenericCollectionService<DataFile>
     /// <exception cref="ArgumentException">If inputs mismatch content attributes</exception>
     /// <returns></returns>
     public Task StoreInDb(DataFile file, byte[] content, StorageAttributes? referenceAttributes);
+    
+    /// <summary>
+    /// Get a list of keys, where metadata matches the schemas declared for the parent collection.
+    /// </summary>
+    /// <param name="fileIds">The ids of the datasets to check</param>
+    /// <returns>A dictionary mapping the dataset id to the list of keys, of which the values were validated.</returns>
+    /// <exception cref="InvalidOperationException">Thrown, if datasets don't share same parent collection.</exception>
+    Task<IDictionary<Guid, List<string>>> GetValidatedMetadates(List<Guid> fileIds);
 }

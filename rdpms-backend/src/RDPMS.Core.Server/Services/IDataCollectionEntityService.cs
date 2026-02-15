@@ -19,8 +19,14 @@ public interface IDataCollectionEntityService : IGenericCollectionService<DataCo
     /// <param name="key">Key of the column</param>
     /// <param name="schemaId">Id of the schema</param>
     /// <param name="defaultMetadataId">Optional id of the default metadata</param>
+    /// <param name="target">Target entity type this column applies to.</param>
     /// <returns>True when a new column was created, false when an existing column was updated.</returns>
-    Task<bool> UpsertMetaDataColumnAsync(Guid collectionId, string key, Guid schemaId, Guid? defaultMetadataId);
+    Task<bool> UpsertMetaDataColumnAsync(
+        Guid collectionId,
+        string key,
+        Guid schemaId,
+        Guid? defaultMetadataId,
+        MetadataColumnTarget target = MetadataColumnTarget.Dataset);
 
     /// <summary>
     /// Rename a metadata column.
@@ -30,6 +36,14 @@ public interface IDataCollectionEntityService : IGenericCollectionService<DataCo
     /// <param name="newKey">The new key</param>
     /// <exception cref="InvalidOperationException">If the column does not exist.</exception>
     /// <returns></returns>
-    Task RenameColumnAsync(Guid collectionId, string oldKey, string newKey);
+    Task RenameColumnAsync(
+        Guid collectionId,
+        string oldKey,
+        string newKey,
+        MetadataColumnTarget target = MetadataColumnTarget.Dataset);
 
+    Task DeleteColumnAsync(
+        Guid collectionId,
+        string key,
+        MetadataColumnTarget target = MetadataColumnTarget.Dataset);
 }

@@ -24,6 +24,8 @@ public class DataSetService(DbContext context, IS3Service s3Service)
         .ThenInclude(f => f.FileType)
         .Include(ds => ds.Files)
         .ThenInclude(f => f.References)
+        .Include(ds => ds.Files)
+        .ThenInclude(f => f.MetadataJsonFields)
     ), IDataSetService
 {
     public async Task<IEnumerable<DataSet>> GetByCollectionAsync(Guid collectionId)
@@ -100,7 +102,7 @@ public class DataSetService(DbContext context, IS3Service s3Service)
 
     public async Task<IDictionary<Guid, List<string>>> GetValidatedMetadates(List<Guid> datasetIds)
     {
-        var result = Context.Set<DataSet>()
+        var result = await Context.Set<DataSet>()
             .Where(ds => datasetIds.Contains(ds.Id))
             .Join(Context.Set<DataCollectionEntity>(),
                 ds => ds.ParentCollectionId, collection => collection.Id,
@@ -116,10 +118,11 @@ public class DataSetService(DbContext context, IS3Service s3Service)
                 tup => tup.fRef.FieldId, rel => rel.MetadataJsonFieldId,
                 (tup, rel)
                     => new { tup.collectionId, tup.ds, tup.col, tup.fRef, schemaId = rel.JsonSchemaEntityId })
+            .Where(tup => tup.col.Target == MetadataColumnTarget.Dataset)
             .Where(tup => tup.col.MetadataKey == tup.fRef.MetadataKey)
             .Where(tup => tup.col.SchemaId == tup.schemaId)
             .GroupBy(tup => tup.ds.Id)
-            .ToDictionary(gr => gr.Key, gr => gr
+            .ToDictionaryAsync(gr => gr.Key, gr => gr
                 .Select(tup => tup.col.MetadataKey)
                 .ToList());
 

@@ -13,6 +13,7 @@ using RDPMS.Core.Infra;
 using RDPMS.Core.Infra.AppInitialization;
 using RDPMS.Core.Infra.Configuration;
 using RDPMS.Core.Persistence;
+using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Model.Repositories;
 using RDPMS.Core.Server.Services;
@@ -136,6 +137,54 @@ internal class Program
         // builder.Services.AddSwaggerGen();
         builder.Services.AddSwaggerGen(options =>
         {
+            options.UseAllOfForInheritance();
+            options.UseOneOfForPolymorphism();
+            options.SelectSubTypesUsing(baseType =>
+            {
+                if (baseType == typeof(DataSetSummaryDTO))
+                {
+                    return
+                    [
+                        typeof(DataSetDetailedDTO),
+                        typeof(DataSetMetadataSummaryDTO),
+                        typeof(DataSetFileMetadataSummaryDTO)
+                    ];
+                }
+
+                if (baseType == typeof(FileSummaryDTO))
+                {
+                    return
+                    [
+                        typeof(FileMetadataSummaryDTO),
+                        typeof(FileDetailedDTO)
+                    ];
+                }
+
+                return [];
+            });
+
+            options.SelectDiscriminatorNameUsing(baseType =>
+            {
+                if (baseType == typeof(DataSetSummaryDTO) || baseType == typeof(FileSummaryDTO))
+                {
+                    return "kind";
+                }
+
+                return null;
+            });
+
+            options.SelectDiscriminatorValueUsing(subType =>
+            {
+                if (subType == typeof(DataSetSummaryDTO)) return "summary";
+                if (subType == typeof(DataSetDetailedDTO)) return "detailed";
+                if (subType == typeof(DataSetMetadataSummaryDTO)) return "metadata-dataset";
+                if (subType == typeof(DataSetFileMetadataSummaryDTO)) return "metadata-file";
+                if (subType == typeof(FileSummaryDTO)) return "summary";
+                if (subType == typeof(FileMetadataSummaryDTO)) return "metadata";
+                if (subType == typeof(FileDetailedDTO)) return "detailed";
+                return null;
+            });
+
             var apiVersions = new List<string> { "v1", "v2" };
             foreach (var description in apiVersions)
             {
@@ -182,8 +231,8 @@ internal class Program
             if (launchConfig.InitDatabase is not LaunchConfiguration.DatabaseInitMode.None)
             {
                 // create and seed database
-                var ctx = app.Services.GetService<DbContext>()!;
-                await ctx.Database.EnsureCreatedAsync();
+                using var scope = app.Services.CreateScope();
+                var ctx = scope.ServiceProvider.GetRequiredService<DbContext>();
                 await ctx.Database.MigrateAsync();
                 await ctx.SaveChangesAsync();
             }
@@ -233,11 +282,11 @@ internal class Program
                 var ctx = new RDPMSPersistenceContext(contextLogger, launchConfig.DatabaseConfiguration, launchConfig);
 
                 programLogger.LogInformation("Initializing database ...");
-                await ctx.Database.EnsureCreatedAsync();
+                // await ctx.Database.EnsureCreatedAsync();
 
                 // let's see what happens if we try to migrate the database :)
-                // await ctx.Database.MigrateAsync();
-                // await ctx.SaveChangesAsync();
+                await ctx.Database.MigrateAsync();
+                await ctx.SaveChangesAsync();
 
                 var globalProject = await ctx.Projects.FindAsync(RDPMSConstants.GlobalProjectId);
                 if (globalProject is null)

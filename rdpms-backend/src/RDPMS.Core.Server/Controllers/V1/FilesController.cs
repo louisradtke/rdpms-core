@@ -1,7 +1,9 @@
+using System.Text;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using RDPMS.Core.Infra.Exceptions;
+using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
@@ -16,6 +18,8 @@ namespace RDPMS.Core.Server.Controllers.V1;
 public class FilesController(
     IFileService fileService,
     IContentTypeService typeService,
+    IMetadataService metadataService,
+    IExportMapper<MetadataJsonField, MetaDateDTO> metadataMapper,
     FileSummaryDTOMapper fileMapper,
     IExportMapper<FileStorageReference, FileStorageReferenceSummaryDTO> referenceMapper,
     FileCreateRequestDTOMapper dfCreateReqMapper,
@@ -23,77 +27,96 @@ public class FilesController(
     ILogger<FilesController> logger) : ControllerBase
 {
     /// <summary>
-    /// Get summaries of all files.
+    /// Get files.
     /// </summary>
     /// <returns></returns>
     [HttpGet("files")]
     [ProducesResponseType<IEnumerable<FileSummaryDTO>>(StatusCodes.Status200OK)]
     [Produces("application/json")]
-    public async Task<ActionResult<IEnumerable<FileSummaryDTO>>> Get()
+    public async Task<ActionResult<IEnumerable<FileSummaryDTO>>> Get(
+        [FromQuery] FileListViewMode view = FileListViewMode.Summary)
     {
-        var list = (await fileService.GetAllAsync()).Select(fileMapper.Export).ToList();
-        foreach (var file in list)
+        var files = (await fileService.GetAllAsync()).ToList();
+        if (view == FileListViewMode.Summary)
         {
-            if (file.Id == null) throw new IllegalStateException("File has null id");
-
-            file.DownloadURI = fileService.GetContentApiUri(file.Id.Value, HttpContext);
+            var list = files.Select(fileMapper.Export).ToList();
+            foreach (var file in list)
+            {
+                if (file.Id == null) throw new IllegalStateException("File has null id");
+                file.DownloadURI = fileService.GetContentApiUri(file.Id.Value, HttpContext);
+            }
+            return Ok(list);
         }
-        return Ok(list);
+
+        var validatedMetaDates = await fileService.GetValidatedMetadates(
+            files.Select(f => f.Id).ToList());
+        var filesWithMetadata = files.Select(file =>
+        {
+            validatedMetaDates.TryGetValue(file.Id, out var list);
+            var dto = FileMetadataSummaryDTO.Create(fileMapper.Export(file));
+            dto.DownloadURI = fileService.GetContentApiUri(file.Id, HttpContext);
+            dto.MetaDates = file.MetadataJsonFields
+                .Select(f => new AssignedMetaDateDTO
+                {
+                    MetadataKey = f.MetadataKey,
+                    MetadataId = f.FieldId,
+                    CollectionSchemaVerified = list?.Contains(f.MetadataKey) ?? false
+                })
+                .ToList();
+            return dto;
+        }).ToList();
+
+        return Ok(filesWithMetadata);
     }
 
-    // /// <summary>
-    // /// Request an upload for a new file.
-    // /// </summary>
-    // /// <param name="requestDto"></param>
-    // /// <returns></returns>
-    // [HttpPost("files")]
-    // [ProducesResponseType<FileCreateResponseDTO>(StatusCodes.Status201Created)]
-    // [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
-    // public async Task<ActionResult> PostNewFile([FromBody] FileCreateRequestDTO requestDto)
-    // {
-    //     if (requestDto.ContentTypeId == null)
-    //     {
-    //         return BadRequest(new ErrorMessageDTO { Message = "ContentTypeId is required." });
-    //     }
-    //     
-    //     if (requestDto.AssociatedDataSetId == null)
-    //     {
-    //         return BadRequest(new ErrorMessageDTO { Message = "AssociatedDataSetId is required." });
-    //     }
-    //
-    //     if (!await typeService.CheckForIdAsync(requestDto.ContentTypeId.Value))
-    //     {
-    //         return BadRequest(new ErrorMessageDTO { Message = "there is no content type for the given id." });
-    //     }
-    //
-    //     var type = await typeService.GetByIdAsync(requestDto.ContentTypeId.Value);
-    //     var request = dfCreateReqMapper.Import(requestDto, type);
-    //     var response = await fileService.RequestFileUploadAsync(request);
-    //     var target = FileCreateResponseDTOMapper.ToDTO(response);
-    //     
-    //     var resourceUri = 
-    //         Url.Action(nameof(Get), null, new {id = target.FileId}, Request.Scheme);
-    //
-    //     return Created(resourceUri, target);
-    // }
+    private async Task<FileDetailedDTO> QueryFileDetailedDTO(Guid id)
+    {
+        var file = await fileService.GetByIdAsync(id);
+        var fileDto = new FileDetailedDTO
+        {
+            Id = file.Id,
+            Name = file.Name,
+            ContentType = fileMapper.Export(file).ContentType,
+            Size = file.SizeBytes,
+            CreatedStampUTC = file.CreatedStamp,
+            DeletedStampUTC = file.DeletedStamp,
+            BeginStampUTC = file.BeginStamp,
+            EndStampUTC = file.EndStamp,
+            IsTimeSeries = file.IsTimeSeries,
+            DeletionState = (DeletionStateDTO)(int)file.DeletionState,
+            DownloadURI = fileService.GetContentApiUri(id, HttpContext),
+            References = file.References.Select(referenceMapper.Export).ToList()
+        };
+
+        var validatedMetaDates = await fileService.GetValidatedMetadates([file.Id]);
+        validatedMetaDates.TryGetValue(file.Id, out var list);
+
+        fileDto.MetaDates = file.MetadataJsonFields
+            .Select(f => new AssignedMetaDateDTO
+            {
+                MetadataKey = f.MetadataKey,
+                MetadataId = f.FieldId,
+                CollectionSchemaVerified = list?.Contains(f.MetadataKey) ?? false
+            })
+            .ToList();
+
+        return fileDto;
+    }
 
     /// <summary>
-    /// Get summary of a single file.
+    /// Get details of a single file.
     /// </summary>
     /// <param name="id">Id of the file.</param>
     /// <returns></returns>
     [HttpGet("files/{id:guid}")]
-    [ProducesResponseType<FileSummaryDTO>(StatusCodes.Status200OK)]
+    [ProducesResponseType<FileDetailedDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces("application/json")]
-    public async Task<ActionResult<FileSummaryDTO>> Get(Guid id)
+    public async Task<ActionResult<FileDetailedDTO>> GetById(Guid id)
     {
         try
         {
-            var file = await fileService.GetByIdAsync(id);
-            var fileDto = fileMapper.Export(file);
-            fileDto.DownloadURI = fileService.GetContentApiUri(id, HttpContext);
-            return Ok(fileDto);
+            return Ok(await QueryFileDetailedDTO(id));
         }
         catch (InvalidOperationException e)
         {
@@ -179,5 +202,125 @@ public class FilesController(
 
         var refs = await fileService.GetStorageReferencesAsync(storeGuid, storageType);
         return Ok(refs.Select(referenceMapper.Export));
+    }
+
+    /// <summary>
+    /// Adds or sets meta documents for a file.
+    /// </summary>
+    /// <param name="id">ID of the file</param>
+    /// <param name="key">Case-insensitive key of the meta date on the file</param>
+    /// <param name="value">JSON meta document</param>
+    /// <returns>HTTP 200 if meta date was replaced successfully (key refers to existing date).
+    /// HTTP 201, if a new meta date was created.
+    /// HTTP 400, if an input-related problem occurs.</returns>
+    [HttpPut("files/{id:guid}/metadata/{key}")]
+    [ProducesResponseType<MetaDateDTO>(StatusCodes.Status200OK)]
+    [ProducesResponseType<MetaDateDTO>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
+    [Consumes("application/octet-stream", "application/json")]
+    public async Task<ActionResult> AssignMetadate([FromRoute] Guid id, [FromRoute] string key,
+        [FromBody] byte[] value)
+    {
+        DataFile file;
+        try
+        {
+            file = await fileService.GetByIdAsync(id);
+        }
+        catch (InvalidOperationException)
+        {
+            return NotFound(new ErrorMessageDTO { Message = "No file with that id." });
+        }
+
+        if (!SlugUtil.IsValidSlug(key)) return BadRequest(new ErrorMessageDTO { Message = "Invalid slug." });
+
+        var contentType = await typeService.GetByMimeType(
+            "application/json",
+            file.ParentDataSet?.ParentCollection?.ParentId
+        );
+
+        var valueStr = Encoding.UTF8.GetString(value);
+        var field = await metadataService.MakeFieldFromValue(valueStr, contentType);
+        var modified = file.MetadataJsonFields.Any(f =>
+            f.MetadataKey.Equals(key, StringComparison.OrdinalIgnoreCase));
+
+        await metadataService.AssignMetadate(file, key, field);
+
+        var returnDto = metadataMapper.Export(await metadataService.GetByIdAsync(field.Id));
+
+        if (!modified) return CreatedAtAction(nameof(MetaDataController.GetMetadate), "MetaData",
+            new { field.Id }, returnDto);
+        return Ok(returnDto);
+    }
+
+    /// <summary>
+    /// Rename key for metadate relation.
+    /// </summary>
+    /// <param name="id">The file ID.</param>
+    /// <param name="key">The old key.</param>
+    /// <param name="newKey">The new key.</param>
+    /// <returns></returns>
+    [HttpPost("files/{id:guid}/metadata/{key}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> RenameMetadate([FromRoute] Guid id, [FromRoute] string key,
+        [FromQuery] string newKey)
+    {
+        DataFile file;
+        try
+        {
+            file = await fileService.GetByIdAsync(id);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new ErrorMessageDTO { Message = ex.Message });
+        }
+
+        if (!SlugUtil.IsValidSlug(key)) return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for key." });
+        if (!SlugUtil.IsValidSlug(newKey))
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for newName." });
+        }
+
+        var normalizedKey = key.ToLowerInvariant();
+        var normalizedNewKey = newKey.ToLowerInvariant();
+        var field = file.MetadataJsonFields
+            .SingleOrDefault(f =>
+                f.MetadataKey.Equals(normalizedKey, StringComparison.OrdinalIgnoreCase));
+        if (field == null) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
+
+        field.MetadataKey = normalizedNewKey;
+        await fileService.UpdateAsync(file);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Removes metadate relation with resp. key.
+    /// </summary>
+    /// <param name="id">ID of the file.</param>
+    /// <param name="key">Key to remove the relation for</param>
+    /// <returns></returns>
+    [HttpDelete("files/{id:guid}/metadata/{key}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> RemoveMetadate([FromRoute] Guid id, [FromRoute] string key)
+    {
+        DataFile file;
+        try
+        {
+            file = await fileService.GetByIdAsync(id);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = ex.Message });
+        }
+
+        if (!SlugUtil.IsValidSlug(key)) return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for key." });
+
+        var removed = file.MetadataJsonFields.RemoveAll(f =>
+            f.MetadataKey.Equals(key, StringComparison.OrdinalIgnoreCase));
+        if (removed == 0) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
+        await fileService.UpdateAsync(file);
+        return Ok();
     }
 }

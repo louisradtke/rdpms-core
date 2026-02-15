@@ -21,6 +21,7 @@ public class DataSetsController(
     IDataCollectionEntityService collectionService,
     DataSetSummaryDTOMapper dataSetSummaryMapper,
     DataSetDetailedDTOMapper dataSetDetailedMapper,
+    FileSummaryDTOMapper fileSummaryMapper,
     IMetadataService metadataService,
     IContentTypeService contentTypeService,
     IImportMapper<DataFile, S3FileCreateRequestDTO, ContentType> s3dfCreateReqMapper,
@@ -40,7 +41,9 @@ public class DataSetsController(
     [ProducesResponseType<IEnumerable<DataSetSummaryDTO>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<DataSetSummaryDTO>>> Get(
         [FromQuery] Guid? collectionId = null,
-        [FromQuery] string? deleted = null
+        [FromQuery] string? deleted = null,
+        [FromQuery] DataSetListViewMode view = DataSetListViewMode.Summary,
+        [FromQuery] MetadataColumnTarget metadataTarget = MetadataColumnTarget.Dataset
     )
     {
         var datasetsQuery = dataSetService.Query();
@@ -76,27 +79,68 @@ public class DataSetsController(
         }
 
         var datasets = await datasetsQuery.ToListAsync();
-        var dtos = datasets
-            .Select(dataSetSummaryMapper.Export)
-            .ToList();
-
-        var validatedMetaDates = await dataSetService.GetValidatedMetadates(
-                datasets.Select(ds => ds.Id).ToList());
-
-        foreach (var (dto, domain) in dtos.Zip(datasets))
+        if (view == DataSetListViewMode.Summary)
         {
-            List<string>? list = null;
-            validatedMetaDates?.TryGetValue(domain.Id, out list);
-
-            dto.MetaDates = domain.MetadataJsonFields.Select(f => new AssignedMetaDateDTO
-            {
-                MetadataKey = f.MetadataKey,
-                MetadataId = f.FieldId,
-                CollectionSchemaVerified = list?.Contains(f.MetadataKey) ?? false
-            })
-            .ToList();
+            var summaryDtos = datasets
+                .Select(dataSetSummaryMapper.Export)
+                .ToList();
+            return Ok(summaryDtos);
         }
-        return Ok(dtos);
+
+        if (metadataTarget == MetadataColumnTarget.File)
+        {
+            var fileIds = datasets
+                .SelectMany(ds => ds.Files.Select(f => f.Id))
+                .Distinct()
+                .ToList();
+            var validatedDataFileMetaDates = fileIds.Count > 0
+                ? await fileService.GetValidatedMetadates(fileIds)
+                : new Dictionary<Guid, List<string>>();
+
+            var fileModeDtos = datasets.Select<DataSet, DataSetSummaryDTO>(domain =>
+            {
+                var dto = DataSetFileMetadataSummaryDTO.Create(dataSetSummaryMapper.Export(domain));
+                dto.Files = domain.Files.Select(file =>
+                {
+                    validatedDataFileMetaDates.TryGetValue(file.Id, out var list);
+
+                    var fileDto = FileMetadataSummaryDTO.Create(fileSummaryMapper.Export(file));
+                    fileDto.DownloadURI = fileService.GetContentApiUri(file.Id, HttpContext);
+                    fileDto.MetaDates = file.MetadataJsonFields
+                        .Select(f => new AssignedMetaDateDTO
+                        {
+                            MetadataKey = f.MetadataKey,
+                            MetadataId = f.FieldId,
+                            CollectionSchemaVerified = list?.Contains(f.MetadataKey) ?? false
+                        })
+                        .ToList();
+                    return fileDto;
+                }).ToList();
+                return dto;
+            }).ToList();
+
+            return Ok(fileModeDtos);
+        }
+
+        var validatedDataSetMetaDates = await dataSetService.GetValidatedMetadates(
+            datasets.Select(ds => ds.Id).ToList());
+        var datasetModeDtos = datasets.Select<DataSet, DataSetSummaryDTO>(domain =>
+        {
+            validatedDataSetMetaDates.TryGetValue(domain.Id, out var list);
+
+            var dto = DataSetMetadataSummaryDTO.Create(dataSetSummaryMapper.Export(domain));
+            dto.MetaDates = domain.MetadataJsonFields
+                .Select(f => new AssignedMetaDateDTO
+                {
+                    MetadataKey = f.MetadataKey,
+                    MetadataId = f.FieldId,
+                    CollectionSchemaVerified = list?.Contains(f.MetadataKey) ?? false
+                })
+                .ToList();
+            return dto;
+        }).ToList();
+
+        return Ok(datasetModeDtos);
     }
 
     [HttpGet("{id:guid}")]
@@ -113,25 +157,39 @@ public class DataSetsController(
         var domainItem = await dataSetService.GetByIdAsync(id);
         var dto = dataSetDetailedMapper.Export(domainItem);
 
+        var fileIds = domainItem.Files.Select(f => f.Id).Distinct().ToList();
+        var validatedFileMetaDates = fileIds.Count > 0
+            ? await fileService.GetValidatedMetadates(fileIds)
+            : new Dictionary<Guid, List<string>>();
+
         if (dto.Files is not null)
         {
             foreach (var file in dto.Files)
             {
                 file.DownloadURI = fileService.GetContentApiUri(file.Id!.Value, HttpContext);
+                var fileDomain = domainItem.Files.Single(f => f.Id == file.Id!.Value);
+                validatedFileMetaDates.TryGetValue(fileDomain.Id, out var fileMetadateList);
+                file.MetaDates = fileDomain.MetadataJsonFields
+                    .Select(f => new AssignedMetaDateDTO
+                    {
+                        MetadataKey = f.MetadataKey,
+                        MetadataId = f.FieldId,
+                        CollectionSchemaVerified = fileMetadateList?.Contains(f.MetadataKey) ?? false
+                    })
+                    .ToList();
             }
         }
 
         var validatedMetaDates = await dataSetService
             .GetValidatedMetadates([domainItem.Id]);
 
-        List<string>? list = null;
-        validatedMetaDates?.TryGetValue(domainItem.Id, out list);
-
-        dto.MetaDates = domainItem.MetadataJsonFields.Select(f => new AssignedMetaDateDTO
+        validatedMetaDates.TryGetValue(domainItem.Id, out var datasetMetadataList);
+        dto.MetaDates = domainItem.MetadataJsonFields
+            .Select(f => new AssignedMetaDateDTO
             {
                 MetadataKey = f.MetadataKey,
                 MetadataId = f.FieldId,
-                CollectionSchemaVerified = list?.Contains(f.MetadataKey) ?? false
+                CollectionSchemaVerified = datasetMetadataList?.Contains(f.MetadataKey) ?? false
             })
             .ToList();
         return dto;

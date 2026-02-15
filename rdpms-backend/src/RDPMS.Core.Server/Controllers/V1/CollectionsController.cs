@@ -109,13 +109,15 @@ public class CollectionsController(
         await dataCollectionEntityService.AddAsync(cMapper.Import(dto, store, project));
         return Ok();
     }
-    
+
     [HttpPut("{id:guid}/metadata/{key}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> AddMetaDataColumn([FromRoute] Guid id, [FromRoute] string key,
-        [FromQuery] Guid schemaId, [FromQuery] Guid? defaultMetadataId = null)
+    public async Task<ActionResult> UpsertMetadataColumn([FromRoute] Guid id, [FromRoute] string key,
+        [FromQuery] Guid schemaId,
+        [FromQuery] Guid? defaultMetadataId = null,
+        [FromQuery] MetadataColumnTarget target = MetadataColumnTarget.Dataset)
     {
         var collectionExists = await dataCollectionEntityService.CheckForIdAsync(id);
         if (!collectionExists)
@@ -124,25 +126,46 @@ public class CollectionsController(
         }
 
         var created = await dataCollectionEntityService.UpsertMetaDataColumnAsync(
-            id, key, schemaId, defaultMetadataId);
+            id, key, schemaId, defaultMetadataId, target);
 
         return created
             ? CreatedAtAction(nameof(GetById), new { id }, id)
             : Ok();
     }
 
+    // TODO: Docstring, DELETE...
     [HttpPost("{id:guid}/metadata/{key}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> RenameMetadataColumn([FromRoute] Guid id, [FromRoute] string key,
-        [FromQuery] string newKey)
+        [FromQuery] string newKey,
+        [FromQuery] MetadataColumnTarget target = MetadataColumnTarget.Dataset)
     {
         try
         {
-            await dataCollectionEntityService.RenameColumnAsync(id, key, newKey);
+            await dataCollectionEntityService.RenameColumnAsync(id, key, newKey, target);
             return Ok();
         }
         catch (InvalidOperationException ex)
+        {
+            return NotFound(new ErrorMessageDTO { Message = "Tuple of id and key not found." });
+        }
+    }
+
+    [HttpDelete("{id:guid}/metadata/{key}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> DeleteMetadataColumn(
+        [FromRoute] Guid id,
+        [FromRoute] string key,
+        [FromQuery] MetadataColumnTarget target = MetadataColumnTarget.Dataset)
+    {
+        try
+        {
+            await dataCollectionEntityService.DeleteColumnAsync(id, key, target);
+            return Ok();
+        }
+        catch (InvalidOperationException e)
         {
             return NotFound(new ErrorMessageDTO { Message = "Tuple of id and key not found." });
         }
