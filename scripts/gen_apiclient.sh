@@ -60,6 +60,8 @@ generate_cli() {
         -o /local/cli \
         "--additional-properties=packageName=$CLI_PYTHON_PACKAGE_NAME"
 
+  python3 "$ROOT_DIR_PATH/scripts/fix_openapi_python_client.py" "$TMP_DIR/cli/rdpms_cli/openapi_client"
+
   rm -rf "$CLI_TARGET_DIR_PATH"
   cp -r "$TMP_DIR/cli/rdpms_cli/openapi_client" "$CLI_TARGET_DIR_PATH"
 }

@@ -146,12 +146,16 @@ def cmd_dataset_list(args):
         print('no datasets found')
         return
     
+    # OpenAPI python generator may return oneOf wrapper objects.
+    # For dataset rows we need the resolved DTO on `actual_instance`.
+    datasets = [getattr(ds, 'actual_instance', ds) for ds in ds_list]
+
     if args.collection:
         header = ["dataset name", "file count", "id"]
-        table = [[ds.name, ds.file_count, ds.id] for ds in ds_list]
+        table = [[ds.name, ds.file_count, ds.id] for ds in datasets]
     else:
         header = ["dataset name", "file count", "id", "collection id"]
-        table = [[ds.name, ds.file_count, ds.id, ds.collection_id] for ds in ds_list]
+        table = [[ds.name, ds.file_count, ds.id, ds.collection_id] for ds in datasets]
 
     print(tabulate(headers=header, tabular_data=table))
 

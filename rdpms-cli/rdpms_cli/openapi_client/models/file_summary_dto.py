@@ -181,7 +181,7 @@ class FileSummaryDTO(BaseModel):
         if object_type ==  'FileMetadataSummaryDTO':
             return import_module("rdpms_cli.openapi_client.models.file_metadata_summary_dto").FileMetadataSummaryDTO.from_dict(obj)
         if object_type ==  'FileSummaryDTO':
-            return import_module("rdpms_cli.openapi_client.models.file_summary_dto").FileSummaryDTO.from_dict(obj)
+            return cls.model_validate(obj)
 
         raise ValueError("FileSummaryDTO failed to lookup discriminator value from " +
                             json.dumps(obj) + ". Discriminator property name: " + cls.__discriminator_property_name +
