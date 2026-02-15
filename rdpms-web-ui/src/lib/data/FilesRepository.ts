@@ -1,4 +1,4 @@
-import { FilesApi, type FileSummaryDTO, type FileCreateRequestDTO, type FileCreateResponseDTO, Configuration } from '$lib/api_client';
+import { FilesApi, type FileSummaryDTO, Configuration } from '$lib/api_client';
 
 export class FilesRepository {
     private readonly ready: Promise<void>;
@@ -32,10 +32,5 @@ export class FilesRepository {
     public async getById(id: string): Promise<FileSummaryDTO> {
         const api = await this.ensureReady();
         return api.apiV1DataFilesIdGet({ id });
-    }
-
-    public async create(request: FileCreateRequestDTO): Promise<FileCreateResponseDTO> {
-        const api = await this.ensureReady();
-        return api.apiV1DataFilesPost({ fileCreateRequestDTO: request });
     }
 }

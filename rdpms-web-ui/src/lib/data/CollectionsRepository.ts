@@ -2,7 +2,8 @@ import {
     type ApiV1DataCollectionsGetRequest, type CollectionDetailedDTO,
     CollectionsApi,
     type CollectionSummaryDTO,
-    Configuration
+    Configuration,
+    type MetadataColumnTarget
 } from '$lib/api_client';
 import {isGuid} from "$lib/util/url-helper";
 
@@ -74,7 +75,7 @@ export class CollectionsRepository {
     public async upsertMetadataColumn(
         collectionId: string,
         key: string,
-        options: { schemaId: string; defaultMetadataId?: string }
+        options: { schemaId: string; defaultMetadataId?: string; target?: MetadataColumnTarget }
     ): Promise<void> {
         const api = await this.ensureReady();
         return api.apiV1DataCollectionsIdMetadataKeyPut({
@@ -82,6 +83,35 @@ export class CollectionsRepository {
             key,
             schemaId: options.schemaId,
             defaultMetadataId: options?.defaultMetadataId,
+            target: options?.target,
+        });
+    }
+
+    public async renameMetadataColumn(
+        collectionId: string,
+        key: string,
+        newKey: string,
+        target?: MetadataColumnTarget
+    ): Promise<void> {
+        const api = await this.ensureReady();
+        return api.apiV1DataCollectionsIdMetadataKeyPost({
+            id: collectionId,
+            key,
+            newKey,
+            target
+        });
+    }
+
+    public async deleteMetadataColumn(
+        collectionId: string,
+        key: string,
+        target?: MetadataColumnTarget
+    ): Promise<void> {
+        const api = await this.ensureReady();
+        return api.apiV1DataCollectionsIdMetadataKeyDelete({
+            id: collectionId,
+            key,
+            target
         });
     }
 }

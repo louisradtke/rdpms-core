@@ -1,7 +1,8 @@
 <script lang="ts">
-    let { showMetaTable, onChange } = $props<{
-        showMetaTable: boolean;
-        onChange: (view: 'basic' | 'meta') => void;
+    type CollectionView = 'basic' | 'dataset-metadata' | 'file-metadata';
+    let { activeView, onChange } = $props<{
+        activeView: CollectionView;
+        onChange: (view: CollectionView) => void;
     }>();
 </script>
 
@@ -9,26 +10,38 @@
     <span class="text-sm text-gray-600">View:</span>
     <button
             class="rounded border px-3 py-1 text-sm"
-            class:bg-blue-600={!showMetaTable}
-            class:text-white={!showMetaTable}
-            class:border-blue-600={!showMetaTable}
-            class:bg-white={showMetaTable}
-            class:text-gray-700={showMetaTable}
+            class:bg-blue-600={activeView === 'basic'}
+            class:text-white={activeView === 'basic'}
+            class:border-blue-600={activeView === 'basic'}
+            class:bg-white={activeView !== 'basic'}
+            class:text-gray-700={activeView !== 'basic'}
             onclick={() => onChange('basic')}
-            aria-pressed={!showMetaTable}
+            aria-pressed={activeView === 'basic'}
     >
         Basic
     </button>
     <button
             class="rounded border px-3 py-1 text-sm"
-            class:bg-blue-600={showMetaTable}
-            class:text-white={showMetaTable}
-            class:border-blue-600={showMetaTable}
-            class:bg-white={!showMetaTable}
-            class:text-gray-700={!showMetaTable}
-            onclick={() => onChange('meta')}
-            aria-pressed={showMetaTable}
+            class:bg-blue-600={activeView === 'dataset-metadata'}
+            class:text-white={activeView === 'dataset-metadata'}
+            class:border-blue-600={activeView === 'dataset-metadata'}
+            class:bg-white={activeView !== 'dataset-metadata'}
+            class:text-gray-700={activeView !== 'dataset-metadata'}
+            onclick={() => onChange('dataset-metadata')}
+            aria-pressed={activeView === 'dataset-metadata'}
     >
-        Metadata coverage
+        Dataset Metadata
+    </button>
+    <button
+            class="rounded border px-3 py-1 text-sm"
+            class:bg-blue-600={activeView === 'file-metadata'}
+            class:text-white={activeView === 'file-metadata'}
+            class:border-blue-600={activeView === 'file-metadata'}
+            class:bg-white={activeView !== 'file-metadata'}
+            class:text-gray-700={activeView !== 'file-metadata'}
+            onclick={() => onChange('file-metadata')}
+            aria-pressed={activeView === 'file-metadata'}
+    >
+        File Metadata
     </button>
 </div>

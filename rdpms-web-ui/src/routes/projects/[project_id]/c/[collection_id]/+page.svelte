@@ -47,11 +47,30 @@
         return repo.getCollectionById(selectedCollectionId);
     });
 
+    type CollectionView = 'basic' | 'dataset-metadata' | 'file-metadata';
+    const viewParam = $derived((page.url.searchParams.get('view') ?? 'basic').toLowerCase());
+    const activeView = $derived.by((): CollectionView => {
+        if (viewParam === 'dataset-metadata' || viewParam === 'meta' || viewParam === 'metadata') {
+            return 'dataset-metadata';
+        }
+        if (viewParam === 'file-metadata' || viewParam === 'meta-files') {
+            return 'file-metadata';
+        }
+        return 'basic';
+    });
+
     let datasetsReq = $derived.by(async () => {
         void reloadTick; // make $derived.by read it as dependency
         const repo = new DataSetsRepository(getOrFetchConfig().then(toApiConfig));
         let c = await collectionReq;
-        return await repo.listByCollection(c.id ?? '');
+        const view = activeView;
+        if (view === 'dataset-metadata') {
+            return await repo.listByCollection(c.id ?? '', { view: 'metadata', metadataTarget: 'dataset' });
+        }
+        if (view === 'file-metadata') {
+            return await repo.listByCollection(c.id ?? '', { view: 'metadata', metadataTarget: 'file' });
+        }
+        return await repo.listByCollection(c.id ?? '', { view: 'summary' });
     });
 
     let collectionAndDatasets = $derived.by(async () => {
@@ -61,10 +80,7 @@
 
     let title = $derived.by(() => (collectionSlug ? `${collectionSlug} - RDPMS` : 'RDPMS'));
 
-    const viewParam = $derived((page.url.searchParams.get('view') ?? 'basic').toLowerCase());
-    const showMetaTable = $derived(viewParam === 'meta' || viewParam === 'metadata');
-
-    const setViewParam = async (view: 'basic' | 'meta') => {
+    const setViewParam = async (view: CollectionView) => {
         const url = new URL(page.url);
         url.searchParams.set('view', view);
         await goto(url, { replaceState: true, keepFocus: true, noScroll: true });
@@ -126,7 +142,7 @@
                     columns={data.collection.metaDateColumns ?? []}
                     projectSlug={projectSlug}
                     collectionSlug={collectionSlug}
-                    showMetaTable={showMetaTable}
+                    activeView={activeView}
                     onViewChange={setViewParam}
                     onDelete={onDatasetDeleted}
                 />

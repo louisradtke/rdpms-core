@@ -1,4 +1,11 @@
-import {DataSetsApi, type DataSetSummaryDTO, Configuration, type DataSetDetailedDTO} from '$lib/api_client';
+import {
+    DataSetListViewMode,
+    DataSetsApi,
+    type DataSetSummaryDTO,
+    Configuration,
+    type DataSetDetailedDTO,
+    MetadataColumnTarget
+} from '$lib/api_client';
 
 export class DataSetsRepository {
     private readonly ready: Promise<void>;
@@ -31,9 +38,22 @@ export class DataSetsRepository {
         return api.apiV1DataDatasetsGet();
     }
 
-    public async listByCollection(collectionId: string): Promise<DataSetSummaryDTO[]> {
+    public async listByCollection(
+        collectionId: string,
+        options?: {
+            view?: 'summary' | 'metadata';
+            metadataTarget?: 'dataset' | 'file';
+        }
+    ): Promise<DataSetSummaryDTO[]> {
         const api = await this.ensureReady();
-        return api.apiV1DataDatasetsGet({ collectionId });
+        return api.apiV1DataDatasetsGet({
+            collectionId,
+            view: options?.view === 'metadata' ? DataSetListViewMode.Metadata : DataSetListViewMode.Summary,
+            metadataTarget:
+                options?.metadataTarget === 'file'
+                    ? MetadataColumnTarget.File
+                    : MetadataColumnTarget.Dataset
+        });
     }
 
     public async getById(id: string): Promise<DataSetDetailedDTO> {
@@ -41,7 +61,7 @@ export class DataSetsRepository {
         return api.apiV1DataDatasetsIdGet({ id });
     }
 
-    public async create(dto: Partial<DataSetSummaryDTO>): Promise<string> {
+    public async create(dto: Partial<DataSetSummaryDTO>): Promise<DataSetDetailedDTO> {
         const api = await this.ensureReady();
         return api.apiV1DataDatasetsPost({ dataSetSummaryDTO: dto as DataSetSummaryDTO });
     }

@@ -1,5 +1,6 @@
 <script lang="ts">
     import { page } from '$app/state';
+    import { MetadataColumnTarget, type MetadataColumnTarget as MetadataColumnTargetType } from '$lib/api_client';
     import LoadingCircle from '$lib/layout/LoadingCircle.svelte';
     import { CollectionsRepository } from '$lib/data/CollectionsRepository';
     import { SchemasRepository } from '$lib/data/SchemasRepository';
@@ -14,6 +15,7 @@
     let schemaIdInput = $state('');
     let newSchemaIdInput = $state('');
     let defaultMetadataIdInput = $state('');
+    let targetInput = $state<MetadataColumnTargetType>(MetadataColumnTarget.Dataset);
     let newSchemaJsonInput = $state('');
 
     let savePending = $state(false);
@@ -45,15 +47,40 @@
     function fillFormFromExisting(
         metadataKey?: string | null,
         schemaId?: string | null,
-        defaultFieldId?: string | null
+        defaultFieldId?: string | null,
+        target?: MetadataColumnTargetType
     ): void {
         keyInput = metadataKey ?? '';
         schemaIdInput = schemaId ?? '';
         newSchemaIdInput = '';
         defaultMetadataIdInput = defaultFieldId ?? '';
+        targetInput = target ?? MetadataColumnTarget.Dataset;
         newSchemaJsonInput = '';
         saveSuccess = '';
         saveError = '';
+    }
+
+    async function renameColumn(
+        collectionId: string,
+        oldKey: string,
+        target: MetadataColumnTargetType
+    ): Promise<void> {
+        const newKey = window.prompt(`Rename metadata key "${oldKey}" to:`, oldKey)?.trim();
+        if (!newKey || newKey === oldKey) return;
+
+        savePending = true;
+        saveError = '';
+        saveSuccess = '';
+        try {
+            const collectionsRepo = new CollectionsRepository(getOrFetchConfig().then(toApiConfig));
+            await collectionsRepo.renameMetadataColumn(collectionId, oldKey, newKey, target);
+            saveSuccess = `Renamed key "${oldKey}" to "${newKey}".`;
+            reloadTick += 1;
+        } catch (err) {
+            saveError = err instanceof Error ? err.message : 'Failed to rename metadata key.';
+        } finally {
+            savePending = false;
+        }
     }
 
     async function submitColumn(collectionId: string): Promise<void> {
@@ -102,9 +129,10 @@
             await collectionsRepo.upsertMetadataColumn(collectionId, key, {
                 schemaId: selectedSchemaDbId,
                 defaultMetadataId: defaultMetadataIdInput.trim() || undefined,
+                target: targetInput,
             });
 
-            saveSuccess = `Schema binding for key "${key}" has been saved.`;
+            saveSuccess = `Schema binding for key "${key}" (${targetInput}) has been saved.`;
             schemaIdInput = selectedSchemaDbId;
             newSchemaIdInput = '';
             newSchemaJsonInput = '';
@@ -151,6 +179,14 @@
                         placeholder="e.g. viz"
                         bind:value={keyInput}
                     />
+                </label>
+
+                <label class="flex flex-col gap-1">
+                    <span class="text-sm font-medium">Target</span>
+                    <select class="rounded-md border border-gray-300 px-3 py-2" bind:value={targetInput}>
+                        <option value={MetadataColumnTarget.Dataset}>Dataset</option>
+                        <option value={MetadataColumnTarget.File}>File</option>
+                    </select>
                 </label>
 
                 <div class="flex min-w-0 items-end gap-2">
@@ -231,6 +267,7 @@
                             <thead>
                                 <tr class="border-b border-gray-200 text-left">
                                     <th class="py-2 pr-4">Key</th>
+                                    <th class="py-2 pr-4">Target</th>
                                     <th class="py-2 pr-4">Schema</th>
                                     <th class="py-2 pr-4">Default</th>
                                     <th class="py-2">Action</th>
@@ -240,14 +277,22 @@
                                 {#each data.collection.metaDateColumns ?? [] as column, idx (`${column.metadataKey ?? column.schema?.id ?? 'none'}-${idx}`)}
                                     <tr class="border-b border-gray-100 align-top">
                                         <td class="py-2 pr-4 font-mono">{column.metadataKey ?? '-'}</td>
+                                        <td class="py-2 pr-4">{column.target ?? MetadataColumnTarget.Dataset}</td>
                                         <td class="py-2 pr-4">{column.schema?.schemaId ?? column.schema?.id ?? '-'}</td>
                                         <td class="py-2 pr-4 font-mono">{column.defaultFieldId ?? '-'}</td>
-                                        <td class="py-2">
+                                        <td class="py-2 flex items-center gap-2">
                                             <button
                                                 class="rounded-md border border-gray-300 px-2 py-1 hover:bg-gray-50"
-                                                onclick={() => fillFormFromExisting(column.metadataKey, column.schema?.id, column.defaultFieldId)}
+                                                onclick={() => fillFormFromExisting(column.metadataKey, column.schema?.id, column.defaultFieldId, column.target)}
                                             >
                                                 Edit in form
+                                            </button>
+                                            <button
+                                                class="rounded-md border border-gray-300 px-2 py-1 hover:bg-gray-50 disabled:opacity-60"
+                                                disabled={savePending || !column.metadataKey}
+                                                onclick={() => renameColumn(data.collection.id ?? '', column.metadataKey ?? '', column.target ?? MetadataColumnTarget.Dataset)}
+                                            >
+                                                Rename key
                                             </button>
                                         </td>
                                     </tr>
