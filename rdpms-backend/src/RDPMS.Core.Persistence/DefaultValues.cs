@@ -181,6 +181,46 @@ public static class DefaultValues
         return BuildDataCollectionEntity(s3Store, projectId, mcapType, imageType, pdfType);
     }
 
+    public static DataCollectionEntity GetIngressDataCollection(DbContext ctx)
+    {
+        return BuildSeedCollection(
+            "Ingress Data",
+            "ingress-data",
+            RDPMSConstants.IngressDataCollectionId,
+            ctx.Set<DataStore>().Find(RDPMSConstants.DummyS3StoreId),
+            RDPMSConstants.GlobalProjectId);
+    }
+
+    public static async Task<DataCollectionEntity> GetIngressDataCollectionAsync(DbContext ctx, CancellationToken token)
+    {
+        return BuildSeedCollection(
+            "Ingress Data",
+            "ingress-data",
+            RDPMSConstants.IngressDataCollectionId,
+            await ctx.Set<DataStore>().FindAsync([RDPMSConstants.DummyS3StoreId], token),
+            RDPMSConstants.GlobalProjectId);
+    }
+
+    public static DataCollectionEntity GetDataPreviewsCollection(DbContext ctx)
+    {
+        return BuildSeedCollection(
+            "Data Previews",
+            "previews",
+            RDPMSConstants.DataPreviewsCollectionId,
+            ctx.Set<DataStore>().Find(RDPMSConstants.DummyS3StoreId),
+            RDPMSConstants.GlobalProjectId);
+    }
+
+    public static async Task<DataCollectionEntity> GetDataPreviewsCollectionAsync(DbContext ctx, CancellationToken token)
+    {
+        return BuildSeedCollection(
+            "Data Previews",
+            "previews",
+            RDPMSConstants.DataPreviewsCollectionId,
+            await ctx.Set<DataStore>().FindAsync([RDPMSConstants.DummyS3StoreId], token),
+            RDPMSConstants.GlobalProjectId);
+    }
+
     private static DataCollectionEntity BuildDataCollectionEntity(S3DataStore? s3Store, Guid projectId,
         ContentType mcapType, ContentType imageType, ContentType pdfType)
     {
@@ -271,6 +311,24 @@ public static class DefaultValues
                     Files = []
                 }
             ]
+        };
+    }
+
+    private static DataCollectionEntity BuildSeedCollection(
+        string name,
+        string slug,
+        Guid id,
+        DataStore? defaultStore,
+        Guid projectId)
+    {
+        return new DataCollectionEntity(name)
+        {
+            Id = id,
+            Slug = slug,
+            ParentProjectId = projectId,
+            DefaultDataStore = defaultStore,
+            DefaultDataStoreId = defaultStore?.Id,
+            ContainedDatasets = []
         };
     }
 

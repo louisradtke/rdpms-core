@@ -474,11 +474,15 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<Guid>("SchemaId")
                         .HasColumnType("TEXT");
 
+                    b.Property<byte>("Target")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DefaultFieldId");
 
-                    b.HasIndex("ParentCollectionId");
+                    b.HasIndex("ParentCollectionId", "MetadataKey", "Target")
+                        .IsUnique();
 
                     b.HasIndex("SchemaId");
 

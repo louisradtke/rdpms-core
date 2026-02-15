@@ -26,4 +26,6 @@ public class MetaDataCollectionColumn : IUniqueEntityWithParent
     /// Reference to the default field, that data sets will inherit from the collection.
     /// </summary>
     public MetadataJsonField? DefaultField { get; set; }
+
+    public MetadataColumnTarget Target { get; set; } = MetadataColumnTarget.Dataset;
 }

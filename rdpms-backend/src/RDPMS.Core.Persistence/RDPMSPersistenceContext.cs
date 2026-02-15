@@ -142,6 +142,9 @@ public class RDPMSPersistenceContext : DbContext
             .WithOne(col => col.ParentCollection)
             .HasForeignKey(col => col.ParentCollectionId)
             .IsRequired();
+        model.Entity<MetaDataCollectionColumn>()
+            .HasIndex(col => new { col.ParentCollectionId, col.MetadataKey, col.Target })
+            .IsUnique();
         // model.Entity<DataCollectionEntity>()
         //     .HasOne(c => c.DefaultLabel)
         //     .WithMany()
@@ -307,6 +310,20 @@ public class RDPMSPersistenceContext : DbContext
             await context.Set<DataCollectionEntity>()
                 .AddAsync(await DefaultValues.GetDummyDataCollectionAsync(context, token), token);
         }
+
+        if (await context.Set<DataCollectionEntity>()
+                .FindAsync(RDPMSConstants.IngressDataCollectionId, token) is null)
+        {
+            await context.Set<DataCollectionEntity>()
+                .AddAsync(await DefaultValues.GetIngressDataCollectionAsync(context, token), token);
+        }
+
+        if (await context.Set<DataCollectionEntity>()
+                .FindAsync(RDPMSConstants.DataPreviewsCollectionId, token) is null)
+        {
+            await context.Set<DataCollectionEntity>()
+                .AddAsync(await DefaultValues.GetDataPreviewsCollectionAsync(context, token), token);
+        }
         
         await SaveChangesAsync(token);
     }
@@ -337,6 +354,16 @@ public class RDPMSPersistenceContext : DbContext
         if (context.Set<DataCollectionEntity>().Find(RDPMSConstants.DummyDataCollectionId) is null)
         {
             context.Set<DataCollectionEntity>().Add(DefaultValues.GetDummyDataCollection(context));
+        }
+
+        if (context.Set<DataCollectionEntity>().Find(RDPMSConstants.IngressDataCollectionId) is null)
+        {
+            context.Set<DataCollectionEntity>().Add(DefaultValues.GetIngressDataCollection(context));
+        }
+
+        if (context.Set<DataCollectionEntity>().Find(RDPMSConstants.DataPreviewsCollectionId) is null)
+        {
+            context.Set<DataCollectionEntity>().Add(DefaultValues.GetDataPreviewsCollection(context));
         }
         
         SaveChanges();
