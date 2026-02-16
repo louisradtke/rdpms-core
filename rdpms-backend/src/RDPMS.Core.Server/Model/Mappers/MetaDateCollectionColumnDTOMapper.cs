@@ -15,7 +15,7 @@ public class MetaDateCollectionColumnDTOMapper(
         {
             DefaultFieldId = domain.DefaultFieldId,
             MetadataKey = domain.MetadataKey,
-            Target = domain.Target,
+            Target = (MetadataColumnTargetDTO) (int) domain.Target,
             Schema = domain.Schema != null ? schemaMapper.Export(domain.Schema) : null
         };
     }

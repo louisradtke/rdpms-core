@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Asp.Versioning;
@@ -137,6 +138,12 @@ internal class Program
         // builder.Services.AddSwaggerGen();
         builder.Services.AddSwaggerGen(options =>
         {
+            options.MapType<JsonElement>(() => new OpenApiSchema
+            {
+                Type = "object",
+                AdditionalPropertiesAllowed = true
+            });
+
             options.UseAllOfForInheritance();
             options.UseOneOfForPolymorphism();
             options.SelectSubTypesUsing(baseType =>

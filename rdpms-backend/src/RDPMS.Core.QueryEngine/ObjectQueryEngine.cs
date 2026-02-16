@@ -53,4 +53,12 @@ public sealed class ObjectQueryEngine(IObjectQueryAstParser parser, IJsonQueryEv
         var ast = parser.Parse(queryJson);
         return evaluator.IsMatch(ast, document);
     }
+
+    /// <summary>
+    /// Parses and evaluates a query object against a JSON document root.
+    /// </summary>
+    public bool IsMatch(QueryNode queryAst, JsonElement document)
+    {
+        return evaluator.IsMatch(queryAst, document);
+    }
 }

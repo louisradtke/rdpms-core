@@ -61,7 +61,7 @@ public class DataSetService(DbContext context, IS3Service s3Service)
             .ToDictionary(s => s.Id);
         var checkTasks = locations
             .Select(l => Task.Run(() =>
-                    s3Service.ValidateFileRef((S3FileStorageReference)l, (S3DataStore) storeDict[l.StoreFid!.Value])));
+                    s3Service.ValidateFileRefAsync((S3FileStorageReference)l, (S3DataStore) storeDict[l.StoreFid!.Value])));
 
         var success = true;
         foreach (var task in checkTasks)

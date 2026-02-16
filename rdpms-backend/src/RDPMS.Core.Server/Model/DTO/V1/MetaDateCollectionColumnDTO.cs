@@ -7,5 +7,5 @@ public record MetaDateCollectionColumnDTO
     public string? MetadataKey { get; set; }
     public SchemaDTO? Schema { get; set; }
     public Guid? DefaultFieldId { get; set; }
-    public MetadataColumnTarget Target { get; set; }
+    public MetadataColumnTargetDTO Target { get; set; }
 }

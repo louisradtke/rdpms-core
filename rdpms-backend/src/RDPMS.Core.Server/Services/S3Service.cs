@@ -118,7 +118,21 @@ public class S3Service(ISecretResolverService secretResolverService, ILogger<S3S
         return await client.PresignedGetObjectAsync(presignedArgs);
     }
 
-    public async Task<bool> ValidateFileRef(S3FileStorageReference reference, S3DataStore store)
+    public async Task<byte[]> GetFileAsync(S3FileStorageReference reference, S3DataStore store)
+    {
+        var client = await ResolveClientAsync(store);
+
+        var stream = new MemoryStream();
+        var getObjectArgs = new GetObjectArgs()
+            .WithBucket(store.Bucket)
+            .WithObject(store.KeyPrefix + reference.ObjectKey)
+            .WithCallbackStream(s => s.CopyTo(stream));
+
+        var stat = await client.GetObjectAsync(getObjectArgs);
+        return stream.ToArray();
+    }
+
+    public async Task<bool> ValidateFileRefAsync(S3FileStorageReference reference, S3DataStore store)
     {
         var client = await ResolveClientAsync(store);
         var args = new StatObjectArgs()

@@ -117,7 +117,7 @@ public class CollectionsController(
     public async Task<ActionResult> UpsertMetadataColumn([FromRoute] Guid id, [FromRoute] string key,
         [FromQuery] Guid schemaId,
         [FromQuery] Guid? defaultMetadataId = null,
-        [FromQuery] MetadataColumnTarget target = MetadataColumnTarget.Dataset)
+        [FromQuery] MetadataColumnTargetDTO target = MetadataColumnTargetDTO.Dataset)
     {
         var collectionExists = await dataCollectionEntityService.CheckForIdAsync(id);
         if (!collectionExists)
@@ -125,8 +125,9 @@ public class CollectionsController(
             return NotFound(new ErrorMessageDTO { Message = "No collection with that id." });
         }
 
+        var targetDto = (MetadataColumnTarget)(int)target;
         var created = await dataCollectionEntityService.UpsertMetaDataColumnAsync(
-            id, key, schemaId, defaultMetadataId, target);
+            id, key, schemaId, defaultMetadataId, targetDto);
 
         return created
             ? CreatedAtAction(nameof(GetById), new { id }, id)
@@ -139,11 +140,12 @@ public class CollectionsController(
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> RenameMetadataColumn([FromRoute] Guid id, [FromRoute] string key,
         [FromQuery] string newKey,
-        [FromQuery] MetadataColumnTarget target = MetadataColumnTarget.Dataset)
+        [FromQuery] MetadataColumnTargetDTO target = MetadataColumnTargetDTO.Dataset)
     {
         try
         {
-            await dataCollectionEntityService.RenameColumnAsync(id, key, newKey, target);
+            var targetDto = (MetadataColumnTarget)(int)target;
+            await dataCollectionEntityService.RenameColumnAsync(id, key, newKey, targetDto);
             return Ok();
         }
         catch (InvalidOperationException ex)
@@ -158,11 +160,12 @@ public class CollectionsController(
     public async Task<ActionResult> DeleteMetadataColumn(
         [FromRoute] Guid id,
         [FromRoute] string key,
-        [FromQuery] MetadataColumnTarget target = MetadataColumnTarget.Dataset)
+        [FromQuery] MetadataColumnTargetDTO target = MetadataColumnTargetDTO.Dataset)
     {
         try
         {
-            await dataCollectionEntityService.DeleteColumnAsync(id, key, target);
+            var targetDto = (MetadataColumnTarget)(int)target;
+            await dataCollectionEntityService.DeleteColumnAsync(id, key, targetDto);
             return Ok();
         }
         catch (InvalidOperationException e)

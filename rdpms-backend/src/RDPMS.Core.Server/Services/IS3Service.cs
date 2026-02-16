@@ -20,7 +20,15 @@ public interface IS3Service
     /// <param name="store">The S3 data store representation.</param>
     /// <returns>Presigned URL where the file can be fetched from.</returns>
     Task<string> RequestPresignedDownloadUrlAsync(S3FileStorageReference reference, S3DataStore store);
- 
+
+    /// <summary>
+    /// Fetch a file from S3.
+    /// </summary>
+    /// <param name="reference">Representation of the file in S3.</param>
+    /// <param name="store">The S3 data store representation.</param>
+    /// <returns>The plain bytes.</returns>
+    Task<byte[]> GetFileAsync(S3FileStorageReference reference, S3DataStore store);
+
     /// <summary>
     /// List of all files in the bucket, matching the prefix of store.
     /// </summary>
@@ -34,5 +42,5 @@ public interface IS3Service
     /// <param name="reference"></param>
     /// <param name="store"></param>
     /// <returns></returns>
-    Task<bool> ValidateFileRef(S3FileStorageReference reference, S3DataStore store);
+    Task<bool> ValidateFileRefAsync(S3FileStorageReference reference, S3DataStore store);
 }

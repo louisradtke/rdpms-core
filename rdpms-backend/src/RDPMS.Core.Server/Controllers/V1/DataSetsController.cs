@@ -1,9 +1,14 @@
 using System.Text;
+using System.Text.Json;
 using Asp.Versioning;
+using Corvus.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RDPMS.Core.Contracts.Schemas;
+using RDPMS.Core.Infra.Exceptions;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
+using RDPMS.Core.QueryEngine;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Services;
@@ -22,6 +27,8 @@ public class DataSetsController(
     DataSetSummaryDTOMapper dataSetSummaryMapper,
     DataSetDetailedDTOMapper dataSetDetailedMapper,
     FileSummaryDTOMapper fileSummaryMapper,
+    IS3Service s3Service,
+    IStoreService storeService,
     IMetadataService metadataService,
     IContentTypeService contentTypeService,
     IImportMapper<DataFile, S3FileCreateRequestDTO, ContentType> s3dfCreateReqMapper,
@@ -30,12 +37,15 @@ public class DataSetsController(
     : ControllerBase
 {
     /// <summary>
-    /// Get data sets.
+    /// Query data sets.
     /// </summary>
     /// <param name="collectionId"></param>
     /// <param name="deleted">comma-separated list of strings, case-insensitive.
     /// Default is <see cref="DeletionState.Active"/>
     /// Valid values can be found in <see cref="DeletionState"/>.</param>
+    /// <param name="view">Whether to only return dataset summaries (default), or metadata as well.</param>
+    /// <param name="metadataTarget">If view is set to yield metadata,
+    /// they will be set either on datasets or files.</param>
     /// <returns></returns>
     [HttpGet]
     [ProducesResponseType<IEnumerable<DataSetSummaryDTO>>(StatusCodes.Status200OK)]
@@ -43,39 +53,18 @@ public class DataSetsController(
         [FromQuery] Guid? collectionId = null,
         [FromQuery] string? deleted = null,
         [FromQuery] DataSetListViewMode view = DataSetListViewMode.Summary,
-        [FromQuery] MetadataColumnTarget metadataTarget = MetadataColumnTarget.Dataset
+        [FromQuery] MetadataColumnTargetDTO metadataTarget = MetadataColumnTargetDTO.Dataset
     )
     {
         var datasetsQuery = dataSetService.Query();
-        
-        // filter for deletion state
+
         try
         {
-            var queriedDeletionStates = deleted?
-                .Split(',')
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Select(s => s.Trim())
-                .Select(s => Enum.Parse<DeletionState>(s, true))
-                .ToArray();
-            if (queriedDeletionStates is not null && queriedDeletionStates.Length > 0)
-            {
-                datasetsQuery = datasetsQuery
-                    .Where(ds => queriedDeletionStates.Contains(ds.DeletionState));
-            }
-            else
-            {
-                datasetsQuery = datasetsQuery
-                    .Where(ds => ds.DeletionState == DeletionState.Active);
-            }
+            datasetsQuery = QueryDatasets(datasetsQuery, collectionId, deleted);
         }
-        catch (ArgumentException ae)
+        catch (QueryException ex)
         {
-            return BadRequest(new ErrorMessageDTO() { Message = $"Invalid value for deleted: {ae.Message}" });
-        }
-
-        if (collectionId is not null)
-        {
-            datasetsQuery = datasetsQuery.Where(ds => ds.ParentCollectionId == collectionId);
+            return BadRequest(new ErrorMessageDTO() { Message = ex.PublicMessage });
         }
 
         var datasets = await datasetsQuery.ToListAsync();
@@ -87,62 +76,124 @@ public class DataSetsController(
             return Ok(summaryDtos);
         }
 
-        if (metadataTarget == MetadataColumnTarget.File)
-        {
-            var fileIds = datasets
-                .SelectMany(ds => ds.Files.Select(f => f.Id))
-                .Distinct()
-                .ToList();
-            var validatedDataFileMetaDates = fileIds.Count > 0
-                ? await fileService.GetValidatedMetadates(fileIds)
-                : new Dictionary<Guid, List<string>>();
+        var dtos = await QueryAndBuildDatasetDtos(metadataTarget, datasets);
 
-            var fileModeDtos = datasets.Select<DataSet, DataSetSummaryDTO>(domain =>
-            {
-                var dto = DataSetFileMetadataSummaryDTO.Create(dataSetSummaryMapper.Export(domain));
-                dto.Files = domain.Files.Select(file =>
-                {
-                    validatedDataFileMetaDates.TryGetValue(file.Id, out var list);
-
-                    var fileDto = FileMetadataSummaryDTO.Create(fileSummaryMapper.Export(file));
-                    fileDto.DownloadURI = fileService.GetContentApiUri(file.Id, HttpContext);
-                    fileDto.MetaDates = file.MetadataJsonFields
-                        .Select(f => new AssignedMetaDateDTO
-                        {
-                            MetadataKey = f.MetadataKey,
-                            MetadataId = f.FieldId,
-                            CollectionSchemaVerified = list?.Contains(f.MetadataKey) ?? false
-                        })
-                        .ToList();
-                    return fileDto;
-                }).ToList();
-                return dto;
-            }).ToList();
-
-            return Ok(fileModeDtos);
-        }
-
-        var validatedDataSetMetaDates = await dataSetService.GetValidatedMetadates(
-            datasets.Select(ds => ds.Id).ToList());
-        var datasetModeDtos = datasets.Select<DataSet, DataSetSummaryDTO>(domain =>
-        {
-            validatedDataSetMetaDates.TryGetValue(domain.Id, out var list);
-
-            var dto = DataSetMetadataSummaryDTO.Create(dataSetSummaryMapper.Export(domain));
-            dto.MetaDates = domain.MetadataJsonFields
-                .Select(f => new AssignedMetaDateDTO
-                {
-                    MetadataKey = f.MetadataKey,
-                    MetadataId = f.FieldId,
-                    CollectionSchemaVerified = list?.Contains(f.MetadataKey) ?? false
-                })
-                .ToList();
-            return dto;
-        }).ToList();
-
-        return Ok(datasetModeDtos);
+        return Ok(dtos);
     }
 
+    /// <summary>
+    /// Query datasets, with additional metadata-based query.
+    /// </summary>
+    /// <param name="collectionId"></param>
+    /// <param name="deleted">comma-separated list of strings, case-insensitive.
+    /// Default is <see cref="DeletionState.Active"/>
+    /// Valid values can be found in <see cref="DeletionState"/>.</param>
+    /// <param name="view">Whether to only return dataset summaries (default), or metadata as well.</param>
+    /// <param name="metadataTarget">If view is set to yield metadata,
+    /// they will be set either on datasets or files.</param>
+    /// <param name="query">Query over metadata items.</param>
+    /// <returns></returns>
+    [HttpPost]
+    [ProducesResponseType<IEnumerable<DataSetSummaryDTO>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<DataSetSummaryDTO>>> QueryComplex(
+        [FromBody] MetadataQueryDTO query,
+        [FromQuery] Guid? collectionId = null,
+        [FromQuery] string? deleted = null,
+        [FromQuery] DataSetListViewMode view = DataSetListViewMode.Summary,
+        [FromQuery] MetadataColumnTargetDTO metadataTarget = MetadataColumnTargetDTO.Dataset
+    )
+    {
+        var datasetsQuery = dataSetService.Query();
+
+        List<DataSet> datasets;
+        try
+        {
+            datasetsQuery = QueryDatasets(datasetsQuery, collectionId, deleted);
+            datasets = (await FilterByMetadata(await datasetsQuery.ToListAsync(), query)).ToList();
+        }
+        catch (QueryException ex)
+        {
+            return BadRequest(new ErrorMessageDTO() { Message = ex.PublicMessage });
+        }
+
+        if (view == DataSetListViewMode.Summary)
+        {
+            var summaryDtos = datasets
+                .Select(dataSetSummaryMapper.Export)
+                .ToList();
+            return Ok(summaryDtos);
+        }
+
+        var dtos = await QueryAndBuildDatasetDtos(metadataTarget, datasets);
+
+        return Ok(dtos);
+    }
+
+    private async Task<IEnumerable<DataSet>> FilterByMetadata(IEnumerable<DataSet> datasets, MetadataQueryDTO query)
+    {
+        var datasetArray = datasets.ToArray();
+        var engine = ObjectQueryEngine.CreateDefault();
+        var astDict = query.Queries
+            .Where(q => q.Target == MetadataColumnTargetDTO.Dataset)
+            .ToDictionary(
+                q => q.MetadataKey,
+                q =>
+                {
+                    var singleQuery = new ObjectQueryDslV1Schema(q.Query);
+                    if (!singleQuery.IsValid()) throw new QueryException($"Invalid query schema for {q.MetadataKey}");
+                    return engine.ParseToAst(singleQuery);
+                }
+            );
+
+        var metadataDict = new Dictionary<Guid, string>();
+        var storesCache = new Dictionary<Guid, S3DataStore>();
+        foreach (var field in datasetArray.SelectMany(ds => ds.MetadataJsonFields))
+        {
+            if (field.DataSetId is null) continue;
+            if (field.Field.Value is null) continue;
+            var reference = field.Field.Value.References
+                .FirstOrDefault(r => r.StorageType == StorageType.Db);
+            if (reference is DbFileStorageReference dbReference)
+            {
+                var data  = dbReference.Data;
+                metadataDict[field.FieldId] = Encoding.UTF8.GetString(data);
+                continue;
+            }
+
+            reference = field.Field.Value.References
+                .FirstOrDefault(r => r.StorageType != StorageType.S3);
+            if (reference is not S3FileStorageReference s3Reference) continue;
+            if (reference.StoreFid is null) continue;
+            if (!storesCache.TryGetValue(reference.StoreFid.Value, out var store))
+            {
+                store = await storeService.GetByIdAsync(reference.StoreFid.Value) as S3DataStore
+                        ?? throw new InvalidOperationException();
+                storesCache[reference.StoreFid.Value] = store;
+            }
+
+            var bytes = await s3Service.GetFileAsync(s3Reference, store);
+            metadataDict[field.FieldId] = Encoding.UTF8.GetString(bytes);
+        }
+        
+        Func<IEnumerable<MetadataQueryPartDTO>, Func<MetadataQueryPartDTO, bool>, bool> predicate = query.Mode switch
+        {
+            QueryMode.And => Enumerable.All,
+            QueryMode.Or => Enumerable.Any,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        return datasetArray.Where(ds =>
+        {
+            return predicate(query.Queries, part =>
+            {
+                if (!ds.Metadata.TryGetValue(part.MetadataKey, out var field)) return false;
+                // astDict[part.MetadataKey].
+                var jsonElem = JsonDocument.Parse(metadataDict[field.Id]).RootElement;
+                return engine.IsMatch(astDict[part.MetadataKey], jsonElem);
+            });
+        });
+    }
+    
     [HttpGet("{id:guid}")]
     [ProducesResponseType<DataSetDetailedDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -217,7 +268,7 @@ public class DataSetsController(
     /// </summary>
     /// <param name="dto"></param>
     /// <returns>On success, responds with the guid of the new data set.</returns>
-    [HttpPost]
+    [HttpPost("new")]
     [Consumes("application/json")]
     [ProducesResponseType<DataSetDetailedDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -491,5 +542,100 @@ public class DataSetsController(
         if (removed == 0) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
         await dataSetService.UpdateAsync(dataSet);
         return Ok();
+    }
+        private static IQueryable<DataSet> QueryDatasets(IQueryable<DataSet> datasetsQuery,
+        Guid? collectionId, string? deleted)
+    {
+        // filter for deletion state
+        try
+        {
+            var queriedDeletionStates = deleted?
+                .Split(',')
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(s => s.Trim())
+                .Select(s => Enum.Parse<DeletionState>(s, true))
+                .ToArray();
+            if (queriedDeletionStates is not null && queriedDeletionStates.Length > 0)
+            {
+                datasetsQuery = datasetsQuery
+                    .Where(ds => queriedDeletionStates.Contains(ds.DeletionState));
+            }
+            else
+            {
+                datasetsQuery = datasetsQuery
+                    .Where(ds => ds.DeletionState == DeletionState.Active);
+            }
+        }
+        catch (ArgumentException ae)
+        {
+            throw new QueryException() { PublicMessage = $"Invalid value for deleted: {ae.Message}" };
+        }
+
+        if (collectionId is not null)
+        {
+            datasetsQuery = datasetsQuery.Where(ds => ds.ParentCollectionId == collectionId);
+        }
+
+        return datasetsQuery;
+    }
+
+    private async Task<List<DataSetSummaryDTO>> QueryAndBuildDatasetDtos(MetadataColumnTargetDTO metadataTarget, List<DataSet> datasets)
+    {
+        List<DataSetSummaryDTO> dtos;
+        if (metadataTarget == MetadataColumnTargetDTO.File)
+        {
+            var fileIds = datasets
+                .SelectMany(ds => ds.Files.Select(f => f.Id))
+                .Distinct()
+                .ToList();
+            var validatedDataFileMetaDates = fileIds.Count > 0
+                ? await fileService.GetValidatedMetadates(fileIds)
+                : new Dictionary<Guid, List<string>>();
+
+            dtos = datasets.Select<DataSet, DataSetSummaryDTO>(domain =>
+            {
+                var dto = DataSetFileMetadataSummaryDTO.Create(dataSetSummaryMapper.Export(domain));
+                dto.Files = domain.Files.Select(file =>
+                {
+                    validatedDataFileMetaDates.TryGetValue(file.Id, out var list);
+
+                    var fileDto = FileMetadataSummaryDTO.Create(fileSummaryMapper.Export(file));
+                    fileDto.DownloadURI = fileService.GetContentApiUri(file.Id, HttpContext);
+                    fileDto.MetaDates = file.MetadataJsonFields
+                        .Select(f => new AssignedMetaDateDTO
+                        {
+                            MetadataKey = f.MetadataKey,
+                            MetadataId = f.FieldId,
+                            CollectionSchemaVerified = list?.Contains(f.MetadataKey) ?? false
+                        })
+                        .ToList();
+                    return fileDto;
+                }).ToList();
+                return dto;
+            }).ToList();
+        }
+        else
+        {
+            
+            var validatedDataSetMetaDates = await dataSetService.GetValidatedMetadates(
+                datasets.Select(ds => ds.Id).ToList());
+            dtos = datasets.Select<DataSet, DataSetSummaryDTO>(domain =>
+            {
+                validatedDataSetMetaDates.TryGetValue(domain.Id, out var list);
+
+                var dto = DataSetMetadataSummaryDTO.Create(dataSetSummaryMapper.Export(domain));
+                dto.MetaDates = domain.MetadataJsonFields
+                    .Select(f => new AssignedMetaDateDTO
+                    {
+                        MetadataKey = f.MetadataKey,
+                        MetadataId = f.FieldId,
+                        CollectionSchemaVerified = list?.Contains(f.MetadataKey) ?? false
+                    })
+                    .ToList();
+                return dto;
+            }).ToList();
+        }
+
+        return dtos;
     }
 }
