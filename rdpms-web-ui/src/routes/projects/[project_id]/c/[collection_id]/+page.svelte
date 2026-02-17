@@ -58,11 +58,7 @@
         }
         return 'basic';
     });
-    let currentView = $state<CollectionView>('basic');
-
-    $effect(() => {
-        currentView = activeView;
-    });
+    let currentView = $derived(activeView);
 
     let datasetsReq = $derived.by(async () => {
         void reloadTick; // make $derived.by read it as dependency
@@ -153,6 +149,7 @@
                     activeView={currentView}
                     onViewChange={setViewParam}
                     onDelete={onDatasetDeleted}
+                    onDataChanged={onDatasetDeleted}
                 />
                 {:catch error}
                         <p class="text-center">Error: {error.message}</p>

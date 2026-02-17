@@ -6,7 +6,7 @@
     import DataSetFileMetaCoverageTable from "$lib/components/collections/DataSetFileMetaCoverageTable.svelte";
 
     type CollectionView = 'basic' | 'dataset-metadata' | 'file-metadata';
-    let { datasets, columns, projectSlug, collectionSlug, activeView, onViewChange, onDelete } = $props<{
+    let { datasets, columns, projectSlug, collectionSlug, activeView, onViewChange, onDelete, onDataChanged } = $props<{
         datasets: DataSetSummaryDTO[];
         columns: MetaDateCollectionColumnDTO[];
         projectSlug: string;
@@ -14,6 +14,7 @@
         activeView: CollectionView;
         onViewChange: (view: CollectionView) => void;
         onDelete: () => void;
+        onDataChanged: () => void;
     }>();
 
     const datasetColumns = $derived(columns.filter((c: MetaDateCollectionColumnDTO) => c.target === MetadataColumnTargetDTO.Dataset));
@@ -35,6 +36,7 @@
         columns={datasetColumns}
         projectSlug={projectSlug}
         collectionSlug={collectionSlug}
+        onDataChanged={onDataChanged}
     />
 {:else}
     <DataSetFileMetaCoverageTable
@@ -42,5 +44,6 @@
         columns={fileColumns}
         projectSlug={projectSlug}
         collectionSlug={collectionSlug}
+        onDataChanged={onDataChanged}
     />
 {/if}
