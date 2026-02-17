@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page } from '$app/state';
-    import { MetadataColumnTarget, type MetadataColumnTarget as MetadataColumnTargetType } from '$lib/api_client';
+    import { MetadataColumnTargetDTO, type MetadataColumnTargetDTO as MetadataColumnTargetDTOType } from '$lib/api_client';
     import LoadingCircle from '$lib/layout/LoadingCircle.svelte';
     import { CollectionsRepository } from '$lib/data/CollectionsRepository';
     import { SchemasRepository } from '$lib/data/SchemasRepository';
@@ -15,7 +15,7 @@
     let schemaIdInput = $state('');
     let newSchemaIdInput = $state('');
     let defaultMetadataIdInput = $state('');
-    let targetInput = $state<MetadataColumnTargetType>(MetadataColumnTarget.Dataset);
+    let targetInput = $state<MetadataColumnTargetDTOType>(MetadataColumnTargetDTO.Dataset);
     let newSchemaJsonInput = $state('');
 
     let savePending = $state(false);
@@ -48,13 +48,13 @@
         metadataKey?: string | null,
         schemaId?: string | null,
         defaultFieldId?: string | null,
-        target?: MetadataColumnTargetType
+        target?: MetadataColumnTargetDTOType
     ): void {
         keyInput = metadataKey ?? '';
         schemaIdInput = schemaId ?? '';
         newSchemaIdInput = '';
         defaultMetadataIdInput = defaultFieldId ?? '';
-        targetInput = target ?? MetadataColumnTarget.Dataset;
+        targetInput = target ?? MetadataColumnTargetDTO.Dataset;
         newSchemaJsonInput = '';
         saveSuccess = '';
         saveError = '';
@@ -63,7 +63,7 @@
     async function renameColumn(
         collectionId: string,
         oldKey: string,
-        target: MetadataColumnTargetType
+        target: MetadataColumnTargetDTOType
     ): Promise<void> {
         const newKey = window.prompt(`Rename metadata key "${oldKey}" to:`, oldKey)?.trim();
         if (!newKey || newKey === oldKey) return;
@@ -184,8 +184,8 @@
                 <label class="flex flex-col gap-1">
                     <span class="text-sm font-medium">Target</span>
                     <select class="rounded-md border border-gray-300 px-3 py-2" bind:value={targetInput}>
-                        <option value={MetadataColumnTarget.Dataset}>Dataset</option>
-                        <option value={MetadataColumnTarget.File}>File</option>
+                        <option value={MetadataColumnTargetDTO.Dataset}>Dataset</option>
+                        <option value={MetadataColumnTargetDTO.File}>File</option>
                     </select>
                 </label>
 
@@ -277,7 +277,7 @@
                                 {#each data.collection.metaDateColumns ?? [] as column, idx (`${column.metadataKey ?? column.schema?.id ?? 'none'}-${idx}`)}
                                     <tr class="border-b border-gray-100 align-top">
                                         <td class="py-2 pr-4 font-mono">{column.metadataKey ?? '-'}</td>
-                                        <td class="py-2 pr-4">{column.target ?? MetadataColumnTarget.Dataset}</td>
+                                        <td class="py-2 pr-4">{column.target ?? MetadataColumnTargetDTO.Dataset}</td>
                                         <td class="py-2 pr-4">{column.schema?.schemaId ?? column.schema?.id ?? '-'}</td>
                                         <td class="py-2 pr-4 font-mono">{column.defaultFieldId ?? '-'}</td>
                                         <td class="py-2 flex items-center gap-2">
@@ -290,7 +290,7 @@
                                             <button
                                                 class="rounded-md border border-gray-300 px-2 py-1 hover:bg-gray-50 disabled:opacity-60"
                                                 disabled={savePending || !column.metadataKey}
-                                                onclick={() => renameColumn(data.collection.id ?? '', column.metadataKey ?? '', column.target ?? MetadataColumnTarget.Dataset)}
+                                                onclick={() => renameColumn(data.collection.id ?? '', column.metadataKey ?? '', column.target ?? MetadataColumnTargetDTO.Dataset)}
                                             >
                                                 Rename key
                                             </button>

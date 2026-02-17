@@ -4,7 +4,7 @@ import {
     type DataSetSummaryDTO,
     Configuration,
     type DataSetDetailedDTO,
-    MetadataColumnTarget
+    MetadataColumnTargetDTO
 } from '$lib/api_client';
 
 export class DataSetsRepository {
@@ -51,8 +51,8 @@ export class DataSetsRepository {
             view: options?.view === 'metadata' ? DataSetListViewMode.Metadata : DataSetListViewMode.Summary,
             metadataTarget:
                 options?.metadataTarget === 'file'
-                    ? MetadataColumnTarget.File
-                    : MetadataColumnTarget.Dataset
+                    ? MetadataColumnTargetDTO.File
+                    : MetadataColumnTargetDTO.Dataset
         });
     }
 
@@ -63,7 +63,7 @@ export class DataSetsRepository {
 
     public async create(dto: Partial<DataSetSummaryDTO>): Promise<DataSetDetailedDTO> {
         const api = await this.ensureReady();
-        return api.apiV1DataDatasetsPost({ dataSetSummaryDTO: dto as DataSetSummaryDTO });
+        return api.apiV1DataDatasetsNewPost({ apiV1DataDatasetsGet200ResponseInner: dto as DataSetSummaryDTO });
     }
 
     public async deleteById(id: string): Promise<void> {

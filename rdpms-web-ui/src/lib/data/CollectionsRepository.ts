@@ -3,7 +3,7 @@ import {
     CollectionsApi,
     type CollectionSummaryDTO,
     Configuration,
-    type MetadataColumnTarget
+    type MetadataColumnTargetDTO
 } from '$lib/api_client';
 import {isGuid} from "$lib/util/url-helper";
 
@@ -75,7 +75,7 @@ export class CollectionsRepository {
     public async upsertMetadataColumn(
         collectionId: string,
         key: string,
-        options: { schemaId: string; defaultMetadataId?: string; target?: MetadataColumnTarget }
+        options: { schemaId: string; defaultMetadataId?: string; target?: MetadataColumnTargetDTO }
     ): Promise<void> {
         const api = await this.ensureReady();
         return api.apiV1DataCollectionsIdMetadataKeyPut({
@@ -91,7 +91,7 @@ export class CollectionsRepository {
         collectionId: string,
         key: string,
         newKey: string,
-        target?: MetadataColumnTarget
+        target?: MetadataColumnTargetDTO
     ): Promise<void> {
         const api = await this.ensureReady();
         return api.apiV1DataCollectionsIdMetadataKeyPost({
@@ -105,7 +105,7 @@ export class CollectionsRepository {
     public async deleteMetadataColumn(
         collectionId: string,
         key: string,
-        target?: MetadataColumnTarget
+        target?: MetadataColumnTargetDTO
     ): Promise<void> {
         const api = await this.ensureReady();
         return api.apiV1DataCollectionsIdMetadataKeyDelete({

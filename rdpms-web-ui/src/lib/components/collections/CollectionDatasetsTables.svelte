@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { MetadataColumnTarget, type DataSetSummaryDTO, type MetaDateCollectionColumnDTO } from "$lib/api_client";
+    import { MetadataColumnTargetDTO, type DataSetSummaryDTO, type MetaDateCollectionColumnDTO } from "$lib/api_client";
     import DataSetViewToggle from "$lib/components/collections/DataSetViewToggle.svelte";
     import DataSetBasicTable from "$lib/components/collections/DataSetBasicTable.svelte";
     import DataSetMetaCoverageTable from "$lib/components/collections/DataSetMetaCoverageTable.svelte";
@@ -16,8 +16,8 @@
         onDelete: () => void;
     }>();
 
-    const datasetColumns = $derived(columns.filter((c: MetaDateCollectionColumnDTO) => c.target === MetadataColumnTarget.Dataset));
-    const fileColumns = $derived(columns.filter((c: MetaDateCollectionColumnDTO) => c.target === MetadataColumnTarget.File));
+    const datasetColumns = $derived(columns.filter((c: MetaDateCollectionColumnDTO) => c.target === MetadataColumnTargetDTO.Dataset));
+    const fileColumns = $derived(columns.filter((c: MetaDateCollectionColumnDTO) => c.target === MetadataColumnTargetDTO.File));
 </script>
 
 <DataSetViewToggle activeView={activeView} onChange={onViewChange} />
