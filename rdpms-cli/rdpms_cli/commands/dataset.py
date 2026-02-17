@@ -15,7 +15,7 @@ def cmd_dataset_upload(args):
     from pathlib import Path
     import datetime
     from rdpms_cli.openapi_client import ApiClient, Configuration
-    from rdpms_cli.openapi_client import DataSetsApi, DataSetSummaryDTO, S3FileCreateRequestDTO
+    from rdpms_cli.openapi_client import DataSetsApi, DataSetCreateRequestDTO, S3FileCreateRequestDTO
     from rdpms_cli.openapi_client.exceptions import BadRequestException, ApiException
 
     conf = load_file()
@@ -40,14 +40,14 @@ def cmd_dataset_upload(args):
 
     print(f"[dataset upload] Uploading dataset from: {args.path}, name: {name}, collection: {args.collection}")
 
-    ds_req_dto = DataSetSummaryDTO(
+    ds_req_dto = DataSetCreateRequestDTO(
         name=name,
         slug=name,
         createdStampUTC=stamp,
         collectionId=args.collection
     )
     try:
-        dataset = ds_api.api_v1_data_datasets_post(ds_req_dto)
+        dataset = ds_api.api_v1_data_datasets_new_post(ds_req_dto)
     except ApiException as api_Ex:
         print(f'encountered HTTP 400', file=sys.stderr)
         print(f'Reason: {api_Ex.reason}')
@@ -71,10 +71,10 @@ def cmd_dataset_upload(args):
         # print(f'\tstats for {file_path}: size={stats.st_size}, sha256={sha256.hexdigest()}, content_type={content_type.display_name}, created={create_stamp}')
         upload_req = S3FileCreateRequestDTO(
             name=str(file_path),
-            sizeBytes=stats.st_size,
-            plainSHA256Hash=sha256.hexdigest(),
-            createdStamp=create_stamp,
-            contentTypeId=content_type.id
+            size_bytes=stats.st_size,
+            plain_sha256_hash=sha256.hexdigest(),
+            created_stamp=create_stamp,
+            content_type_id=content_type.id
         )
         upload_resp = ds_api.api_v1_data_datasets_id_add_s3_post(ds_id, upload_req)
 
@@ -94,7 +94,7 @@ def cmd_dataset_upload(args):
             for child in filenames:
                 relative_file = (dirpath / child).relative_to(pth)
                 print(f'uploading file: {child} (in {dirpath}) -> {relative_file}')
-                upload_file(dataset, pth, relative_file, types)
+                upload_file(dataset.id, pth, relative_file, types)
     else:
         upload_file(dataset.id, Path('.'), pth, types)
 
@@ -146,9 +146,7 @@ def cmd_dataset_list(args):
         print('no datasets found')
         return
     
-    # OpenAPI python generator may return oneOf wrapper objects.
-    # For dataset rows we need the resolved DTO on `actual_instance`.
-    datasets = [getattr(ds, 'actual_instance', ds) for ds in ds_list]
+    datasets = ds_list
 
     if args.collection:
         header = ["dataset name", "file count", "id"]

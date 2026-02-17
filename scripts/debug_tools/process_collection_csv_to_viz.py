@@ -32,7 +32,7 @@ from rdpms_cli.openapi_client.configuration import Configuration
 from rdpms_cli.openapi_client.api.data_sets_api import DataSetsApi
 from rdpms_cli.openapi_client.api.files_api import FilesApi
 from rdpms_cli.openapi_client.api.meta_data_api import MetaDataApi
-from rdpms_cli.openapi_client.models.data_set_summary_dto import DataSetSummaryDTO
+from rdpms_cli.openapi_client.models.data_set_create_request_dto import DataSetCreateRequestDTO
 from rdpms_cli.openapi_client.models.s3_file_create_request_dto import S3FileCreateRequestDTO
 from rdpms_cli.openapi_client.exceptions import ApiException
 from rdpms_cli.util.TypeStore import get_types
@@ -89,6 +89,22 @@ def build_client() -> tuple[ApiClient, DataSetsApi, MetaDataApi]:
     instance = conf.instances[conf.active_instance_key]
     client = ApiClient(Configuration(host=instance.base_url))
     return client, DataSetsApi(client), MetaDataApi(client)
+
+
+def create_dataset_id(ds_api: DataSetsApi, ds_req: DataSetCreateRequestDTO) -> uuid.UUID:
+    created = ds_api.api_v1_data_datasets_new_post(ds_req)
+    dataset_id = getattr(created, "id", None)
+    if not dataset_id:
+        raise RuntimeError("target dataset creation returned no id")
+    return uuid.UUID(str(dataset_id))
+
+
+def list_collection_datasets(ds_api: DataSetsApi, collection_id: uuid.UUID) -> list[object]:
+    return ds_api.api_v1_data_datasets_get(collection_id=collection_id)
+
+
+def get_dataset_details(ds_api: DataSetsApi, dataset_id: str) -> object:
+    return ds_api.api_v1_data_datasets_id_get(dataset_id)
 
 
 def tracker_path() -> Path:
@@ -164,9 +180,11 @@ def find_csv_file(dataset_detailed) -> object:
     csv_files = [
         f
         for f in files
-        if (f.name and f.name.lower().endswith(".csv"))
-        or ((f.content_type and (f.content_type.abbreviation or "").lower() == "csv"))
-        or ((f.content_type and (f.content_type.mime_type or "").lower() in {"text/csv", "application/csv"}))
+        if (
+            (f.name and f.name.lower().endswith(".csv"))
+            or ((f.content_type and (f.content_type.abbreviation or "").lower() == "csv"))
+            or ((f.content_type and (f.content_type.mime_type or "").lower() in {"text/csv", "application/csv"}))
+        )
     ]
     if not csv_files:
         raise ValueError("no CSV file found in dataset")
@@ -247,25 +265,20 @@ def upload_file_to_dataset(ds_api: DataSetsApi, types, dataset_id: str, file_pat
         response = requests.put(upload_resp.upload_uri, data=f)
     response.raise_for_status()
 
-    refreshed = ds_api.api_v1_data_datasets_id_get(dataset_id)
-    uploaded = next((f for f in (refreshed.files or []) if f.name == file_path.name), None)
-    if not uploaded or not uploaded.id:
-        raise RuntimeError("uploaded file not found in dataset after upload")
-    return str(uploaded.id)
+    if not upload_resp.file_id:
+        raise RuntimeError("upload response did not include file id")
+    return str(upload_resp.file_id)
 
 
 def create_target_dataset(ds_api: DataSetsApi, target_collection_id: uuid.UUID, name: str) -> str:
     now_utc = dt.datetime.now(dt.timezone.utc)
-    request = DataSetSummaryDTO(
+    request = DataSetCreateRequestDTO(
         name=name,
         slug=f'{slugify(name)}-{now_utc.strftime("%Y%m%d%H%M%S")}',
         created_stamp_utc=now_utc,
         collection_id=target_collection_id,
     )
-    created = ds_api.api_v1_data_datasets_post(request)
-    if not created.id:
-        raise RuntimeError("target dataset creation returned no id")
-    return str(created.id)
+    return str(create_dataset_id(ds_api, request))
 
 
 def find_schema_guid_by_urn(meta_api: MetaDataApi, schema_urn: str) -> uuid.UUID | None:
@@ -340,17 +353,18 @@ def process_source_dataset(
     schema_guid: uuid.UUID | None,
 ) -> tuple[str, str, str, str, str]:
     source_dataset_id = str(source_dataset.id)
-    source_name = source_dataset.name or source_dataset_id
+    source_name = str(source_dataset.name or source_dataset_id)
 
-    detailed = ds_api.api_v1_data_datasets_id_get(source_dataset_id)
+    detailed = get_dataset_details(ds_api, source_dataset_id)
     csv_file = find_csv_file(detailed)
-    if not csv_file.id:
+    csv_file_id = csv_file.id
+    if not csv_file_id:
         raise RuntimeError("source csv file has no id")
 
     download_uri = csv_file.download_uri
     if not download_uri:
         files_api = FilesApi(ds_api.api_client)
-        file_summary = files_api.api_v1_data_files_id_get(csv_file.id)
+        file_summary = files_api.api_v1_data_files_id_get(csv_file_id)
         download_uri = file_summary.download_uri
     if not download_uri:
         raise RuntimeError("file has no download URI")
@@ -380,7 +394,7 @@ def process_source_dataset(
         schema_guid=schema_guid,
     )
 
-    return source_dataset_id, source_name, str(csv_file.id), target_dataset_id, target_plot_file_id
+    return source_dataset_id, source_name, str(csv_file_id), target_dataset_id, target_plot_file_id
 
 
 def main() -> int:
@@ -402,7 +416,7 @@ def main() -> int:
     else:
         print(f"[warn] schema URN not found, metadata will not be validated: {args.schema_urn}")
 
-    source_datasets = ds_api.api_v1_data_datasets_get(collection_id=source_collection_id)
+    source_datasets = list_collection_datasets(ds_api, source_collection_id)
     print(f"[info] found {len(source_datasets)} datasets in source collection {source_collection_id}")
 
     processed_count = 0
@@ -411,7 +425,7 @@ def main() -> int:
 
     for source_dataset in source_datasets:
         source_dataset_id = str(source_dataset.id)
-        source_dataset_name = source_dataset.name or source_dataset_id
+        source_dataset_name = str(source_dataset.name or source_dataset_id)
 
         if not args.force and source_dataset_id in processed_success:
             skipped_count += 1

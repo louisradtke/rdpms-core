@@ -6,7 +6,7 @@ from typing import Union
 from rdpms_cli.commands.collection import cmd_collection_new, cmd_collection_list
 from rdpms_cli.commands.dataset import (cmd_dataset_upload, cmd_dataset_download, cmd_dataset_seal,
                                         cmd_dataset_metadata, cmd_dataset_list, cmd_dataset_describe)
-from rdpms_cli.commands.metadata import cmd_metadata_show, cmd_metadata_set, cmd_metadata_validate
+from rdpms_cli.commands.metadata import cmd_metadata_show, cmd_metadata_validate, cmd_metadata_assign
 from rdpms_cli.commands.project import cmd_project_list, cmd_project_select, cmd_project_create
 from rdpms_cli.commands.instance import cmd_instance_add, cmd_instance_list, cmd_instance_select, cmd_instance_remove
 from rdpms_cli.commands.pipeline import cmd_pipeline_run, cmd_pipeline_list, cmd_pipeline_status
@@ -131,15 +131,26 @@ def build_parser() -> ArgumentParser:
 
     metadata_show = metadata_subparsers.add_parser('show', help='Show metadata')
     metadata_show.add_argument('resource_id', help='Resource ID')
-    metadata_show.add_argument('--type', choices=['project', 'collection', 'dataset'], help='Resource type')
+    metadata_show.add_argument('--type', choices=['project', 'collection', 'dataset', 'file'], help='Resource type')
     metadata_show.set_defaults(func=cmd_metadata_show)
 
-    metadata_set = metadata_subparsers.add_parser('set', help='Set metadata value')
-    metadata_set.add_argument('resource_id', help='Resource ID')
-    metadata_set.add_argument('key', help='Metadata key')
-    metadata_set.add_argument('value', help='Metadata value')
-    metadata_set.add_argument('--type', choices=['project', 'collection', 'dataset'], help='Resource type')
-    metadata_set.set_defaults(func=cmd_metadata_set)
+    metadata_assign = metadata_subparsers.add_parser(
+        'assign',
+        aliases=['set'],
+        help='Assign metadata to dataset/file or configure collection metadata column'
+    )
+    metadata_assign.add_argument('resource_type', choices=['file', 'dataset', 'collection'],
+                                 help='Target resource type')
+    metadata_assign.add_argument('resource_id', help='Resource ID')
+    metadata_assign.add_argument('key', help='Metadata key')
+    metadata_assign.add_argument('--json', help='Inline JSON metadata document (for file/dataset)')
+    metadata_assign.add_argument('--json-file', help='Path to JSON metadata document file (for file/dataset)')
+    metadata_assign.add_argument('--target', choices=['dataset', 'file'],
+                                 help='Collection column target (required for collection)')
+    metadata_assign.add_argument('--schema-id', help='Schema UUID for collection metadata column')
+    metadata_assign.add_argument('--default-metadata-id',
+                                 help='Default metadata UUID for collection metadata column')
+    metadata_assign.set_defaults(func=cmd_metadata_assign)
 
     metadata_validate = metadata_subparsers.add_parser('validate', help='Validate metadata against schema')
     metadata_validate.add_argument('resource_id', help='Resource ID')

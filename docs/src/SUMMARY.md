@@ -3,6 +3,7 @@
 # User Manual
 
 - [Index](./user_section/index.md)
+- [CLI Usage](./user_section/cli.md) <!-- User-facing CLI command reference with implemented vs placeholder command status and usage examples. -->
 - [Metadata Query Engine](./user_section/query-engine.md) <!-- User-facing overview of the JSON query DSL, supported operators, and example queries. -->
 
 # Developer Section
