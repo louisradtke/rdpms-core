@@ -1,5 +1,5 @@
 
-# DataSetMetadataSummaryDTO
+# MetadataColumnTargetDTO
 
 
 ## Properties
@@ -10,11 +10,11 @@ Name | Type
 ## Example
 
 ```typescript
-import type { DataSetMetadataSummaryDTO } from ''
+import type { MetadataColumnTargetDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-} satisfies DataSetMetadataSummaryDTO
+} satisfies MetadataColumnTargetDTO
 
 console.log(example)
 
@@ -23,7 +23,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as DataSetMetadataSummaryDTO
+const exampleParsed = JSON.parse(exampleJSON) as MetadataColumnTargetDTO
 console.log(exampleParsed)
 ```
 

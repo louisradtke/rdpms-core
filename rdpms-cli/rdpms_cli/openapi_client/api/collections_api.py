@@ -22,7 +22,7 @@ from typing_extensions import Annotated
 from uuid import UUID
 from rdpms_cli.openapi_client.models.collection_detailed_dto import CollectionDetailedDTO
 from rdpms_cli.openapi_client.models.collection_summary_dto import CollectionSummaryDTO
-from rdpms_cli.openapi_client.models.metadata_column_target import MetadataColumnTarget
+from rdpms_cli.openapi_client.models.metadata_column_target_dto import MetadataColumnTargetDTO
 
 from rdpms_cli.openapi_client.api_client import ApiClient, RequestSerialized
 from rdpms_cli.openapi_client.api_response import ApiResponse
@@ -600,7 +600,7 @@ class CollectionsApi:
         self,
         id: UUID,
         key: StrictStr,
-        target: Optional[MetadataColumnTarget] = None,
+        target: Optional[MetadataColumnTargetDTO] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -622,7 +622,7 @@ class CollectionsApi:
         :param key: (required)
         :type key: str
         :param target:
-        :type target: MetadataColumnTarget
+        :type target: MetadataColumnTargetDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -675,7 +675,7 @@ class CollectionsApi:
         self,
         id: UUID,
         key: StrictStr,
-        target: Optional[MetadataColumnTarget] = None,
+        target: Optional[MetadataColumnTargetDTO] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -697,7 +697,7 @@ class CollectionsApi:
         :param key: (required)
         :type key: str
         :param target:
-        :type target: MetadataColumnTarget
+        :type target: MetadataColumnTargetDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -750,7 +750,7 @@ class CollectionsApi:
         self,
         id: UUID,
         key: StrictStr,
-        target: Optional[MetadataColumnTarget] = None,
+        target: Optional[MetadataColumnTargetDTO] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -772,7 +772,7 @@ class CollectionsApi:
         :param key: (required)
         :type key: str
         :param target:
-        :type target: MetadataColumnTarget
+        :type target: MetadataColumnTargetDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -893,7 +893,7 @@ class CollectionsApi:
         id: UUID,
         key: StrictStr,
         new_key: Optional[StrictStr] = None,
-        target: Optional[MetadataColumnTarget] = None,
+        target: Optional[MetadataColumnTargetDTO] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -917,7 +917,7 @@ class CollectionsApi:
         :param new_key:
         :type new_key: str
         :param target:
-        :type target: MetadataColumnTarget
+        :type target: MetadataColumnTargetDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -972,7 +972,7 @@ class CollectionsApi:
         id: UUID,
         key: StrictStr,
         new_key: Optional[StrictStr] = None,
-        target: Optional[MetadataColumnTarget] = None,
+        target: Optional[MetadataColumnTargetDTO] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -996,7 +996,7 @@ class CollectionsApi:
         :param new_key:
         :type new_key: str
         :param target:
-        :type target: MetadataColumnTarget
+        :type target: MetadataColumnTargetDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1051,7 +1051,7 @@ class CollectionsApi:
         id: UUID,
         key: StrictStr,
         new_key: Optional[StrictStr] = None,
-        target: Optional[MetadataColumnTarget] = None,
+        target: Optional[MetadataColumnTargetDTO] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1075,7 +1075,7 @@ class CollectionsApi:
         :param new_key:
         :type new_key: str
         :param target:
-        :type target: MetadataColumnTarget
+        :type target: MetadataColumnTargetDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1203,7 +1203,7 @@ class CollectionsApi:
         key: StrictStr,
         schema_id: Optional[UUID] = None,
         default_metadata_id: Optional[UUID] = None,
-        target: Optional[MetadataColumnTarget] = None,
+        target: Optional[MetadataColumnTargetDTO] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1229,7 +1229,7 @@ class CollectionsApi:
         :param default_metadata_id:
         :type default_metadata_id: UUID
         :param target:
-        :type target: MetadataColumnTarget
+        :type target: MetadataColumnTargetDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1287,7 +1287,7 @@ class CollectionsApi:
         key: StrictStr,
         schema_id: Optional[UUID] = None,
         default_metadata_id: Optional[UUID] = None,
-        target: Optional[MetadataColumnTarget] = None,
+        target: Optional[MetadataColumnTargetDTO] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1313,7 +1313,7 @@ class CollectionsApi:
         :param default_metadata_id:
         :type default_metadata_id: UUID
         :param target:
-        :type target: MetadataColumnTarget
+        :type target: MetadataColumnTargetDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1371,7 +1371,7 @@ class CollectionsApi:
         key: StrictStr,
         schema_id: Optional[UUID] = None,
         default_metadata_id: Optional[UUID] = None,
-        target: Optional[MetadataColumnTarget] = None,
+        target: Optional[MetadataColumnTargetDTO] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1397,7 +1397,7 @@ class CollectionsApi:
         :param default_metadata_id:
         :type default_metadata_id: UUID
         :param target:
-        :type target: MetadataColumnTarget
+        :type target: MetadataColumnTargetDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of

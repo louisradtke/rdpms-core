@@ -1,22 +1,20 @@
 
-# DataSetFileMetadataSummaryDTO
+# QueryMode
 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`files` | [Array&lt;FileMetadataSummaryDTO&gt;](FileMetadataSummaryDTO.md)
 
 ## Example
 
 ```typescript
-import type { DataSetFileMetadataSummaryDTO } from ''
+import type { QueryMode } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "files": null,
-} satisfies DataSetFileMetadataSummaryDTO
+} satisfies QueryMode
 
 console.log(example)
 
@@ -25,7 +23,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as DataSetFileMetadataSummaryDTO
+const exampleParsed = JSON.parse(exampleJSON) as QueryMode
 console.log(exampleParsed)
 ```
 

@@ -20,12 +20,13 @@ from pydantic import Field, StrictBytes, StrictStr
 from typing import List, Optional, Union
 from typing_extensions import Annotated
 from uuid import UUID
-from rdpms_cli.openapi_client.models.api_v1_data_datasets_get200_response_inner import ApiV1DataDatasetsGet200ResponseInner
-from rdpms_cli.openapi_client.models.data_set_detailed_dto import DataSetDetailedDTO
+from rdpms_cli.openapi_client.models.data_set_create_request_dto import DataSetCreateRequestDTO
 from rdpms_cli.openapi_client.models.data_set_list_view_mode import DataSetListViewMode
+from rdpms_cli.openapi_client.models.data_set_summary_dto import DataSetSummaryDTO
 from rdpms_cli.openapi_client.models.file_create_response_dto import FileCreateResponseDTO
 from rdpms_cli.openapi_client.models.meta_date_dto import MetaDateDTO
-from rdpms_cli.openapi_client.models.metadata_column_target import MetadataColumnTarget
+from rdpms_cli.openapi_client.models.metadata_column_target_dto import MetadataColumnTargetDTO
+from rdpms_cli.openapi_client.models.metadata_query_dto import MetadataQueryDTO
 from rdpms_cli.openapi_client.models.s3_file_create_request_dto import S3FileCreateRequestDTO
 
 from rdpms_cli.openapi_client.api_client import ApiClient, RequestSerialized
@@ -51,8 +52,8 @@ class DataSetsApi:
         self,
         collection_id: Optional[UUID] = None,
         deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
-        view: Optional[DataSetListViewMode] = None,
-        metadata_target: Optional[MetadataColumnTarget] = None,
+        view: Annotated[Optional[DataSetListViewMode], Field(description="Whether to only return dataset summaries (default), or metadata as well.")] = None,
+        metadata_target: Annotated[Optional[MetadataColumnTargetDTO], Field(description="If view is set to yield metadata,             they will be set either on datasets or files.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -65,18 +66,18 @@ class DataSetsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[ApiV1DataDatasetsGet200ResponseInner]:
-        """Get data sets.
+    ) -> List[DataSetSummaryDTO]:
+        """Query data sets.
 
 
         :param collection_id: 
         :type collection_id: UUID
         :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
-        :param view:
+        :param view: Whether to only return dataset summaries (default), or metadata as well.
         :type view: DataSetListViewMode
-        :param metadata_target:
-        :type metadata_target: MetadataColumnTarget
+        :param metadata_target: If view is set to yield metadata,             they will be set either on datasets or files.
+        :type metadata_target: MetadataColumnTargetDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -111,7 +112,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[ApiV1DataDatasetsGet200ResponseInner]",
+            '200': "List[DataSetSummaryDTO]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -129,8 +130,8 @@ class DataSetsApi:
         self,
         collection_id: Optional[UUID] = None,
         deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
-        view: Optional[DataSetListViewMode] = None,
-        metadata_target: Optional[MetadataColumnTarget] = None,
+        view: Annotated[Optional[DataSetListViewMode], Field(description="Whether to only return dataset summaries (default), or metadata as well.")] = None,
+        metadata_target: Annotated[Optional[MetadataColumnTargetDTO], Field(description="If view is set to yield metadata,             they will be set either on datasets or files.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -143,18 +144,18 @@ class DataSetsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[ApiV1DataDatasetsGet200ResponseInner]]:
-        """Get data sets.
+    ) -> ApiResponse[List[DataSetSummaryDTO]]:
+        """Query data sets.
 
 
         :param collection_id: 
         :type collection_id: UUID
         :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
-        :param view:
+        :param view: Whether to only return dataset summaries (default), or metadata as well.
         :type view: DataSetListViewMode
-        :param metadata_target:
-        :type metadata_target: MetadataColumnTarget
+        :param metadata_target: If view is set to yield metadata,             they will be set either on datasets or files.
+        :type metadata_target: MetadataColumnTargetDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -189,7 +190,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[ApiV1DataDatasetsGet200ResponseInner]",
+            '200': "List[DataSetSummaryDTO]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -207,8 +208,8 @@ class DataSetsApi:
         self,
         collection_id: Optional[UUID] = None,
         deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
-        view: Optional[DataSetListViewMode] = None,
-        metadata_target: Optional[MetadataColumnTarget] = None,
+        view: Annotated[Optional[DataSetListViewMode], Field(description="Whether to only return dataset summaries (default), or metadata as well.")] = None,
+        metadata_target: Annotated[Optional[MetadataColumnTargetDTO], Field(description="If view is set to yield metadata,             they will be set either on datasets or files.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -222,17 +223,17 @@ class DataSetsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get data sets.
+        """Query data sets.
 
 
         :param collection_id: 
         :type collection_id: UUID
         :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
-        :param view:
+        :param view: Whether to only return dataset summaries (default), or metadata as well.
         :type view: DataSetListViewMode
-        :param metadata_target:
-        :type metadata_target: MetadataColumnTarget
+        :param metadata_target: If view is set to yield metadata,             they will be set either on datasets or files.
+        :type metadata_target: MetadataColumnTargetDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -267,7 +268,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[ApiV1DataDatasetsGet200ResponseInner]",
+            '200': "List[DataSetSummaryDTO]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -923,7 +924,7 @@ class DataSetsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> DataSetDetailedDTO:
+    ) -> DataSetSummaryDTO:
         """api_v1_data_datasets_id_get
 
 
@@ -960,7 +961,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DataSetDetailedDTO",
+            '200': "DataSetSummaryDTO",
             '404': "ProblemDetails",
         }
         response_data = self.api_client.call_api(
@@ -990,7 +991,7 @@ class DataSetsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[DataSetDetailedDTO]:
+    ) -> ApiResponse[DataSetSummaryDTO]:
         """api_v1_data_datasets_id_get
 
 
@@ -1027,7 +1028,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DataSetDetailedDTO",
+            '200': "DataSetSummaryDTO",
             '404': "ProblemDetails",
         }
         response_data = self.api_client.call_api(
@@ -1094,7 +1095,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DataSetDetailedDTO",
+            '200': "DataSetSummaryDTO",
             '404': "ProblemDetails",
         }
         response_data = self.api_client.call_api(
@@ -2308,9 +2309,9 @@ class DataSetsApi:
 
 
     @validate_call
-    def api_v1_data_datasets_post(
+    def api_v1_data_datasets_new_post(
         self,
-        api_v1_data_datasets_get200_response_inner: Optional[ApiV1DataDatasetsGet200ResponseInner] = None,
+        data_set_create_request_dto: Optional[DataSetCreateRequestDTO] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2323,12 +2324,12 @@ class DataSetsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> DataSetDetailedDTO:
+    ) -> DataSetSummaryDTO:
         """Add a single item to the system.
 
 
-        :param api_v1_data_datasets_get200_response_inner: 
-        :type api_v1_data_datasets_get200_response_inner: ApiV1DataDatasetsGet200ResponseInner
+        :param data_set_create_request_dto: 
+        :type data_set_create_request_dto: DataSetCreateRequestDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2351,8 +2352,8 @@ class DataSetsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._api_v1_data_datasets_post_serialize(
-            api_v1_data_datasets_get200_response_inner=api_v1_data_datasets_get200_response_inner,
+        _param = self._api_v1_data_datasets_new_post_serialize(
+            data_set_create_request_dto=data_set_create_request_dto,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2360,7 +2361,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DataSetDetailedDTO",
+            '200': "DataSetSummaryDTO",
             '400': "ProblemDetails",
         }
         response_data = self.api_client.call_api(
@@ -2375,9 +2376,9 @@ class DataSetsApi:
 
 
     @validate_call
-    def api_v1_data_datasets_post_with_http_info(
+    def api_v1_data_datasets_new_post_with_http_info(
         self,
-        api_v1_data_datasets_get200_response_inner: Optional[ApiV1DataDatasetsGet200ResponseInner] = None,
+        data_set_create_request_dto: Optional[DataSetCreateRequestDTO] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2390,12 +2391,12 @@ class DataSetsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[DataSetDetailedDTO]:
+    ) -> ApiResponse[DataSetSummaryDTO]:
         """Add a single item to the system.
 
 
-        :param api_v1_data_datasets_get200_response_inner: 
-        :type api_v1_data_datasets_get200_response_inner: ApiV1DataDatasetsGet200ResponseInner
+        :param data_set_create_request_dto: 
+        :type data_set_create_request_dto: DataSetCreateRequestDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2418,8 +2419,8 @@ class DataSetsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._api_v1_data_datasets_post_serialize(
-            api_v1_data_datasets_get200_response_inner=api_v1_data_datasets_get200_response_inner,
+        _param = self._api_v1_data_datasets_new_post_serialize(
+            data_set_create_request_dto=data_set_create_request_dto,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2427,7 +2428,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DataSetDetailedDTO",
+            '200': "DataSetSummaryDTO",
             '400': "ProblemDetails",
         }
         response_data = self.api_client.call_api(
@@ -2442,9 +2443,9 @@ class DataSetsApi:
 
 
     @validate_call
-    def api_v1_data_datasets_post_without_preload_content(
+    def api_v1_data_datasets_new_post_without_preload_content(
         self,
-        api_v1_data_datasets_get200_response_inner: Optional[ApiV1DataDatasetsGet200ResponseInner] = None,
+        data_set_create_request_dto: Optional[DataSetCreateRequestDTO] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2461,8 +2462,8 @@ class DataSetsApi:
         """Add a single item to the system.
 
 
-        :param api_v1_data_datasets_get200_response_inner: 
-        :type api_v1_data_datasets_get200_response_inner: ApiV1DataDatasetsGet200ResponseInner
+        :param data_set_create_request_dto: 
+        :type data_set_create_request_dto: DataSetCreateRequestDTO
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2485,8 +2486,8 @@ class DataSetsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._api_v1_data_datasets_post_serialize(
-            api_v1_data_datasets_get200_response_inner=api_v1_data_datasets_get200_response_inner,
+        _param = self._api_v1_data_datasets_new_post_serialize(
+            data_set_create_request_dto=data_set_create_request_dto,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2494,7 +2495,7 @@ class DataSetsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DataSetDetailedDTO",
+            '200': "DataSetSummaryDTO",
             '400': "ProblemDetails",
         }
         response_data = self.api_client.call_api(
@@ -2504,9 +2505,9 @@ class DataSetsApi:
         return response_data.response
 
 
-    def _api_v1_data_datasets_post_serialize(
+    def _api_v1_data_datasets_new_post_serialize(
         self,
-        api_v1_data_datasets_get200_response_inner,
+        data_set_create_request_dto,
         _request_auth,
         _content_type,
         _headers,
@@ -2532,8 +2533,8 @@ class DataSetsApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if api_v1_data_datasets_get200_response_inner is not None:
-            _body_params = api_v1_data_datasets_get200_response_inner
+        if data_set_create_request_dto is not None:
+            _body_params = data_set_create_request_dto
 
 
         # set the HTTP header `Accept`
@@ -2552,6 +2553,346 @@ class DataSetsApi:
                 self.api_client.select_header_content_type(
                     [
                         'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/api/v1/data/datasets/new',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def api_v1_data_datasets_post(
+        self,
+        collection_id: Optional[UUID] = None,
+        deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
+        view: Annotated[Optional[DataSetListViewMode], Field(description="Whether to only return dataset summaries (default), or metadata as well.")] = None,
+        metadata_target: Annotated[Optional[MetadataColumnTargetDTO], Field(description="If view is set to yield metadata,             they will be set either on datasets or files.")] = None,
+        metadata_query_dto: Annotated[Optional[MetadataQueryDTO], Field(description="Query over metadata items.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> List[DataSetSummaryDTO]:
+        """Query datasets, with additional metadata-based query.
+
+
+        :param collection_id: 
+        :type collection_id: UUID
+        :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
+        :type deleted: str
+        :param view: Whether to only return dataset summaries (default), or metadata as well.
+        :type view: DataSetListViewMode
+        :param metadata_target: If view is set to yield metadata,             they will be set either on datasets or files.
+        :type metadata_target: MetadataColumnTargetDTO
+        :param metadata_query_dto: Query over metadata items.
+        :type metadata_query_dto: MetadataQueryDTO
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._api_v1_data_datasets_post_serialize(
+            collection_id=collection_id,
+            deleted=deleted,
+            view=view,
+            metadata_target=metadata_target,
+            metadata_query_dto=metadata_query_dto,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[DataSetSummaryDTO]",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def api_v1_data_datasets_post_with_http_info(
+        self,
+        collection_id: Optional[UUID] = None,
+        deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
+        view: Annotated[Optional[DataSetListViewMode], Field(description="Whether to only return dataset summaries (default), or metadata as well.")] = None,
+        metadata_target: Annotated[Optional[MetadataColumnTargetDTO], Field(description="If view is set to yield metadata,             they will be set either on datasets or files.")] = None,
+        metadata_query_dto: Annotated[Optional[MetadataQueryDTO], Field(description="Query over metadata items.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[List[DataSetSummaryDTO]]:
+        """Query datasets, with additional metadata-based query.
+
+
+        :param collection_id: 
+        :type collection_id: UUID
+        :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
+        :type deleted: str
+        :param view: Whether to only return dataset summaries (default), or metadata as well.
+        :type view: DataSetListViewMode
+        :param metadata_target: If view is set to yield metadata,             they will be set either on datasets or files.
+        :type metadata_target: MetadataColumnTargetDTO
+        :param metadata_query_dto: Query over metadata items.
+        :type metadata_query_dto: MetadataQueryDTO
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._api_v1_data_datasets_post_serialize(
+            collection_id=collection_id,
+            deleted=deleted,
+            view=view,
+            metadata_target=metadata_target,
+            metadata_query_dto=metadata_query_dto,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[DataSetSummaryDTO]",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def api_v1_data_datasets_post_without_preload_content(
+        self,
+        collection_id: Optional[UUID] = None,
+        deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
+        view: Annotated[Optional[DataSetListViewMode], Field(description="Whether to only return dataset summaries (default), or metadata as well.")] = None,
+        metadata_target: Annotated[Optional[MetadataColumnTargetDTO], Field(description="If view is set to yield metadata,             they will be set either on datasets or files.")] = None,
+        metadata_query_dto: Annotated[Optional[MetadataQueryDTO], Field(description="Query over metadata items.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Query datasets, with additional metadata-based query.
+
+
+        :param collection_id: 
+        :type collection_id: UUID
+        :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
+        :type deleted: str
+        :param view: Whether to only return dataset summaries (default), or metadata as well.
+        :type view: DataSetListViewMode
+        :param metadata_target: If view is set to yield metadata,             they will be set either on datasets or files.
+        :type metadata_target: MetadataColumnTargetDTO
+        :param metadata_query_dto: Query over metadata items.
+        :type metadata_query_dto: MetadataQueryDTO
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._api_v1_data_datasets_post_serialize(
+            collection_id=collection_id,
+            deleted=deleted,
+            view=view,
+            metadata_target=metadata_target,
+            metadata_query_dto=metadata_query_dto,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[DataSetSummaryDTO]",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _api_v1_data_datasets_post_serialize(
+        self,
+        collection_id,
+        deleted,
+        view,
+        metadata_target,
+        metadata_query_dto,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if collection_id is not None:
+            
+            _query_params.append(('collectionId', collection_id))
+            
+        if deleted is not None:
+            
+            _query_params.append(('deleted', deleted))
+            
+        if view is not None:
+            
+            _query_params.append(('view', view.value))
+            
+        if metadata_target is not None:
+            
+            _query_params.append(('metadataTarget', metadata_target.value))
+            
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if metadata_query_dto is not None:
+            _body_params = metadata_query_dto
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json', 
+                        'text/json', 
+                        'application/*+json'
                     ]
                 )
             )

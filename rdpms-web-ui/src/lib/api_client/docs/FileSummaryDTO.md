@@ -6,7 +6,6 @@
 
 Name | Type
 ------------ | -------------
-`kind` | string
 `id` | string
 `name` | string
 `downloadURI` | string
@@ -19,6 +18,7 @@ Name | Type
 `isTimeSeries` | boolean
 `metaDates` | [Array&lt;AssignedMetaDateDTO&gt;](AssignedMetaDateDTO.md)
 `deletionState` | [DeletionStateDTO](DeletionStateDTO.md)
+`references` | [Array&lt;FileStorageReferenceSummaryDTO&gt;](FileStorageReferenceSummaryDTO.md)
 
 ## Example
 
@@ -27,7 +27,6 @@ import type { FileSummaryDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "kind": null,
   "id": null,
   "name": null,
   "downloadURI": null,
@@ -40,6 +39,7 @@ const example = {
   "isTimeSeries": null,
   "metaDates": null,
   "deletionState": null,
+  "references": null,
 } satisfies FileSummaryDTO
 
 console.log(example)

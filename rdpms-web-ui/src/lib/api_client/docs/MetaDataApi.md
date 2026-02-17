@@ -348,8 +348,8 @@ async function example() {
   const api = new MetaDataApi();
 
   const body = {
-    // any | The JSON document (optional)
-    body: ...,
+    // object | The JSON document (optional)
+    body: Object,
   } satisfies ApiV1DataSchemasPostRequest;
 
   try {
@@ -369,7 +369,7 @@ example().catch(console.error);
 
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **body** | `any` | The JSON document | [Optional] |
+| **body** | `object` | The JSON document | [Optional] |
 
 ### Return type
 

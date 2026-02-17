@@ -20,6 +20,13 @@ import {
     AssignedMetaDateDTOToJSON,
     AssignedMetaDateDTOToJSONTyped,
 } from './AssignedMetaDateDTO';
+import type { FileStorageReferenceSummaryDTO } from './FileStorageReferenceSummaryDTO';
+import {
+    FileStorageReferenceSummaryDTOFromJSON,
+    FileStorageReferenceSummaryDTOFromJSONTyped,
+    FileStorageReferenceSummaryDTOToJSON,
+    FileStorageReferenceSummaryDTOToJSONTyped,
+} from './FileStorageReferenceSummaryDTO';
 import type { ContentTypeDTO } from './ContentTypeDTO';
 import {
     ContentTypeDTOFromJSON,
@@ -35,20 +42,12 @@ import {
     DeletionStateDTOToJSONTyped,
 } from './DeletionStateDTO';
 
-import { type FileDetailedDTO, FileDetailedDTOFromJSONTyped, FileDetailedDTOToJSON, FileDetailedDTOToJSONTyped } from './FileDetailedDTO';
-import { type FileMetadataSummaryDTO, FileMetadataSummaryDTOFromJSONTyped, FileMetadataSummaryDTOToJSON, FileMetadataSummaryDTOToJSONTyped } from './FileMetadataSummaryDTO';
 /**
  * 
  * @export
  * @interface FileSummaryDTO
  */
 export interface FileSummaryDTO {
-    /**
-     * 
-     * @type {string}
-     * @memberof FileSummaryDTO
-     */
-    kind: string;
     /**
      * 
      * @type {string}
@@ -122,6 +121,14 @@ export interface FileSummaryDTO {
      * @memberof FileSummaryDTO
      */
     deletionState?: DeletionStateDTO;
+    /**
+     * Storage references of the file.
+     * Null means this information is not included.
+     * Empty means this file currently has no references.
+     * @type {Array<FileStorageReferenceSummaryDTO>}
+     * @memberof FileSummaryDTO
+     */
+    references?: Array<FileStorageReferenceSummaryDTO> | null;
 }
 
 
@@ -130,7 +137,6 @@ export interface FileSummaryDTO {
  * Check if a given object implements the FileSummaryDTO interface.
  */
 export function instanceOfFileSummaryDTO(value: object): value is FileSummaryDTO {
-    if (!('kind' in value) || value['kind'] === undefined) return false;
     return true;
 }
 
@@ -142,21 +148,8 @@ export function FileSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
     if (json == null) {
         return json;
     }
-    if (!ignoreDiscriminator) {
-        if (json['kind'] === 'detailed') {
-            return FileDetailedDTOFromJSONTyped(json, ignoreDiscriminator);
-        }
-        if (json['kind'] === 'metadata') {
-            return FileMetadataSummaryDTOFromJSONTyped(json, ignoreDiscriminator);
-        }
-        if (json['kind'] === 'summary') {
-            return FileSummaryDTOFromJSONTyped(json, true);
-        }
-
-    }
     return {
         
-        'kind': json['kind'],
         'id': json['id'] == null ? undefined : json['id'],
         'name': json['name'] == null ? undefined : json['name'],
         'downloadURI': json['downloadURI'] == null ? undefined : json['downloadURI'],
@@ -169,6 +162,7 @@ export function FileSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
         'isTimeSeries': json['isTimeSeries'] == null ? undefined : json['isTimeSeries'],
         'metaDates': json['metaDates'] == null ? undefined : ((json['metaDates'] as Array<any>).map(AssignedMetaDateDTOFromJSON)),
         'deletionState': json['deletionState'] == null ? undefined : DeletionStateDTOFromJSON(json['deletionState']),
+        'references': json['references'] == null ? undefined : ((json['references'] as Array<any>).map(FileStorageReferenceSummaryDTOFromJSON)),
     };
 }
 
@@ -181,20 +175,8 @@ export function FileSummaryDTOToJSONTyped(value?: FileSummaryDTO | null, ignoreD
         return value;
     }
 
-    if (!ignoreDiscriminator) {
-        switch (value['kind']) {
-            case 'detailed':
-                return FileDetailedDTOToJSONTyped(value as FileDetailedDTO, ignoreDiscriminator);
-            case 'metadata':
-                return FileMetadataSummaryDTOToJSONTyped(value as FileMetadataSummaryDTO, ignoreDiscriminator);
-            default:
-                return value;
-        }
-    }
-
     return {
         
-        'kind': value['kind'],
         'id': value['id'],
         'name': value['name'],
         'downloadURI': value['downloadURI'],
@@ -207,6 +189,7 @@ export function FileSummaryDTOToJSONTyped(value?: FileSummaryDTO | null, ignoreD
         'isTimeSeries': value['isTimeSeries'],
         'metaDates': value['metaDates'] == null ? undefined : ((value['metaDates'] as Array<any>).map(AssignedMetaDateDTOToJSON)),
         'deletionState': DeletionStateDTOToJSON(value['deletionState']),
+        'references': value['references'] == null ? undefined : ((value['references'] as Array<any>).map(FileStorageReferenceSummaryDTOToJSON)),
     };
 }
 

@@ -174,7 +174,7 @@ async function example() {
     id: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
     // string
     key: key_example,
-    // MetadataColumnTarget (optional)
+    // MetadataColumnTargetDTO (optional)
     target: ...,
   } satisfies ApiV1DataCollectionsIdMetadataKeyDeleteRequest;
 
@@ -197,7 +197,7 @@ example().catch(console.error);
 |------------- | ------------- | ------------- | -------------|
 | **id** | `string` |  | [Defaults to `undefined`] |
 | **key** | `string` |  | [Defaults to `undefined`] |
-| **target** | `MetadataColumnTarget` |  | [Optional] [Defaults to `undefined`] [Enum: Dataset, File] |
+| **target** | `MetadataColumnTargetDTO` |  | [Optional] [Defaults to `undefined`] [Enum: Dataset, File] |
 
 ### Return type
 
@@ -248,7 +248,7 @@ async function example() {
     key: key_example,
     // string (optional)
     newKey: newKey_example,
-    // MetadataColumnTarget (optional)
+    // MetadataColumnTargetDTO (optional)
     target: ...,
   } satisfies ApiV1DataCollectionsIdMetadataKeyPostRequest;
 
@@ -272,7 +272,7 @@ example().catch(console.error);
 | **id** | `string` |  | [Defaults to `undefined`] |
 | **key** | `string` |  | [Defaults to `undefined`] |
 | **newKey** | `string` |  | [Optional] [Defaults to `undefined`] |
-| **target** | `MetadataColumnTarget` |  | [Optional] [Defaults to `undefined`] [Enum: Dataset, File] |
+| **target** | `MetadataColumnTargetDTO` |  | [Optional] [Defaults to `undefined`] [Enum: Dataset, File] |
 
 ### Return type
 
@@ -325,7 +325,7 @@ async function example() {
     schemaId: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
     // string (optional)
     defaultMetadataId: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
-    // MetadataColumnTarget (optional)
+    // MetadataColumnTargetDTO (optional)
     target: ...,
   } satisfies ApiV1DataCollectionsIdMetadataKeyPutRequest;
 
@@ -350,7 +350,7 @@ example().catch(console.error);
 | **key** | `string` |  | [Defaults to `undefined`] |
 | **schemaId** | `string` |  | [Optional] [Defaults to `undefined`] |
 | **defaultMetadataId** | `string` |  | [Optional] [Defaults to `undefined`] |
-| **target** | `MetadataColumnTarget` |  | [Optional] [Defaults to `undefined`] [Enum: Dataset, File] |
+| **target** | `MetadataColumnTargetDTO` |  | [Optional] [Defaults to `undefined`] [Enum: Dataset, File] |
 
 ### Return type
 

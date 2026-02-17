@@ -1,23 +1,29 @@
 
-# DataSetDetailedDTO
+# DataSetCreateRequestDTO
 
-Represents a summary of a dataset, including identifying information, timestamps, state, tags, and metadata fields.
+Request body for creating a new dataset. Kept non-polymorphic on purpose to avoid discriminator/subtype binding issues.
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`files` | [Array&lt;DataSetDetailedDTOAllOfFiles&gt;](DataSetDetailedDTOAllOfFiles.md)
+`slug` | string
+`name` | string
+`createdStampUTC` | Date
+`collectionId` | string
 
 ## Example
 
 ```typescript
-import type { DataSetDetailedDTO } from ''
+import type { DataSetCreateRequestDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "files": null,
-} satisfies DataSetDetailedDTO
+  "slug": null,
+  "name": null,
+  "createdStampUTC": null,
+  "collectionId": null,
+} satisfies DataSetCreateRequestDTO
 
 console.log(example)
 
@@ -26,7 +32,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as DataSetDetailedDTO
+const exampleParsed = JSON.parse(exampleJSON) as DataSetCreateRequestDTO
 console.log(exampleParsed)
 ```
 

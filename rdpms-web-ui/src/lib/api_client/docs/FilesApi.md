@@ -17,7 +17,7 @@ All URIs are relative to *http://localhost*
 
 ## apiV1DataFileRefsGet
 
-> ApiV1DataFilesGet200ResponseInner apiV1DataFileRefsGet(storeGuid, type)
+> FileSummaryDTO apiV1DataFileRefsGet(storeGuid, type)
 
 
 
@@ -63,7 +63,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**ApiV1DataFilesGet200ResponseInner**](ApiV1DataFilesGet200ResponseInner.md)
+[**FileSummaryDTO**](FileSummaryDTO.md)
 
 ### Authorization
 
@@ -85,7 +85,7 @@ No authorization required
 
 ## apiV1DataFilesGet
 
-> Array&lt;ApiV1DataFilesGet200ResponseInner&gt; apiV1DataFilesGet(view)
+> Array&lt;FileSummaryDTO&gt; apiV1DataFilesGet(view)
 
 Get files.
 
@@ -128,7 +128,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**Array&lt;ApiV1DataFilesGet200ResponseInner&gt;**](ApiV1DataFilesGet200ResponseInner.md)
+[**Array&lt;FileSummaryDTO&gt;**](FileSummaryDTO.md)
 
 ### Authorization
 
@@ -284,7 +284,7 @@ No authorization required
 
 ## apiV1DataFilesIdGet
 
-> FileDetailedDTO apiV1DataFilesIdGet(id)
+> FileSummaryDTO apiV1DataFilesIdGet(id)
 
 Get details of a single file.
 
@@ -327,7 +327,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**FileDetailedDTO**](FileDetailedDTO.md)
+[**FileSummaryDTO**](FileSummaryDTO.md)
 
 ### Authorization
 

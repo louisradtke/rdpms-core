@@ -1,28 +1,24 @@
 
-# MetaDateCollectionColumnDTO
+# MetadataQueryDTO
 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`metadataKey` | string
-`schema` | [SchemaDTO](SchemaDTO.md)
-`defaultFieldId` | string
-`target` | [MetadataColumnTargetDTO](MetadataColumnTargetDTO.md)
+`mode` | [QueryMode](QueryMode.md)
+`queries` | [Array&lt;MetadataQueryPartDTO&gt;](MetadataQueryPartDTO.md)
 
 ## Example
 
 ```typescript
-import type { MetaDateCollectionColumnDTO } from ''
+import type { MetadataQueryDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "metadataKey": null,
-  "schema": null,
-  "defaultFieldId": null,
-  "target": null,
-} satisfies MetaDateCollectionColumnDTO
+  "mode": null,
+  "queries": null,
+} satisfies MetadataQueryDTO
 
 console.log(example)
 
@@ -31,7 +27,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as MetaDateCollectionColumnDTO
+const exampleParsed = JSON.parse(exampleJSON) as MetadataQueryDTO
 console.log(exampleParsed)
 ```
 

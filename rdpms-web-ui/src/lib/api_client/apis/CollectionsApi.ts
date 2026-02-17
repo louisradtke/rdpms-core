@@ -18,7 +18,7 @@ import type {
   CollectionDetailedDTO,
   CollectionSummaryDTO,
   ErrorMessageDTO,
-  MetadataColumnTarget,
+  MetadataColumnTargetDTO,
   ProblemDetails,
 } from '../models/index';
 import {
@@ -28,8 +28,8 @@ import {
     CollectionSummaryDTOToJSON,
     ErrorMessageDTOFromJSON,
     ErrorMessageDTOToJSON,
-    MetadataColumnTargetFromJSON,
-    MetadataColumnTargetToJSON,
+    MetadataColumnTargetDTOFromJSON,
+    MetadataColumnTargetDTOToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
 } from '../models/index';
@@ -47,14 +47,14 @@ export interface ApiV1DataCollectionsIdGetRequest {
 export interface ApiV1DataCollectionsIdMetadataKeyDeleteRequest {
     id: string;
     key: string;
-    target?: MetadataColumnTarget;
+    target?: MetadataColumnTargetDTO;
 }
 
 export interface ApiV1DataCollectionsIdMetadataKeyPostRequest {
     id: string;
     key: string;
     newKey?: string;
-    target?: MetadataColumnTarget;
+    target?: MetadataColumnTargetDTO;
 }
 
 export interface ApiV1DataCollectionsIdMetadataKeyPutRequest {
@@ -62,7 +62,7 @@ export interface ApiV1DataCollectionsIdMetadataKeyPutRequest {
     key: string;
     schemaId?: string;
     defaultMetadataId?: string;
-    target?: MetadataColumnTarget;
+    target?: MetadataColumnTargetDTO;
 }
 
 export interface ApiV1DataCollectionsPostRequest {

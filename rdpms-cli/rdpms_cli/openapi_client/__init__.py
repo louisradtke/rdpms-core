@@ -34,32 +34,30 @@ __all__ = [
     "ApiKeyError",
     "ApiAttributeError",
     "ApiException",
-    "ApiV1DataDatasetsGet200ResponseInner",
-    "ApiV1DataFilesGet200ResponseInner",
     "AssignedMetaDateDTO",
     "CollectionDetailedDTO",
     "CollectionSummaryDTO",
     "ContentTypeDTO",
-    "DataSetDetailedDTO",
-    "DataSetDetailedDTOAllOfFiles",
-    "DataSetFileMetadataSummaryDTO",
+    "DataSetCreateRequestDTO",
     "DataSetListViewMode",
-    "DataSetMetadataSummaryDTO",
     "DataSetSummaryDTO",
     "DataStoreSummaryDTO",
     "DeletionStateDTO",
     "ErrorMessageDTO",
+    "FileCreateRequestDTO",
     "FileCreateResponseDTO",
-    "FileDetailedDTO",
     "FileListViewMode",
-    "FileMetadataSummaryDTO",
     "FileStorageReferenceSummaryDTO",
     "FileSummaryDTO",
+    "HttpValidationProblemDetails",
     "MetaDateCollectionColumnDTO",
     "MetaDateDTO",
-    "MetadataColumnTarget",
+    "MetadataColumnTargetDTO",
+    "MetadataQueryDTO",
+    "MetadataQueryPartDTO",
     "ProblemDetails",
     "ProjectSummaryDTO",
+    "QueryMode",
     "S3FileCreateRequestDTO",
     "SchemaDTO",
     "TagDTO",
@@ -86,32 +84,30 @@ from rdpms_cli.openapi_client.exceptions import ApiAttributeError as ApiAttribut
 from rdpms_cli.openapi_client.exceptions import ApiException as ApiException
 
 # import models into sdk package
-from rdpms_cli.openapi_client.models.api_v1_data_datasets_get200_response_inner import ApiV1DataDatasetsGet200ResponseInner as ApiV1DataDatasetsGet200ResponseInner
-from rdpms_cli.openapi_client.models.api_v1_data_files_get200_response_inner import ApiV1DataFilesGet200ResponseInner as ApiV1DataFilesGet200ResponseInner
 from rdpms_cli.openapi_client.models.assigned_meta_date_dto import AssignedMetaDateDTO as AssignedMetaDateDTO
 from rdpms_cli.openapi_client.models.collection_detailed_dto import CollectionDetailedDTO as CollectionDetailedDTO
 from rdpms_cli.openapi_client.models.collection_summary_dto import CollectionSummaryDTO as CollectionSummaryDTO
 from rdpms_cli.openapi_client.models.content_type_dto import ContentTypeDTO as ContentTypeDTO
-from rdpms_cli.openapi_client.models.data_set_detailed_dto import DataSetDetailedDTO as DataSetDetailedDTO
-from rdpms_cli.openapi_client.models.data_set_detailed_dto_all_of_files import DataSetDetailedDTOAllOfFiles as DataSetDetailedDTOAllOfFiles
-from rdpms_cli.openapi_client.models.data_set_file_metadata_summary_dto import DataSetFileMetadataSummaryDTO as DataSetFileMetadataSummaryDTO
+from rdpms_cli.openapi_client.models.data_set_create_request_dto import DataSetCreateRequestDTO as DataSetCreateRequestDTO
 from rdpms_cli.openapi_client.models.data_set_list_view_mode import DataSetListViewMode as DataSetListViewMode
-from rdpms_cli.openapi_client.models.data_set_metadata_summary_dto import DataSetMetadataSummaryDTO as DataSetMetadataSummaryDTO
 from rdpms_cli.openapi_client.models.data_set_summary_dto import DataSetSummaryDTO as DataSetSummaryDTO
 from rdpms_cli.openapi_client.models.data_store_summary_dto import DataStoreSummaryDTO as DataStoreSummaryDTO
 from rdpms_cli.openapi_client.models.deletion_state_dto import DeletionStateDTO as DeletionStateDTO
 from rdpms_cli.openapi_client.models.error_message_dto import ErrorMessageDTO as ErrorMessageDTO
+from rdpms_cli.openapi_client.models.file_create_request_dto import FileCreateRequestDTO as FileCreateRequestDTO
 from rdpms_cli.openapi_client.models.file_create_response_dto import FileCreateResponseDTO as FileCreateResponseDTO
-from rdpms_cli.openapi_client.models.file_detailed_dto import FileDetailedDTO as FileDetailedDTO
 from rdpms_cli.openapi_client.models.file_list_view_mode import FileListViewMode as FileListViewMode
-from rdpms_cli.openapi_client.models.file_metadata_summary_dto import FileMetadataSummaryDTO as FileMetadataSummaryDTO
 from rdpms_cli.openapi_client.models.file_storage_reference_summary_dto import FileStorageReferenceSummaryDTO as FileStorageReferenceSummaryDTO
 from rdpms_cli.openapi_client.models.file_summary_dto import FileSummaryDTO as FileSummaryDTO
+from rdpms_cli.openapi_client.models.http_validation_problem_details import HttpValidationProblemDetails as HttpValidationProblemDetails
 from rdpms_cli.openapi_client.models.meta_date_collection_column_dto import MetaDateCollectionColumnDTO as MetaDateCollectionColumnDTO
 from rdpms_cli.openapi_client.models.meta_date_dto import MetaDateDTO as MetaDateDTO
-from rdpms_cli.openapi_client.models.metadata_column_target import MetadataColumnTarget as MetadataColumnTarget
+from rdpms_cli.openapi_client.models.metadata_column_target_dto import MetadataColumnTargetDTO as MetadataColumnTargetDTO
+from rdpms_cli.openapi_client.models.metadata_query_dto import MetadataQueryDTO as MetadataQueryDTO
+from rdpms_cli.openapi_client.models.metadata_query_part_dto import MetadataQueryPartDTO as MetadataQueryPartDTO
 from rdpms_cli.openapi_client.models.problem_details import ProblemDetails as ProblemDetails
 from rdpms_cli.openapi_client.models.project_summary_dto import ProjectSummaryDTO as ProjectSummaryDTO
+from rdpms_cli.openapi_client.models.query_mode import QueryMode as QueryMode
 from rdpms_cli.openapi_client.models.s3_file_create_request_dto import S3FileCreateRequestDTO as S3FileCreateRequestDTO
 from rdpms_cli.openapi_client.models.schema_dto import SchemaDTO as SchemaDTO
 from rdpms_cli.openapi_client.models.tag_dto import TagDTO as TagDTO

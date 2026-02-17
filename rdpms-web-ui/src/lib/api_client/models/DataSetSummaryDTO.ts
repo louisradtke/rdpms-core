@@ -20,6 +20,13 @@ import {
     AssignedMetaDateDTOToJSON,
     AssignedMetaDateDTOToJSONTyped,
 } from './AssignedMetaDateDTO';
+import type { FileSummaryDTO } from './FileSummaryDTO';
+import {
+    FileSummaryDTOFromJSON,
+    FileSummaryDTOFromJSONTyped,
+    FileSummaryDTOToJSON,
+    FileSummaryDTOToJSONTyped,
+} from './FileSummaryDTO';
 import type { DeletionStateDTO } from './DeletionStateDTO';
 import {
     DeletionStateDTOFromJSON,
@@ -35,9 +42,6 @@ import {
     TagDTOToJSONTyped,
 } from './TagDTO';
 
-import { type DataSetDetailedDTO, DataSetDetailedDTOFromJSONTyped, DataSetDetailedDTOToJSON, DataSetDetailedDTOToJSONTyped } from './DataSetDetailedDTO';
-import { type DataSetMetadataSummaryDTO, DataSetMetadataSummaryDTOFromJSONTyped, DataSetMetadataSummaryDTOToJSON, DataSetMetadataSummaryDTOToJSONTyped } from './DataSetMetadataSummaryDTO';
-import { type DataSetFileMetadataSummaryDTO, DataSetFileMetadataSummaryDTOFromJSONTyped, DataSetFileMetadataSummaryDTOToJSON, DataSetFileMetadataSummaryDTOToJSONTyped } from './DataSetFileMetadataSummaryDTO';
 /**
  * Represents a summary of a dataset, including identifying information, timestamps, state, tags,
  * and metadata fields.
@@ -45,12 +49,6 @@ import { type DataSetFileMetadataSummaryDTO, DataSetFileMetadataSummaryDTOFromJS
  * @interface DataSetSummaryDTO
  */
 export interface DataSetSummaryDTO {
-    /**
-     * 
-     * @type {string}
-     * @memberof DataSetSummaryDTO
-     */
-    kind: string;
     /**
      * Uniquely identifies the dataset. Typically server-generated. Should not be manually set by the client.
      * @type {string}
@@ -132,6 +130,14 @@ export interface DataSetSummaryDTO {
      */
     metaDates?: Array<AssignedMetaDateDTO> | null;
     /**
+     * Files of the dataset.
+     * Null means this information is not included.
+     * Empty means this dataset has no files.
+     * @type {Array<FileSummaryDTO>}
+     * @memberof DataSetSummaryDTO
+     */
+    files?: Array<FileSummaryDTO> | null;
+    /**
      * Amount of files in the dataset.
      * @type {number}
      * @memberof DataSetSummaryDTO
@@ -151,7 +157,6 @@ export interface DataSetSummaryDTO {
  * Check if a given object implements the DataSetSummaryDTO interface.
  */
 export function instanceOfDataSetSummaryDTO(value: object): value is DataSetSummaryDTO {
-    if (!('kind' in value) || value['kind'] === undefined) return false;
     return true;
 }
 
@@ -163,24 +168,8 @@ export function DataSetSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: b
     if (json == null) {
         return json;
     }
-    if (!ignoreDiscriminator) {
-        if (json['kind'] === 'detailed') {
-            return DataSetDetailedDTOFromJSONTyped(json, ignoreDiscriminator);
-        }
-        if (json['kind'] === 'metadata-dataset') {
-            return DataSetMetadataSummaryDTOFromJSONTyped(json, ignoreDiscriminator);
-        }
-        if (json['kind'] === 'metadata-file') {
-            return DataSetFileMetadataSummaryDTOFromJSONTyped(json, ignoreDiscriminator);
-        }
-        if (json['kind'] === 'summary') {
-            return DataSetSummaryDTOFromJSONTyped(json, true);
-        }
-
-    }
     return {
         
-        'kind': json['kind'],
         'id': json['id'] == null ? undefined : json['id'],
         'slug': json['slug'] == null ? undefined : json['slug'],
         'name': json['name'] == null ? undefined : json['name'],
@@ -193,6 +182,7 @@ export function DataSetSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: b
         'deletionState': json['deletionState'] == null ? undefined : DeletionStateDTOFromJSON(json['deletionState']),
         'isTimeSeries': json['isTimeSeries'] == null ? undefined : json['isTimeSeries'],
         'metaDates': json['metaDates'] == null ? undefined : ((json['metaDates'] as Array<any>).map(AssignedMetaDateDTOFromJSON)),
+        'files': json['files'] == null ? undefined : ((json['files'] as Array<any>).map(FileSummaryDTOFromJSON)),
         'fileCount': json['fileCount'] == null ? undefined : json['fileCount'],
         'collectionId': json['collectionId'] == null ? undefined : json['collectionId'],
     };
@@ -207,22 +197,8 @@ export function DataSetSummaryDTOToJSONTyped(value?: DataSetSummaryDTO | null, i
         return value;
     }
 
-    if (!ignoreDiscriminator) {
-        switch (value['kind']) {
-            case 'detailed':
-                return DataSetDetailedDTOToJSONTyped(value as DataSetDetailedDTO, ignoreDiscriminator);
-            case 'metadata-dataset':
-                return DataSetMetadataSummaryDTOToJSONTyped(value as DataSetMetadataSummaryDTO, ignoreDiscriminator);
-            case 'metadata-file':
-                return DataSetFileMetadataSummaryDTOToJSONTyped(value as DataSetFileMetadataSummaryDTO, ignoreDiscriminator);
-            default:
-                return value;
-        }
-    }
-
     return {
         
-        'kind': value['kind'],
         'id': value['id'],
         'slug': value['slug'],
         'name': value['name'],
@@ -235,6 +211,7 @@ export function DataSetSummaryDTOToJSONTyped(value?: DataSetSummaryDTO | null, i
         'deletionState': DeletionStateDTOToJSON(value['deletionState']),
         'isTimeSeries': value['isTimeSeries'],
         'metaDates': value['metaDates'] == null ? undefined : ((value['metaDates'] as Array<any>).map(AssignedMetaDateDTOToJSON)),
+        'files': value['files'] == null ? undefined : ((value['files'] as Array<any>).map(FileSummaryDTOToJSON)),
         'fileCount': value['fileCount'],
         'collectionId': value['collectionId'],
     };

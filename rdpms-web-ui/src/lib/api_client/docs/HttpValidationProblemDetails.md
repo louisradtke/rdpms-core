@@ -1,20 +1,32 @@
 
-# FileMetadataSummaryDTO
+# HttpValidationProblemDetails
 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
+`type` | string
+`title` | string
+`status` | number
+`detail` | string
+`instance` | string
+`errors` | { [key: string]: Array&lt;string&gt;; }
 
 ## Example
 
 ```typescript
-import type { FileMetadataSummaryDTO } from ''
+import type { HttpValidationProblemDetails } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-} satisfies FileMetadataSummaryDTO
+  "type": null,
+  "title": null,
+  "status": null,
+  "detail": null,
+  "instance": null,
+  "errors": null,
+} satisfies HttpValidationProblemDetails
 
 console.log(example)
 
@@ -23,7 +35,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as FileMetadataSummaryDTO
+const exampleParsed = JSON.parse(exampleJSON) as HttpValidationProblemDetails
 console.log(exampleParsed)
 ```
 

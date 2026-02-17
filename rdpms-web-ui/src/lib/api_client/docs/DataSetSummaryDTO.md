@@ -7,7 +7,6 @@ Represents a summary of a dataset, including identifying information, timestamps
 
 Name | Type
 ------------ | -------------
-`kind` | string
 `id` | string
 `slug` | string
 `name` | string
@@ -20,6 +19,7 @@ Name | Type
 `deletionState` | [DeletionStateDTO](DeletionStateDTO.md)
 `isTimeSeries` | boolean
 `metaDates` | [Array&lt;AssignedMetaDateDTO&gt;](AssignedMetaDateDTO.md)
+`files` | [Array&lt;FileSummaryDTO&gt;](FileSummaryDTO.md)
 `fileCount` | number
 `collectionId` | string
 
@@ -30,7 +30,6 @@ import type { DataSetSummaryDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "kind": null,
   "id": null,
   "slug": null,
   "name": null,
@@ -43,6 +42,7 @@ const example = {
   "deletionState": null,
   "isTimeSeries": null,
   "metaDates": null,
+  "files": null,
   "fileCount": null,
   "collectionId": null,
 } satisfies DataSetSummaryDTO

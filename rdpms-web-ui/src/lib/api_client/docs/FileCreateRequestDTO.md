@@ -1,22 +1,34 @@
 
-# FileDetailedDTO
+# FileCreateRequestDTO
 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`references` | [Array&lt;FileStorageReferenceSummaryDTO&gt;](FileStorageReferenceSummaryDTO.md)
+`name` | string
+`contentTypeId` | string
+`sizeBytes` | number
+`plainSHA256Hash` | string
+`createdStamp` | Date
+`beginStamp` | Date
+`endStamp` | Date
 
 ## Example
 
 ```typescript
-import type { FileDetailedDTO } from ''
+import type { FileCreateRequestDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "references": null,
-} satisfies FileDetailedDTO
+  "name": null,
+  "contentTypeId": null,
+  "sizeBytes": null,
+  "plainSHA256Hash": null,
+  "createdStamp": null,
+  "beginStamp": null,
+  "endStamp": null,
+} satisfies FileCreateRequestDTO
 
 console.log(example)
 
@@ -25,7 +37,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as FileDetailedDTO
+const exampleParsed = JSON.parse(exampleJSON) as FileCreateRequestDTO
 console.log(exampleParsed)
 ```
 

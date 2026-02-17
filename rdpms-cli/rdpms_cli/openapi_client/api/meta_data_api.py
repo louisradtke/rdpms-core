@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictBool, StrictBytes, StrictStr
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 from uuid import UUID
 from rdpms_cli.openapi_client.models.meta_date_dto import MetaDateDTO
@@ -1323,7 +1323,7 @@ class MetaDataApi:
     @validate_call
     def api_v1_data_schemas_post(
         self,
-        body: Annotated[Optional[Any], Field(description="The JSON document")] = None,
+        body: Annotated[Optional[Dict[str, Any]], Field(description="The JSON document")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1390,7 +1390,7 @@ class MetaDataApi:
     @validate_call
     def api_v1_data_schemas_post_with_http_info(
         self,
-        body: Annotated[Optional[Any], Field(description="The JSON document")] = None,
+        body: Annotated[Optional[Dict[str, Any]], Field(description="The JSON document")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1457,7 +1457,7 @@ class MetaDataApi:
     @validate_call
     def api_v1_data_schemas_post_without_preload_content(
         self,
-        body: Annotated[Optional[Any], Field(description="The JSON document")] = None,
+        body: Annotated[Optional[Dict[str, Any]], Field(description="The JSON document")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],

@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**apiV1DataDatasetsGet**](DataSetsApi.md#apiv1datadatasetsget) | **GET** /api/v1/data/datasets | Get data sets. |
+| [**apiV1DataDatasetsGet**](DataSetsApi.md#apiv1datadatasetsget) | **GET** /api/v1/data/datasets | Query data sets. |
 | [**apiV1DataDatasetsIdAddS3Post**](DataSetsApi.md#apiv1datadatasetsidadds3post) | **POST** /api/v1/data/datasets/{id}/add/s3 | Add a single file to the system. Request a single S3 upload URL. |
 | [**apiV1DataDatasetsIdDelete**](DataSetsApi.md#apiv1datadatasetsiddelete) | **DELETE** /api/v1/data/datasets/{id} |  |
 | [**apiV1DataDatasetsIdGet**](DataSetsApi.md#apiv1datadatasetsidget) | **GET** /api/v1/data/datasets/{id} |  |
@@ -12,15 +12,16 @@ All URIs are relative to *http://localhost*
 | [**apiV1DataDatasetsIdMetadataKeyPost**](DataSetsApi.md#apiv1datadatasetsidmetadatakeypost) | **POST** /api/v1/data/datasets/{id}/metadata/{key} | Rename key for metadate relation. |
 | [**apiV1DataDatasetsIdMetadataKeyPut**](DataSetsApi.md#apiv1datadatasetsidmetadatakeyput) | **PUT** /api/v1/data/datasets/{id}/metadata/{key} | Adds or sets meta documents for a data set. |
 | [**apiV1DataDatasetsIdSealPut**](DataSetsApi.md#apiv1datadatasetsidsealput) | **PUT** /api/v1/data/datasets/{id}/seal | Seals a data set. Only works for data sets that are in \&quot;Uninitialized\&quot; state. |
-| [**apiV1DataDatasetsPost**](DataSetsApi.md#apiv1datadatasetspost) | **POST** /api/v1/data/datasets | Add a single item to the system. |
+| [**apiV1DataDatasetsNewPost**](DataSetsApi.md#apiv1datadatasetsnewpost) | **POST** /api/v1/data/datasets/new | Add a single item to the system. |
+| [**apiV1DataDatasetsPost**](DataSetsApi.md#apiv1datadatasetspost) | **POST** /api/v1/data/datasets | Query datasets, with additional metadata-based query. |
 
 
 
 ## apiV1DataDatasetsGet
 
-> Array&lt;ApiV1DataDatasetsGet200ResponseInner&gt; apiV1DataDatasetsGet(collectionId, deleted, view, metadataTarget)
+> Array&lt;DataSetSummaryDTO&gt; apiV1DataDatasetsGet(collectionId, deleted, view, metadataTarget)
 
-Get data sets.
+Query data sets.
 
 ### Example
 
@@ -40,9 +41,9 @@ async function example() {
     collectionId: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
     // string | comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState. (optional)
     deleted: deleted_example,
-    // DataSetListViewMode (optional)
+    // DataSetListViewMode | Whether to only return dataset summaries (default), or metadata as well. (optional)
     view: ...,
-    // MetadataColumnTarget (optional)
+    // MetadataColumnTargetDTO | If view is set to yield metadata,             they will be set either on datasets or files. (optional)
     metadataTarget: ...,
   } satisfies ApiV1DataDatasetsGetRequest;
 
@@ -65,12 +66,12 @@ example().catch(console.error);
 |------------- | ------------- | ------------- | -------------|
 | **collectionId** | `string` |  | [Optional] [Defaults to `undefined`] |
 | **deleted** | `string` | comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState. | [Optional] [Defaults to `undefined`] |
-| **view** | `DataSetListViewMode` |  | [Optional] [Defaults to `undefined`] [Enum: Summary, Metadata] |
-| **metadataTarget** | `MetadataColumnTarget` |  | [Optional] [Defaults to `undefined`] [Enum: Dataset, File] |
+| **view** | `DataSetListViewMode` | Whether to only return dataset summaries (default), or metadata as well. | [Optional] [Defaults to `undefined`] [Enum: Summary, Metadata] |
+| **metadataTarget** | `MetadataColumnTargetDTO` | If view is set to yield metadata,             they will be set either on datasets or files. | [Optional] [Defaults to `undefined`] [Enum: Dataset, File] |
 
 ### Return type
 
-[**Array&lt;ApiV1DataDatasetsGet200ResponseInner&gt;**](ApiV1DataDatasetsGet200ResponseInner.md)
+[**Array&lt;DataSetSummaryDTO&gt;**](DataSetSummaryDTO.md)
 
 ### Authorization
 
@@ -228,7 +229,7 @@ No authorization required
 
 ## apiV1DataDatasetsIdGet
 
-> DataSetDetailedDTO apiV1DataDatasetsIdGet(id)
+> DataSetSummaryDTO apiV1DataDatasetsIdGet(id)
 
 
 
@@ -271,7 +272,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**DataSetDetailedDTO**](DataSetDetailedDTO.md)
+[**DataSetSummaryDTO**](DataSetSummaryDTO.md)
 
 ### Authorization
 
@@ -574,11 +575,77 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
-## apiV1DataDatasetsPost
+## apiV1DataDatasetsNewPost
 
-> DataSetDetailedDTO apiV1DataDatasetsPost(apiV1DataDatasetsGet200ResponseInner)
+> DataSetSummaryDTO apiV1DataDatasetsNewPost(dataSetCreateRequestDTO)
 
 Add a single item to the system.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DataSetsApi,
+} from '';
+import type { ApiV1DataDatasetsNewPostRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new DataSetsApi();
+
+  const body = {
+    // DataSetCreateRequestDTO |  (optional)
+    dataSetCreateRequestDTO: ...,
+  } satisfies ApiV1DataDatasetsNewPostRequest;
+
+  try {
+    const data = await api.apiV1DataDatasetsNewPost(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **dataSetCreateRequestDTO** | [DataSetCreateRequestDTO](DataSetCreateRequestDTO.md) |  | [Optional] |
+
+### Return type
+
+[**DataSetSummaryDTO**](DataSetSummaryDTO.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+| **400** | Bad Request |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## apiV1DataDatasetsPost
+
+> Array&lt;DataSetSummaryDTO&gt; apiV1DataDatasetsPost(collectionId, deleted, view, metadataTarget, metadataQueryDTO)
+
+Query datasets, with additional metadata-based query.
 
 ### Example
 
@@ -594,8 +661,16 @@ async function example() {
   const api = new DataSetsApi();
 
   const body = {
-    // ApiV1DataDatasetsGet200ResponseInner |  (optional)
-    apiV1DataDatasetsGet200ResponseInner: ...,
+    // string |  (optional)
+    collectionId: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
+    // string | comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState. (optional)
+    deleted: deleted_example,
+    // DataSetListViewMode | Whether to only return dataset summaries (default), or metadata as well. (optional)
+    view: ...,
+    // MetadataColumnTargetDTO | If view is set to yield metadata,             they will be set either on datasets or files. (optional)
+    metadataTarget: ...,
+    // MetadataQueryDTO | Query over metadata items. (optional)
+    metadataQueryDTO: ...,
   } satisfies ApiV1DataDatasetsPostRequest;
 
   try {
@@ -615,11 +690,15 @@ example().catch(console.error);
 
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **apiV1DataDatasetsGet200ResponseInner** | [ApiV1DataDatasetsGet200ResponseInner](ApiV1DataDatasetsGet200ResponseInner.md) |  | [Optional] |
+| **collectionId** | `string` |  | [Optional] [Defaults to `undefined`] |
+| **deleted** | `string` | comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState. | [Optional] [Defaults to `undefined`] |
+| **view** | `DataSetListViewMode` | Whether to only return dataset summaries (default), or metadata as well. | [Optional] [Defaults to `undefined`] [Enum: Summary, Metadata] |
+| **metadataTarget** | `MetadataColumnTargetDTO` | If view is set to yield metadata,             they will be set either on datasets or files. | [Optional] [Defaults to `undefined`] [Enum: Dataset, File] |
+| **metadataQueryDTO** | [MetadataQueryDTO](MetadataQueryDTO.md) | Query over metadata items. | [Optional] |
 
 ### Return type
 
-[**DataSetDetailedDTO**](DataSetDetailedDTO.md)
+[**Array&lt;DataSetSummaryDTO&gt;**](DataSetSummaryDTO.md)
 
 ### Authorization
 
@@ -627,7 +706,7 @@ No authorization required
 
 ### HTTP request headers
 
-- **Content-Type**: `application/json`
+- **Content-Type**: `application/json`, `text/json`, `application/*+json`
 - **Accept**: `application/json`
 
 
@@ -635,7 +714,6 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | OK |  -  |
-| **400** | Bad Request |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 

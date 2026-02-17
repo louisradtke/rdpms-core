@@ -15,31 +15,34 @@
 
 import * as runtime from '../runtime';
 import type {
-  ApiV1DataDatasetsGet200ResponseInner,
-  DataSetDetailedDTO,
+  DataSetCreateRequestDTO,
   DataSetListViewMode,
+  DataSetSummaryDTO,
   ErrorMessageDTO,
   FileCreateResponseDTO,
   MetaDateDTO,
-  MetadataColumnTarget,
+  MetadataColumnTargetDTO,
+  MetadataQueryDTO,
   ProblemDetails,
   S3FileCreateRequestDTO,
 } from '../models/index';
 import {
-    ApiV1DataDatasetsGet200ResponseInnerFromJSON,
-    ApiV1DataDatasetsGet200ResponseInnerToJSON,
-    DataSetDetailedDTOFromJSON,
-    DataSetDetailedDTOToJSON,
+    DataSetCreateRequestDTOFromJSON,
+    DataSetCreateRequestDTOToJSON,
     DataSetListViewModeFromJSON,
     DataSetListViewModeToJSON,
+    DataSetSummaryDTOFromJSON,
+    DataSetSummaryDTOToJSON,
     ErrorMessageDTOFromJSON,
     ErrorMessageDTOToJSON,
     FileCreateResponseDTOFromJSON,
     FileCreateResponseDTOToJSON,
     MetaDateDTOFromJSON,
     MetaDateDTOToJSON,
-    MetadataColumnTargetFromJSON,
-    MetadataColumnTargetToJSON,
+    MetadataColumnTargetDTOFromJSON,
+    MetadataColumnTargetDTOToJSON,
+    MetadataQueryDTOFromJSON,
+    MetadataQueryDTOToJSON,
     ProblemDetailsFromJSON,
     ProblemDetailsToJSON,
     S3FileCreateRequestDTOFromJSON,
@@ -50,7 +53,7 @@ export interface ApiV1DataDatasetsGetRequest {
     collectionId?: string;
     deleted?: string;
     view?: DataSetListViewMode;
-    metadataTarget?: MetadataColumnTarget;
+    metadataTarget?: MetadataColumnTargetDTO;
 }
 
 export interface ApiV1DataDatasetsIdAddS3PostRequest {
@@ -87,8 +90,16 @@ export interface ApiV1DataDatasetsIdSealPutRequest {
     id: string;
 }
 
+export interface ApiV1DataDatasetsNewPostRequest {
+    dataSetCreateRequestDTO?: DataSetCreateRequestDTO;
+}
+
 export interface ApiV1DataDatasetsPostRequest {
-    apiV1DataDatasetsGet200ResponseInner?: ApiV1DataDatasetsGet200ResponseInner;
+    collectionId?: string;
+    deleted?: string;
+    view?: DataSetListViewMode;
+    metadataTarget?: MetadataColumnTargetDTO;
+    metadataQueryDTO?: MetadataQueryDTO;
 }
 
 /**
@@ -97,9 +108,9 @@ export interface ApiV1DataDatasetsPostRequest {
 export class DataSetsApi extends runtime.BaseAPI {
 
     /**
-     * Get data sets.
+     * Query data sets.
      */
-    async apiV1DataDatasetsGetRaw(requestParameters: ApiV1DataDatasetsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ApiV1DataDatasetsGet200ResponseInner>>> {
+    async apiV1DataDatasetsGetRaw(requestParameters: ApiV1DataDatasetsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<DataSetSummaryDTO>>> {
         const queryParameters: any = {};
 
         if (requestParameters['collectionId'] != null) {
@@ -130,13 +141,13 @@ export class DataSetsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ApiV1DataDatasetsGet200ResponseInnerFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(DataSetSummaryDTOFromJSON));
     }
 
     /**
-     * Get data sets.
+     * Query data sets.
      */
-    async apiV1DataDatasetsGet(requestParameters: ApiV1DataDatasetsGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ApiV1DataDatasetsGet200ResponseInner>> {
+    async apiV1DataDatasetsGet(requestParameters: ApiV1DataDatasetsGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<DataSetSummaryDTO>> {
         const response = await this.apiV1DataDatasetsGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -217,7 +228,7 @@ export class DataSetsApi extends runtime.BaseAPI {
 
     /**
      */
-    async apiV1DataDatasetsIdGetRaw(requestParameters: ApiV1DataDatasetsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DataSetDetailedDTO>> {
+    async apiV1DataDatasetsIdGetRaw(requestParameters: ApiV1DataDatasetsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DataSetSummaryDTO>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -240,12 +251,12 @@ export class DataSetsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => DataSetDetailedDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => DataSetSummaryDTOFromJSON(jsonValue));
     }
 
     /**
      */
-    async apiV1DataDatasetsIdGet(requestParameters: ApiV1DataDatasetsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DataSetDetailedDTO> {
+    async apiV1DataDatasetsIdGet(requestParameters: ApiV1DataDatasetsIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DataSetSummaryDTO> {
         const response = await this.apiV1DataDatasetsIdGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -429,8 +440,56 @@ export class DataSetsApi extends runtime.BaseAPI {
     /**
      * Add a single item to the system.
      */
-    async apiV1DataDatasetsPostRaw(requestParameters: ApiV1DataDatasetsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DataSetDetailedDTO>> {
+    async apiV1DataDatasetsNewPostRaw(requestParameters: ApiV1DataDatasetsNewPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DataSetSummaryDTO>> {
         const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/data/datasets/new`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: DataSetCreateRequestDTOToJSON(requestParameters['dataSetCreateRequestDTO']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DataSetSummaryDTOFromJSON(jsonValue));
+    }
+
+    /**
+     * Add a single item to the system.
+     */
+    async apiV1DataDatasetsNewPost(requestParameters: ApiV1DataDatasetsNewPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DataSetSummaryDTO> {
+        const response = await this.apiV1DataDatasetsNewPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Query datasets, with additional metadata-based query.
+     */
+    async apiV1DataDatasetsPostRaw(requestParameters: ApiV1DataDatasetsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<DataSetSummaryDTO>>> {
+        const queryParameters: any = {};
+
+        if (requestParameters['collectionId'] != null) {
+            queryParameters['collectionId'] = requestParameters['collectionId'];
+        }
+
+        if (requestParameters['deleted'] != null) {
+            queryParameters['deleted'] = requestParameters['deleted'];
+        }
+
+        if (requestParameters['view'] != null) {
+            queryParameters['view'] = requestParameters['view'];
+        }
+
+        if (requestParameters['metadataTarget'] != null) {
+            queryParameters['metadataTarget'] = requestParameters['metadataTarget'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -444,16 +503,16 @@ export class DataSetsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: ApiV1DataDatasetsGet200ResponseInnerToJSON(requestParameters['apiV1DataDatasetsGet200ResponseInner']),
+            body: MetadataQueryDTOToJSON(requestParameters['metadataQueryDTO']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => DataSetDetailedDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(DataSetSummaryDTOFromJSON));
     }
 
     /**
-     * Add a single item to the system.
+     * Query datasets, with additional metadata-based query.
      */
-    async apiV1DataDatasetsPost(requestParameters: ApiV1DataDatasetsPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DataSetDetailedDTO> {
+    async apiV1DataDatasetsPost(requestParameters: ApiV1DataDatasetsPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<DataSetSummaryDTO>> {
         const response = await this.apiV1DataDatasetsPostRaw(requestParameters, initOverrides);
         return await response.value();
     }

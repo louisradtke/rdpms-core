@@ -20,9 +20,8 @@ from pydantic import Field, StrictBytes, StrictStr
 from typing import List, Optional, Tuple, Union
 from typing_extensions import Annotated
 from uuid import UUID
-from rdpms_cli.openapi_client.models.api_v1_data_files_get200_response_inner import ApiV1DataFilesGet200ResponseInner
-from rdpms_cli.openapi_client.models.file_detailed_dto import FileDetailedDTO
 from rdpms_cli.openapi_client.models.file_list_view_mode import FileListViewMode
+from rdpms_cli.openapi_client.models.file_summary_dto import FileSummaryDTO
 from rdpms_cli.openapi_client.models.meta_date_dto import MetaDateDTO
 
 from rdpms_cli.openapi_client.api_client import ApiClient, RequestSerialized
@@ -60,7 +59,7 @@ class FilesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiV1DataFilesGet200ResponseInner:
+    ) -> FileSummaryDTO:
         """api_v1_data_file_refs_get
 
 
@@ -100,7 +99,7 @@ class FilesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ApiV1DataFilesGet200ResponseInner",
+            '200': "FileSummaryDTO",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -130,7 +129,7 @@ class FilesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[ApiV1DataFilesGet200ResponseInner]:
+    ) -> ApiResponse[FileSummaryDTO]:
         """api_v1_data_file_refs_get
 
 
@@ -170,7 +169,7 @@ class FilesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ApiV1DataFilesGet200ResponseInner",
+            '200': "FileSummaryDTO",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -240,7 +239,7 @@ class FilesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ApiV1DataFilesGet200ResponseInner",
+            '200': "FileSummaryDTO",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -335,7 +334,7 @@ class FilesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[ApiV1DataFilesGet200ResponseInner]:
+    ) -> List[FileSummaryDTO]:
         """Get files.
 
 
@@ -372,7 +371,7 @@ class FilesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[ApiV1DataFilesGet200ResponseInner]",
+            '200': "List[FileSummaryDTO]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -401,7 +400,7 @@ class FilesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[ApiV1DataFilesGet200ResponseInner]]:
+    ) -> ApiResponse[List[FileSummaryDTO]]:
         """Get files.
 
 
@@ -438,7 +437,7 @@ class FilesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[ApiV1DataFilesGet200ResponseInner]",
+            '200': "List[FileSummaryDTO]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -504,7 +503,7 @@ class FilesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[ApiV1DataFilesGet200ResponseInner]",
+            '200': "List[FileSummaryDTO]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1121,7 +1120,7 @@ class FilesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> FileDetailedDTO:
+    ) -> FileSummaryDTO:
         """Get details of a single file.
 
 
@@ -1158,7 +1157,7 @@ class FilesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "FileDetailedDTO",
+            '200': "FileSummaryDTO",
             '404': "ProblemDetails",
         }
         response_data = self.api_client.call_api(
@@ -1188,7 +1187,7 @@ class FilesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[FileDetailedDTO]:
+    ) -> ApiResponse[FileSummaryDTO]:
         """Get details of a single file.
 
 
@@ -1225,7 +1224,7 @@ class FilesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "FileDetailedDTO",
+            '200': "FileSummaryDTO",
             '404': "ProblemDetails",
         }
         response_data = self.api_client.call_api(
@@ -1292,7 +1291,7 @@ class FilesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "FileDetailedDTO",
+            '200': "FileSummaryDTO",
             '404': "ProblemDetails",
         }
         response_data = self.api_client.call_api(

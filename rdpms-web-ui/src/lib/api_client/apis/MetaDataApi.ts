@@ -42,7 +42,7 @@ export interface ApiV1DataSchemasIdBlobGetRequest {
 }
 
 export interface ApiV1DataSchemasPostRequest {
-    body?: any | null;
+    body?: object;
 }
 
 /**

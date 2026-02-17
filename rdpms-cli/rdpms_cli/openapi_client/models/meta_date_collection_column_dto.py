@@ -20,7 +20,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from uuid import UUID
-from rdpms_cli.openapi_client.models.metadata_column_target import MetadataColumnTarget
+from rdpms_cli.openapi_client.models.metadata_column_target_dto import MetadataColumnTargetDTO
 from rdpms_cli.openapi_client.models.schema_dto import SchemaDTO
 from typing import Optional, Set
 from typing_extensions import Self
@@ -32,7 +32,7 @@ class MetaDateCollectionColumnDTO(BaseModel):
     metadata_key: Optional[StrictStr] = Field(default=None, alias="metadataKey")
     var_schema: Optional[SchemaDTO] = Field(default=None, alias="schema")
     default_field_id: Optional[UUID] = Field(default=None, alias="defaultFieldId")
-    target: Optional[MetadataColumnTarget] = None
+    target: Optional[MetadataColumnTargetDTO] = None
     __properties: ClassVar[List[str]] = ["metadataKey", "schema", "defaultFieldId", "target"]
 
     model_config = ConfigDict(

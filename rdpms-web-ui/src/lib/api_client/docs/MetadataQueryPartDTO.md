@@ -1,20 +1,26 @@
 
-# MetadataColumnTarget
+# MetadataQueryPartDTO
 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
+`query` | object
+`metadataKey` | string
+`target` | [MetadataColumnTargetDTO](MetadataColumnTargetDTO.md)
 
 ## Example
 
 ```typescript
-import type { MetadataColumnTarget } from ''
+import type { MetadataQueryPartDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-} satisfies MetadataColumnTarget
+  "query": null,
+  "metadataKey": null,
+  "target": null,
+} satisfies MetadataQueryPartDTO
 
 console.log(example)
 
@@ -23,7 +29,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as MetadataColumnTarget
+const exampleParsed = JSON.parse(exampleJSON) as MetadataQueryPartDTO
 console.log(exampleParsed)
 ```
 

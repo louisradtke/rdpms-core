@@ -15,22 +15,19 @@
 
 import * as runtime from '../runtime';
 import type {
-  ApiV1DataFilesGet200ResponseInner,
   ErrorMessageDTO,
-  FileDetailedDTO,
   FileListViewMode,
+  FileSummaryDTO,
   MetaDateDTO,
   ProblemDetails,
 } from '../models/index';
 import {
-    ApiV1DataFilesGet200ResponseInnerFromJSON,
-    ApiV1DataFilesGet200ResponseInnerToJSON,
     ErrorMessageDTOFromJSON,
     ErrorMessageDTOToJSON,
-    FileDetailedDTOFromJSON,
-    FileDetailedDTOToJSON,
     FileListViewModeFromJSON,
     FileListViewModeToJSON,
+    FileSummaryDTOFromJSON,
+    FileSummaryDTOToJSON,
     MetaDateDTOFromJSON,
     MetaDateDTOToJSON,
     ProblemDetailsFromJSON,
@@ -82,7 +79,7 @@ export class FilesApi extends runtime.BaseAPI {
 
     /**
      */
-    async apiV1DataFileRefsGetRaw(requestParameters: ApiV1DataFileRefsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiV1DataFilesGet200ResponseInner>> {
+    async apiV1DataFileRefsGetRaw(requestParameters: ApiV1DataFileRefsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FileSummaryDTO>> {
         const queryParameters: any = {};
 
         if (requestParameters['storeGuid'] != null) {
@@ -105,12 +102,12 @@ export class FilesApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ApiV1DataFilesGet200ResponseInnerFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => FileSummaryDTOFromJSON(jsonValue));
     }
 
     /**
      */
-    async apiV1DataFileRefsGet(requestParameters: ApiV1DataFileRefsGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiV1DataFilesGet200ResponseInner> {
+    async apiV1DataFileRefsGet(requestParameters: ApiV1DataFileRefsGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileSummaryDTO> {
         const response = await this.apiV1DataFileRefsGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -118,7 +115,7 @@ export class FilesApi extends runtime.BaseAPI {
     /**
      * Get files.
      */
-    async apiV1DataFilesGetRaw(requestParameters: ApiV1DataFilesGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ApiV1DataFilesGet200ResponseInner>>> {
+    async apiV1DataFilesGetRaw(requestParameters: ApiV1DataFilesGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<FileSummaryDTO>>> {
         const queryParameters: any = {};
 
         if (requestParameters['view'] != null) {
@@ -137,13 +134,13 @@ export class FilesApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ApiV1DataFilesGet200ResponseInnerFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(FileSummaryDTOFromJSON));
     }
 
     /**
      * Get files.
      */
-    async apiV1DataFilesGet(requestParameters: ApiV1DataFilesGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ApiV1DataFilesGet200ResponseInner>> {
+    async apiV1DataFilesGet(requestParameters: ApiV1DataFilesGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<FileSummaryDTO>> {
         const response = await this.apiV1DataFilesGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -224,7 +221,7 @@ export class FilesApi extends runtime.BaseAPI {
     /**
      * Get details of a single file.
      */
-    async apiV1DataFilesIdGetRaw(requestParameters: ApiV1DataFilesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FileDetailedDTO>> {
+    async apiV1DataFilesIdGetRaw(requestParameters: ApiV1DataFilesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FileSummaryDTO>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -247,13 +244,13 @@ export class FilesApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => FileDetailedDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => FileSummaryDTOFromJSON(jsonValue));
     }
 
     /**
      * Get details of a single file.
      */
-    async apiV1DataFilesIdGet(requestParameters: ApiV1DataFilesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileDetailedDTO> {
+    async apiV1DataFilesIdGet(requestParameters: ApiV1DataFilesIdGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FileSummaryDTO> {
         const response = await this.apiV1DataFilesIdGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
