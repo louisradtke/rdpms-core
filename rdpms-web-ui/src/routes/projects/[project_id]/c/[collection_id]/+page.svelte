@@ -58,12 +58,17 @@
         }
         return 'basic';
     });
+    let currentView = $state<CollectionView>('basic');
+
+    $effect(() => {
+        currentView = activeView;
+    });
 
     let datasetsReq = $derived.by(async () => {
         void reloadTick; // make $derived.by read it as dependency
         const repo = new DataSetsRepository(getOrFetchConfig().then(toApiConfig));
         let c = await collectionReq;
-        const view = activeView;
+        const view = currentView;
         if (view === 'dataset-metadata') {
             return await repo.listByCollection(c.id ?? '', { view: 'metadata', metadataTarget: 'dataset' });
         }
@@ -81,6 +86,9 @@
     let title = $derived.by(() => (collectionSlug ? `${collectionSlug} - RDPMS` : 'RDPMS'));
 
     const setViewParam = async (view: CollectionView) => {
+        if (view === currentView) return;
+        currentView = view;
+        reloadTick += 1;
         const url = new URL(page.url);
         url.searchParams.set('view', view);
         await goto(url, { replaceState: true, keepFocus: true, noScroll: true });
@@ -142,7 +150,7 @@
                     columns={data.collection.metaDateColumns ?? []}
                     projectSlug={projectSlug}
                     collectionSlug={collectionSlug}
-                    activeView={activeView}
+                    activeView={currentView}
                     onViewChange={setViewParam}
                     onDelete={onDatasetDeleted}
                 />
