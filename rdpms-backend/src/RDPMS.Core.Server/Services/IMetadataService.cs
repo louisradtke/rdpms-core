@@ -11,6 +11,8 @@ public interface IMetadataService : IGenericCollectionService<MetadataJsonField>
     /// <summary>
     /// Assigns a metadata field to an entity.
     /// Also removes any existing metadata field with the same key.
+    /// If the parent collection defines a metadata column for the key/target, validation
+    /// is automatically attempted using that column schema.
     /// </summary>
     /// <param name="entity">Instance of the entity</param>
     /// <param name="key">Case-insensitive key of meta date</param>

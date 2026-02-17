@@ -47,14 +47,15 @@ public class MetadataService(
 
     public async Task AssignMetadate(IUniqueEntity entity, string key, MetadataJsonField value)
     {
+        var normalizedKey = key.ToLowerInvariant();
         var link = new DataEntityMetadataJsonField()
         {
-            MetadataKey = key,
+            MetadataKey = normalizedKey,
             Field = value,
         };
 
         var existingRefs = Context.Set<DataEntityMetadataJsonField>()
-            .Where(l => l.MetadataKey == key)
+            .Where(l => l.MetadataKey == normalizedKey)
             .AsQueryable();
         switch (entity)
         {
@@ -74,6 +75,11 @@ public class MetadataService(
 
         Context.Add(link);
         await Context.SaveChangesAsync();
+
+        var schemaId = await ResolveCollectionColumnSchemaId(entity, normalizedKey);
+        if (schemaId is null) return;
+
+        await VerifySchema(value.Id, schemaId.Value);
     }
 
     public async Task<bool> VerifySchema(Guid metadateId, Guid schemaId)
@@ -151,5 +157,47 @@ public class MetadataService(
         await Context.SaveChangesAsync();
 
         return true;
+    }
+
+    private async Task<Guid?> ResolveCollectionColumnSchemaId(IUniqueEntity entity, string normalizedKey)
+    {
+        Guid? collectionId = null;
+        MetadataColumnTarget target;
+
+        switch (entity)
+        {
+            case DataSet dataSet:
+                collectionId = dataSet.ParentCollectionId;
+                target = MetadataColumnTarget.Dataset;
+                break;
+            case DataFile dataFile:
+                target = MetadataColumnTarget.File;
+
+                if (dataFile.ParentDataSetId is null)
+                {
+                    return null;
+                }
+
+                collectionId = await Context.Set<DataSet>()
+                    .Where(ds => ds.Id == dataFile.ParentDataSetId.Value)
+                    .Select(ds => (Guid?)ds.ParentCollectionId)
+                    .SingleOrDefaultAsync();
+                break;
+            default:
+                throw new ArgumentException("Unknown entity type");
+        }
+
+        if (collectionId is null || collectionId == Guid.Empty)
+        {
+            return null;
+        }
+
+        return await Context.Set<MetaDataCollectionColumn>()
+            .Where(c =>
+                c.ParentCollectionId == collectionId.Value &&
+                c.MetadataKey == normalizedKey &&
+                c.Target == target)
+            .Select(c => (Guid?)c.SchemaId)
+            .SingleOrDefaultAsync();
     }
 }
