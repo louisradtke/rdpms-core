@@ -31,6 +31,7 @@ public class DataSetsController(
     IStoreService storeService,
     IMetadataService metadataService,
     IContentTypeService contentTypeService,
+    IImportMapper<DataSet, DataSetCreateRequestDTO> dataSetCreateReqMapper,
     IImportMapper<DataFile, S3FileCreateRequestDTO, ContentType> s3dfCreateReqMapper,
     IExportMapper<MetadataJsonField, MetaDateDTO> metadataMapper,
     ILogger<DataSetsController> logger)
@@ -195,15 +196,15 @@ public class DataSetsController(
     }
     
     [HttpGet("{id:guid}")]
-    [ProducesResponseType<DataSetDetailedDTO>(StatusCodes.Status200OK)]
+    [ProducesResponseType<DataSetSummaryDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<DataSetDetailedDTO>> GetById([FromRoute] Guid id)
+    public async Task<ActionResult<DataSetSummaryDTO>> GetById([FromRoute] Guid id)
     {
         var dto = await QueryDataSetDetailedDTO(id);
         return Ok(dto);
     }
 
-    private async Task<DataSetDetailedDTO> QueryDataSetDetailedDTO(Guid id)
+    private async Task<DataSetSummaryDTO> QueryDataSetDetailedDTO(Guid id)
     {
         var domainItem = await dataSetService.GetByIdAsync(id);
         var dto = dataSetDetailedMapper.Export(domainItem);
@@ -270,16 +271,19 @@ public class DataSetsController(
     /// <returns>On success, responds with the guid of the new data set.</returns>
     [HttpPost("new")]
     [Consumes("application/json")]
-    [ProducesResponseType<DataSetDetailedDTO>(StatusCodes.Status200OK)]
+    [ProducesResponseType<DataSetSummaryDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> Post([FromBody] DataSetSummaryDTO dto)
+    public async Task<ActionResult> Post([FromBody] DataSetCreateRequestDTO dto)
     {
-        if (dto.Id != null)
+        DataSet domainItem;
+        try
         {
-            return BadRequest("Id is not allowed to be set.");
+            domainItem = dataSetCreateReqMapper.Import(dto);
         }
-
-        var domainItem = dataSetSummaryMapper.Import(dto);
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = ex.Message });
+        }
 
         if (domainItem.ParentId == null)
         {
@@ -594,12 +598,12 @@ public class DataSetsController(
 
             dtos = datasets.Select<DataSet, DataSetSummaryDTO>(domain =>
             {
-                var dto = DataSetFileMetadataSummaryDTO.Create(dataSetSummaryMapper.Export(domain));
+                var dto = dataSetSummaryMapper.Export(domain);
                 dto.Files = domain.Files.Select(file =>
                 {
                     validatedDataFileMetaDates.TryGetValue(file.Id, out var list);
 
-                    var fileDto = FileMetadataSummaryDTO.Create(fileSummaryMapper.Export(file));
+                    var fileDto = fileSummaryMapper.Export(file);
                     fileDto.DownloadURI = fileService.GetContentApiUri(file.Id, HttpContext);
                     fileDto.MetaDates = file.MetadataJsonFields
                         .Select(f => new AssignedMetaDateDTO
@@ -623,7 +627,7 @@ public class DataSetsController(
             {
                 validatedDataSetMetaDates.TryGetValue(domain.Id, out var list);
 
-                var dto = DataSetMetadataSummaryDTO.Create(dataSetSummaryMapper.Export(domain));
+                var dto = dataSetSummaryMapper.Export(domain);
                 dto.MetaDates = domain.MetadataJsonFields
                     .Select(f => new AssignedMetaDateDTO
                     {

@@ -1,11 +1,5 @@
-using System.Text.Json.Serialization;
-
 namespace RDPMS.Core.Server.Model.DTO.V1;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
-[JsonDerivedType(typeof(FileSummaryDTO), "summary")]
-[JsonDerivedType(typeof(FileMetadataSummaryDTO), "metadata")]
-[JsonDerivedType(typeof(FileDetailedDTO), "detailed")]
 public record FileSummaryDTO
 {
     public Guid? Id { get; set; }
@@ -31,4 +25,11 @@ public record FileSummaryDTO
     /// Lifecycle is: None -> [DeletionPending ->] Deleted
     /// </summary>
     public DeletionStateDTO? DeletionState { get; set; }
+
+    /// <summary>
+    /// Storage references of the file.
+    /// Null means this information is not included.
+    /// Empty means this file currently has no references.
+    /// </summary>
+    public List<FileStorageReferenceSummaryDTO>? References { get; set; }
 }

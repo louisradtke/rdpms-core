@@ -1,21 +1,18 @@
 using RDPMS.Core.Infra.AppInitialization;
-using RDPMS.Core.Infra.Exceptions;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
-using RDPMS.Core.Server.Util;
 
 namespace RDPMS.Core.Server.Model.Mappers;
 
 [AutoRegister(registerFlags: RegisterFlags.ShallowInterfaces | RegisterFlags.Self)]
-public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper,
-    IExportMapper<MetadataJsonField, MetaDateDTO> metaDateMapper)
-    : IExportMapper<DataSet, DataSetDetailedDTO>
+public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper)
+    : IExportMapper<DataSet, DataSetSummaryDTO>
 {
-    public DataSetDetailedDTO Export(DataSet domain)
+    public DataSetSummaryDTO Export(DataSet domain)
     {
         var beginStamp = domain.Files.Min(f => f.BeginStamp);
         var endStamp = domain.Files.Max(f => f.EndStamp);
-        return new DataSetDetailedDTO
+        return new DataSetSummaryDTO
         {
             Id = domain.Id,
             Slug = domain.Slug,
@@ -33,6 +30,8 @@ public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper,
             IsTimeSeries = domain.Files.Any(file => file.BeginStamp.HasValue),
             Files = domain.Files.Select(fileMapper.Export).ToList(),
             CollectionId = domain.ParentId,
+            FileCount = domain.Files.Count,
+            DeletionState = (DeletionStateDTO) (int) domain.DeletionState
         };
     }
 }

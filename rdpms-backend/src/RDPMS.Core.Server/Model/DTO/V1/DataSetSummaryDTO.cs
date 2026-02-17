@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using RDPMS.Core.Persistence.Model;
 
 namespace RDPMS.Core.Server.Model.DTO.V1;
@@ -7,11 +6,6 @@ namespace RDPMS.Core.Server.Model.DTO.V1;
 /// Represents a summary of a dataset, including identifying information, timestamps, state, tags,
 /// and metadata fields.
 /// </summary>
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
-[JsonDerivedType(typeof(DataSetSummaryDTO), "summary")]
-[JsonDerivedType(typeof(DataSetDetailedDTO), "detailed")]
-[JsonDerivedType(typeof(DataSetMetadataSummaryDTO), "metadata-dataset")]
-[JsonDerivedType(typeof(DataSetFileMetadataSummaryDTO), "metadata-file")]
 public record DataSetSummaryDTO
 {
     /// <summary>
@@ -83,6 +77,13 @@ public record DataSetSummaryDTO
     /// Only to be set by server.
     /// </summary>
     public List<AssignedMetaDateDTO>? MetaDates { get; set; }
+
+    /// <summary>
+    /// Files of the dataset.
+    /// Null means this information is not included.
+    /// Empty means this dataset has no files.
+    /// </summary>
+    public List<FileSummaryDTO>? Files { get; set; }
 
     /// <summary>
     /// Amount of files in the dataset.

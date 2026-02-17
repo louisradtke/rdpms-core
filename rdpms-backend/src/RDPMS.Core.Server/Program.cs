@@ -145,52 +145,6 @@ internal class Program
             });
 
             options.UseAllOfForInheritance();
-            options.UseOneOfForPolymorphism();
-            options.SelectSubTypesUsing(baseType =>
-            {
-                if (baseType == typeof(DataSetSummaryDTO))
-                {
-                    return
-                    [
-                        typeof(DataSetDetailedDTO),
-                        typeof(DataSetMetadataSummaryDTO),
-                        typeof(DataSetFileMetadataSummaryDTO)
-                    ];
-                }
-
-                if (baseType == typeof(FileSummaryDTO))
-                {
-                    return
-                    [
-                        typeof(FileMetadataSummaryDTO),
-                        typeof(FileDetailedDTO)
-                    ];
-                }
-
-                return [];
-            });
-
-            options.SelectDiscriminatorNameUsing(baseType =>
-            {
-                if (baseType == typeof(DataSetSummaryDTO) || baseType == typeof(FileSummaryDTO))
-                {
-                    return "kind";
-                }
-
-                return null;
-            });
-
-            options.SelectDiscriminatorValueUsing(subType =>
-            {
-                if (subType == typeof(DataSetSummaryDTO)) return "summary";
-                if (subType == typeof(DataSetDetailedDTO)) return "detailed";
-                if (subType == typeof(DataSetMetadataSummaryDTO)) return "metadata-dataset";
-                if (subType == typeof(DataSetFileMetadataSummaryDTO)) return "metadata-file";
-                if (subType == typeof(FileSummaryDTO)) return "summary";
-                if (subType == typeof(FileMetadataSummaryDTO)) return "metadata";
-                if (subType == typeof(FileDetailedDTO)) return "detailed";
-                return null;
-            });
 
             var apiVersions = new List<string> { "v1", "v2" };
             foreach (var description in apiVersions)

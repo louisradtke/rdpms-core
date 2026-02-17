@@ -53,7 +53,7 @@ public class FilesController(
         var filesWithMetadata = files.Select(file =>
         {
             validatedMetaDates.TryGetValue(file.Id, out var list);
-            var dto = FileMetadataSummaryDTO.Create(fileMapper.Export(file));
+            var dto = fileMapper.Export(file);
             dto.DownloadURI = fileService.GetContentApiUri(file.Id, HttpContext);
             dto.MetaDates = file.MetadataJsonFields
                 .Select(f => new AssignedMetaDateDTO
@@ -69,24 +69,13 @@ public class FilesController(
         return Ok(filesWithMetadata);
     }
 
-    private async Task<FileDetailedDTO> QueryFileDetailedDTO(Guid id)
+    private async Task<FileSummaryDTO> QueryFileDetailedDTO(Guid id)
     {
         var file = await fileService.GetByIdAsync(id);
-        var fileDto = new FileDetailedDTO
-        {
-            Id = file.Id,
-            Name = file.Name,
-            ContentType = fileMapper.Export(file).ContentType,
-            Size = file.SizeBytes,
-            CreatedStampUTC = file.CreatedStamp,
-            DeletedStampUTC = file.DeletedStamp,
-            BeginStampUTC = file.BeginStamp,
-            EndStampUTC = file.EndStamp,
-            IsTimeSeries = file.IsTimeSeries,
-            DeletionState = (DeletionStateDTO)(int)file.DeletionState,
-            DownloadURI = fileService.GetContentApiUri(id, HttpContext),
-            References = file.References.Select(referenceMapper.Export).ToList()
-        };
+        var fileDto = fileMapper.Export(file);
+        fileDto.DownloadURI = fileService.GetContentApiUri(id, HttpContext);
+        fileDto.References = file.References.Select(referenceMapper.Export).ToList();
+        fileDto.Size = file.SizeBytes;
 
         var validatedMetaDates = await fileService.GetValidatedMetadates([file.Id]);
         validatedMetaDates.TryGetValue(file.Id, out var list);
@@ -109,10 +98,10 @@ public class FilesController(
     /// <param name="id">Id of the file.</param>
     /// <returns></returns>
     [HttpGet("files/{id:guid}")]
-    [ProducesResponseType<FileDetailedDTO>(StatusCodes.Status200OK)]
+    [ProducesResponseType<FileSummaryDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces("application/json")]
-    public async Task<ActionResult<FileDetailedDTO>> GetById(Guid id)
+    public async Task<ActionResult<FileSummaryDTO>> GetById(Guid id)
     {
         try
         {
