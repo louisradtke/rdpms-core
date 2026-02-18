@@ -10,9 +10,11 @@
     import {isGuid} from "$lib/util/url-helper";
     import FileDisplay from "$lib/layout/FileDisplay.svelte";
     import {MetaDataRepository} from "$lib/data/MetaDataRepository";
-    import type {DataSetDetailedDTO, FileSummaryDTO} from "$lib/api_client";
+    import {MetadataColumnTargetDTO, type DataSetSummaryDTO, type FileSummaryDTO} from "$lib/api_client";
     import type {VisualizationManifest} from "$lib/contracts/schemas/visualization-manifest.v1";
     import {FilesRepository} from "$lib/data/FilesRepository";
+    import DatasetMetadataPanel from '$lib/components/datasets/DatasetMetadataPanel.svelte';
+    import DatasetFilesBrowser from '$lib/components/datasets/DatasetFilesBrowser.svelte';
 
     const VISUALIZATION_SCHEMA_ID = "urn:rdpms:core:schema:visualization-manifest:v1";
     const VISUALIZATION_KEY = "viz";
@@ -36,6 +38,7 @@
     let collectionId = $derived(page.params.collection_id ?? '');
     let projectId = $derived(page.params.project_id ?? '');
     let dataSetId = $derived(page.params.dataset_id ?? '');
+    let reloadTick = $state(0);
 
     // Validate required params
     $effect(() => {
@@ -44,17 +47,20 @@
 
     // Re-create promises when params change
     let collectionReq = $derived.by(() => {
+        void reloadTick;
         const repo = new CollectionsRepository(getOrFetchConfig().then(toApiConfig));
         return repo.getCollectionByIdOrSlug(collectionId, projectId);
     });
 
     let datasetsReq = $derived.by(async () => {
+        void reloadTick;
         const repo = new DataSetsRepository(getOrFetchConfig().then(toApiConfig));
         let c = await collectionReq;
         return await repo.listByCollection(c.id ?? '');
     });
 
     let datasetDetailedReq = $derived.by(async () => {
+        void reloadTick;
         const repo = new DataSetsRepository(getOrFetchConfig().then(toApiConfig));
 
         if (isGuid(dataSetId)) {
@@ -86,7 +92,7 @@
         return fielsRepo.getById(fileId)
     };
 
-    const mapManifestToDisplayItems = async (dataset: DataSetDetailedDTO, manifest: VisualizationManifest):
+    const mapManifestToDisplayItems = async (dataset: DataSetSummaryDTO, manifest: VisualizationManifest):
         Promise<VisualizationViewState> => 
     {
         const firstView = manifest.views?.[0];
@@ -120,7 +126,7 @@
         };
     };
 
-    const getVisualizationView = async (dataset: DataSetDetailedDTO): Promise<VisualizationViewState> => {
+    const getVisualizationView = async (dataset: DataSetSummaryDTO): Promise<VisualizationViewState> => {
         const assignedViz = dataset.metaDates?.find(
             (entry) => normalize(entry.metadataKey) === VISUALIZATION_KEY
         );
@@ -143,7 +149,10 @@
     let datasetPageReq = $derived.by(async () => {
         const dsDetail = await datasetDetailedReq;
         const visualization = await getVisualizationView(dsDetail);
-        return {dsDetail, visualization};
+        const collection = await collectionReq;
+        const datasetColumns = (collection.metaDateColumns ?? [])
+            .filter((column) => column.target === MetadataColumnTargetDTO.Dataset);
+        return {dsDetail, visualization, datasetColumns};
     });
 
     let allDataSets = $derived.by(async () => {
@@ -163,6 +172,10 @@
             tooltip: `data set with ID ${ds.id}`
         }));
     });
+
+    const onDatasetMetadataChanged = () => {
+        reloadTick += 1;
+    };
 
     let title = $derived(collectionId ? `${collectionId} - RDPMS` : "RDPMS");
 </script>
@@ -186,6 +199,14 @@
             <EntityHeader type="DATASET" entity={pageData.dsDetail} />
             <div class="my-6"></div>
 
+            <DatasetMetadataPanel
+                dataset={pageData.dsDetail}
+                columns={pageData.datasetColumns}
+                onDataChanged={onDatasetMetadataChanged}
+            />
+
+            <div class="my-6"></div>
+
             {#if pageData.visualization}
                 <section class="mb-6">
                     <h2 class="text-lg font-semibold text-gray-800">{pageData.visualization.title ?? "Visualization"}</h2>
@@ -202,6 +223,7 @@
                                         file={item.file}
                                         preferredPluginIds={item.preferredPluginIds}
                                         preferredDefaultPluginId={item.preferredDefaultPluginId}
+                                        defaultDisplayMode="auto"
                                     />
                                 </div>
                             </details>
@@ -212,20 +234,14 @@
                                 file={item.file}
                                 preferredPluginIds={item.preferredPluginIds}
                                 preferredDefaultPluginId={item.preferredDefaultPluginId}
+                                defaultDisplayMode="auto"
                             />
                         {/if}
                     {/each}
                 </div>
-            {:else if pageData.dsDetail.files}
-                <div class="space-y-4">
-                    {#each pageData.dsDetail.files as file (file.id)}
-                        <FileDisplay
-                            title={file.name ?? file.id ?? 'none'}
-                            fileSlug={"file" + file.id}
-                            file={file}/>
-                    {/each}
-                </div>
             {/if}
+
+            <DatasetFilesBrowser files={pageData.dsDetail.files ?? []} />
         {:catch error}
             <p>{error}</p>
         {/await}

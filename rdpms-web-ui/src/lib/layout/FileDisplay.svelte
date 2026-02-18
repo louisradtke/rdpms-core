@@ -8,6 +8,8 @@
     import CodePlugin from "$lib/layout/displayPlugins/CodePlugin.svelte";
     import {autoPluginCandidates, CORE_PLUGIN_IDS, isSupportedCorePluginId, type CorePluginId} from "$lib/layout/displayPlugins/plugin-registry";
 
+    type DisplayMode = CorePluginId | 'hidden';
+
     function downloadName(file: FileSummaryDTO): string {
         if (file.name) return file.name;
         if (file.contentType?.abbreviation) return file.id + '.' + file.contentType.abbreviation;
@@ -44,18 +46,23 @@
         fileSlug,
         file,
         preferredPluginIds = [],
-        preferredDefaultPluginId
+        preferredDefaultPluginId,
+        includeHiddenMode = false,
+        defaultDisplayMode = 'auto'
     }: {
         title: string;
         fileSlug: string;
         file: FileSummaryDTO;
         preferredPluginIds?: string[];
         preferredDefaultPluginId?: string;
+        includeHiddenMode?: boolean;
+        defaultDisplayMode?: 'auto' | 'hidden';
     } = $props();
 
     let size = $derived(!Number.isNaN(file?.size) ? new FileSize(file.size || 0) : undefined);
 
-    const pluginLabels: Record<CorePluginId, string> = {
+    const pluginLabels: Record<DisplayMode, string> = {
+        hidden: 'Hidden',
         [CORE_PLUGIN_IDS.image]: 'Image',
         [CORE_PLUGIN_IDS.table]: 'Table',
         [CORE_PLUGIN_IDS.pdf]: 'PDF',
@@ -88,7 +95,16 @@
         return result;
     };
 
-    const resolveInitialPlugin = (pluginIds: CorePluginId[], defaultPluginId?: string): CorePluginId | null => {
+    const resolveInitialPlugin = (
+        pluginIds: CorePluginId[],
+        defaultPluginId?: string,
+        hiddenEnabled = false,
+        preferredMode: 'auto' | 'hidden' = 'auto'
+    ): DisplayMode | null => {
+        if (hiddenEnabled && preferredMode === 'hidden') {
+            return 'hidden';
+        }
+
         if (defaultPluginId && isSupportedCorePluginId(defaultPluginId) && pluginIds.includes(defaultPluginId)) {
             return defaultPluginId;
         }
@@ -97,25 +113,33 @@
     };
 
     let selectablePluginIds = $derived.by(() => collectSelectablePlugins(preferredPluginIds, file));
-    let userSelectedPluginId = $state<CorePluginId | null>(null);
+    let selectableModes = $derived.by((): DisplayMode[] => {
+        const modes: DisplayMode[] = [];
+        if (includeHiddenMode) {
+            modes.push('hidden');
+        }
+        modes.push(...selectablePluginIds);
+        return modes;
+    });
+    let userSelectedPluginId = $state<DisplayMode | null>(null);
     let visitedPluginIds = $state<CorePluginId[]>([]);
     let selectedPluginId = $derived.by(() => {
-        if (userSelectedPluginId && selectablePluginIds.includes(userSelectedPluginId)) {
+        if (userSelectedPluginId && selectableModes.includes(userSelectedPluginId)) {
             return userSelectedPluginId;
         }
 
-        return resolveInitialPlugin(selectablePluginIds, preferredDefaultPluginId);
+        return resolveInitialPlugin(selectablePluginIds, preferredDefaultPluginId, includeHiddenMode, defaultDisplayMode);
     });
 
-    const isSelected = (pluginId: CorePluginId): boolean => selectedPluginId === pluginId;
+    const isSelected = (pluginId: DisplayMode): boolean => selectedPluginId === pluginId;
     const isMounted = (pluginId: CorePluginId): boolean => isSelected(pluginId) || visitedPluginIds.includes(pluginId);
 
-    const selectPlugin = (pluginId: CorePluginId): void => {
+    const selectPlugin = (pluginId: DisplayMode): void => {
         const nextVisited = [...visitedPluginIds];
-        if (selectedPluginId && !nextVisited.includes(selectedPluginId)) {
+        if (selectedPluginId && selectedPluginId !== 'hidden' && !nextVisited.includes(selectedPluginId)) {
             nextVisited.push(selectedPluginId);
         }
-        if (!nextVisited.includes(pluginId)) {
+        if (pluginId !== 'hidden' && !nextVisited.includes(pluginId)) {
             nextVisited.push(pluginId);
         }
         visitedPluginIds = nextVisited;
@@ -129,12 +153,12 @@
         <header class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-2">
             <h2 class="font-medium text-gray-800">{title}</h2>
             <div class="flex items-center gap-4">
-                {#if selectablePluginIds.length > 0}
+                {#if selectableModes.length > 0}
                     <div class="inline-flex overflow-hidden rounded-md border border-gray-300 bg-white">
-                        {#each selectablePluginIds as pluginId (pluginId)}
+                        {#each selectableModes as pluginId (pluginId)}
                             <button
                                 type="button"
-                                class={`cursor-pointer px-2 py-1 text-xs ${isSelected(pluginId) ? 'bg-gray-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'} ${pluginId !== selectablePluginIds[0] ? 'border-l border-gray-300' : ''}`}
+                                class={`cursor-pointer px-2 py-1 text-xs ${isSelected(pluginId) ? 'bg-gray-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'} ${pluginId !== selectableModes[0] ? 'border-l border-gray-300' : ''}`}
                                 onclick={() => selectPlugin(pluginId)}
                             >
                                 {pluginLabels[pluginId]}
@@ -154,6 +178,7 @@
                 <CodeCopyField text={file.downloadURI ?? ''} copyOnly={true} tooltip="Copy download URI" />
             </div>
         </header>
+        {#if selectedPluginId !== 'hidden'}
         <div class="p-4">
             {#if selectablePluginIds.includes(CORE_PLUGIN_IDS.image) && isMounted(CORE_PLUGIN_IDS.image)}
                 <div class={isSelected(CORE_PLUGIN_IDS.image) ? 'block' : 'hidden'}>
@@ -179,6 +204,7 @@
                 <p class="text-center text-sm text-gray-500">File type not supported</p>
             {/if}
         </div>
+        {/if}
     </section>
 
 </div>

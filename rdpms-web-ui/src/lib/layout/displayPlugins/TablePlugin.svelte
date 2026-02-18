@@ -89,7 +89,9 @@
     {#if rows.length === 0}
         <div class="text-center text-sm text-gray-500">No data available</div>
     {:else}
-        <SvelteTable {columns} {rows}></SvelteTable>
+        <div class="max-h-[60vh] overflow-auto rounded-md border border-gray-200">
+            <SvelteTable {columns} {rows}></SvelteTable>
+        </div>
     {/if}
 {:catch error}
     <div class="error">Error: {error.message}</div>
