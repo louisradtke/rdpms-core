@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
+using RDPMS.Core.Server.Model.Logic;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Services;
 
@@ -20,7 +21,8 @@ public class MetaDataController(
     IMetadataService metadataService,
     ISchemaService schemaService,
     IExportMapper<MetadataJsonField, MetaDateDTO> metadataMapper,
-    IExportMapper<JsonSchemaEntity, SchemaDTO> schemaMapper)
+    IExportMapper<JsonSchemaEntity, SchemaDTO> schemaMapper,
+    IExportMapper<ValidationResult, SchemaValidationResultDTO> schemaValidationResultMapper)
     : ControllerBase
 {
     /// <summary>
@@ -60,19 +62,20 @@ public class MetaDataController(
     }
 
     /// <summary>
-    /// Validate meta date against a schema. On success, the meta date gets updated and true gets returned.
-    /// If meta date cannot be validated, false gets returned.
+    /// Validate meta date against a schema and return a detailed result.
+    /// If verbose mode is enabled, validator traces are included.
     /// </summary>
     /// <param name="id">ID </param>
     /// <param name="schemaId"></param>
+    /// <param name="verbose"></param>
     /// <returns></returns>
     [HttpPut("metadata/{id:guid}/validate/{schemaId:guid}")]
-    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    [ProducesResponseType<SchemaValidationResultDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> ValidateMetadata([FromRoute] Guid id, [FromRoute] Guid schemaId)
+    public async Task<ActionResult<SchemaValidationResultDTO>> ValidateMetadata([FromRoute] Guid id, [FromRoute] Guid schemaId, [FromQuery] bool? verbose = false)
     {
-        var result = await metadataService.VerifySchema(id, schemaId);
-        return Ok(result);
+        var result = await metadataService.VerifySchema(id, schemaId, verbose ?? false);
+        return Ok(schemaValidationResultMapper.Export(result));
     }
 
     /// <summary>

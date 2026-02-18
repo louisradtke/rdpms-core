@@ -1,5 +1,6 @@
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
+using RDPMS.Core.Server.Model.Logic;
 using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
@@ -26,6 +27,7 @@ public interface IMetadataService : IGenericCollectionService<MetadataJsonField>
     /// <exception cref="InvalidOperationException">If ids fail to resolve</exception>
     /// <param name="metadateId">Id of the meta date</param>
     /// <param name="schemaId">Id of the schema</param>
-    /// <returns>true, if schema is valid or was valid before, false otherwise</returns>
-    Task<bool> VerifySchema(Guid metadateId, Guid schemaId);
+    /// <param name="verbose">If true, include validator traces in result output.</param>
+    /// <returns>Validation result including status and detailed reasons/traces.</returns>
+    Task<ValidationResult> VerifySchema(Guid metadateId, Guid schemaId, bool verbose = false);
 }

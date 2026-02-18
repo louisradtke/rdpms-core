@@ -4,6 +4,7 @@ using Json.Schema;
 using Microsoft.EntityFrameworkCore;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
+using RDPMS.Core.Server.Model.Logic;
 using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
@@ -82,7 +83,7 @@ public class MetadataService(
         await VerifySchema(value.Id, schemaId.Value);
     }
 
-    public async Task<bool> VerifySchema(Guid metadateId, Guid schemaId)
+    public async Task<ValidationResult> VerifySchema(Guid metadateId, Guid schemaId, bool verbose = false)
     {
         var metadate = await GetByIdAsync(metadateId);
         DbFileStorageReference? metadateRef;
@@ -100,7 +101,14 @@ public class MetadataService(
         }
         if (metadateRef is null) throw new InvalidOperationException("Metadate reference is null");
         
-        if (metadate.ValidatedSchemas.Any(s => s.Id == schemaId)) return true;
+        if (metadate.ValidatedSchemas.Any(s => s.Id == schemaId))
+        {
+            return new ValidationResult
+            {
+                Succesful = true,
+                Reasons = []
+            };
+        }
 
         JsonSchemaEntity schemaEntity = null!;
         try
@@ -149,14 +157,66 @@ public class MetadataService(
             }
         };
         var schema = JsonSchema.Build(schemaDocument.RootElement, buildOptions);
-        var evaluationResults = schema.Evaluate(metadateDocument.RootElement);
+        var evaluationOptions = EvaluationOptions.From(EvaluationOptions.Default);
+        if (verbose)
+        {
+            evaluationOptions.OutputFormat = OutputFormat.List;
+        }
+
+        var evaluationResults = schema.Evaluate(metadateDocument.RootElement, evaluationOptions);
+
+        var result = new ValidationResult
+        {
+            Succesful = evaluationResults.IsValid,
+            Reasons = verbose ? CollectReasons(evaluationResults) : null,
+            Traces = verbose ? CollectTraces(evaluationResults) : null
+        };
         
-        if (!evaluationResults.IsValid) return false;
+        if (!evaluationResults.IsValid) return result;
         metadate.ValidatedSchemas.Add(schemaEntity);
         Context.Update(metadate);
         await Context.SaveChangesAsync();
 
-        return true;
+        return result;
+    }
+
+    private static List<string> CollectReasons(EvaluationResults root)
+    {
+        var reasons = new List<string>();
+        Traverse(root, node =>
+        {
+            if (node.Errors is null) return;
+
+            foreach (var entry in node.Errors)
+            {
+                reasons.Add($"[{node.InstanceLocation}] {entry.Value}");
+            }
+        });
+
+        return reasons
+            .Distinct()
+            .ToList();
+    }
+
+    private static List<string> CollectTraces(EvaluationResults root)
+    {
+        var traces = new List<string>();
+        Traverse(root, node =>
+        {
+            traces.Add(
+                $"valid={node.IsValid}; evalPath={node.EvaluationPath}; instance={node.InstanceLocation}; schema={node.SchemaLocation}");
+        });
+
+        return traces;
+    }
+
+    private static void Traverse(EvaluationResults node, Action<EvaluationResults> action)
+    {
+        action(node);
+        foreach (var detail in node.Details ?? [])
+        {
+            Traverse(detail, action);
+        }
     }
 
     private async Task<Guid?> ResolveCollectionColumnSchemaId(IUniqueEntity entity, string normalizedKey)
