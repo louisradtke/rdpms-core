@@ -26,6 +26,12 @@ public static class DefaultValues
             },
             new()
             {
+                Abbreviation = "yaml", Name = "YAML", Description = "Yet Another Markup Language",
+                MimeType = "application/yaml", Id = Guid.Parse("c3406b21-3fdb-470f-839e-741caf8f5eb1"),
+                ParentProjectId = parentProjectId
+            },
+            new()
+            {
                 Abbreviation = "txt", Name = "Text", Description = "Plain text", MimeType = "text/plain",
                 Id = Guid.Parse("52fea9e9-6329-40a6-9f47-34b5765395d1"),
                 ParentProjectId = parentProjectId

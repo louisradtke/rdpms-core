@@ -9,3 +9,4 @@
 # Developer Section
 
 - [Contracts and Schemas](./dev_section/contracts.md) <!-- Contains sections about the purpose of contracts and of technical aspects like code generation. -->
+- [Visualization Plugin Registry](./dev_section/visualization-plugin-registry.md) <!-- Registry of core web UI visualization plugins, including IDs and plugin selection behavior. -->

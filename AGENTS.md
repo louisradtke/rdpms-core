@@ -29,6 +29,9 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 - `swagger.yaml` API spec snapshot
 - `schemas/` JSON Schemas for shared contracts (see `schemas/README.md`)
 
+### README Pointers
+- Several main project areas (for example backend, CLI, web UI, docs, and schemas) may contain `README.md` files with useful context; check them early when starting work in that area.
+
 ## Backend Notes (.NET)
 - Solution: `rdpms-backend/rdpms-backend.sln`
 - Server project: `rdpms-backend/src/RDPMS.Core.Server`

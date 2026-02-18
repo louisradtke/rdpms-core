@@ -8,6 +8,11 @@ Everything you need to build a Svelte project, powered by [`sv`](https://github.
 - [Tailwind CSS](https://tailwindcss.com/)
 - [heroicons](https://heroicons.com/outline)
 
+## Docs Notes
+
+- The developer documentation includes a visualization plugin registry:
+  - `docs/src/dev_section/visualization-plugin-registry.md`
+
 ## Creating a project
 
 If you're seeing this, you've probably already done this step. Congrats!
