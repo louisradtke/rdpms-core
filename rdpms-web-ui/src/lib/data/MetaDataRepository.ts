@@ -1,4 +1,4 @@
-import { Configuration, DataSetsApi, FilesApi, MetaDataApi, type MetaDateDTO } from '$lib/api_client';
+import { Configuration, DataSetsApi, FilesApi, MetaDataApi, type MetaDateDTO, type SchemaValidationResultDTO } from '$lib/api_client';
 
 export class MetaDataRepository {
     private readonly ready: Promise<void>;
@@ -60,6 +60,19 @@ export class MetaDataRepository {
             id: fileId,
             key,
             body: jsonValue
+        });
+    }
+
+    public async validateMetadata(
+        metadataId: string,
+        schemaId: string,
+        verbose = true
+    ): Promise<SchemaValidationResultDTO> {
+        const { metadataApi } = await this.ensureReady();
+        return metadataApi.apiV1DataMetadataIdValidateSchemaIdPut({
+            id: metadataId,
+            schemaId,
+            verbose
         });
     }
 }
