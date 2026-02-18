@@ -6,7 +6,7 @@ All URIs are relative to *http://localhost*
 |------------- | ------------- | -------------|
 | [**apiV1DataMetadataGet**](MetaDataApi.md#apiv1datametadataget) | **GET** /api/v1/data/metadata | Get all metadata. Contents can be retrieved via Files API. |
 | [**apiV1DataMetadataIdGet**](MetaDataApi.md#apiv1datametadataidget) | **GET** /api/v1/data/metadata/{id} | Get a single meta date by id. Content can be retrieved via Files API. |
-| [**apiV1DataMetadataIdValidateSchemaIdPut**](MetaDataApi.md#apiv1datametadataidvalidateschemaidput) | **PUT** /api/v1/data/metadata/{id}/validate/{schemaId} | Validate meta date against a schema. On success, the meta date gets updated and true gets returned. If meta date cannot be validated, false gets returned. |
+| [**apiV1DataMetadataIdValidateSchemaIdPut**](MetaDataApi.md#apiv1datametadataidvalidateschemaidput) | **PUT** /api/v1/data/metadata/{id}/validate/{schemaId} | Validate meta date against a schema and return a detailed result. If verbose mode is enabled, validator traces are included. |
 | [**apiV1DataSchemasGet**](MetaDataApi.md#apiv1dataschemasget) | **GET** /api/v1/data/schemas | Get all schemas registered in the system. |
 | [**apiV1DataSchemasIdBlobGet**](MetaDataApi.md#apiv1dataschemasidblobget) | **GET** /api/v1/data/schemas/{id}/blob | Get the raw value of a schema. |
 | [**apiV1DataSchemasPost**](MetaDataApi.md#apiv1dataschemaspost) | **POST** /api/v1/data/schemas | Add a new schema to the system. |
@@ -138,9 +138,9 @@ No authorization required
 
 ## apiV1DataMetadataIdValidateSchemaIdPut
 
-> boolean apiV1DataMetadataIdValidateSchemaIdPut(id, schemaId)
+> SchemaValidationResultDTO apiV1DataMetadataIdValidateSchemaIdPut(id, schemaId, verbose)
 
-Validate meta date against a schema. On success, the meta date gets updated and true gets returned. If meta date cannot be validated, false gets returned.
+Validate meta date against a schema and return a detailed result. If verbose mode is enabled, validator traces are included.
 
 ### Example
 
@@ -160,6 +160,8 @@ async function example() {
     id: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
     // string | 
     schemaId: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
+    // boolean |  (optional)
+    verbose: true,
   } satisfies ApiV1DataMetadataIdValidateSchemaIdPutRequest;
 
   try {
@@ -181,10 +183,11 @@ example().catch(console.error);
 |------------- | ------------- | ------------- | -------------|
 | **id** | `string` | ID | [Defaults to `undefined`] |
 | **schemaId** | `string` |  | [Defaults to `undefined`] |
+| **verbose** | `boolean` |  | [Optional] [Defaults to `false`] |
 
 ### Return type
 
-**boolean**
+[**SchemaValidationResultDTO**](SchemaValidationResultDTO.md)
 
 ### Authorization
 

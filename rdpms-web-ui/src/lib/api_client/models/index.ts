@@ -26,4 +26,5 @@ export * from './ProjectSummaryDTO';
 export * from './QueryMode';
 export * from './S3FileCreateRequestDTO';
 export * from './SchemaDTO';
+export * from './SchemaValidationResultDTO';
 export * from './TagDTO';

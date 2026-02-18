@@ -22,6 +22,7 @@ from typing_extensions import Annotated
 from uuid import UUID
 from rdpms_cli.openapi_client.models.meta_date_dto import MetaDateDTO
 from rdpms_cli.openapi_client.models.schema_dto import SchemaDTO
+from rdpms_cli.openapi_client.models.schema_validation_result_dto import SchemaValidationResultDTO
 
 from rdpms_cli.openapi_client.api_client import ApiClient, RequestSerialized
 from rdpms_cli.openapi_client.api_response import ApiResponse
@@ -548,6 +549,7 @@ class MetaDataApi:
         self,
         id: Annotated[UUID, Field(description="ID")],
         schema_id: UUID,
+        verbose: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -560,14 +562,16 @@ class MetaDataApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> bool:
-        """Validate meta date against a schema. On success, the meta date gets updated and true gets returned. If meta date cannot be validated, false gets returned.
+    ) -> SchemaValidationResultDTO:
+        """Validate meta date against a schema and return a detailed result. If verbose mode is enabled, validator traces are included.
 
 
         :param id: ID (required)
         :type id: UUID
         :param schema_id:  (required)
         :type schema_id: UUID
+        :param verbose: 
+        :type verbose: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -593,6 +597,7 @@ class MetaDataApi:
         _param = self._api_v1_data_metadata_id_validate_schema_id_put_serialize(
             id=id,
             schema_id=schema_id,
+            verbose=verbose,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -600,7 +605,7 @@ class MetaDataApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bool",
+            '200': "SchemaValidationResultDTO",
             '404': "ErrorMessageDTO",
         }
         response_data = self.api_client.call_api(
@@ -619,6 +624,7 @@ class MetaDataApi:
         self,
         id: Annotated[UUID, Field(description="ID")],
         schema_id: UUID,
+        verbose: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -631,14 +637,16 @@ class MetaDataApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[bool]:
-        """Validate meta date against a schema. On success, the meta date gets updated and true gets returned. If meta date cannot be validated, false gets returned.
+    ) -> ApiResponse[SchemaValidationResultDTO]:
+        """Validate meta date against a schema and return a detailed result. If verbose mode is enabled, validator traces are included.
 
 
         :param id: ID (required)
         :type id: UUID
         :param schema_id:  (required)
         :type schema_id: UUID
+        :param verbose: 
+        :type verbose: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -664,6 +672,7 @@ class MetaDataApi:
         _param = self._api_v1_data_metadata_id_validate_schema_id_put_serialize(
             id=id,
             schema_id=schema_id,
+            verbose=verbose,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -671,7 +680,7 @@ class MetaDataApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bool",
+            '200': "SchemaValidationResultDTO",
             '404': "ErrorMessageDTO",
         }
         response_data = self.api_client.call_api(
@@ -690,6 +699,7 @@ class MetaDataApi:
         self,
         id: Annotated[UUID, Field(description="ID")],
         schema_id: UUID,
+        verbose: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -703,13 +713,15 @@ class MetaDataApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Validate meta date against a schema. On success, the meta date gets updated and true gets returned. If meta date cannot be validated, false gets returned.
+        """Validate meta date against a schema and return a detailed result. If verbose mode is enabled, validator traces are included.
 
 
         :param id: ID (required)
         :type id: UUID
         :param schema_id:  (required)
         :type schema_id: UUID
+        :param verbose: 
+        :type verbose: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -735,6 +747,7 @@ class MetaDataApi:
         _param = self._api_v1_data_metadata_id_validate_schema_id_put_serialize(
             id=id,
             schema_id=schema_id,
+            verbose=verbose,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -742,7 +755,7 @@ class MetaDataApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bool",
+            '200': "SchemaValidationResultDTO",
             '404': "ErrorMessageDTO",
         }
         response_data = self.api_client.call_api(
@@ -756,6 +769,7 @@ class MetaDataApi:
         self,
         id,
         schema_id,
+        verbose,
         _request_auth,
         _content_type,
         _headers,
@@ -782,6 +796,10 @@ class MetaDataApi:
         if schema_id is not None:
             _path_params['schemaId'] = schema_id
         # process the query parameters
+        if verbose is not None:
+            
+            _query_params.append(('verbose', verbose))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter

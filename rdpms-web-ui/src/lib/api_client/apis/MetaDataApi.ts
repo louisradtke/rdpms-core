@@ -18,6 +18,7 @@ import type {
   ErrorMessageDTO,
   MetaDateDTO,
   SchemaDTO,
+  SchemaValidationResultDTO,
 } from '../models/index';
 import {
     ErrorMessageDTOFromJSON,
@@ -26,6 +27,8 @@ import {
     MetaDateDTOToJSON,
     SchemaDTOFromJSON,
     SchemaDTOToJSON,
+    SchemaValidationResultDTOFromJSON,
+    SchemaValidationResultDTOToJSON,
 } from '../models/index';
 
 export interface ApiV1DataMetadataIdGetRequest {
@@ -35,6 +38,7 @@ export interface ApiV1DataMetadataIdGetRequest {
 export interface ApiV1DataMetadataIdValidateSchemaIdPutRequest {
     id: string;
     schemaId: string;
+    verbose?: boolean;
 }
 
 export interface ApiV1DataSchemasIdBlobGetRequest {
@@ -117,9 +121,9 @@ export class MetaDataApi extends runtime.BaseAPI {
     }
 
     /**
-     * Validate meta date against a schema. On success, the meta date gets updated and true gets returned. If meta date cannot be validated, false gets returned.
+     * Validate meta date against a schema and return a detailed result. If verbose mode is enabled, validator traces are included.
      */
-    async apiV1DataMetadataIdValidateSchemaIdPutRaw(requestParameters: ApiV1DataMetadataIdValidateSchemaIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<boolean>> {
+    async apiV1DataMetadataIdValidateSchemaIdPutRaw(requestParameters: ApiV1DataMetadataIdValidateSchemaIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SchemaValidationResultDTO>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -136,6 +140,10 @@ export class MetaDataApi extends runtime.BaseAPI {
 
         const queryParameters: any = {};
 
+        if (requestParameters['verbose'] != null) {
+            queryParameters['verbose'] = requestParameters['verbose'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
 
@@ -150,17 +158,13 @@ export class MetaDataApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        if (this.isJsonMime(response.headers.get('content-type'))) {
-            return new runtime.JSONApiResponse<boolean>(response);
-        } else {
-            return new runtime.TextApiResponse(response) as any;
-        }
+        return new runtime.JSONApiResponse(response, (jsonValue) => SchemaValidationResultDTOFromJSON(jsonValue));
     }
 
     /**
-     * Validate meta date against a schema. On success, the meta date gets updated and true gets returned. If meta date cannot be validated, false gets returned.
+     * Validate meta date against a schema and return a detailed result. If verbose mode is enabled, validator traces are included.
      */
-    async apiV1DataMetadataIdValidateSchemaIdPut(requestParameters: ApiV1DataMetadataIdValidateSchemaIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<boolean> {
+    async apiV1DataMetadataIdValidateSchemaIdPut(requestParameters: ApiV1DataMetadataIdValidateSchemaIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SchemaValidationResultDTO> {
         const response = await this.apiV1DataMetadataIdValidateSchemaIdPutRaw(requestParameters, initOverrides);
         return await response.value();
     }

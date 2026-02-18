@@ -39,6 +39,7 @@ docs/ProjectsApi.md
 docs/QueryMode.md
 docs/S3FileCreateRequestDTO.md
 docs/SchemaDTO.md
+docs/SchemaValidationResultDTO.md
 docs/StoresApi.md
 docs/TagDTO.md
 index.ts
@@ -68,6 +69,7 @@ models/ProjectSummaryDTO.ts
 models/QueryMode.ts
 models/S3FileCreateRequestDTO.ts
 models/SchemaDTO.ts
+models/SchemaValidationResultDTO.ts
 models/TagDTO.ts
 models/index.ts
 runtime.ts

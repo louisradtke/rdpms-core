@@ -916,7 +916,7 @@ paths:
     put:
       tags:
         - MetaData
-      summary: "Validate meta date against a schema. On success, the meta date gets updated and true gets returned.\nIf meta date cannot be validated, false gets returned."
+      summary: "Validate meta date against a schema and return a detailed result.\nIf verbose mode is enabled, validator traces are included."
       parameters:
         - name: id
           in: path
@@ -932,13 +932,19 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: verbose
+          in: query
+          description: ''
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: boolean
+                $ref: '#/components/schemas/SchemaValidationResultDTO'
         '404':
           description: Not Found
           content:
@@ -1650,6 +1656,26 @@ components:
           nullable: true
         schemaId:
           type: string
+          nullable: true
+      additionalProperties: false
+    SchemaValidationResultDTO:
+      type: object
+      properties:
+        succesful:
+          type: boolean
+          description: Wether validation of the meta date was succesful or not.
+          nullable: true
+        reasons:
+          type: array
+          items:
+            type: string
+          description: 'If validation failed, a list of reasons why.'
+          nullable: true
+        traces:
+          type: array
+          items:
+            type: string
+          description: 'Optional validation trace output, intended for debugging.'
           nullable: true
       additionalProperties: false
     TagDTO:
