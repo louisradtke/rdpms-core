@@ -1,5 +1,7 @@
 # Research Data and Pipeline Management System (RDPMS)
 
+![](docs/images/screenshot-mcap-viz.png)
+
 RDPMS is a project that follows a twofold approach: (1) it may store and process data that was collected especially in robotics and autonomous driving context and (2) may support sharing and tracking (for legal compliance reasons) of data across multiple instances.
 
 The "tracking" may be implemented as "taint": it shall be clearly traceable, which parts (in time) of a dataset were processed to which datasets. Thus, a deletion request may be performed with minimal loss and effort.
