@@ -176,7 +176,7 @@
                     <span class="text-sm font-medium">Metadata key</span>
                     <input
                         class="rounded-md border border-gray-300 px-3 py-2"
-                        placeholder="e.g. viz"
+                        placeholder="e.g. rdpms.viz"
                         bind:value={keyInput}
                     />
                 </label>

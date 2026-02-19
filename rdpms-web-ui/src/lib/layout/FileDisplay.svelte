@@ -6,6 +6,7 @@
     import TablePlugin from "$lib/layout/displayPlugins/TablePlugin.svelte";
     import PdfPlugin from "$lib/layout/displayPlugins/PdfPlugin.svelte";
     import CodePlugin from "$lib/layout/displayPlugins/CodePlugin.svelte";
+    import GpsTrackSvgPlugin from "$lib/layout/displayPlugins/GpsTrackSvgPlugin.svelte";
     import {autoPluginCandidates, CORE_PLUGIN_IDS, isSupportedCorePluginId, type CorePluginId} from "$lib/layout/displayPlugins/plugin-registry";
 
     type DisplayMode = CorePluginId | 'hidden';
@@ -66,7 +67,8 @@
         [CORE_PLUGIN_IDS.image]: 'Image',
         [CORE_PLUGIN_IDS.table]: 'Table',
         [CORE_PLUGIN_IDS.pdf]: 'PDF',
-        [CORE_PLUGIN_IDS.code]: 'Code'
+        [CORE_PLUGIN_IDS.code]: 'Code',
+        [CORE_PLUGIN_IDS.gpsTrackSvg]: 'GPS Track (SVG)'
     };
 
     const collectSelectablePlugins = (preferredIds: string[], fallbackFile: FileSummaryDTO): CorePluginId[] => {
@@ -198,6 +200,11 @@
             {#if selectablePluginIds.includes(CORE_PLUGIN_IDS.code) && isMounted(CORE_PLUGIN_IDS.code)}
                 <div class={isSelected(CORE_PLUGIN_IDS.code) ? 'block' : 'hidden'}>
                     <CodePlugin dataUri={file.downloadURI ?? ''} />
+                </div>
+            {/if}
+            {#if selectablePluginIds.includes(CORE_PLUGIN_IDS.gpsTrackSvg) && isMounted(CORE_PLUGIN_IDS.gpsTrackSvg)}
+                <div class={isSelected(CORE_PLUGIN_IDS.gpsTrackSvg) ? 'block' : 'hidden'}>
+                    <GpsTrackSvgPlugin dataUri={file.downloadURI ?? ''} />
                 </div>
             {/if}
             {#if !selectedPluginId}

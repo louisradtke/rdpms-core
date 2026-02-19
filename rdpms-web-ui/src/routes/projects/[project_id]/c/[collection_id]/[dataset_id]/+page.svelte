@@ -17,7 +17,7 @@
     import DatasetFilesBrowser from '$lib/components/datasets/DatasetFilesBrowser.svelte';
 
     const VISUALIZATION_SCHEMA_ID = "urn:rdpms:core:schema:visualization-manifest:v1";
-    const VISUALIZATION_KEY = "viz";
+    const VISUALIZATION_KEY = "rdpms.viz";
 
     type DisplayItem = {
         itemId: string;

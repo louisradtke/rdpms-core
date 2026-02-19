@@ -4,7 +4,8 @@ export const CORE_PLUGIN_IDS = {
     image: 'rdpms.image',
     table: 'rdpms.table',
     pdf: 'rdpms.pdf',
-    code: 'rdpms.code'
+    code: 'rdpms.code',
+    gpsTrackSvg: 'rdpms.gps-track-svg'
 } as const;
 
 export type CorePluginId = (typeof CORE_PLUGIN_IDS)[keyof typeof CORE_PLUGIN_IDS];
