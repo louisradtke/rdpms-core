@@ -1,10 +1,10 @@
 # Research Data and Pipeline Management System (RDPMS)
 
-![](docs/images/screenshot-mcap-viz.png)
+![A visualization meta date is used to display files extracted from a ROS2 bag](docs/images/screenshot-mcap-viz.png)
 
-RDPMS is a project that follows a twofold approach: (1) it may store and process data that was collected especially in robotics and autonomous driving context and (2) may support sharing and tracking (for legal compliance reasons) of data across multiple instances.
+RDPMS is an early-stage project for research data and pipeline management. The long-term goal is to treat data, metadata, and workflows as one connected system instead of separate tools.
 
-The "tracking" may be implemented as "taint": it shall be clearly traceable, which parts (in time) of a dataset were processed to which datasets. Thus, a deletion request may be performed with minimal loss and effort.
+The initial development scope is robotics and autonomous driving (as part of the author's master's thesis), where single recordings can be very large and processing steps are frequent. The broader goal is domain-agnostic: make large transient datasets easier to search, inspect, process, and trace. In the target system, metadata is queryable (see [docs](./docs/src/user_section/query-engine.md)) and can drive workflow selection, automated checks, and data previews, while preserving links between raw data, derived artifacts, and processing history.
 
 ## Repository layout
 
@@ -79,7 +79,7 @@ Remarks:
 - "FSD" refers to a project and concepts by a group of Formula Student teams: ETH Zürich, TU Hamburg, KIT, NTNU Trondheim, Uni Bayreuth, and TU Dortmund.
 
 | Enumeration | Requirement Text                                                                                | Priority |
-|-------------|-------------------------------------------------------------------------------------------------|----------|
+| ----------- | ----------------------------------------------------------------------------------------------- | -------- |
 | A           | **General**                                                                                     |          |
 | A.1         | Group multiple data files to a set (1:1, 1:many) [FSD A.1]                                      | HIGH     |
 | A.2         | Search/Filter by existence of topics, content of topics, metadata [FSD 1.2]                     | MOD      |
