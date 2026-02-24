@@ -4,7 +4,7 @@
 
 RDPMS is an early-stage project for research data and pipeline management. The long-term goal is to treat data, metadata, and workflows as one connected system instead of separate tools.
 
-The initial development scope is robotics and autonomous driving (as part of the author's master's thesis), where single recordings can be very large and processing steps are frequent. The broader goal is domain-agnostic: make large transient datasets easier to search, inspect, process, and trace. In the target system, metadata is queryable (see [docs](./docs/src/user_section/query-engine.md)) and can drive workflow selection, automated checks, and data previews, while preserving links between raw data, derived artifacts, and processing history.
+The initial development scope is robotics and autonomous driving (as part of [@louisradtke](https://github.com/louisradtke)'s master's thesis), where single recordings can be very large and processing steps are frequent. The broader goal is domain-agnostic: make large transient datasets easier to search, inspect, process, and trace. In the target system, metadata is queryable (see [docs](./docs/src/user_section/query-engine.md)) and can drive workflow selection, automated checks, and data previews, while preserving links between raw data, derived artifacts, and processing history.
 
 ## Repository layout
 
