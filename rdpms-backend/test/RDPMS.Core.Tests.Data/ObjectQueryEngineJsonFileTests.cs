@@ -14,6 +14,7 @@ public class ObjectQueryEngineJsonFileTests
     private const string MinTwoTopicsInFileQueryFixture = "query.min-two-topics-in-file.json";
     private const string TypedOdomQueryFixture = "query.typed-odom.json";
     private const string ImageTypedQueryFixture = "query.image-typed.json";
+    private const string ImageTypedRegexQueryFixture = "query.image-typed-regex.json";
 
     private static readonly (string QueryFileName, string FileName, bool ShouldMatch)[] FileInformationCases =
     [
@@ -41,6 +42,9 @@ public class ObjectQueryEngineJsonFileTests
 
         (ImageTypedQueryFixture, "time-series-container.full.json", true),
         (ImageTypedQueryFixture, "time-series-container.missing-image.json", false),
+
+        (ImageTypedRegexQueryFixture, "time-series-container.full.json", true),
+        (ImageTypedRegexQueryFixture, "time-series-container.missing-image.json", false),
     ];
 
     [Test]

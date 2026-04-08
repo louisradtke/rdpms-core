@@ -1,0 +1,6 @@
+{ "topics": { "$elemMatch": {
+  "$and": [
+    { "name": "/image" },
+    { "messageType.name": { "$regex": "^sensor_msgs\\/msg\\/(Compressed)?Image$"}}
+  ]
+}}}
