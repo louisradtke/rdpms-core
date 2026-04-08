@@ -1,0 +1,6 @@
+{ "topics": { "$elemMatch": {
+  "$and": [
+    { "name": "/odom" },
+    { "messageType.name": "nav_msgs/msg/Odometry" }
+  ]
+}}}

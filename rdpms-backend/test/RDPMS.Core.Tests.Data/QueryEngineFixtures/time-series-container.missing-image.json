@@ -1,0 +1,13 @@
+{
+  "topics": [
+    {
+      "name": "/odom",
+      "metadata": {},
+      "messageType": {
+        "name": "nav_msgs/msg/Odometry",
+        "reference": "https://docs.ros2.org/latest/api/nav_msgs/msg/Odometry.html",
+        "fields": []
+      }
+    }
+  ]
+}

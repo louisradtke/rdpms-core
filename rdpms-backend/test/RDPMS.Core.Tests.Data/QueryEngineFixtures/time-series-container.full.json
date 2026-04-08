@@ -1,0 +1,22 @@
+{
+  "topics": [
+    {
+      "name": "/odom",
+      "metadata": {},
+      "messageType": {
+        "name": "nav_msgs/msg/Odometry",
+        "reference": "https://docs.ros2.org/latest/api/nav_msgs/msg/Odometry.html",
+        "fields": []
+      }
+    },
+    {
+      "name": "/image",
+      "metadata": {},
+      "messageType": {
+        "name": "sensor_msgs/msg/CompressedImage",
+        "reference": "https://docs.ros2.org/latest/api/sensor_msgs/msg/CompressedImage.html",
+        "fields": []
+      }
+    }
+  ]
+}

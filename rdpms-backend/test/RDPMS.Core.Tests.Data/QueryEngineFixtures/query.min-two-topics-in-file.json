@@ -1,0 +1,6 @@
+{ "content.filesContainer.files": {
+  "$elemMatch": { "$and": [
+    { "path": "recording/rosbag_0.db3" },
+    { "file.content.timeSeriesContainer.topics": { "$gteSize": 2 } }
+  ]}
+}}

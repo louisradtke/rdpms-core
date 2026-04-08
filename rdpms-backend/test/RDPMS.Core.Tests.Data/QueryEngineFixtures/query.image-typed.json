@@ -1,0 +1,9 @@
+{ "topics": { "$elemMatch": {
+  "$and": [
+    { "name": "/image" },
+    { "messageType.name": { "$in": [
+      "sensor_msgs/msg/Image",
+      "sensor_msgs/msg/CompressedImage"
+    ]}}
+  ]
+}}}
