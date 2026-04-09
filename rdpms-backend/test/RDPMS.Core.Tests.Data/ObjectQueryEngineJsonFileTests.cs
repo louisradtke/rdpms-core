@@ -8,21 +8,68 @@ namespace RDPMS.Core.Tests.Data;
 [TestFixture]
 public class ObjectQueryEngineJsonFileTests
 {
+    /// <summary>
+    /// Assumes file-information:v1 schema.
+    /// All files with timeseries (topics) have to contain both odom and image (with matching type).
+    /// </summary>
     private const string StrictTopicQueryFixture = "query.strict-odom-and-image.json";
+    
+    /// <summary>
+    /// Assumes file-information:v1 schema.
+    /// In total, odom and image topics have to be contained in at least one file (with matching type).
+    /// </summary>
+    private const string StrictTopicAnywhereQueryFixture = "query.strict-odom-and-image-anywhere.json";
+    
+    /// <summary>
+    /// Assumes file-information:v1 schema.
+    /// Uses the $containsAll operator, to check if /odom and /image topics exist anywhere
+    /// </summary>
     private const string ContainsAllQueryFixture = "query.contains-all-topics.json";
+    
+    /// <summary>
+    /// Assumes file-information:v1 schema.
+    /// All files with timeseries (topics) have to contain both odom and image, only by name.
+    /// </summary>
     private const string AllElemMatchQueryFixture = "query.all-elem-match-topics.json";
+    
+    /// <summary>
+    /// Assumes file-information:v1 schema.
+    /// checks, if recording/rosbag_0.db3 contains at least two arbitrary topics
+    /// </summary>
     private const string MinTwoTopicsInFileQueryFixture = "query.min-two-topics-in-file.json";
+    
+    /// <summary>
+    /// Assumes time-series-container:v1 schema.
+    /// Checks, if accordingly typed /odom topic exists.
+    /// </summary>
     private const string TypedOdomQueryFixture = "query.typed-odom.json";
+    
+    /// <summary>
+    /// Assumes time-series-container:v1 schema.
+    /// Checks, if /image topic exists and type is one of sensor_msgs/CompressedImage, sensor_msgs/Image via $in.
+    /// </summary>
     private const string ImageTypedQueryFixture = "query.image-typed.json";
+    
+    /// <summary>
+    /// Assumes time-series-container:v1 schema.
+    /// Checks, if /image topic exists and type is one of sensor_msgs/CompressedImage, sensor_msgs/Image, via $regex.
+    /// </summary>
     private const string ImageTypedRegexQueryFixture = "query.image-typed-regex.json";
 
     private static readonly (string QueryFileName, string FileName, bool ShouldMatch)[] FileInformationCases =
     [
         (StrictTopicQueryFixture, "file-information.full.json", true),
+        (StrictTopicQueryFixture, "file-information.distributed-bag.json", false),
         (StrictTopicQueryFixture, "file-information.missing-image.json", false),
         (StrictTopicQueryFixture, "file-information.no-timeseries.json", false),
 
+        (StrictTopicAnywhereQueryFixture, "file-information.full.json", true),
+        (StrictTopicAnywhereQueryFixture, "file-information.distributed-bag.json", true),
+        (StrictTopicAnywhereQueryFixture, "file-information.missing-image.json", false),
+        (StrictTopicAnywhereQueryFixture, "file-information.no-timeseries.json", false),
+
         (ContainsAllQueryFixture, "file-information.full.json", true),
+        (ContainsAllQueryFixture, "file-information.distributed-bag.json", true),
         (ContainsAllQueryFixture, "file-information.missing-image.json", false),
         (ContainsAllQueryFixture, "file-information.no-timeseries.json", false),
 

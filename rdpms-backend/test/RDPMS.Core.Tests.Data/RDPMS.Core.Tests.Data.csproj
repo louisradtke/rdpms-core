@@ -32,6 +32,12 @@
 
     <ItemGroup>
       <None Include="QueryEngineFixtures\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+      <None Update="QueryEngineFixtures\query.strict-odom-and-image-anywhere.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="QueryEngineFixtures\file-information.distributed-bag.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

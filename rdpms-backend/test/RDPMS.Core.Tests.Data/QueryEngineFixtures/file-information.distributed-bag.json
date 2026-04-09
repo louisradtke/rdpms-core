@@ -1,0 +1,59 @@
+{
+  "sizeBytes": 2048,
+  "content": {
+    "filesContainer": {
+      "containerType": "zip",
+      "files": [
+        {
+          "path": "rosbag_pedal_ros_2025_10_15-14_14_25_odom.mcap",
+          "file": {
+            "sizeBytes": 40000,
+            "content": {
+              "timeSeriesContainer": {
+                "topics": [
+                  {
+                    "name": "/odom",
+                    "metadata": {},
+                    "messageType": {
+                      "name": "nav_msgs/msg/Odometry",
+                      "reference": "https://docs.ros2.org/latest/api/nav_msgs/msg/Odometry.html",
+                      "fields": []
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "path": "rosbag_pedal_ros_2025_10_15-14_14_25_image.mcap",
+          "file": {
+            "sizeBytes": 5000000,
+            "content": {
+              "timeSeriesContainer": {
+                "topics": [
+                  {
+                    "name": "/image",
+                    "metadata": {},
+                    "messageType": {
+                      "name": "sensor_msgs/msg/Image",
+                      "reference": "https://docs.ros2.org/latest/api/sensor_msgs/msg/Image.html",
+                      "fields": []
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "path": "metadata.yaml",
+          "file": {
+            "sizeBytes": 4700,
+            "content": {}
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "urn:rdpms:core:schema:object-query-dsl:v1",
+  "$and":[
+    {
+      "content.filesContainer.files": {
+        "$elemMatch": {
+          "file.content.timeSeriesContainer.topics": {
+            "$elemMatch": {
+              "name": "/odom",
+              "messageType.name": "nav_msgs/msg/Odometry"
+            }
+          }
+        }
+      }
+    },
+    {
+      "content.filesContainer.files": {
+        "$elemMatch": {
+          "file.content.timeSeriesContainer.topics": {
+            "$elemMatch": {
+              "name": "/image",
+              "messageType.name": { "$in": [
+                "sensor_msgs/msg/Image",
+                "sensor_msgs/msg/CompressedImage"
+              ]}
+            }
+          }
+        }
+      }
+    }
+  ]
+}
