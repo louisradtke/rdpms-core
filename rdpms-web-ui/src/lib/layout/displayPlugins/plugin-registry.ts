@@ -15,6 +15,7 @@ export interface PluginDownloadPolicy {
 	maxBytes: number;
 	description: string;
 	overrideLabel?: string;
+	strategy?: 'block' | 'truncate';
 }
 
 export interface PluginDisplayPolicy {
@@ -46,8 +47,9 @@ const corePluginPolicies: Partial<Record<CorePluginId, CorePluginPolicy>> = {
 	[CORE_PLUGIN_IDS.code]: {
 		download: {
 			maxBytes: 2 * MEBIBYTE,
-			description: 'Code previews download the full file into the browser before rendering it.',
-			overrideLabel: 'Download anyway'
+			description: 'Code previews load only the first 2 MiB of the file in the browser.',
+			overrideLabel: 'Download anyway',
+			strategy: 'truncate'
 		},
 		display: {
 			maxBytes: 2 * MEBIBYTE,

@@ -216,6 +216,10 @@
 			return false;
 		}
 
+		if (selectedPluginPolicy?.download?.strategy === 'truncate') {
+			return false;
+		}
+
 		return selectedPluginDownloadLimitExceeded && !isDownloadLimitAcknowledged(selectedPluginId);
 	});
 </script>
