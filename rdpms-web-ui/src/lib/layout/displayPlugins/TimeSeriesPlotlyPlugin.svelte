@@ -233,6 +233,9 @@
 					config?: Partial<Config>
 				) => Promise<PlotlyHTMLElement>;
 				purge: (root: HTMLElement) => void;
+				Plots: {
+					resize: (root: HTMLElement) => Promise<void> | void;
+				};
 			};
 		};
 
@@ -254,6 +257,9 @@
 					nextParams.plotData.layout,
 					nextParams.plotData.config
 				);
+				requestAnimationFrame(() => {
+					Plotly.Plots.resize(node);
+				});
 				if (!cancelled && runId === currentRun) {
 					renderedPlot = true;
 				}
@@ -273,6 +279,17 @@
 			}
 		});
 
+		const resizeObserver = new ResizeObserver(() => {
+			loadPlotly()
+				.then((Plotly) => {
+					if (!cancelled) {
+						Plotly.Plots.resize(node);
+					}
+				})
+				.catch(() => undefined);
+		});
+		resizeObserver.observe(node);
+
 		return {
 			update(nextParams) {
 				loadAndRender(nextParams).catch((error) => {
@@ -285,6 +302,7 @@
 			},
 			destroy() {
 				cancelled = true;
+				resizeObserver.disconnect();
 				import('plotly.js-dist-min')
 					.then((PlotlyModule) => {
 						const Plotly = PlotlyModule.default as {
