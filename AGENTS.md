@@ -25,6 +25,7 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 - `rdpms-cli/` Python CLI client
 - `rdpms-web-ui/` Svelte 5 + Vite 6 web UI
 - `plugins/` plugin-related code
+- `plugins/tools/develop/` prototype workflow/debug scripts; see `plugins/tools/develop/README.md` for the current workflow inventory and Python entry points
 - `config/`, `docs/`, `scripts/` misc support
 - `swagger.yaml` API spec snapshot
 - `schemas/` JSON Schemas for shared contracts (see `schemas/README.md`)
