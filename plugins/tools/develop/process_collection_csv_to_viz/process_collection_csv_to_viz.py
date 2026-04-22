@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 import requests
 
 # Allow direct execution from repository root without requiring editable install.
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 CLI_SRC_ROOT = REPO_ROOT / "rdpms-cli"
 if str(CLI_SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(CLI_SRC_ROOT))
@@ -54,7 +54,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--target-collection", "-t", required=True, help="Target collection id")
     parser.add_argument(
         "--metadata-key",
-        default="viz",
+        default="rdpms.viz",
         help="Metadata key to assign on source dataset (default: viz)",
     )
     parser.add_argument(

@@ -18,7 +18,7 @@ import sys
 import requests
 
 # Allow direct execution from repository root without requiring editable install.
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 CLI_SRC_ROOT = REPO_ROOT / 'rdpms-cli'
 if str(CLI_SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(CLI_SRC_ROOT))
