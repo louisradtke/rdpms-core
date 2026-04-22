@@ -23,12 +23,12 @@ The initial development scope is robotics and autonomous driving (as part of [@l
 ### Dependencies
 
 - .NET 9 SDK
-- Node.js + npm
 - Docker or Podman (plus a Podman VM if using Podman)
+- Node.js + npm only if you intentionally want to run the web UI outside the dev container
 
 ### Rider dev setup
 
-The JetBrains Rider project is in `rdpms-backend/`. The "Full Dev-Stack" profile runs dependencies via the compose `deps` profile and runs the backend and web UI. If using a Podman VM, set the Engine API URL (unix socket path) in the IDE/plugin settings.
+The JetBrains Rider project is in `rdpms-backend/`. The "Full Dev-Stack" profile runs the backend natively, starts the compose `deps` profile for supporting services, and attaches browser debugging to the web UI served on `http://localhost:5173`. If using a Podman VM, set the Engine API URL (unix socket path) in the IDE/plugin settings.
 
 ### CLI dev setup
 
@@ -48,9 +48,27 @@ docker compose -f rdpms-backend/compose.yaml --profile deps up
 docker compose -f rdpms-backend/compose.yaml --profile full up
 ```
 
-Note: `dev` only contains a static webserver and minio instance. `full` additionally spins up the .NET solution and a PostgreSQL-instance. `full` is WIP and still needs the UI started separately.
+Notes:
+- `deps` is the preferred workflow when running the backend natively. It starts Postgres, MinIO, nginx, and the `rdpms-web-ui` dev container.
+- `full` additionally starts the containerized backend.
 
 #### Web UI
+
+Preferred dev workflow:
+
+```bash
+docker compose -f rdpms-backend/compose.yaml --profile deps up rdpms-web-ui
+```
+
+The web UI source is bind-mounted into the container, so you still edit files locally in `rdpms-web-ui/`, but package-manager and validation commands should usually run inside the container:
+
+```bash
+docker compose -f rdpms-backend/compose.yaml --profile deps exec rdpms-web-ui npm run check
+docker compose -f rdpms-backend/compose.yaml --profile deps exec rdpms-web-ui npm run lint
+docker compose -f rdpms-backend/compose.yaml --profile deps exec rdpms-web-ui npm run build
+```
+
+Fallback host-side workflow:
 
 ```bash
 cd rdpms-web-ui

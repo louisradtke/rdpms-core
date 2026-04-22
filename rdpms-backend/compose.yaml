@@ -22,6 +22,23 @@
 #      - cat /app/debug.yaml
     profiles: ["full"]
 
+  rdpms-web-ui:
+    build:
+      context: ../rdpms-web-ui
+      dockerfile: Dockerfile.dev
+    working_dir: /app
+    command:
+      - sh
+      - -c
+      - npm ci && npm run dev -- --host 0.0.0.0 --port 5173
+    volumes:
+      - "../rdpms-web-ui:/app"
+      - "rdpms-web-ui-node-modules:/app/node_modules"
+      - "rdpms-web-ui-npm-cache:/root/.npm"
+    ports:
+      - "5173:5173"
+    profiles: ["deps"]
+
   static-server:
     image: "nginx"
     volumes:
@@ -59,8 +76,10 @@
       interval: 3s
       timeout: 5s
       retries: 5
-    profiles: ["full"]
+    profiles: ["full", "deps"]
 
 volumes:
   postgres-data:
   minio-data:
+  rdpms-web-ui-node-modules:
+  rdpms-web-ui-npm-cache:

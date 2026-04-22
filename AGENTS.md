@@ -52,7 +52,8 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 - Docker dev stack (deps or full):
   - `docker compose -f rdpms-backend/compose.yaml --profile deps up`
   - `docker compose -f rdpms-backend/compose.yaml --profile full up`
-  - `full` is WIP and still needs the UI started separately
+  - `deps` is the preferred profile for native backend development; it starts Postgres, MinIO, nginx, and the web UI dev container
+  - `full` starts the containerized backend in addition to the same supporting services
 
 ### Tests
 - NUnit project: `rdpms-backend/test/RDPMS.Core.Tests.Data`
@@ -70,6 +71,15 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 - Svelte 5 + Vite 6 + Tailwind 4
 - Scripts in `rdpms-web-ui/package.json` (`dev`, `build`, `check`, `lint`)
 - Package manager preference: `npm`
+- Dev container:
+  - The web UI is intended to run inside the `rdpms-web-ui` service from `rdpms-backend/compose.yaml`
+  - Source code is bind-mounted from the host; edit files normally in the repo, but prefer running `npm` commands inside the container
+  - Default dev URL is `http://localhost:5173`
+- Preferred container commands:
+  - `docker compose -f rdpms-backend/compose.yaml --profile deps up rdpms-web-ui`
+  - `docker compose -f rdpms-backend/compose.yaml --profile deps exec rdpms-web-ui npm run check`
+  - `docker compose -f rdpms-backend/compose.yaml --profile deps exec rdpms-web-ui npm run lint`
+  - `docker compose -f rdpms-backend/compose.yaml --profile deps exec rdpms-web-ui npm run build`
 
 ### Web UI Layout Guardrails
 - App shell scrolling:
@@ -116,8 +126,9 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 - CLI is installed/run on the host (not in the compose stack).
 - JetBrains Rider setup:
   - Rider project is in `rdpms-backend/`.
-  - "Full Dev-Stack" profile runs dependencies via compose `deps` and runs backend + web UI.
-  - Dev deps: .NET, Node + npm, Docker or Podman (plus a Podman VM if using Podman).
+  - "Full Dev-Stack" runs the native backend, compose `deps`, and browser debugging for the web UI.
+  - The web UI dev server is expected to come from the `rdpms-web-ui` compose service, not a host-side `npm run dev`.
+  - Dev deps: .NET, Docker or Podman (plus a Podman VM if using Podman). Host-side Node/npm is optional if you intentionally bypass the container workflow.
   - If using Podman VM, set the Engine API URL (unix socket path) in the IDE/plugin settings.
 
 ## Migrations
@@ -126,6 +137,8 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 
 ## Agent Behavior
 - If changes touch project conventions, workflows, or architecture, suggest updating this `AGENTS.md` and offer to make the edit.
+- For `rdpms-web-ui`, prefer running package-manager and validation commands inside the `rdpms-web-ui` compose service instead of on the host.
+- Normal file edits still happen in the repository workspace on the host because the container bind-mounts `rdpms-web-ui/`.
 
 ## Backend Structure (ASP.NET Core)
 ### Project/Layer Overview

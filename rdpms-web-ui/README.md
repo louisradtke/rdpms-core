@@ -1,49 +1,46 @@
-# sv
+# RDPMS Web UI
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
-
-## Built using:
-
-- [Svelte](https://svelte.dev)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [heroicons](https://heroicons.com/outline)
+Svelte 5 + Vite 6 frontend for RDPMS.
 
 ## Docs Notes
 
 - The developer documentation includes a visualization plugin registry:
   - `docs/src/dev_section/visualization-plugin-registry.md`
 
-## Creating a project
+## Development
 
-If you're seeing this, you've probably already done this step. Congrats!
+Preferred workflow: run the dev server inside the `rdpms-web-ui` container from `rdpms-backend/compose.yaml`.
+
+From the repository root:
 
 ```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+docker compose -f rdpms-backend/compose.yaml --profile deps up rdpms-web-ui
 ```
 
-## Developing
+The app is then available at `http://localhost:5173`.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+The source tree is bind-mounted into the container, so edit files locally as usual. For checks and builds, prefer running `npm` inside the container:
 
 ```bash
-npm run dev
+docker compose -f rdpms-backend/compose.yaml --profile deps exec rdpms-web-ui npm run check
+docker compose -f rdpms-backend/compose.yaml --profile deps exec rdpms-web-ui npm run lint
+docker compose -f rdpms-backend/compose.yaml --profile deps exec rdpms-web-ui npm run build
+```
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+## Host-side Fallback
+
+If you intentionally want to run the frontend outside the container:
+
+```bash
+cd rdpms-web-ui
+npm install
+npm run dev
 ```
 
 ## Building
 
-To create a production version of your app:
+For a production build inside the container:
 
 ```bash
-npm run build
+docker compose -f rdpms-backend/compose.yaml --profile deps exec rdpms-web-ui npm run build
 ```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
