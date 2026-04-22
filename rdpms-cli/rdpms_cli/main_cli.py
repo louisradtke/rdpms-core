@@ -101,7 +101,9 @@ def build_parser() -> ArgumentParser:
 
     dataset_download = dataset_subparsers.add_parser('download', aliases=['d', 'get'], help='Download a dataset')
     dataset_download.add_argument('dataset_id', help='Dataset ID')
-    dataset_download.add_argument('--output', '-o', help='Output path')
+    dataset_download.add_argument('--output', '-o', help='Output directory')
+    dataset_download.add_argument('--force', '-f', action='store_true',
+                                  help='Replace the output directory if it already exists')
     dataset_download.set_defaults(func=cmd_dataset_download)
 
     dataset_new = dataset_subparsers.add_parser('new', help='Create a new dataset, but do not upload anything')
