@@ -99,7 +99,7 @@ public class DataFileService(
         //     throw new InvalidOperationException("DataSet not found or not in invalid state!");
         // }
 
-        var key = $"stores/{dataStoreId}/{file.Name}";
+        var key = $"stores/{dataStoreId}/files/{file.Id}/{file.Name}";
         var uploadUrl = await s3Service.RequestPresignedUploadUrlAsync(store, key);
 
         reference.ObjectKey = key;
