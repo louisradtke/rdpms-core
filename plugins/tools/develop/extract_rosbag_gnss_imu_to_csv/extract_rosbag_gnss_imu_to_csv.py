@@ -45,7 +45,7 @@ GNSS_TOPIC = '/gnss'
 GNSS_TYPE = 'sensor_msgs/msg/NavSatFix'
 IMU_TOPIC = '/imu/data'
 IMU_TYPE = 'sensor_msgs/msg/Imu'
-TRACKER_FILENAME = 'processed_rosbag_source_datasets.csv'
+TRACKER_FILENAME = 'cache/processed_rosbag_source_datasets.csv'
 
 
 def parse_args() -> argparse.Namespace:
@@ -190,6 +190,7 @@ def ensure_tracker_header(path: Path) -> None:
     if path.exists():
         return
 
+    path.parent.mkdir(parents=True, exist_ok=True)
     with path.open('w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(

@@ -39,7 +39,7 @@ from rdpms_cli.util.TypeStore import get_types
 from rdpms_cli.util.config_store import load_file
 
 VISUALIZATION_SCHEMA_URN = "urn:rdpms:core:schema:visualization-manifest:v1"
-TRACKER_FILENAME = "processed_source_datasets.csv"
+TRACKER_FILENAME = "cache/processed_source_datasets.csv"
 EXPECTED_HEADERS = ["seconds", "acc_x", "acc_y", "acc_z", "roll_rate", "pitch_rate", "yaw_rate"]
 
 
@@ -115,6 +115,7 @@ def ensure_tracker_header(path: Path) -> None:
     if path.exists():
         return
 
+    path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(
