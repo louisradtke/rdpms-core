@@ -1,0 +1,26 @@
+source_collection: 00000000-0000-0000-0000-000000000000
+target_collection: 00000000-0000-0000-0000-000000000000
+
+source_metadata_key: rdpms.tsdata
+target_metadata_key: rdpms.tsdata
+target_schema_urn: urn:rdpms:core:schema:time-series-container:v1
+
+trigger_topic_name: /vehicle/motion_state
+trigger_topic_type: std_msgs/msg/Float32
+movement_threshold: 0.001
+padding_seconds: 5.0
+
+topics_to_keep:
+  - /vehicle/motion_state
+  - /tf
+  - /tf_static
+  - /imu/data
+  - /gnss
+
+docker_image: ros:jazzy-ros-base
+input_storage: mcap
+output_storage_id: mcap
+compression_mode: file
+compression_format: zstd
+progress: false
+name_suffix: trimmed-motion-window

@@ -19,8 +19,9 @@ public interface IDataSetService : IGenericCollectionService<DataSet>
     /// Check, whether slug is unique and fulfils the slug constraints.
     /// </summary>
     /// <param name="slug">slug to check</param>
-    /// <returns>true if valid, false otherwise</returns>
-    Task<bool> ValidateSlug(string slug);
+    /// <param name="collectionScope"></param>
+    /// <return s>true if valid, false otherwise</returns>
+    Task<bool> ValidateSlug(string slug, Guid collectionScope);
 
     /// <summary>
     /// Get a list of keys, where metadata matches the schemas declared for the parent collection.

@@ -89,9 +89,11 @@ public class DataSetService(DbContext context, IS3Service s3Service)
         await UpdateAsync(ds);
     }
 
-    public async Task<bool> ValidateSlug(string slug)
+    public async Task<bool> ValidateSlug(string slug, Guid collectionScope)
     {
         if (await Context.Set<DataSet>()
+                .Where(d => d.ParentCollectionId == collectionScope)
+                .Where(d => d.DeletionState != DeletionState.Deleted)
                 .AnyAsync(d => d.Slug == slug))
         {
             return false;

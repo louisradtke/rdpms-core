@@ -1,0 +1,24 @@
+source_collection: 0c2577b9-e824-409d-8bdc-d4051612d4cc
+target_collection: 8291d4b8-d7db-4185-81bc-f8744474ef06
+
+source_metadata_key: rdpms.tsdata
+target_metadata_key: rdpms.tsdata
+target_schema_urn: urn:rdpms:core:schema:time-series-container:v1
+
+trigger_topic_name: /speed
+trigger_topic_type: std_msgs/msg/Float32
+movement_threshold: 0.001
+padding_seconds: 5.0
+
+topics_to_keep:
+  - /vehicle/motion_state
+  - /tf
+  - /tf_static
+  - /imu/data
+  - /gnss
+
+docker_image: rdpms/tool-trim_motion_rosbag
+output_storage_id: mcap
+compression_mode: file
+compression_format: zstd
+name_suffix: trimmed-motion-window

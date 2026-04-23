@@ -73,6 +73,7 @@ def parse_args() -> argparse.Namespace:
         default=0,
         help="Optional max number of source datasets to process this run (0 = unlimited)",
     )
+    parser.add_argument("--tracker-id", help="Optional tracker id to isolate processed-state for this workflow")
     return parser.parse_args()
 
 
@@ -107,8 +108,11 @@ def get_dataset_details(ds_api: DataSetsApi, dataset_id: str) -> object:
     return ds_api.api_v1_data_datasets_id_get(dataset_id)
 
 
-def tracker_path() -> Path:
-    return Path(__file__).resolve().parent / TRACKER_FILENAME
+def tracker_path(tracker_id: str | None) -> Path:
+    default_path = Path(TRACKER_FILENAME)
+    if not tracker_id:
+        return Path(__file__).resolve().parent / default_path
+    return Path(__file__).resolve().parent / default_path.parent / f'{default_path.stem}-{tracker_id}{default_path.suffix}'
 
 
 def ensure_tracker_header(path: Path) -> None:
@@ -404,7 +408,7 @@ def main() -> int:
     source_collection_id = uuid.UUID(args.source_collection)
     target_collection_id = uuid.UUID(args.target_collection)
 
-    tracker = tracker_path()
+    tracker = tracker_path(args.tracker_id)
     ensure_tracker_header(tracker)
     processed_success = load_successful_source_ids(tracker)
 

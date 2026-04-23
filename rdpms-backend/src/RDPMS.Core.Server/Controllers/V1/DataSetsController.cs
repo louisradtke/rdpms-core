@@ -295,7 +295,7 @@ public class DataSetsController(
             return BadRequest(new ErrorMessageDTO { Message = "Slug is required." });
         }
 
-        if (!await dataSetService.ValidateSlug(domainItem.Slug))
+        if (!await dataSetService.ValidateSlug(domainItem.Slug, domainItem.ParentId.Value))
         {
             return BadRequest(new ErrorMessageDTO { Message = "Slug is not valid." });
         }
