@@ -129,7 +129,7 @@ def find_motion_window_ns(
     topic_type: str,
     movement_threshold: float,
     padding_seconds: float,
-) -> tuple[int, int]:
+) -> tuple[int, int, int]:
     try:
         from rosbags.highlevel import AnyReader
     except ImportError as exc:
