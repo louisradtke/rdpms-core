@@ -10,6 +10,8 @@ Name | Type
 `slug` | string
 `name` | string
 `filesCount` | number
+`storageReferenceCount` | number
+`storageBytes` | number
 `storageType` | string
 `propertiesJson` | string
 `projectId` | string
@@ -26,6 +28,8 @@ const example = {
   "slug": null,
   "name": null,
   "filesCount": null,
+  "storageReferenceCount": null,
+  "storageBytes": null,
   "storageType": null,
   "propertiesJson": null,
   "projectId": null,

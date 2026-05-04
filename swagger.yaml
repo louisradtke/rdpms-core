@@ -402,6 +402,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
+  /api/v1/data/datasets/new/sealed/s3:
+    post:
+      tags:
+        - DataSets
+      summary: "Register an already existing S3-backed dataset and seal it in a single operation.\nAll object keys are relative to the referenced datastore prefix."
+      requestBody:
+        description: Dataset and file references to register.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SealedS3DataSetCreateRequestDTO'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSetSummaryDTO'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
   '/api/v1/data/datasets/{id}/add/s3':
     post:
       tags:
@@ -1345,6 +1369,14 @@ components:
           type: integer
           format: int32
           nullable: true
+        storageReferenceCount:
+          type: integer
+          format: int32
+          nullable: true
+        storageBytes:
+          type: integer
+          format: int64
+          nullable: true
         storageType:
           type: string
           nullable: true
@@ -1678,6 +1710,90 @@ components:
           description: 'Optional validation trace output, intended for debugging.'
           nullable: true
       additionalProperties: false
+    SealedS3DataSetCreateRequestDTO:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: Optional human-readable identifier. Must be unique within the collection.
+          nullable: true
+        name:
+          type: string
+          description: Mandatory dataset name.
+          nullable: true
+        createdStampUTC:
+          type: string
+          description: Mandatory creation timestamp in UTC.
+          format: date-time
+          nullable: true
+        collectionId:
+          type: string
+          description: Mandatory parent collection id.
+          format: uuid
+          nullable: true
+        storeId:
+          type: string
+          description: 'Mandatory S3 datastore id. Its endpoint, bucket, and key prefix are used to validate all file references.'
+          format: uuid
+          nullable: true
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/SealedS3DataSetFileCreateRequestDTO'
+          description: Files to register as part of this dataset.
+          nullable: true
+      additionalProperties: false
+      description: "Request body for registering an already existing S3-backed dataset and sealing it in one operation.\nObject keys are relative to the referenced RDPMS.Core.Persistence.Model.S3DataStore.KeyPrefix."
+    SealedS3DataSetFileCreateRequestDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: File name as stored in RDPMS. This may include a relative path inside the dataset.
+          nullable: true
+        objectKey:
+          type: string
+          description: S3 object key relative to the datastore prefix.
+          nullable: true
+        contentTypeId:
+          type: string
+          description: Content type id for this file.
+          format: uuid
+          nullable: true
+        sizeBytes:
+          type: integer
+          description: Plain file size. For already existing S3 objects this is also used as the expected storage-reference size.
+          format: int64
+          nullable: true
+        plainSHA256Hash:
+          type: string
+          description: Optional SHA256 of the plain file. Unknown hashes may be omitted.
+          nullable: true
+        storedSHA256Hash:
+          type: string
+          description: Optional SHA256 of the stored object. Defaults to PlainSHA256Hash when omitted.
+          nullable: true
+        compressionAlgorithm:
+          type: string
+          description: Optional storage compression algorithm. Defaults to Plain.
+          nullable: true
+        createdStampUTC:
+          type: string
+          description: Optional file creation timestamp in UTC. Defaults to dataset CreatedStampUTC.
+          format: date-time
+          nullable: true
+        beginStampUTC:
+          type: string
+          description: Optional first timestamp represented by this file.
+          format: date-time
+          nullable: true
+        endStampUTC:
+          type: string
+          description: Optional final timestamp represented by this file.
+          format: date-time
+          nullable: true
+      additionalProperties: false
+      description: File entry for RDPMS.Core.Server.Model.DTO.V1.SealedS3DataSetCreateRequestDTO.
     TagDTO:
       type: object
       properties:

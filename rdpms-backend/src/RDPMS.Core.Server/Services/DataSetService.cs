@@ -89,17 +89,22 @@ public class DataSetService(DbContext context, IS3Service s3Service)
         await UpdateAsync(ds);
     }
 
-    public async Task<bool> ValidateSlug(string slug, Guid collectionScope)
+    public async Task<DataSetSlugValidationResult> ValidateSlug(string slug, Guid collectionScope)
     {
+        if (!SlugUtil.IsValidSlug(slug))
+        {
+            return DataSetSlugValidationResult.InvalidFormat;
+        }
+
         if (await Context.Set<DataSet>()
                 .Where(d => d.ParentCollectionId == collectionScope)
                 .Where(d => d.DeletionState != DeletionState.Deleted)
                 .AnyAsync(d => d.Slug == slug))
         {
-            return false;
+            return DataSetSlugValidationResult.AlreadyTaken;
         }
         
-        return SlugUtil.IsValidSlug(slug);
+        return DataSetSlugValidationResult.Valid;
     }
 
     public async Task<IDictionary<Guid, List<string>>> GetValidatedMetadates(List<Guid> datasetIds)

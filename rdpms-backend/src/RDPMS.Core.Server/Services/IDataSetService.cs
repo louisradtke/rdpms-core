@@ -4,6 +4,13 @@ using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
 
+public enum DataSetSlugValidationResult
+{
+    Valid,
+    InvalidFormat,
+    AlreadyTaken
+}
+
 public interface IDataSetService : IGenericCollectionService<DataSet>
 {
     Task<IEnumerable<DataSet>> GetByCollectionAsync(Guid collectionId);
@@ -16,12 +23,12 @@ public interface IDataSetService : IGenericCollectionService<DataSet>
     public Task SealDataset(Guid id);
 
     /// <summary>
-    /// Check, whether slug is unique and fulfils the slug constraints.
+    /// Check whether a slug is unique and fulfils the slug constraints.
     /// </summary>
-    /// <param name="slug">slug to check</param>
-    /// <param name="collectionScope"></param>
-    /// <return s>true if valid, false otherwise</returns>
-    Task<bool> ValidateSlug(string slug, Guid collectionScope);
+    /// <param name="slug">Slug to check.</param>
+    /// <param name="collectionScope">Parent collection scope.</param>
+    /// <returns>The validation result for the requested slug.</returns>
+    Task<DataSetSlugValidationResult> ValidateSlug(string slug, Guid collectionScope);
 
     /// <summary>
     /// Get a list of keys, where metadata matches the schemas declared for the parent collection.

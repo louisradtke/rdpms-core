@@ -40,6 +40,8 @@ docs/QueryMode.md
 docs/S3FileCreateRequestDTO.md
 docs/SchemaDTO.md
 docs/SchemaValidationResultDTO.md
+docs/SealedS3DataSetCreateRequestDTO.md
+docs/SealedS3DataSetFileCreateRequestDTO.md
 docs/StoresApi.md
 docs/TagDTO.md
 index.ts
@@ -70,6 +72,8 @@ models/QueryMode.ts
 models/S3FileCreateRequestDTO.ts
 models/SchemaDTO.ts
 models/SchemaValidationResultDTO.ts
+models/SealedS3DataSetCreateRequestDTO.ts
+models/SealedS3DataSetFileCreateRequestDTO.ts
 models/TagDTO.ts
 models/index.ts
 runtime.ts

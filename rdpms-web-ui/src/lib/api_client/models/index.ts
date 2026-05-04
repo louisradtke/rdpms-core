@@ -27,4 +27,6 @@ export * from './QueryMode';
 export * from './S3FileCreateRequestDTO';
 export * from './SchemaDTO';
 export * from './SchemaValidationResultDTO';
+export * from './SealedS3DataSetCreateRequestDTO';
+export * from './SealedS3DataSetFileCreateRequestDTO';
 export * from './TagDTO';

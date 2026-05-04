@@ -1,9 +1,9 @@
 import {
     DataSetListViewMode,
     DataSetsApi,
+    type DataSetCreateRequestDTO,
     type DataSetSummaryDTO,
     Configuration,
-    type DataSetDetailedDTO,
     MetadataColumnTargetDTO
 } from '$lib/api_client';
 
@@ -56,14 +56,14 @@ export class DataSetsRepository {
         });
     }
 
-    public async getById(id: string): Promise<DataSetDetailedDTO> {
+    public async getById(id: string): Promise<DataSetSummaryDTO> {
         const api = await this.ensureReady();
         return api.apiV1DataDatasetsIdGet({ id });
     }
 
-    public async create(dto: Partial<DataSetSummaryDTO>): Promise<DataSetDetailedDTO> {
+    public async create(dto: Partial<DataSetCreateRequestDTO>): Promise<DataSetSummaryDTO> {
         const api = await this.ensureReady();
-        return api.apiV1DataDatasetsNewPost({ apiV1DataDatasetsGet200ResponseInner: dto as DataSetSummaryDTO });
+        return api.apiV1DataDatasetsNewPost({ dataSetCreateRequestDTO: dto as DataSetCreateRequestDTO });
     }
 
     public async deleteById(id: string): Promise<void> {

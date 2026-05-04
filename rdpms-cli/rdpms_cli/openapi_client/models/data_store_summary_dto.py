@@ -31,11 +31,13 @@ class DataStoreSummaryDTO(BaseModel):
     slug: Optional[StrictStr] = None
     name: Optional[StrictStr] = None
     files_count: Optional[StrictInt] = Field(default=None, alias="filesCount")
+    storage_reference_count: Optional[StrictInt] = Field(default=None, alias="storageReferenceCount")
+    storage_bytes: Optional[StrictInt] = Field(default=None, alias="storageBytes")
     storage_type: Optional[StrictStr] = Field(default=None, alias="storageType")
     properties_json: Optional[StrictStr] = Field(default=None, alias="propertiesJson")
     project_id: Optional[UUID] = Field(default=None, alias="projectId")
     can_write: Optional[StrictBool] = Field(default=None, description="Whether the store accepts new data, or is read-only.", alias="canWrite")
-    __properties: ClassVar[List[str]] = ["id", "slug", "name", "filesCount", "storageType", "propertiesJson", "projectId", "canWrite"]
+    __properties: ClassVar[List[str]] = ["id", "slug", "name", "filesCount", "storageReferenceCount", "storageBytes", "storageType", "propertiesJson", "projectId", "canWrite"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -96,6 +98,16 @@ class DataStoreSummaryDTO(BaseModel):
         if self.files_count is None and "files_count" in self.model_fields_set:
             _dict['filesCount'] = None
 
+        # set to None if storage_reference_count (nullable) is None
+        # and model_fields_set contains the field
+        if self.storage_reference_count is None and "storage_reference_count" in self.model_fields_set:
+            _dict['storageReferenceCount'] = None
+
+        # set to None if storage_bytes (nullable) is None
+        # and model_fields_set contains the field
+        if self.storage_bytes is None and "storage_bytes" in self.model_fields_set:
+            _dict['storageBytes'] = None
+
         # set to None if storage_type (nullable) is None
         # and model_fields_set contains the field
         if self.storage_type is None and "storage_type" in self.model_fields_set:
@@ -127,6 +139,8 @@ class DataStoreSummaryDTO(BaseModel):
             "slug": obj.get("slug"),
             "name": obj.get("name"),
             "filesCount": obj.get("filesCount"),
+            "storageReferenceCount": obj.get("storageReferenceCount"),
+            "storageBytes": obj.get("storageBytes"),
             "storageType": obj.get("storageType"),
             "propertiesJson": obj.get("propertiesJson"),
             "projectId": obj.get("projectId"),

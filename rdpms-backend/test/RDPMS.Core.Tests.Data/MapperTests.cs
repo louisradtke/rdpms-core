@@ -1,4 +1,5 @@
 using RDPMS.Core.Persistence.Model;
+using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
 
 namespace RDPMS.Core.Tests.Data;
@@ -21,5 +22,22 @@ public class MapperTests
     public void PathSanitizationCheck_False_Test(string value)
     {
         Assert.That(FileCreateRequestDTOMapper.CheckIfPathIsValid(value), Is.False);
+    }
+
+    [Test]
+    public void DataSetCreateRequestDTOMapper_InvalidSlug_ThrowsDetailedMessage()
+    {
+        var mapper = new DataSetCreateRequestDTOMapper();
+        var dto = new DataSetCreateRequestDTO
+        {
+            Name = "Test data set",
+            CreatedStampUTC = DateTime.UtcNow,
+            CollectionId = Guid.NewGuid(),
+            Slug = "my invalid slug"
+        };
+
+        var ex = Assert.Throws<ArgumentException>(() => mapper.Import(dto));
+
+        Assert.That(ex!.Message, Does.Contain("Use 1 to 128 characters"));
     }
 }

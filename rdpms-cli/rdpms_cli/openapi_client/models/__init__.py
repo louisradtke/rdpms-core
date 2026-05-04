@@ -40,5 +40,7 @@ from rdpms_cli.openapi_client.models.query_mode import QueryMode
 from rdpms_cli.openapi_client.models.s3_file_create_request_dto import S3FileCreateRequestDTO
 from rdpms_cli.openapi_client.models.schema_dto import SchemaDTO
 from rdpms_cli.openapi_client.models.schema_validation_result_dto import SchemaValidationResultDTO
+from rdpms_cli.openapi_client.models.sealed_s3_data_set_create_request_dto import SealedS3DataSetCreateRequestDTO
+from rdpms_cli.openapi_client.models.sealed_s3_data_set_file_create_request_dto import SealedS3DataSetFileCreateRequestDTO
 from rdpms_cli.openapi_client.models.tag_dto import TagDTO
 

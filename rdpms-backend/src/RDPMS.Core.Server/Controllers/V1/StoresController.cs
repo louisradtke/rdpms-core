@@ -12,7 +12,10 @@ namespace RDPMS.Core.Server.Controllers.V1;
 [Consumes("application/json")]
 [Route("api/v{version:apiVersion}/data/stores")]
 [ApiVersion("1.0")]
-public class StoresController(IStoreService storeService, StoreSummaryDTOMapper storeMapper) : ControllerBase
+public class StoresController(
+    IStoreService storeService,
+    IFileService fileService,
+    StoreSummaryDTOMapper storeMapper) : ControllerBase
 {
     /// <summary>
     /// Get all data stores.
@@ -44,7 +47,9 @@ public class StoresController(IStoreService storeService, StoreSummaryDTOMapper 
             query = query.Where(s => s.ParentProjectId == parentProjectId);
         }
         
-        return Ok(query.AsEnumerable().Select(storeMapper.Export));
+        var dtos = query.AsEnumerable().Select(storeMapper.Export).ToList();
+        await EnrichStoreUsage(dtos);
+        return Ok(dtos);
     }
     
     /// <summary>
@@ -57,6 +62,47 @@ public class StoresController(IStoreService storeService, StoreSummaryDTOMapper 
     public async Task<ActionResult<DataStoreSummaryDTO>> GetById(Guid id)
     {
         var item = await storeService.GetByIdAsync(id);
-        return Ok(storeMapper.Export(item));
+        var dto = storeMapper.Export(item);
+        await EnrichStoreUsage([dto]);
+        return Ok(dto);
+    }
+
+    private async Task EnrichStoreUsage(IEnumerable<DataStoreSummaryDTO> stores)
+    {
+        var storeList = stores.ToList();
+        if (storeList.Count == 0)
+        {
+            return;
+        }
+
+        var storeIds = storeList
+            .Where(store => store.Id is not null)
+            .Select(store => store.Id!.Value)
+            .ToHashSet();
+        var refs = (await fileService.GetStorageReferencesAsync())
+            .Where(reference => reference.StoreFid is not null && storeIds.Contains(reference.StoreFid.Value))
+            .GroupBy(reference => reference.StoreFid!.Value)
+            .ToDictionary(
+                group => group.Key,
+                group => new
+                {
+                    Count = group.Count(),
+                    Bytes = group.Sum(reference => reference.SizeBytes)
+                });
+
+        foreach (var store in storeList)
+        {
+            if (store.Id is null || !refs.TryGetValue(store.Id.Value, out var usage))
+            {
+                store.FilesCount = 0;
+                store.StorageReferenceCount = 0;
+                store.StorageBytes = 0;
+                continue;
+            }
+
+            store.FilesCount = usage.Count;
+            store.StorageReferenceCount = usage.Count;
+            store.StorageBytes = usage.Bytes;
+        }
     }
 }

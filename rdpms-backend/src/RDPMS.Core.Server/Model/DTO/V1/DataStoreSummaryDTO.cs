@@ -6,6 +6,8 @@ public record DataStoreSummaryDTO
     public string? Slug { get; set; }
     public string? Name { get; set; }
     public int? FilesCount { get; set; }
+    public int? StorageReferenceCount { get; set; }
+    public long? StorageBytes { get; set; }
     public string? StorageType { get; set; }
     public string? PropertiesJson { get; set; }
     public Guid? ProjectId { get; set; }

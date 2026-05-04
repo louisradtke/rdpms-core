@@ -61,6 +61,8 @@ __all__ = [
     "S3FileCreateRequestDTO",
     "SchemaDTO",
     "SchemaValidationResultDTO",
+    "SealedS3DataSetCreateRequestDTO",
+    "SealedS3DataSetFileCreateRequestDTO",
     "TagDTO",
 ]
 
@@ -112,5 +114,7 @@ from rdpms_cli.openapi_client.models.query_mode import QueryMode as QueryMode
 from rdpms_cli.openapi_client.models.s3_file_create_request_dto import S3FileCreateRequestDTO as S3FileCreateRequestDTO
 from rdpms_cli.openapi_client.models.schema_dto import SchemaDTO as SchemaDTO
 from rdpms_cli.openapi_client.models.schema_validation_result_dto import SchemaValidationResultDTO as SchemaValidationResultDTO
+from rdpms_cli.openapi_client.models.sealed_s3_data_set_create_request_dto import SealedS3DataSetCreateRequestDTO as SealedS3DataSetCreateRequestDTO
+from rdpms_cli.openapi_client.models.sealed_s3_data_set_file_create_request_dto import SealedS3DataSetFileCreateRequestDTO as SealedS3DataSetFileCreateRequestDTO
 from rdpms_cli.openapi_client.models.tag_dto import TagDTO as TagDTO
 

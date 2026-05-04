@@ -27,6 +27,8 @@ declare -A TRACKER_IDS=(
   [trim_motion]='rosbag-linear-trim-v1'
   [annotate_truncated]='rosbag-linear-annotate-truncated-v1'
   [extract_trimmed]='rosbag-linear-extract-trimmed-v1'
+  [speed_raw]='rosbag-linear-speed-raw-v1'
+  [speed_truncated]='rosbag-linear-speed-truncated-v1'
 )
 
 PIPELINE_ORDER=()
@@ -200,11 +202,39 @@ tool_extract_rosbag_gnss_imu_to_csv() {
   run_tool "extract_rosbag_gnss_imu_to_csv/extract_rosbag_gnss_imu_to_csv.py" "${args[@]}" "$@"
 }
 
+tool_extract_speed_csv_plotly() {
+  local source_role="$1"
+  local target_role="$2"
+  local tracker_key="$3"
+  shift 3 || true
+
+  local args=(
+    --source-collection "$(collection_id "$source_role")"
+    --target-collection "$(collection_id "$target_role")"
+    --tracker-id "$(tracker_id "$tracker_key")"
+  )
+
+  while IFS= read -r arg; do
+    args+=("$arg")
+  done < <(maybe_force_args)
+
+  while IFS= read -r arg; do
+    args+=("$arg")
+  done < <(maybe_limit_args)
+
+  run_tool "extract_speed_csv_plotly/extract_speed_csv_plotly.py" "${args[@]}" "$@"
+}
+
 declare_rosbag_pipelines() {
   register_pipeline \
     'annotate_raw_rosbags' \
     'Annotate raw rosbag datasets with minimal rdpms.tsdata metadata' \
-    "tool_annotate_rosbag_tsdata raw linear_annotate_raw"
+    "tool_annotate_rosbag_tsdata raw annotate_raw"
+
+  register_pipeline \
+    'plot_raw_speed' \
+    'Extract raw bag speed CSV and attach a Plotly visualization manifest' \
+    "tool_extract_speed_csv_plotly raw viz speed_raw"
 
   register_pipeline \
     'trim_motion_window' \
@@ -218,8 +248,13 @@ declare_rosbag_pipelines() {
 
   register_pipeline \
     'extract_viz' \
-    'Annotate trimmed rosbag datasets with minimal rdpms.tsdata metadata' \
-    "tool_extract_rosbag_gnss_imu_to_csv truncated viz tool_viz_truncated"
+    'Extract GNSS/IMU CSV artifacts from the trimmed rosbag collection into the viz collection' \
+    "tool_extract_rosbag_gnss_imu_to_csv truncated viz extract_trimmed"
+
+  register_pipeline \
+    'plot_trimmed_speed' \
+    'Extract trimmed bag speed CSV and attach a Plotly visualization manifest' \
+    "tool_extract_speed_csv_plotly truncated viz speed_truncated"
 }
 
 declare_join_demo_pipelines() {
@@ -227,6 +262,11 @@ declare_join_demo_pipelines() {
     'annotate_raw_rosbags' \
     'Annotate raw rosbag datasets with minimal rdpms.tsdata metadata' \
     "tool_annotate_rosbag_tsdata raw annotate_raw"
+
+  register_pipeline \
+    'plot_raw_speed' \
+    'Extract raw bag speed CSV and attach a Plotly visualization manifest' \
+    "tool_extract_speed_csv_plotly raw viz speed_raw"
 
   register_pipeline \
     'trim_motion_window' \
@@ -242,6 +282,11 @@ declare_join_demo_pipelines() {
     'extract_gnss_imu_from_trimmed' \
     'Extract GNSS/IMU CSV artifacts from the trimmed rosbag collection into the viz collection' \
     "tool_extract_rosbag_gnss_imu_to_csv truncated viz extract_trimmed"
+
+  register_pipeline \
+    'plot_trimmed_speed' \
+    'Extract trimmed bag speed CSV and attach a Plotly visualization manifest' \
+    "tool_extract_speed_csv_plotly truncated viz speed_truncated"
 }
 
 workflow_rosbag_linear() {

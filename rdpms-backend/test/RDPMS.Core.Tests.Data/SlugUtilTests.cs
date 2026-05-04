@@ -30,8 +30,8 @@ public class SlugUtilTests
     [TestCase]
     public void SlugRegex_TestLengths()
     {
-        var shortSlug = string.Join("", Enumerable.Range(0, 64).Select(_ => "a"));
-        var longSlug = string.Join("", Enumerable.Range(0, 65).Select(_ => "a"));
+        var shortSlug = string.Join("", Enumerable.Range(0, 128).Select(_ => "a"));
+        var longSlug = string.Join("", Enumerable.Range(0, 129).Select(_ => "a"));
 
         var regex = SlugUtil.SlugRegex;
         using (Assert.EnterMultipleScope())

@@ -605,8 +605,8 @@ def assign_visualization_manifest(
                         'title': 'IMU CSV',
                         'source': {'fileId': str(imu_file_id)},
                         'renderer': {
-                            'kind': ['rdpms.table', 'rdpms.code'],
-                            'default': 'rdpms.table',
+                            'kind': ['rdpms.timeseries-plotly', 'rdpms.table', 'rdpms.code'],
+                            'default': 'rdpms.timeseries-plotly',
                         },
                         'collapsible': False,
                         'collapsedByDefault': False,

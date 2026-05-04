@@ -28,7 +28,7 @@ public class DataSetCreateRequestDTOMapper : IImportMapper<DataSet, DataSetCreat
 
         if (foreign.Slug is not null && !SlugUtil.IsValidSlug(foreign.Slug))
         {
-            throw new ArgumentException("Slug is not valid.");
+            throw new ArgumentException(SlugUtil.GetInvalidSlugMessage());
         }
 
         return new DataSet(foreign.Name)

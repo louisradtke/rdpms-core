@@ -13,6 +13,7 @@ All URIs are relative to *http://localhost*
 | [**apiV1DataDatasetsIdMetadataKeyPut**](DataSetsApi.md#apiv1datadatasetsidmetadatakeyput) | **PUT** /api/v1/data/datasets/{id}/metadata/{key} | Adds or sets meta documents for a data set. |
 | [**apiV1DataDatasetsIdSealPut**](DataSetsApi.md#apiv1datadatasetsidsealput) | **PUT** /api/v1/data/datasets/{id}/seal | Seals a data set. Only works for data sets that are in \&quot;Uninitialized\&quot; state. |
 | [**apiV1DataDatasetsNewPost**](DataSetsApi.md#apiv1datadatasetsnewpost) | **POST** /api/v1/data/datasets/new | Add a single item to the system. |
+| [**apiV1DataDatasetsNewSealedS3Post**](DataSetsApi.md#apiv1datadatasetsnewsealeds3post) | **POST** /api/v1/data/datasets/new/sealed/s3 | Register an already existing S3-backed dataset and seal it in a single operation. All object keys are relative to the referenced datastore prefix. |
 | [**apiV1DataDatasetsPost**](DataSetsApi.md#apiv1datadatasetspost) | **POST** /api/v1/data/datasets | Query datasets, with additional metadata-based query. |
 
 
@@ -617,6 +618,72 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **dataSetCreateRequestDTO** | [DataSetCreateRequestDTO](DataSetCreateRequestDTO.md) |  | [Optional] |
+
+### Return type
+
+[**DataSetSummaryDTO**](DataSetSummaryDTO.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+| **400** | Bad Request |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## apiV1DataDatasetsNewSealedS3Post
+
+> DataSetSummaryDTO apiV1DataDatasetsNewSealedS3Post(sealedS3DataSetCreateRequestDTO)
+
+Register an already existing S3-backed dataset and seal it in a single operation. All object keys are relative to the referenced datastore prefix.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DataSetsApi,
+} from '';
+import type { ApiV1DataDatasetsNewSealedS3PostRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new DataSetsApi();
+
+  const body = {
+    // SealedS3DataSetCreateRequestDTO | Dataset and file references to register. (optional)
+    sealedS3DataSetCreateRequestDTO: ...,
+  } satisfies ApiV1DataDatasetsNewSealedS3PostRequest;
+
+  try {
+    const data = await api.apiV1DataDatasetsNewSealedS3Post(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **sealedS3DataSetCreateRequestDTO** | [SealedS3DataSetCreateRequestDTO](SealedS3DataSetCreateRequestDTO.md) | Dataset and file references to register. | [Optional] |
 
 ### Return type
 

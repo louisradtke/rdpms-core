@@ -6,8 +6,6 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
-import os
-import subprocess
 import sys
 import tempfile
 import traceback
@@ -29,7 +27,6 @@ from common_rosbag_tooling import (
     build_tracker_path,
     build_minimal_time_series_metadata,
     create_target_dataset,
-    detect_rosbag_input,
     download_dataset_files,
     ensure_tracker_header,
     find_schema_guid_by_urn,
@@ -124,7 +121,7 @@ def query_eligible_dataset_ids(ds_api, *, source_collection_id: uuid.UUID, sourc
 
 def find_motion_window_ns(
     *,
-    bag_input: Path,
+    bag_inputs: list[Path],
     topic_name: str,
     topic_type: str,
     movement_threshold: float,
@@ -140,7 +137,7 @@ def find_motion_window_ns(
     first_motion_stamp_ns: int | None = None
     last_motion_stamp_ns: int | None = None
 
-    with AnyReader([bag_input]) as reader:
+    with AnyReader(bag_inputs) as reader:
         matching_connections = [
             connection
             for connection in reader.connections
@@ -174,51 +171,6 @@ def find_motion_window_ns(
     return first_bag_stamp_ns, start_ns, end_ns
 
 
-def docker_log_path(tracker: Path) -> Path:
-    return tracker.with_name(f'{tracker.stem}-docker.log')
-
-
-def run_rosbag_command_in_docker(
-    *,
-    host_work_dir: Path,
-    docker_image: str,
-    ros_args: list[str],
-    docker_log_file: Path,
-) -> None:
-    work_mount = '/work'
-    command = [
-        'docker',
-        'run',
-        '--rm',
-        '--user',
-        f'{os.getuid()}:{os.getgid()}',
-        '-v',
-        f'{host_work_dir}:{work_mount}',
-        '-w',
-        work_mount,
-        docker_image,
-        'ros2',
-        'bag',
-        *ros_args,
-    ]
-    docker_log_file.parent.mkdir(parents=True, exist_ok=True)
-    with docker_log_file.open('a', encoding='utf-8') as log_file:
-        log_file.write(
-            f'\n[{dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")}] '
-            f'docker run for work_dir={host_work_dir}\n'
-        )
-        log_file.write(f'command: {" ".join(command)}\n\n')
-        log_file.flush()
-        subprocess.run(
-            command,
-            check=True,
-            env=os.environ.copy(),
-            stdout=log_file,
-            stderr=subprocess.STDOUT,
-            text=True,
-        )
-
-
 def collect_output_files(output_uri: Path) -> list[Path]:
     if output_uri.is_file():
         return [output_uri]
@@ -227,14 +179,131 @@ def collect_output_files(output_uri: Path) -> list[Path]:
     raise RuntimeError(f'expected output bag at {output_uri}, but nothing was produced')
 
 
-def container_bag_files(tmp_root: Path, container_work_dir: Path, downloaded_paths: list[Path]) -> list[str]:
+def rosbag_input_paths(downloaded_paths: list[Path]) -> list[Path]:
+    metadata_files = [path for path in downloaded_paths if path.name == 'metadata.yaml']
+    if metadata_files:
+        return [metadata_files[0].parent]
+
     bag_files = [
         path for path in downloaded_paths if path.suffix.lower() in {'.mcap', '.db3', '.bag'}
     ]
     if bag_files:
-        return [str(container_work_dir / path.relative_to(tmp_root)) for path in sorted(bag_files)]
+        return sorted(bag_files)
+    if len(downloaded_paths) == 1:
+        return downloaded_paths
 
-    raise RuntimeError('could not determine concrete rosbag files for docker ros2 bag commands')
+    candidates = ', '.join(path.name for path in downloaded_paths)
+    raise RuntimeError(f'could not determine rosbag input files from downloaded files: {candidates}')
+
+
+def storage_plugin_from_config(config: dict[str, object]):
+    from rosbags.rosbag2 import StoragePlugin
+
+    storage_id = str(config.get('output_storage_id', 'sqlite3')).strip().lower()
+    if storage_id == 'mcap':
+        return StoragePlugin.MCAP
+    if storage_id == 'sqlite3':
+        return StoragePlugin.SQLITE3
+    raise RuntimeError(f'unsupported output_storage_id: {storage_id}')
+
+
+def typestore_from_config(config: dict[str, object]):
+    try:
+        from rosbags.typesys import get_typestore
+        from rosbags.typesys.stores import Stores
+    except ImportError as exc:
+        raise RuntimeError('missing dependency: rosbags. Install it with `pip install rosbags`.') from exc
+
+    store_name = str(config.get('typestore', 'ROS2_JAZZY')).strip().upper()
+    try:
+        store = getattr(Stores, store_name)
+    except AttributeError as exc:
+        available = ', '.join(name for name in dir(Stores) if name.startswith('ROS2_'))
+        raise RuntimeError(f'unknown typestore {store_name!r}; available: {available}') from exc
+
+    return get_typestore(store)
+
+
+def add_writer_connection(writer, conn, typestore):
+    ext = conn.ext
+    serialization_format = getattr(ext, 'serialization_format', 'cdr')
+    offered_qos_profiles = getattr(ext, 'offered_qos_profiles', ())
+    msgdef = getattr(conn.msgdef, 'data', None)
+    rihs01 = conn.digest or None
+
+    kwargs = {
+        'serialization_format': serialization_format,
+        'offered_qos_profiles': offered_qos_profiles,
+    }
+    if msgdef and rihs01:
+        kwargs['msgdef'] = msgdef
+        kwargs['rihs01'] = rihs01
+    else:
+        kwargs['typestore'] = typestore
+
+    return writer.add_connection(conn.topic, conn.msgtype, **kwargs)
+
+
+def connection_signature(conn) -> tuple[str, str, str, str]:
+    ext = conn.ext
+    serialization_format = getattr(ext, 'serialization_format', 'cdr')
+    offered_qos_profiles = getattr(ext, 'offered_qos_profiles', ())
+    return (
+        conn.topic,
+        conn.msgtype,
+        serialization_format,
+        repr(offered_qos_profiles),
+    )
+
+
+def write_filtered_rosbag(
+    *,
+    bag_inputs: list[Path],
+    output_uri: Path,
+    topics_to_keep: list[str],
+    start_time_ns: int,
+    end_time_ns: int,
+    config: dict[str, object],
+) -> int:
+    try:
+        from rosbags.highlevel import AnyReader
+        from rosbags.rosbag2 import Writer
+    except ImportError as exc:
+        raise RuntimeError('missing dependency: rosbags. Install it with `pip install rosbags`.') from exc
+
+    topic_filter = set(topics_to_keep)
+    written_count = 0
+    storage_plugin = storage_plugin_from_config(config)
+    typestore = typestore_from_config(config)
+
+    with AnyReader(bag_inputs) as reader, Writer(output_uri, version=9, storage_plugin=storage_plugin) as writer:
+        conn_map = {}
+        output_connections = {}
+        selected_connections = []
+        for conn in reader.connections:
+            if conn.topic not in topic_filter:
+                continue
+            signature = connection_signature(conn)
+            if signature not in output_connections:
+                output_connections[signature] = add_writer_connection(writer, conn, typestore)
+            conn_map[id(conn)] = output_connections[signature]
+            selected_connections.append(conn)
+
+        if not selected_connections:
+            raise RuntimeError(f'none of the configured topics exist in the input bag: {sorted(topic_filter)}')
+
+        for conn, timestamp, data in reader.messages(
+            connections=selected_connections,
+            start=start_time_ns,
+            stop=end_time_ns + 1,
+        ):
+            writer.write(conn_map[id(conn)], timestamp, data)
+            written_count += 1
+
+    if written_count == 0:
+        raise RuntimeError('filtered rosbag would contain no messages')
+
+    return written_count
 
 
 def tracker_path(tracker_id: str | None) -> Path:
@@ -250,7 +319,6 @@ def process_dataset(
     types,
     config: dict[str, object],
     ts_schema_guid,
-    docker_log_file: Path,
 ) -> tuple[str, str, str, str]:
     source_dataset_id = uuid.UUID(str(source_dataset.id))
     source_dataset_details = get_dataset_details(ds_api, source_dataset_id)
@@ -262,81 +330,33 @@ def process_dataset(
         output_dir = tmp / 'output'
         output_dir.mkdir(parents=True, exist_ok=True)
         downloaded = download_dataset_files(source_dataset_details, files_api, input_dir)
-        bag_input = detect_rosbag_input(downloaded)
+        bag_inputs = rosbag_input_paths(downloaded)
 
-        bag_start_ns, start_time_ns, end_time_ns = find_motion_window_ns(
-            bag_input=bag_input,
+        _bag_start_ns, start_time_ns, end_time_ns = find_motion_window_ns(
+            bag_inputs=bag_inputs,
             topic_name=require_str(config, 'trigger_topic_name'),
             topic_type=require_str(config, 'trigger_topic_type'),
             movement_threshold=float(config.get('movement_threshold', 0.001)),
             padding_seconds=float(config.get('padding_seconds', 5.0)),
         )
-        start_offset_seconds = max(0.0, (start_time_ns - bag_start_ns) / 1_000_000_000.0)
-        end_offset_seconds = max(start_offset_seconds, (end_time_ns - bag_start_ns) / 1_000_000_000.0)
         print(
             f'[info] movement window for {source_dataset_name}: '
             f'{start_time_ns} .. {end_time_ns}'
         )
 
-        container_work_dir = Path('/work')
-        container_bag_inputs = container_bag_files(tmp, container_work_dir, downloaded)
-        cut_output_uri = output_dir / f'{source_dataset_id}-cut-window'
-        extract_output_uri = output_dir / f'{source_dataset_id}-motion-window'
-        container_cut_output_uri = container_work_dir / cut_output_uri.relative_to(tmp)
-        container_extract_output_uri = container_work_dir / extract_output_uri.relative_to(tmp)
-
-        cut_args = [
-            'cut',
-            *container_bag_inputs,
-            '--output',
-            str(container_cut_output_uri),
-            '--start',
-            f'{start_offset_seconds:.3f}',
-            '--end',
-            f'{end_offset_seconds:.3f}',
-            '--out-storage',
-            str(config.get('output_storage_id', 'sqlite3')),
-        ]
-        input_storage = str(config.get('input_storage', '')).strip()
-        if input_storage:
-            cut_args.extend(['--in-storage', input_storage])
-        transient_local_policy = str(config.get('transient_local_policy', '')).strip()
-        if transient_local_policy:
-            cut_args.extend(['--transient-local-policy', transient_local_policy])
-        if bool(config.get('progress', False)):
-            cut_args.append('--progress')
-        run_rosbag_command_in_docker(
-            host_work_dir=tmp,
-            docker_image=require_str(config, 'docker_image'),
-            ros_args=cut_args,
-            docker_log_file=docker_log_file,
+        output_uri = output_dir / f'{source_dataset_id}-motion-window'
+        written_count = write_filtered_rosbag(
+            bag_inputs=bag_inputs,
+            output_uri=output_uri,
+            topics_to_keep=require_topics(config, 'topics_to_keep'),
+            start_time_ns=start_time_ns,
+            end_time_ns=end_time_ns,
+            config=config,
         )
+        print(f'[info] wrote filtered rosbag with {written_count} messages')
 
-        extract_args = [
-            'extract',
-            str(container_cut_output_uri),
-            '--output',
-            str(container_extract_output_uri),
-            '--out-storage',
-            str(config.get('output_storage_id', 'sqlite3')),
-            '--compression-format',
-            str(config.get('compression_format', 'zstd')),
-            '--compression-mode',
-            str(config.get('compression_mode', 'FILE')).upper(),
-            '--topic',
-            *require_topics(config, 'topics_to_keep'),
-        ]
-        if bool(config.get('progress', False)):
-            extract_args.append('--progress')
-        run_rosbag_command_in_docker(
-            host_work_dir=tmp,
-            docker_image=require_str(config, 'docker_image'),
-            ros_args=extract_args,
-            docker_log_file=docker_log_file,
-        )
-
-        output_files = collect_output_files(extract_output_uri)
-        topic_summary = summarize_time_series_topics(extract_output_uri)
+        output_files = collect_output_files(output_uri)
+        topic_summary = summarize_time_series_topics(output_uri)
         metadata_doc = build_minimal_time_series_metadata(topic_summary)
 
         target_dataset_id = create_target_dataset(
@@ -344,7 +364,7 @@ def process_dataset(
             target_collection_id=get_collection_id(config, None, 'target_collection'),
             source_dataset_id=source_dataset_id,
             source_dataset_name=source_dataset_name,
-            name_suffix=str(config.get('name_suffix', 'motion-window')),
+            name_suffix=str(config.get('name_suffix', 'trim')),
         )
 
         uploaded_file_ids: list[uuid.UUID] = []
@@ -382,7 +402,6 @@ def main() -> int:
     config['target_collection'] = str(target_collection_id)
 
     tracker = tracker_path(args.tracker_id)
-    docker_log_file = docker_log_path(tracker)
     ensure_tracker_header(
         tracker,
         ['processed_at_utc', 'status', 'source_dataset_id', 'source_dataset_name', 'target_dataset_id', 'target_file_ids', 'message'],
@@ -435,7 +454,6 @@ def main() -> int:
                 types=types,
                 config=config,
                 ts_schema_guid=ts_schema_guid,
-                docker_log_file=docker_log_file,
             )
             append_tracker_row(
                 tracker,
@@ -461,11 +479,10 @@ def main() -> int:
                     str(source_dataset.name or source_dataset_id),
                     '',
                     '',
-                    f'{str(exc).strip()} (docker log: {docker_log_file})',
+                    str(exc).strip(),
                 ],
             )
             print(f'[error] failed for dataset {source_dataset_id}: {exc}')
-            print(f'[error] docker log: {docker_log_file}')
             print(traceback.format_exc())
 
     print(

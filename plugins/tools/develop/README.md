@@ -68,7 +68,9 @@ Outline:
 | Tool   | Extract Rosbag GNSS + IMU to CSV | `extract_rosbag_gnss_imu_to_csv/extract_rosbag_gnss_imu_to_csv.py` | Cyclic / repeated run | Filters source datasets by `rdpms.tsdata`, downloads ROS2 bag files, extracts `/gnss` and `/imu/data` to CSV, uploads the derived CSV files to a target collection, refreshes `rdpms.tsdata`, and assigns `rdpms.viz` on the source dataset. Uses `cache/processed_rosbag_source_datasets.csv` as an idempotence tracker. |
 | Helper | Annotate Dataset Time Series Metadata | `annotate_dataset_time_series_metadata/annotate_dataset_time_series_metadata.py` | Manual trigger | Assigns synthetic/manual `rdpms.tsdata` metadata to a dataset and validates it against the time-series schema. |
 | Tool   | Annotate Rosbag TSData | `annotate_rosbag_tsdata/annotate_rosbag_tsdata.py` | Manual trigger or cyclic / repeated run | Downloads rosbag dataset files, summarizes all contained topics, and assigns minimal `rdpms.tsdata` metadata with topic name, message count, first/last timestamp, and `messageType.name`. |
-| Tool   | Trim Motion Rosbag | `trim_motion_rosbag/trim_motion_rosbag.py` | Cyclic / repeated run | Queries source datasets by `rdpms.tsdata` for a configured topic/type, detects a movement window from a `Float32` topic, trims the bag to that window with configurable padding, rewrites it via `ros2 bag convert` inside Docker, uploads the result dataset to a target collection, and assigns minimal `rdpms.tsdata` on the derived bag. |
+| Tool   | Register Existing S3 Rosbags | `register_existing_s3_rosbags/register_existing_s3_rosbags.py` | Manual trigger | Recursively scans an S3 prefix for rosbag directories identified by `metadata.yaml`, skips already registered dataset slugs, and registers each bag as a sealed S3-backed dataset through the API. |
+| Tool   | Trim Motion Rosbag | `trim_motion_rosbag/trim_motion_rosbag.py` | Cyclic / repeated run | Queries source datasets by `rdpms.tsdata` for a configured topic/type, detects a movement window from a `Float32` topic, rewrites a new uncompressed bag by record timestamp and configured topics, uploads the result dataset to a target collection, and assigns minimal `rdpms.tsdata` on the derived bag. |
+| Tool   | Extract Speed CSV Plotly | `extract_speed_csv_plotly/extract_speed_csv_plotly.py` | Cyclic / repeated run | Queries bag datasets by `rdpms.tsdata`, extracts a configured `Float32` speed topic to CSV, uploads the CSV to a target collection, and assigns a Plotly visualization manifest on the source dataset. |
 | Template | Workflow Template | `workflow_template.sh` | Manual trigger | Bash template for wiring tool-call patterns together by logical collection roles such as `raw`, `intermediate`, and `visualization`. |
 
 ## Workflow Template
@@ -208,6 +210,32 @@ Purpose:
 - assign topic `name`, `metadata.messageCount`, `metadata.firstMessageTimestamp`, `metadata.lastMessageTimestamp`, and `messageType.name`,
 - optionally run collection-wide with tracker-backed idempotence.
 
+### Register Existing S3 Rosbags
+
+Entry point:
+
+```bash
+python plugins/tools/develop/register_existing_s3_rosbags/register_existing_s3_rosbags.py \
+  --config plugins/tools/develop/register_existing_s3_rosbags/config.example.yaml \
+  --secrets plugins/tools/develop/register_existing_s3_rosbags/secrets.example.yaml \
+  --dry-run
+```
+
+Purpose:
+- scan an existing S3 bucket/prefix for rosbag directories containing `metadata.yaml`,
+- optionally restrict matched rosbag directory paths with `discovery.directory_regex` or `--regex`,
+- skip datasets whose derived slug already exists in the target collection,
+- register every file below each rosbag directory as an S3 reference relative to the configured datastore prefix,
+- create the target dataset directly in sealed state through `POST /api/v1/data/datasets/new/sealed/s3`.
+
+Notes:
+- the main config intentionally does not contain credentials or S3 endpoint details; `rdpms.s3_store_id` is the join key into the secrets YAML,
+- copy `config.example.yaml` to `config.yaml` and `secrets.example.yaml` to `secrets.yaml` for a real run,
+- dataset name and slug are the rosbag directory basename,
+- the API server validates every inserted S3 reference by object key and size before saving the dataset,
+- the tool-specific `.gitignore` keeps local `config.yaml` and `secrets.yaml` out of the repo,
+- the script requires `boto3`, `PyYAML`, and `requests` in the Python environment.
+
 ### Trim Motion Rosbag
 
 Entry point:
@@ -221,14 +249,29 @@ Purpose:
 - query source datasets by `rdpms.tsdata` for a configured trigger topic and ROS type,
 - download new bags from a source collection,
 - detect the first and last receive timestamp where motion occurs on the configured `Float32` topic,
-- trim the bag to that window plus configurable padding,
-- rewrite the bag via `ros2 bag convert` inside Docker,
+- trim the bag to that window plus configurable padding by record timestamp,
 - keep only a configured list of topics,
-- compress the result,
+- copy selected messages as serialized data without deserializing every topic,
 - upload the rewritten bag into a target collection,
 - assign minimal `rdpms.tsdata` to the derived dataset.
 
 Notes:
-- the script expects Docker to be callable from the environment and inherits `DOCKER_HOST` as-is,
-- the container image and rosbag output settings are configured through the YAML file,
+- the output bag is currently uncompressed,
+- `output_storage_id` controls whether the writer creates `mcap` or `sqlite3`,
 - `config.example.yaml` is only a template and should be copied or edited for a concrete workflow.
+
+### Extract Speed CSV Plotly
+
+Entry point:
+
+```bash
+python plugins/tools/develop/extract_speed_csv_plotly/extract_speed_csv_plotly.py \
+  --source-collection <source-collection-id> \
+  --target-collection <target-collection-id>
+```
+
+Purpose:
+- query source datasets by `rdpms.tsdata` for a configured speed topic,
+- extract that `Float32` topic into a `stamp,speed` CSV,
+- upload the CSV as a derived dataset,
+- assign a `rdpms.viz` manifest on the source dataset that opens the CSV with `rdpms.timeseries-plotly`.

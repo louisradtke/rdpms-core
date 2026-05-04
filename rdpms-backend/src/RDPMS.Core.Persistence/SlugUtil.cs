@@ -5,10 +5,13 @@ namespace RDPMS.Core.Persistence;
 
 public static class SlugUtil
 {
+    public const string SlugValidationRules =
+        "Use 1 to 128 characters: letters, numbers, '.', '+', '-', or '_'.";
+
     /// <summary>
     /// DO NOT USE THIS FOR VALIDATION. <see cref="IsValidSlug"/> is the single source of truth for that."/>
     /// </summary>
-    public static Regex SlugRegex { get; } = new(@"^[A-Za-z0-9\.\+\-_]{1,64}$",
+    public static Regex SlugRegex { get; } = new(@"^[A-Za-z0-9\.\+\-_]{1,128}$",
         RegexOptions.Compiled,
         TimeSpan.FromMilliseconds(250));
 
@@ -22,6 +25,11 @@ public static class SlugUtil
         // if (Guid.TryParse(slug, out _)) return false;
         return !string.IsNullOrWhiteSpace(slug) &&
                SlugRegex.IsMatch(slug);
+    }
+
+    public static string GetInvalidSlugMessage(string fieldName = "Slug")
+    {
+        return $"{fieldName} is invalid. {SlugValidationRules}";
     }
 
     public static bool TypeIsQualifiedForSlug(Type type)

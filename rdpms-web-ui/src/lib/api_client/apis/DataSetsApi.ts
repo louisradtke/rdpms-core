@@ -25,6 +25,7 @@ import type {
   MetadataQueryDTO,
   ProblemDetails,
   S3FileCreateRequestDTO,
+  SealedS3DataSetCreateRequestDTO,
 } from '../models/index';
 import {
     DataSetCreateRequestDTOFromJSON,
@@ -47,6 +48,8 @@ import {
     ProblemDetailsToJSON,
     S3FileCreateRequestDTOFromJSON,
     S3FileCreateRequestDTOToJSON,
+    SealedS3DataSetCreateRequestDTOFromJSON,
+    SealedS3DataSetCreateRequestDTOToJSON,
 } from '../models/index';
 
 export interface ApiV1DataDatasetsGetRequest {
@@ -92,6 +95,10 @@ export interface ApiV1DataDatasetsIdSealPutRequest {
 
 export interface ApiV1DataDatasetsNewPostRequest {
     dataSetCreateRequestDTO?: DataSetCreateRequestDTO;
+}
+
+export interface ApiV1DataDatasetsNewSealedS3PostRequest {
+    sealedS3DataSetCreateRequestDTO?: SealedS3DataSetCreateRequestDTO;
 }
 
 export interface ApiV1DataDatasetsPostRequest {
@@ -466,6 +473,38 @@ export class DataSetsApi extends runtime.BaseAPI {
      */
     async apiV1DataDatasetsNewPost(requestParameters: ApiV1DataDatasetsNewPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DataSetSummaryDTO> {
         const response = await this.apiV1DataDatasetsNewPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Register an already existing S3-backed dataset and seal it in a single operation. All object keys are relative to the referenced datastore prefix.
+     */
+    async apiV1DataDatasetsNewSealedS3PostRaw(requestParameters: ApiV1DataDatasetsNewSealedS3PostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DataSetSummaryDTO>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/data/datasets/new/sealed/s3`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: SealedS3DataSetCreateRequestDTOToJSON(requestParameters['sealedS3DataSetCreateRequestDTO']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DataSetSummaryDTOFromJSON(jsonValue));
+    }
+
+    /**
+     * Register an already existing S3-backed dataset and seal it in a single operation. All object keys are relative to the referenced datastore prefix.
+     */
+    async apiV1DataDatasetsNewSealedS3Post(requestParameters: ApiV1DataDatasetsNewSealedS3PostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DataSetSummaryDTO> {
+        const response = await this.apiV1DataDatasetsNewSealedS3PostRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

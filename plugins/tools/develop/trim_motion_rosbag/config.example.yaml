@@ -12,15 +12,12 @@ padding_seconds: 5.0
 
 topics_to_keep:
   - /vehicle/motion_state
+  - /speed
   - /tf
   - /tf_static
   - /imu/data
   - /gnss
 
-docker_image: ros:jazzy-ros-base
-input_storage: mcap
 output_storage_id: mcap
-compression_mode: file
-compression_format: zstd
-progress: false
+typestore: ROS2_JAZZY
 name_suffix: trimmed-motion-window

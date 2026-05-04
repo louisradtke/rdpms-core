@@ -45,6 +45,18 @@ export interface DataStoreSummaryDTO {
     filesCount?: number | null;
     /**
      * 
+     * @type {number}
+     * @memberof DataStoreSummaryDTO
+     */
+    storageReferenceCount?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof DataStoreSummaryDTO
+     */
+    storageBytes?: number | null;
+    /**
+     * 
      * @type {string}
      * @memberof DataStoreSummaryDTO
      */
@@ -90,6 +102,8 @@ export function DataStoreSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator:
         'slug': json['slug'] == null ? undefined : json['slug'],
         'name': json['name'] == null ? undefined : json['name'],
         'filesCount': json['filesCount'] == null ? undefined : json['filesCount'],
+        'storageReferenceCount': json['storageReferenceCount'] == null ? undefined : json['storageReferenceCount'],
+        'storageBytes': json['storageBytes'] == null ? undefined : json['storageBytes'],
         'storageType': json['storageType'] == null ? undefined : json['storageType'],
         'propertiesJson': json['propertiesJson'] == null ? undefined : json['propertiesJson'],
         'projectId': json['projectId'] == null ? undefined : json['projectId'],
@@ -112,6 +126,8 @@ export function DataStoreSummaryDTOToJSONTyped(value?: DataStoreSummaryDTO | nul
         'slug': value['slug'],
         'name': value['name'],
         'filesCount': value['filesCount'],
+        'storageReferenceCount': value['storageReferenceCount'],
+        'storageBytes': value['storageBytes'],
         'storageType': value['storageType'],
         'propertiesJson': value['propertiesJson'],
         'projectId': value['projectId'],

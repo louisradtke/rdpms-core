@@ -295,9 +295,138 @@ public class DataSetsController(
             return BadRequest(new ErrorMessageDTO { Message = "Slug is required." });
         }
 
-        if (!await dataSetService.ValidateSlug(domainItem.Slug, domainItem.ParentId.Value))
+        var slugValidationResult = await dataSetService.ValidateSlug(domainItem.Slug, domainItem.ParentId.Value);
+        switch (slugValidationResult)
         {
-            return BadRequest(new ErrorMessageDTO { Message = "Slug is not valid." });
+            case DataSetSlugValidationResult.Valid:
+                break;
+            case DataSetSlugValidationResult.InvalidFormat:
+                return BadRequest(new ErrorMessageDTO { Message = SlugUtil.GetInvalidSlugMessage() });
+            case DataSetSlugValidationResult.AlreadyTaken:
+                return BadRequest(new ErrorMessageDTO
+                {
+                    Message = $"Slug '{domainItem.Slug}' is already taken in this collection."
+                });
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        await dataSetService.AddAsync(domainItem);
+
+        var responseDto = await QueryDataSetDetailedDTO(domainItem.Id);
+        return Ok(responseDto);
+    }
+
+    /// <summary>
+    /// Register an already existing S3-backed dataset and seal it in a single operation.
+    /// All object keys are relative to the referenced datastore prefix.
+    /// </summary>
+    /// <param name="dto">Dataset and file references to register.</param>
+    /// <returns>The created dataset.</returns>
+    [HttpPost("new/sealed/s3")]
+    [Consumes("application/json")]
+    [ProducesResponseType<DataSetSummaryDTO>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorMessageDTO>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> PostSealedS3([FromBody] SealedS3DataSetCreateRequestDTO dto)
+    {
+        var datasetValidationError = ValidateSealedS3DatasetRequest(dto);
+        if (datasetValidationError is not null)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = datasetValidationError });
+        }
+
+        if (!await collectionService.CheckForIdAsync(dto.CollectionId!.Value))
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "CollectionId does not refer to an existing collection." });
+        }
+
+        if (!await storeService.CheckForIdAsync(dto.StoreId!.Value))
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "StoreId does not refer to an existing store." });
+        }
+
+        var collection = await collectionService.GetByIdAsync(dto.CollectionId.Value);
+        var requestedStore = await storeService.GetByIdAsync(dto.StoreId!.Value);
+        if (requestedStore is not S3DataStore store)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "StoreId must refer to an S3 data store." });
+        }
+
+        if (collection.ParentProjectId != store.ParentProjectId)
+        {
+            return BadRequest(new ErrorMessageDTO
+            {
+                Message = "CollectionId and StoreId must belong to the same project."
+            });
+        }
+
+        var slug = dto.Slug!.Trim();
+        var slugValidationResult = await dataSetService.ValidateSlug(slug, dto.CollectionId.Value);
+        switch (slugValidationResult)
+        {
+            case DataSetSlugValidationResult.Valid:
+                break;
+            case DataSetSlugValidationResult.InvalidFormat:
+                return BadRequest(new ErrorMessageDTO { Message = SlugUtil.GetInvalidSlugMessage() });
+            case DataSetSlugValidationResult.AlreadyTaken:
+                return BadRequest(new ErrorMessageDTO
+                {
+                    Message = $"Slug '{slug}' is already taken in this collection."
+                });
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        List<DataFile> files;
+        try
+        {
+            files = await BuildSealedS3DataFiles(dto, store);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = ex.Message });
+        }
+
+        foreach (var reference in files.SelectMany(f => f.References).OfType<S3FileStorageReference>())
+        {
+            bool isValid;
+            try
+            {
+                isValid = await s3Service.ValidateFileRefAsync(reference, store);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new ErrorMessageDTO { Message = ex.Message });
+            }
+
+            if (!isValid)
+            {
+                return BadRequest(new ErrorMessageDTO
+                {
+                    Message = $"Could not validate object '{reference.ObjectKey}' in store '{store.Id}'."
+                });
+            }
+        }
+
+        var domainItem = new DataSet(dto.Name!.Trim())
+        {
+            Id = Guid.NewGuid(),
+            Slug = slug,
+            ParentCollectionId = dto.CollectionId.Value,
+            AncestorDatasetIds = [],
+            AssignedTags = [],
+            CreatedStamp = dto.CreatedStampUTC!.Value,
+            DeletedStamp = null,
+            LifecycleState = DataSetState.Sealed,
+            DeletionState = DeletionState.Active,
+            Files = files,
+            SourceForJobs = [],
+            MetadataJsonFields = []
+        };
+
+        foreach (var file in domainItem.Files)
+        {
+            file.ParentDataSetId = domainItem.Id;
         }
 
         await dataSetService.AddAsync(domainItem);
@@ -398,6 +527,163 @@ public class DataSetsController(
         var target = FileCreateResponseDTOMapper.ToDTO(response);
 
         return Ok(target);
+    }
+
+    private static string? ValidateSealedS3DatasetRequest(SealedS3DataSetCreateRequestDTO dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Name))
+        {
+            return "Name is required.";
+        }
+
+        if (dto.CreatedStampUTC is null)
+        {
+            return "CreatedStampUTC is required.";
+        }
+
+        if (dto.CollectionId is null)
+        {
+            return "CollectionId is required.";
+        }
+
+        if (dto.StoreId is null)
+        {
+            return "StoreId is required.";
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Slug))
+        {
+            return "Slug is required.";
+        }
+
+        if (dto.Files is null || dto.Files.Count == 0)
+        {
+            return "At least one file is required.";
+        }
+
+        var duplicateName = dto.Files
+            .Where(f => !string.IsNullOrWhiteSpace(f.Name))
+            .GroupBy(f => f.Name!.Trim(), StringComparer.Ordinal)
+            .FirstOrDefault(g => g.Count() > 1)
+            ?.Key;
+        if (duplicateName is not null)
+        {
+            return $"File name '{duplicateName}' is duplicated in this dataset.";
+        }
+
+        var duplicateObjectKey = dto.Files
+            .Where(f => !string.IsNullOrWhiteSpace(f.ObjectKey))
+            .GroupBy(f => NormalizeObjectKey(f.ObjectKey!), StringComparer.Ordinal)
+            .FirstOrDefault(g => g.Count() > 1)
+            ?.Key;
+        if (duplicateObjectKey is not null)
+        {
+            return $"Object key '{duplicateObjectKey}' is duplicated in this dataset.";
+        }
+
+        return null;
+    }
+
+    private async Task<List<DataFile>> BuildSealedS3DataFiles(
+        SealedS3DataSetCreateRequestDTO datasetDto,
+        S3DataStore store)
+    {
+        var contentTypeCache = new Dictionary<Guid, ContentType>();
+        var files = new List<DataFile>();
+
+        foreach (var fileDto in datasetDto.Files!)
+        {
+            if (string.IsNullOrWhiteSpace(fileDto.Name))
+            {
+                throw new ArgumentException("File Name is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(fileDto.ObjectKey))
+            {
+                throw new ArgumentException($"ObjectKey is required for file '{fileDto.Name}'.");
+            }
+
+            if (fileDto.ContentTypeId is null)
+            {
+                throw new ArgumentException($"ContentTypeId is required for file '{fileDto.Name}'.");
+            }
+
+            if (fileDto.SizeBytes is null || fileDto.SizeBytes < 0)
+            {
+                throw new ArgumentException($"SizeBytes must be >= 0 for file '{fileDto.Name}'.");
+            }
+
+            if ((fileDto.BeginStampUTC is null) != (fileDto.EndStampUTC is null))
+            {
+                throw new ArgumentException(
+                    $"BeginStampUTC and EndStampUTC must be both null or both non-null for file '{fileDto.Name}'.");
+            }
+
+            if (!contentTypeCache.TryGetValue(fileDto.ContentTypeId.Value, out var contentType))
+            {
+                if (!await typeService.CheckForIdAsync(fileDto.ContentTypeId.Value))
+                {
+                    throw new ArgumentException($"ContentTypeId does not exist for file '{fileDto.Name}'.");
+                }
+
+                contentType = await typeService.GetByIdAsync(fileDto.ContentTypeId.Value);
+                contentTypeCache[fileDto.ContentTypeId.Value] = contentType;
+            }
+
+            var compression = ParseCompressionAlgorithm(fileDto.CompressionAlgorithm, fileDto.Name);
+            var plainHash = fileDto.PlainSHA256Hash ?? string.Empty;
+            var storageHash = fileDto.StoredSHA256Hash ?? plainHash;
+            var objectKey = NormalizeObjectKey(fileDto.ObjectKey);
+            if (string.IsNullOrWhiteSpace(objectKey))
+            {
+                throw new ArgumentException($"ObjectKey is required for file '{fileDto.Name}'.");
+            }
+
+            files.Add(new DataFile(fileDto.Name.Trim())
+            {
+                FileType = contentType,
+                SizeBytes = fileDto.SizeBytes.Value,
+                SHA256Hash = plainHash,
+                CreatedStamp = fileDto.CreatedStampUTC ?? datasetDto.CreatedStampUTC!.Value,
+                BeginStamp = fileDto.BeginStampUTC,
+                EndStamp = fileDto.EndStampUTC,
+                DeletionState = DeletionState.Active,
+                References =
+                [
+                    new S3FileStorageReference
+                    {
+                        StoreFid = store.Id,
+                        ObjectKey = objectKey,
+                        Algorithm = compression,
+                        SizeBytes = fileDto.SizeBytes.Value,
+                        SHA256Hash = storageHash
+                    }
+                ],
+                MetadataJsonFields = []
+            });
+        }
+
+        return files;
+    }
+
+    private static CompressionAlgorithm ParseCompressionAlgorithm(string? value, string? fileName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return CompressionAlgorithm.Plain;
+        }
+
+        if (Enum.TryParse<CompressionAlgorithm>(value, ignoreCase: true, out var algorithm))
+        {
+            return algorithm;
+        }
+
+        throw new ArgumentException($"Unknown CompressionAlgorithm '{value}' for file '{fileName}'.");
+    }
+
+    private static string NormalizeObjectKey(string objectKey)
+    {
+        return objectKey.Trim().TrimStart('/');
     }
 
     /// <summary>

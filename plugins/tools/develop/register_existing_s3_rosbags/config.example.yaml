@@ -1,0 +1,21 @@
+rdpms:
+  base_url: http://localhost:5000
+  collection_id: 00000000-0000-0000-0000-000000000000
+
+# This must be the RDPMS datastore id. The same id is used in secrets.example.yaml.
+s3_store_id: 00000000-0000-0000-0000-000000000000
+
+discovery:
+  # Matched against the rosbag directory path after removing the configured S3 prefix.
+  # Leave empty to accept every directory containing metadata.yaml.
+  directory_regex:
+
+registration:
+  # Values can be RDPMS content type abbreviations or UUIDs.
+  content_type_by_extension:
+    .yaml: yaml
+    .yml: yaml
+    .mcap: mcap
+    .bag: bag
+    .db3: bag
+  fallback_content_type: bag

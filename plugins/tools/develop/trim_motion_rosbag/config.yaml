@@ -12,6 +12,7 @@ padding_seconds: 5.0
 
 topics_to_keep:
   - /vehicle/motion_state
+  - /speed
   - /tf
   - /tf_static
   - /imu/data

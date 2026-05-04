@@ -69,7 +69,7 @@ public class DataCollectionSummaryDTOMapper
             Name = domain.Name,
             Description = domain.Description,
             DataSetCount = domain.ContainedDatasets?.Count(ds => ds.DeletionState == DeletionState.Active) ?? 0,
-            DefaultDataStoreId = domain.DefaultDataStore?.Id,
+            DefaultDataStoreId = domain.DefaultDataStore?.Id ?? domain.DefaultDataStoreId,
             ProjectId = domain.ParentId
         };
     }
