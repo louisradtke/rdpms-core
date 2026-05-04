@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="compose full" type="docker-deploy" factoryName="docker-compose.yml" server-name="Podman Machine">
+  <configuration default="false" name="compose full" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker Rootless">
     <deployment type="docker-compose.yml">
       <settings>
         <option name="profiles">
