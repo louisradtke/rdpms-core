@@ -14,8 +14,12 @@ import sys
 # Allow direct execution from repository root without requiring editable install.
 REPO_ROOT = Path(__file__).resolve().parents[4]
 CLI_SRC_ROOT = REPO_ROOT / 'rdpms-cli'
-if str(CLI_SRC_ROOT) not in sys.path:
-    sys.path.insert(0, str(CLI_SRC_ROOT))
+DEV_TOOLS_ROOT = Path(__file__).resolve().parents[1]
+for candidate in (CLI_SRC_ROOT, DEV_TOOLS_ROOT):
+    if str(candidate) not in sys.path:
+        sys.path.insert(0, str(candidate))
+
+from common_develop_tooling import add_develop_directory_options
 
 from rdpms_cli.openapi_client.api_client import ApiClient
 from rdpms_cli.openapi_client.configuration import Configuration
@@ -59,6 +63,7 @@ def parse_args() -> argparse.Namespace:
         default=0,
         help='Message count hint for /imu/data topic metadata (default: 0)',
     )
+    add_develop_directory_options(parser)
     return parser.parse_args()
 
 

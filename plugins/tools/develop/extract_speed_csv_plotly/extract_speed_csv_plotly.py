@@ -9,7 +9,6 @@ import datetime as dt
 import json
 import re
 import sys
-import tempfile
 import traceback
 import uuid
 from pathlib import Path
@@ -40,6 +39,7 @@ from common_rosbag_tooling import (
     stamp_from_ns,
     upload_file_to_dataset,
 )
+from common_develop_tooling import add_develop_directory_options, temporary_directory
 from rdpms_cli.openapi_client.exceptions import ApiException
 from rdpms_cli.openapi_client.models.metadata_column_target_dto import MetadataColumnTargetDTO
 from rdpms_cli.openapi_client.models.metadata_query_dto import MetadataQueryDTO
@@ -79,6 +79,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--force', action='store_true', help='Process datasets even if tracker has status=success')
     parser.add_argument('--limit', type=int, default=0, help='Optional max number of source datasets to process')
     parser.add_argument('--name-suffix', default='speed-csv', help='Suffix for generated target dataset names')
+    add_develop_directory_options(parser)
     return parser.parse_args()
 
 
@@ -87,8 +88,8 @@ def slugify(value: str) -> str:
     return slug or 'speed-csv'
 
 
-def tracker_path(tracker_id: str | None) -> Path:
-    return build_tracker_path(Path(__file__), TRACKER_FILENAME, tracker_id)
+def tracker_path(tracker_id: str | None, cache_dir: str | None) -> Path:
+    return build_tracker_path(Path(__file__), TRACKER_FILENAME, tracker_id, cache_dir)
 
 
 def rosbag_input_paths(downloaded_paths: list[Path]) -> list[Path]:
@@ -340,8 +341,7 @@ def process_source_dataset(
     source_dataset_details = get_dataset_details(ds_api, source_dataset_id)
     source_dataset_name = str(source_dataset_details.name or source_dataset_id)
 
-    with tempfile.TemporaryDirectory(prefix='rdpms-speed-csv-') as tmp_dir:
-        tmp = Path(tmp_dir)
+    with temporary_directory('rdpms-speed-csv-', args.tmp_download_base_dir) as tmp:
         downloaded = download_dataset_files(source_dataset_details, files_api, tmp / 'input')
         bag_inputs = rosbag_input_paths(downloaded)
         csv_path = tmp / f'{slugify(source_dataset_name)}-speed.csv'
@@ -386,7 +386,7 @@ def main() -> int:
     source_collection_id = uuid.UUID(args.source_collection)
     target_collection_id = uuid.UUID(args.target_collection)
 
-    tracker = tracker_path(args.tracker_id)
+    tracker = tracker_path(args.tracker_id, args.cache_dir)
     ensure_tracker_header(
         tracker,
         [

@@ -9,7 +9,6 @@ import datetime as dt
 import hashlib
 import json
 import re
-import tempfile
 import traceback
 import uuid
 from pathlib import Path
@@ -20,8 +19,12 @@ import requests
 # Allow direct execution from repository root without requiring editable install.
 REPO_ROOT = Path(__file__).resolve().parents[4]
 CLI_SRC_ROOT = REPO_ROOT / 'rdpms-cli'
-if str(CLI_SRC_ROOT) not in sys.path:
-    sys.path.insert(0, str(CLI_SRC_ROOT))
+DEV_TOOLS_ROOT = Path(__file__).resolve().parents[1]
+for candidate in (CLI_SRC_ROOT, DEV_TOOLS_ROOT):
+    if str(candidate) not in sys.path:
+        sys.path.insert(0, str(candidate))
+
+from common_develop_tooling import add_develop_directory_options, build_cache_path, temporary_directory
 
 from rdpms_cli.openapi_client.api_client import ApiClient
 from rdpms_cli.openapi_client.configuration import Configuration
@@ -88,6 +91,7 @@ def parse_args() -> argparse.Namespace:
         help='Optional max number of source datasets to process this run (0 = unlimited)',
     )
     parser.add_argument('--tracker-id', help='Optional tracker id to isolate processed-state for this workflow')
+    add_develop_directory_options(parser)
     return parser.parse_args()
 
 
@@ -183,11 +187,8 @@ def list_collection_datasets(ds_api: DataSetsApi, collection_id: uuid.UUID) -> l
     return ds_api.api_v1_data_datasets_get(collection_id=collection_id)
 
 
-def tracker_path(tracker_id: str | None) -> Path:
-    default_path = Path(TRACKER_FILENAME)
-    if not tracker_id:
-        return Path(__file__).resolve().parent / default_path
-    return Path(__file__).resolve().parent / default_path.parent / f'{default_path.stem}-{tracker_id}{default_path.suffix}'
+def tracker_path(tracker_id: str | None, cache_dir: str | None) -> Path:
+    return build_cache_path(Path(__file__), TRACKER_FILENAME, tracker_id, cache_dir)
 
 
 def ensure_tracker_header(path: Path) -> None:
@@ -655,9 +656,7 @@ def process_source_dataset(
     rosbag_file_id = uuid.UUID(str(rosbag_file.id))
     download_uri = resolve_download_uri(files_api, rosbag_file_id, rosbag_file.download_uri)
 
-    with tempfile.TemporaryDirectory(prefix='rdpms-ros2-csv-') as tmp_dir:
-        tmp = Path(tmp_dir)
-
+    with temporary_directory('rdpms-ros2-csv-', args.tmp_download_base_dir) as tmp:
         rosbag_name = rosbag_file.name or f'{rosbag_file_id}.db3'
         bag_path = tmp / rosbag_name
 
@@ -733,7 +732,7 @@ def main() -> int:
     source_collection_id = uuid.UUID(args.source_collection)
     target_collection_id = uuid.UUID(args.target_collection)
 
-    tracker = tracker_path(args.tracker_id)
+    tracker = tracker_path(args.tracker_id, args.cache_dir)
     ensure_tracker_header(tracker)
     processed_success = load_successful_source_ids(tracker)
 

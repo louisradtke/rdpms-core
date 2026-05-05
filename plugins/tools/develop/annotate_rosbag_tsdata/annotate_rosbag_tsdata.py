@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import sys
-import tempfile
 import traceback
 import uuid
 from pathlib import Path
@@ -34,6 +33,7 @@ from common_rosbag_tooling import (
     load_successful_source_ids,
     summarize_time_series_topics,
 )
+from common_develop_tooling import add_develop_directory_options, temporary_directory
 from rdpms_cli.openapi_client.exceptions import ApiException
 
 TSDATA_KEY = 'rdpms.tsdata'
@@ -59,19 +59,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--tracker-id', help='Optional tracker id to isolate processed-state for this workflow')
     parser.add_argument('--force', action='store_true', help='Re-annotate datasets even if tracker says success')
     parser.add_argument('--limit', type=int, default=0, help='Optional max number of datasets to process')
+    add_develop_directory_options(parser)
     return parser.parse_args()
 
 
-def tracker_path(tracker_id: str | None) -> Path:
-    return build_tracker_path(Path(__file__), TRACKER_FILENAME, tracker_id)
+def tracker_path(tracker_id: str | None, cache_dir: str | None) -> Path:
+    return build_tracker_path(Path(__file__), TRACKER_FILENAME, tracker_id, cache_dir)
 
 
 def process_dataset(dataset_id: uuid.UUID, *, ds_api, files_api, meta_api, args: argparse.Namespace, schema_guid):
     dataset = get_dataset_details(ds_api, dataset_id)
     dataset_name = str(dataset.name or dataset_id)
 
-    with tempfile.TemporaryDirectory(prefix='rdpms-annotate-rosbag-') as tmp_dir:
-        tmp = Path(tmp_dir)
+    with temporary_directory('rdpms-annotate-rosbag-', args.tmp_download_base_dir) as tmp:
         downloaded = download_dataset_files(dataset, files_api, tmp)
         bag_input = detect_rosbag_input(downloaded)
         topic_summary = summarize_time_series_topics(bag_input)
@@ -89,7 +89,7 @@ def process_dataset(dataset_id: uuid.UUID, *, ds_api, files_api, meta_api, args:
 
 def main() -> int:
     args = parse_args()
-    tracker = tracker_path(args.tracker_id)
+    tracker = tracker_path(args.tracker_id, args.cache_dir)
     ensure_tracker_header(
         tracker,
         ['processed_at_utc', 'status', 'source_dataset_id', 'source_dataset_name', 'metadata_id', 'message'],

@@ -11,7 +11,6 @@ import io
 import json
 import re
 import sys
-import tempfile
 import traceback
 import uuid
 from pathlib import Path
@@ -24,8 +23,12 @@ import requests
 # Allow direct execution from repository root without requiring editable install.
 REPO_ROOT = Path(__file__).resolve().parents[4]
 CLI_SRC_ROOT = REPO_ROOT / "rdpms-cli"
-if str(CLI_SRC_ROOT) not in sys.path:
-    sys.path.insert(0, str(CLI_SRC_ROOT))
+DEV_TOOLS_ROOT = Path(__file__).resolve().parents[1]
+for candidate in (CLI_SRC_ROOT, DEV_TOOLS_ROOT):
+    if str(candidate) not in sys.path:
+        sys.path.insert(0, str(candidate))
+
+from common_develop_tooling import add_develop_directory_options, build_cache_path, temporary_directory
 
 from rdpms_cli.openapi_client.api_client import ApiClient
 from rdpms_cli.openapi_client.configuration import Configuration
@@ -74,6 +77,7 @@ def parse_args() -> argparse.Namespace:
         help="Optional max number of source datasets to process this run (0 = unlimited)",
     )
     parser.add_argument("--tracker-id", help="Optional tracker id to isolate processed-state for this workflow")
+    add_develop_directory_options(parser)
     return parser.parse_args()
 
 
@@ -108,11 +112,8 @@ def get_dataset_details(ds_api: DataSetsApi, dataset_id: str) -> object:
     return ds_api.api_v1_data_datasets_id_get(dataset_id)
 
 
-def tracker_path(tracker_id: str | None) -> Path:
-    default_path = Path(TRACKER_FILENAME)
-    if not tracker_id:
-        return Path(__file__).resolve().parent / default_path
-    return Path(__file__).resolve().parent / default_path.parent / f'{default_path.stem}-{tracker_id}{default_path.suffix}'
+def tracker_path(tracker_id: str | None, cache_dir: str | None) -> Path:
+    return build_cache_path(Path(__file__), TRACKER_FILENAME, tracker_id, cache_dir)
 
 
 def ensure_tracker_header(path: Path) -> None:
@@ -356,6 +357,7 @@ def process_source_dataset(
     target_collection_id: uuid.UUID,
     metadata_key: str,
     schema_guid: uuid.UUID | None,
+    tmp_download_base_dir: str | None,
 ) -> tuple[str, str, str, str, str]:
     source_dataset_id = str(source_dataset.id)
     source_name = str(source_dataset.name or source_dataset_id)
@@ -380,8 +382,8 @@ def process_source_dataset(
 
     imu_data = parse_imu_csv(raw_bytes)
 
-    with tempfile.TemporaryDirectory(prefix="rdpms-debug-viz-") as tmp_dir:
-        png_path = Path(tmp_dir) / f"{slugify(source_name)}-plot.png"
+    with temporary_directory("rdpms-debug-viz-", tmp_download_base_dir) as tmp:
+        png_path = tmp / f"{slugify(source_name)}-plot.png"
         create_plot_png(imu_data, png_path)
 
         target_dataset_name = f"viz-{source_name}-{source_dataset_id[:8]}"
@@ -408,7 +410,7 @@ def main() -> int:
     source_collection_id = uuid.UUID(args.source_collection)
     target_collection_id = uuid.UUID(args.target_collection)
 
-    tracker = tracker_path(args.tracker_id)
+    tracker = tracker_path(args.tracker_id, args.cache_dir)
     ensure_tracker_header(tracker)
     processed_success = load_successful_source_ids(tracker)
 
@@ -452,6 +454,7 @@ def main() -> int:
                 target_collection_id=target_collection_id,
                 metadata_key=args.metadata_key,
                 schema_guid=schema_guid,
+                tmp_download_base_dir=args.tmp_download_base_dir,
             )
 
             append_tracker_row(

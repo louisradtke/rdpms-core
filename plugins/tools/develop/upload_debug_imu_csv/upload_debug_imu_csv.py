@@ -21,8 +21,12 @@ import requests
 # Allow direct execution from repository root without requiring editable install.
 REPO_ROOT = Path(__file__).resolve().parents[4]
 CLI_SRC_ROOT = REPO_ROOT / "rdpms-cli"
-if str(CLI_SRC_ROOT) not in sys.path:
-    sys.path.insert(0, str(CLI_SRC_ROOT))
+DEV_TOOLS_ROOT = Path(__file__).resolve().parents[1]
+for candidate in (CLI_SRC_ROOT, DEV_TOOLS_ROOT):
+    if str(candidate) not in sys.path:
+        sys.path.insert(0, str(candidate))
+
+from common_develop_tooling import add_develop_directory_options, resolve_tmp_download_base_dir
 
 from rdpms_cli.openapi_client.api_client import ApiClient
 from rdpms_cli.openapi_client.configuration import Configuration
@@ -63,8 +67,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        default="/tmp",
-        help="Directory where the CSV file will be created (default: /tmp)",
+        help="Directory where the CSV file will be created (default: --tmp-download-base-dir or /tmp)",
     )
     parser.add_argument(
         "--seed",
@@ -77,6 +80,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Keep generated CSV file after upload (default: delete it)",
     )
+    add_develop_directory_options(parser)
     return parser.parse_args()
 
 
@@ -266,7 +270,11 @@ def main() -> int:
     timestamp_utc = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     dataset_name = args.name or f"debug-imu-{timestamp_utc}"
 
-    out_dir = Path(args.output_dir)
+    out_dir = (
+        Path(args.output_dir)
+        if args.output_dir
+        else resolve_tmp_download_base_dir(args.tmp_download_base_dir) or Path("/tmp")
+    )
     out_dir.mkdir(parents=True, exist_ok=True)
     csv_path = out_dir / f"{slugify(dataset_name)}.csv"
 

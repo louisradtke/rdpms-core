@@ -7,7 +7,6 @@ import argparse
 import datetime as dt
 import json
 import sys
-import tempfile
 import traceback
 import uuid
 from pathlib import Path
@@ -36,6 +35,7 @@ from common_rosbag_tooling import (
     summarize_time_series_topics,
     upload_file_to_dataset,
 )
+from common_develop_tooling import add_develop_directory_options, temporary_directory
 from rdpms_cli.openapi_client.exceptions import ApiException
 from rdpms_cli.openapi_client.models.metadata_column_target_dto import MetadataColumnTargetDTO
 from rdpms_cli.openapi_client.models.metadata_query_dto import MetadataQueryDTO
@@ -58,6 +58,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--tracker-id', help='Optional tracker id to isolate processed-state for this workflow')
     parser.add_argument('--force', action='store_true', help='Reprocess datasets even if tracker says success')
     parser.add_argument('--limit', type=int, default=0, help='Optional max number of datasets to process')
+    add_develop_directory_options(parser)
     return parser.parse_args()
 
 
@@ -306,8 +307,8 @@ def write_filtered_rosbag(
     return written_count
 
 
-def tracker_path(tracker_id: str | None) -> Path:
-    return build_tracker_path(Path(__file__), TRACKER_FILENAME, tracker_id)
+def tracker_path(tracker_id: str | None, cache_dir: str | None) -> Path:
+    return build_tracker_path(Path(__file__), TRACKER_FILENAME, tracker_id, cache_dir)
 
 
 def process_dataset(
@@ -319,13 +320,13 @@ def process_dataset(
     types,
     config: dict[str, object],
     ts_schema_guid,
+    tmp_download_base_dir: str | None,
 ) -> tuple[str, str, str, str]:
     source_dataset_id = uuid.UUID(str(source_dataset.id))
     source_dataset_details = get_dataset_details(ds_api, source_dataset_id)
     source_dataset_name = str(source_dataset_details.name or source_dataset_id)
 
-    with tempfile.TemporaryDirectory(prefix='rdpms-trim-motion-') as tmp_dir:
-        tmp = Path(tmp_dir)
+    with temporary_directory('rdpms-trim-motion-', tmp_download_base_dir) as tmp:
         input_dir = tmp / 'input'
         output_dir = tmp / 'output'
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -401,7 +402,7 @@ def main() -> int:
     config = dict(config)
     config['target_collection'] = str(target_collection_id)
 
-    tracker = tracker_path(args.tracker_id)
+    tracker = tracker_path(args.tracker_id, args.cache_dir)
     ensure_tracker_header(
         tracker,
         ['processed_at_utc', 'status', 'source_dataset_id', 'source_dataset_name', 'target_dataset_id', 'target_file_ids', 'message'],
@@ -454,6 +455,7 @@ def main() -> int:
                 types=types,
                 config=config,
                 ts_schema_guid=ts_schema_guid,
+                tmp_download_base_dir=args.tmp_download_base_dir,
             )
             append_tracker_row(
                 tracker,

@@ -22,6 +22,8 @@ SLEEP_SECONDS="${SLEEP_SECONDS:-5}"
 RUN_FOREVER="${RUN_FOREVER:-1}"
 MAX_CYCLES="${MAX_CYCLES:-1}"
 TRIM_CONFIG_PATH="${TRIM_CONFIG_PATH:-plugins/tools/develop/trim_motion_rosbag/config.yaml}"
+TOOL_CACHE_DIR="${TOOL_CACHE_DIR:-}"
+TOOL_TMP_DOWNLOAD_BASE_DIR="${TOOL_TMP_DOWNLOAD_BASE_DIR:-}"
 declare -A TRACKER_IDS=(
   [annotate_raw]='rosbag-linear-annotate-raw-v1'
   [trim_motion]='rosbag-linear-trim-v1'
@@ -55,9 +57,17 @@ collection_id() {
 run_tool() {
   local rel_script="$1"
   shift
+  local shared_args=()
 
-  log "running $rel_script $*"
-  "$PYTHON_BIN" "$REPO_ROOT/plugins/tools/develop/$rel_script" "$@"
+  if [[ -n "$TOOL_CACHE_DIR" ]]; then
+    shared_args+=(--cache-dir "$TOOL_CACHE_DIR")
+  fi
+  if [[ -n "$TOOL_TMP_DOWNLOAD_BASE_DIR" ]]; then
+    shared_args+=(--tmp-download-base-dir "$TOOL_TMP_DOWNLOAD_BASE_DIR")
+  fi
+
+  log "running $rel_script ${shared_args[*]} $*"
+  "$PYTHON_BIN" "$REPO_ROOT/plugins/tools/develop/$rel_script" "${shared_args[@]}" "$@"
 }
 
 tracker_id() {
@@ -335,6 +345,8 @@ Environment overrides:
   MAX_CYCLES=5
   RUN_FOREVER=1
   TRIM_CONFIG_PATH=plugins/tools/develop/trim_motion_rosbag/config.yaml
+  TOOL_CACHE_DIR=/mnt/rdpms-tool-cache
+  TOOL_TMP_DOWNLOAD_BASE_DIR=/mnt/rdpms-tool-tmp
 
 Core idea:
   Collections are the interface between pipelines. Each pipeline consumes from one

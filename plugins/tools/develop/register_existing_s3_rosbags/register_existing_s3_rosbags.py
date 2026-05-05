@@ -14,6 +14,12 @@ from typing import Any
 
 import requests
 
+DEV_TOOLS_ROOT = Path(__file__).resolve().parents[1]
+if str(DEV_TOOLS_ROOT) not in sys.path:
+    sys.path.insert(0, str(DEV_TOOLS_ROOT))
+
+from common_develop_tooling import add_develop_directory_options
+
 SLUG_RE = re.compile(r'^[A-Za-z0-9\.\+\-_]{1,128}$')
 
 DEFAULT_EXTENSION_TYPES = {
@@ -50,6 +56,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--dry-run', action='store_true', help='Only list intended registrations')
     parser.add_argument('--regex', help='Override discovery.directory_regex from the main config')
     parser.add_argument('--limit', type=int, default=0, help='Maximum number of candidates to register')
+    add_develop_directory_options(parser)
     return parser.parse_args()
 
 

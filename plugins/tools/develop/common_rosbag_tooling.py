@@ -12,6 +12,7 @@ from pathlib import Path
 
 import requests
 
+from common_develop_tooling import build_cache_path
 from rdpms_cli.openapi_client.api_client import ApiClient
 from rdpms_cli.openapi_client.api.data_sets_api import DataSetsApi
 from rdpms_cli.openapi_client.api.files_api import FilesApi
@@ -269,11 +270,10 @@ def append_tracker_row(path: Path, row: list[str]) -> None:
         writer.writerow(row)
 
 
-def build_tracker_path(script_path: Path, default_filename: str, tracker_id: str | None) -> Path:
-    if not tracker_id:
-        return script_path.resolve().parent / default_filename
-
-    default_path = Path(default_filename)
-    stem = default_path.stem
-    suffix = default_path.suffix or '.csv'
-    return script_path.resolve().parent / default_path.parent / f'{stem}-{tracker_id}{suffix}'
+def build_tracker_path(
+    script_path: Path,
+    default_filename: str,
+    tracker_id: str | None,
+    cache_dir: str | Path | None = None,
+) -> Path:
+    return build_cache_path(script_path, default_filename, tracker_id, cache_dir)

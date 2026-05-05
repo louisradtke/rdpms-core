@@ -106,6 +106,23 @@ Why this shape is useful:
 
 ### Tool Entry Points
 
+All develop tool entry points accept these shared directory options:
+
+```bash
+--cache-dir <dir>
+--tmp-download-base-dir <dir>
+```
+
+`--cache-dir` redirects persistent local tracker/cache files from the tool-local `cache/` directories into one shared directory. `--tmp-download-base-dir` redirects temporary downloaded/generated working files from the system temp directory into the given base directory. The equivalent environment variables are `RDPMS_TOOL_CACHE_DIR` and `RDPMS_TOOL_TMP_DOWNLOAD_BASE_DIR`.
+
+The linear workflow script forwards these options to every tool when these environment variables are set:
+
+```bash
+TOOL_CACHE_DIR=/mnt/rdpms-tool-cache \
+TOOL_TMP_DOWNLOAD_BASE_DIR=/mnt/rdpms-tool-tmp \
+bash plugins/tools/develop/workflow_rosbag_linear.sh workflow_rosbag_linear
+```
+
 ### 1. Upload IMU CSV
 
 Entry point:
