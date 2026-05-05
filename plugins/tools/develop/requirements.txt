@@ -1,0 +1,3 @@
+rosbags
+requests
+boto3
