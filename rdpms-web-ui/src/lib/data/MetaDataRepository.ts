@@ -1,4 +1,11 @@
-import { Configuration, DataSetsApi, FilesApi, MetaDataApi, type MetaDateDTO, type SchemaValidationResultDTO } from '$lib/api_client';
+import {
+    Configuration,
+    DataSetsApi,
+    FilesApi,
+    MetaDataApi,
+    type MetaDateDTO,
+    type SchemaValidationResultDTO
+} from "$lib/api_client";
 
 export class MetaDataRepository {
     private readonly ready: Promise<void>;
@@ -14,23 +21,35 @@ export class MetaDataRepository {
                 this.filesApi = new FilesApi(conf);
             })
             .catch((err) => {
-                console.error('Failed to initialize MetaDataRepository APIs:', err);
+                console.error("Failed to initialize MetaDataRepository APIs:", err);
                 throw err;
             });
     }
 
-    private async ensureReady(): Promise<{ metadataApi: MetaDataApi; datasetsApi: DataSetsApi; filesApi: FilesApi }> {
+    private async ensureReady(): Promise<{
+        metadataApi: MetaDataApi;
+        datasetsApi: DataSetsApi;
+        filesApi: FilesApi;
+    }> {
         if (this.metadataApi && this.datasetsApi && this.filesApi) {
-            return { metadataApi: this.metadataApi, datasetsApi: this.datasetsApi, filesApi: this.filesApi };
+            return {
+                metadataApi: this.metadataApi,
+                datasetsApi: this.datasetsApi,
+                filesApi: this.filesApi
+            };
         }
 
         await this.ready;
 
         if (!this.metadataApi || !this.datasetsApi || !this.filesApi) {
-            throw new Error('MetaDataRepository APIs failed to initialize.');
+            throw new Error("MetaDataRepository APIs failed to initialize.");
         }
 
-        return { metadataApi: this.metadataApi, datasetsApi: this.datasetsApi, filesApi: this.filesApi };
+        return {
+            metadataApi: this.metadataApi,
+            datasetsApi: this.datasetsApi,
+            filesApi: this.filesApi
+        };
     }
 
     public async getById(id: string): Promise<MetaDateDTO> {
@@ -45,7 +64,11 @@ export class MetaDataRepository {
         return JSON.parse(text);
     }
 
-    public async setDatasetMetadata(datasetId: string, key: string, jsonValue: string): Promise<MetaDateDTO> {
+    public async setDatasetMetadata(
+        datasetId: string,
+        key: string,
+        jsonValue: string
+    ): Promise<MetaDateDTO> {
         const { datasetsApi } = await this.ensureReady();
         return datasetsApi.apiV1DataDatasetsIdMetadataKeyPut({
             id: datasetId,
@@ -54,7 +77,11 @@ export class MetaDataRepository {
         });
     }
 
-    public async setFileMetadata(fileId: string, key: string, jsonValue: string): Promise<MetaDateDTO> {
+    public async setFileMetadata(
+        fileId: string,
+        key: string,
+        jsonValue: string
+    ): Promise<MetaDateDTO> {
         const { filesApi } = await this.ensureReady();
         return filesApi.apiV1DataFilesIdMetadataKeyPut({
             id: fileId,

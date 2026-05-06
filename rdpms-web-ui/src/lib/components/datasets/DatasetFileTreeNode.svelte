@@ -1,17 +1,17 @@
 <script lang="ts">
-    import FileDisplay from '$lib/layout/FileDisplay.svelte';
-    import type { FileTreeNode } from '$lib/components/datasets/file-tree';
-    import DatasetFileTreeNode from '$lib/components/datasets/DatasetFileTreeNode.svelte';
+    import FileDisplay from "$lib/layout/FileDisplay.svelte";
+    import type { FileTreeNode } from "$lib/components/datasets/file-tree";
+    import DatasetFileTreeNode from "$lib/components/datasets/DatasetFileTreeNode.svelte";
 
     let { node, level = 0 } = $props<{
         node: FileTreeNode;
         level?: number;
     }>();
 
-    const toSlug = (value: string): string => value.replace(/[^a-zA-Z0-9_-]/g, '-');
+    const toSlug = (value: string): string => value.replace(/[^a-zA-Z0-9_-]/g, "-");
 </script>
 
-{#if node.type === 'folder'}
+{#if node.type === "folder"}
     <details class="rounded-lg border border-gray-200 bg-white" open={level < 2}>
         <summary class="cursor-pointer px-3 py-2 text-sm font-medium text-gray-700">
             {node.name}

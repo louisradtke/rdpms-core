@@ -2,4 +2,4 @@
     export let uri: string;
 </script>
 
-<img alt="" src={uri}>
+<img alt="" src={uri} />

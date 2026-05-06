@@ -1,30 +1,32 @@
 <script lang="ts">
-    import type { SidebarItem } from '$lib/SidebarItem';
+    import type { SidebarItem } from "$lib/SidebarItem";
 
-    export let itemsPromise: Promise<SidebarItem[]>; // List of sidebar items
-    export let baseUrl: string; // URL or partial link containing a wildcard for hrefValue
+    let { itemsPromise, baseUrl } = $props<{
+        itemsPromise: Promise<SidebarItem[]>;
+        baseUrl: string;
+    }>();
 
-    // Utility function to construct the final href for each item
     const constructHref = (hrefValue: string): string => {
-        return baseUrl.replace('*', hrefValue);
+        return baseUrl.replace("*", hrefValue);
     };
 </script>
 
-<aside class="w-64 bg-gray-100 text-gray-800 border-gray-400 p-4 space-y-2 overflow-y-auto">
+<aside
+    class="w-64 shrink-0 bg-gray-100 text-gray-800 border-gray-400 p-4 space-y-2 overflow-y-auto"
+>
     <ul class="space-y-1">
-
         {#await itemsPromise}
             <li>Loading...</li>
         {:then items}
-            {#each items.map((v, i) => ({item: v, index: i})) as vi (vi.index)}
+            {#each items as item, index (index)}
                 <li>
                     <a
-                            href={constructHref(vi.item.hrefValue)}
-                            class="block px-3 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring
+                        href={constructHref(item.hrefValue)}
+                        class="block px-3 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring
                             focus:ring-gray-500 focus:ring-opacity-50"
-                            title={vi.item.tooltip ?? ''}
+                        title={item.tooltip ?? ""}
                     >
-                        {vi.item.label}
+                        {item.label}
                     </a>
                 </li>
             {/each}

@@ -1,4 +1,4 @@
-import { Configuration, MetaDataApi, type SchemaDTO } from '$lib/api_client';
+import { Configuration, MetaDataApi, type SchemaDTO } from "$lib/api_client";
 
 export class SchemasRepository {
     private readonly ready: Promise<void>;
@@ -10,7 +10,7 @@ export class SchemasRepository {
                 this.api = new MetaDataApi(conf);
             })
             .catch((err) => {
-                console.error('Failed to initialize SchemasRepository:', err);
+                console.error("Failed to initialize SchemasRepository:", err);
                 throw err;
             });
     }
@@ -19,7 +19,7 @@ export class SchemasRepository {
         if (this.api) return this.api;
         await this.ready;
         if (!this.api) {
-            throw new Error('SchemasRepository API failed to initialize.');
+            throw new Error("SchemasRepository API failed to initialize.");
         }
         return this.api;
     }

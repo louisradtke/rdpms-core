@@ -1,14 +1,14 @@
-import type { FileSummaryDTO } from '$lib/api_client';
+import type { FileSummaryDTO } from "$lib/api_client";
 
 export type FileTreeFolderNode = {
-    type: 'folder';
+    type: "folder";
     name: string;
     path: string;
     children: FileTreeNode[];
 };
 
 export type FileTreeFileNode = {
-    type: 'file';
+    type: "file";
     name: string;
     path: string;
     file: FileSummaryDTO;
@@ -22,18 +22,23 @@ type InternalFolder = {
 };
 
 const normalizeSegments = (file: FileSummaryDTO): string[] => {
-    const raw = (file.name ?? file.id ?? 'unnamed').replace(/\\/g, '/');
-    return raw.split('/').map((segment) => segment.trim()).filter((segment) => segment.length > 0);
+    const raw = (file.name ?? file.id ?? "unnamed").replace(/\\/g, "/");
+    return raw
+        .split("/")
+        .map((segment) => segment.trim())
+        .filter((segment) => segment.length > 0);
 };
 
-const toPublicNodes = (folder: InternalFolder, pathPrefix = ''): FileTreeNode[] => {
+const toPublicNodes = (folder: InternalFolder, pathPrefix = ""): FileTreeNode[] => {
     const entries: FileTreeNode[] = [];
 
-    const folderEntries = Array.from(folder.folders.entries()).sort(([left], [right]) => left.localeCompare(right));
+    const folderEntries = Array.from(folder.folders.entries()).sort(([left], [right]) =>
+        left.localeCompare(right)
+    );
     for (const [name, child] of folderEntries) {
         const path = pathPrefix ? `${pathPrefix}/${name}` : name;
         entries.push({
-            type: 'folder',
+            type: "folder",
             name,
             path,
             children: toPublicNodes(child, path)
@@ -57,16 +62,16 @@ export const buildFileTree = (files: FileSummaryDTO[]): FileTreeNode[] => {
         const segments = normalizeSegments(file);
         if (segments.length === 0) {
             root.files.push({
-                type: 'file',
-                name: file.name ?? file.id ?? 'unnamed',
-                path: file.name ?? file.id ?? 'unnamed',
+                type: "file",
+                name: file.name ?? file.id ?? "unnamed",
+                path: file.name ?? file.id ?? "unnamed",
                 file
             });
             continue;
         }
 
         let current = root;
-        let path = '';
+        let path = "";
         for (let index = 0; index < segments.length - 1; index += 1) {
             const segment = segments[index];
             path = path ? `${path}/${segment}` : segment;
@@ -79,7 +84,7 @@ export const buildFileTree = (files: FileSummaryDTO[]): FileTreeNode[] => {
         const leafName = segments[segments.length - 1];
         const leafPath = path ? `${path}/${leafName}` : leafName;
         current.files.push({
-            type: 'file',
+            type: "file",
             name: leafName,
             path: leafPath,
             file

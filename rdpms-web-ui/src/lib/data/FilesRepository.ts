@@ -1,4 +1,4 @@
-import { FilesApi, type FileSummaryDTO, Configuration } from '$lib/api_client';
+import { FilesApi, type FileSummaryDTO, Configuration } from "$lib/api_client";
 
 export class FilesRepository {
     private readonly ready: Promise<void>;
@@ -10,7 +10,7 @@ export class FilesRepository {
                 this.api = new FilesApi(conf);
             })
             .catch((err) => {
-                console.error('Failed to initialize FilesApi:', err);
+                console.error("Failed to initialize FilesApi:", err);
                 throw err;
             });
     }
@@ -19,7 +19,7 @@ export class FilesRepository {
         if (this.api) return this.api;
         await this.ready;
         if (!this.api) {
-            throw new Error('FilesApi failed to initialize.');
+            throw new Error("FilesApi failed to initialize.");
         }
         return this.api;
     }

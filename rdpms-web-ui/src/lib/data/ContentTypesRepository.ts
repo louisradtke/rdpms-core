@@ -1,4 +1,4 @@
-import { ContentTypesApi, type ContentTypeDTO, Configuration } from '$lib/api_client';
+import { ContentTypesApi, type ContentTypeDTO, Configuration } from "$lib/api_client";
 
 export class ContentTypesRepository {
     private readonly ready: Promise<void>;
@@ -10,7 +10,7 @@ export class ContentTypesRepository {
                 this.api = new ContentTypesApi(conf);
             })
             .catch((err) => {
-                console.error('Failed to initialize ContentTypesApi:', err);
+                console.error("Failed to initialize ContentTypesApi:", err);
                 throw err;
             });
     }
@@ -19,7 +19,7 @@ export class ContentTypesRepository {
         if (this.api) return this.api;
         await this.ready;
         if (!this.api) {
-            throw new Error('ContentTypesApi failed to initialize.');
+            throw new Error("ContentTypesApi failed to initialize.");
         }
         return this.api;
     }

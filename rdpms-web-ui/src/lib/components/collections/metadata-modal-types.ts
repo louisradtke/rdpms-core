@@ -1,5 +1,5 @@
 export type MetadataAssignmentTarget = {
-    targetType: 'dataset' | 'file';
+    targetType: "dataset" | "file";
     targetId: string;
     title: string;
     metadataKey: string;

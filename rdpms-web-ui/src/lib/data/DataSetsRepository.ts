@@ -5,7 +5,7 @@ import {
     type DataSetSummaryDTO,
     Configuration,
     MetadataColumnTargetDTO
-} from '$lib/api_client';
+} from "$lib/api_client";
 
 export class DataSetsRepository {
     private readonly ready: Promise<void>;
@@ -19,7 +19,7 @@ export class DataSetsRepository {
             })
             .catch((err) => {
                 // Prevent unhandled rejections and surface errors later in ensureReady
-                console.error('Failed to initialize DataSetsApi:', err);
+                console.error("Failed to initialize DataSetsApi:", err);
                 throw err;
             });
     }
@@ -28,7 +28,7 @@ export class DataSetsRepository {
         if (this.api) return this.api;
         await this.ready; // wait for config -> api creation
         if (!this.api) {
-            throw new Error('DataSetsApi failed to initialize.');
+            throw new Error("DataSetsApi failed to initialize.");
         }
         return this.api;
     }
@@ -41,16 +41,19 @@ export class DataSetsRepository {
     public async listByCollection(
         collectionId: string,
         options?: {
-            view?: 'summary' | 'metadata';
-            metadataTarget?: 'dataset' | 'file';
+            view?: "summary" | "metadata";
+            metadataTarget?: "dataset" | "file";
         }
     ): Promise<DataSetSummaryDTO[]> {
         const api = await this.ensureReady();
         return api.apiV1DataDatasetsGet({
             collectionId,
-            view: options?.view === 'metadata' ? DataSetListViewMode.Metadata : DataSetListViewMode.Summary,
+            view:
+                options?.view === "metadata"
+                    ? DataSetListViewMode.Metadata
+                    : DataSetListViewMode.Summary,
             metadataTarget:
-                options?.metadataTarget === 'file'
+                options?.metadataTarget === "file"
                     ? MetadataColumnTargetDTO.File
                     : MetadataColumnTargetDTO.Dataset
         });
@@ -63,7 +66,9 @@ export class DataSetsRepository {
 
     public async create(dto: Partial<DataSetCreateRequestDTO>): Promise<DataSetSummaryDTO> {
         const api = await this.ensureReady();
-        return api.apiV1DataDatasetsNewPost({ dataSetCreateRequestDTO: dto as DataSetCreateRequestDTO });
+        return api.apiV1DataDatasetsNewPost({
+            dataSetCreateRequestDTO: dto as DataSetCreateRequestDTO
+        });
     }
 
     public async deleteById(id: string): Promise<void> {

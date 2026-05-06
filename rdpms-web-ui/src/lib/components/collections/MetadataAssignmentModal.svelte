@@ -1,8 +1,8 @@
 <script lang="ts">
-    import type { SchemaValidationResultDTO } from '$lib/api_client';
-    import { MetaDataRepository } from '$lib/data/MetaDataRepository';
-    import { getOrFetchConfig, toApiConfig } from '$lib/util/config-helper';
-    import type { MetadataAssignmentTarget } from '$lib/components/collections/metadata-modal-types';
+    import type { SchemaValidationResultDTO } from "$lib/api_client";
+    import { MetaDataRepository } from "$lib/data/MetaDataRepository";
+    import { getOrFetchConfig, toApiConfig } from "$lib/util/config-helper";
+    import type { MetadataAssignmentTarget } from "$lib/components/collections/metadata-modal-types";
 
     // Shared requirements for refactors:
     // 1) This modal must remain the single metadata editor for both dataset and file coverage tables.
@@ -17,21 +17,21 @@
 
     let loading = $state(false);
     let actionPending = $state(false);
-    let actionLabel = $state('');
-    let errorMessage = $state('');
-    let infoMessage = $state('');
-    let editorJson = $state('{\n  \n}');
+    let actionLabel = $state("");
+    let errorMessage = $state("");
+    let infoMessage = $state("");
+    let editorJson = $state("{\n  \n}");
     let originalJsonCanonical = $state<string | null>(JSON.stringify({}));
-    let originalEditorJson = $state('{\n  \n}');
-    let currentMetadataId = $state('');
+    let originalEditorJson = $state("{\n  \n}");
+    let currentMetadataId = $state("");
     let currentValidated = $state(false);
     let validationResult = $state<SchemaValidationResultDTO | null>(null);
-    let lastLoadedTargetKey = $state('');
+    let lastLoadedTargetKey = $state("");
     let pendingDataRefresh = $state(false);
     let loadVersion = 0;
 
-    const schemaValidationId = $derived(target?.schemaDbId ?? '');
-    const schemaDisplayId = $derived(target?.schemaId ?? target?.schemaDbId ?? '');
+    const schemaValidationId = $derived(target?.schemaDbId ?? "");
+    const schemaDisplayId = $derived(target?.schemaId ?? target?.schemaDbId ?? "");
 
     const canonicalizeJson = (value: string): string | null => {
         try {
@@ -42,7 +42,7 @@
     };
 
     const asRecord = (value: unknown): Record<string, unknown> | null => {
-        if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        if (!value || typeof value !== "object" || Array.isArray(value)) {
             return null;
         }
         return value as Record<string, unknown>;
@@ -52,7 +52,7 @@
         if (!Array.isArray(value)) {
             return [];
         }
-        return value.filter((entry): entry is string => typeof entry === 'string');
+        return value.filter((entry): entry is string => typeof entry === "string");
     };
 
     const toSchemaValidationResult = (value: unknown): SchemaValidationResultDTO | null => {
@@ -61,7 +61,7 @@
             return null;
         }
 
-        const hasFlag = typeof record.succesful === 'boolean' || record.succesful === null;
+        const hasFlag = typeof record.succesful === "boolean" || record.succesful === null;
         const reasons = toStringArray(record.reasons);
         const traces = toStringArray(record.traces);
         if (!hasFlag && reasons.length === 0 && traces.length === 0) {
@@ -75,7 +75,10 @@
         };
     };
 
-    const readErrorDetails = async (err: unknown, fallback: string): Promise<{
+    const readErrorDetails = async (
+        err: unknown,
+        fallback: string
+    ): Promise<{
         message: string;
         validation: SchemaValidationResultDTO | null;
     }> => {
@@ -103,21 +106,22 @@
         if (validation) {
             const firstReason = (validation.reasons ?? [])[0];
             return {
-                message: firstReason ? `Validation failed: ${firstReason}` : 'Validation failed.',
+                message: firstReason ? `Validation failed: ${firstReason}` : "Validation failed.",
                 validation
             };
         }
 
         const payloadRecord = asRecord(payload);
-        const payloadMessage = typeof payload === 'string'
-            ? payload
-            : typeof payloadRecord?.message === 'string'
-                ? payloadRecord.message
-                : typeof payloadRecord?.detail === 'string'
+        const payloadMessage =
+            typeof payload === "string"
+                ? payload
+                : typeof payloadRecord?.message === "string"
+                  ? payloadRecord.message
+                  : typeof payloadRecord?.detail === "string"
                     ? payloadRecord.detail
                     : null;
 
-        if (payloadMessage && payloadMessage.trim() !== '') {
+        if (payloadMessage && payloadMessage.trim() !== "") {
             return { message: payloadMessage, validation: null };
         }
 
@@ -162,10 +166,10 @@
             nextTarget.targetType,
             nextTarget.targetId,
             nextTarget.metadataKey,
-            nextTarget.metadataId ?? '',
-            nextTarget.schemaId ?? '',
-            nextTarget.schemaDbId ?? ''
-        ].join('::');
+            nextTarget.metadataId ?? "",
+            nextTarget.schemaId ?? "",
+            nextTarget.schemaDbId ?? ""
+        ].join("::");
 
         if (targetKey === lastLoadedTargetKey && open) {
             return;
@@ -174,20 +178,20 @@
 
         const currentLoadVersion = ++loadVersion;
         loading = true;
-        errorMessage = '';
-        infoMessage = '';
+        errorMessage = "";
+        infoMessage = "";
         validationResult = null;
         actionPending = false;
-        actionLabel = '';
-        editorJson = '{\n  \n}';
+        actionLabel = "";
+        editorJson = "{\n  \n}";
         originalEditorJson = editorJson;
         originalJsonCanonical = JSON.stringify({});
 
-        currentMetadataId = nextTarget.metadataId ?? '';
+        currentMetadataId = nextTarget.metadataId ?? "";
         currentValidated = Boolean(nextTarget.validated);
 
         if (!nextTarget.metadataId) {
-            editorJson = '{\n  \n}';
+            editorJson = "{\n  \n}";
             originalEditorJson = editorJson;
             originalJsonCanonical = JSON.stringify({});
             loading = false;
@@ -204,7 +208,7 @@
             currentMetadataId = metadata.id ?? nextTarget.metadataId;
 
             if (!metadata.fileId) {
-                throw new Error('Metadata file reference is missing.');
+                throw new Error("Metadata file reference is missing.");
             }
 
             const jsonValue = await repo.getJsonValueByFileId(metadata.fileId);
@@ -219,7 +223,7 @@
             if (currentLoadVersion !== loadVersion) {
                 return;
             }
-            errorMessage = err instanceof Error ? err.message : 'Failed to load metadata.';
+            errorMessage = err instanceof Error ? err.message : "Failed to load metadata.";
         } finally {
             if (currentLoadVersion === loadVersion) {
                 loading = false;
@@ -236,30 +240,30 @@
 
     $effect(() => {
         if (!open) {
-            lastLoadedTargetKey = '';
+            lastLoadedTargetKey = "";
             pendingDataRefresh = false;
         }
     });
 
     const saveMetadata = async (): Promise<boolean> => {
         if (!target) {
-            errorMessage = 'Missing metadata target.';
+            errorMessage = "Missing metadata target.";
             return false;
         }
         if (editorJsonCanonical === null) {
-            errorMessage = 'Metadata JSON is not valid.';
+            errorMessage = "Metadata JSON is not valid.";
             return false;
         }
 
         actionPending = true;
-        actionLabel = 'Saving...';
-        errorMessage = '';
-        infoMessage = '';
+        actionLabel = "Saving...";
+        errorMessage = "";
+        infoMessage = "";
 
         try {
             const repo = new MetaDataRepository(getOrFetchConfig().then(toApiConfig));
             const saveResult =
-                target.targetType === 'dataset'
+                target.targetType === "dataset"
                     ? await repo.setDatasetMetadata(target.targetId, target.metadataKey, editorJson)
                     : await repo.setFileMetadata(target.targetId, target.metadataKey, editorJson);
 
@@ -268,33 +272,33 @@
             originalEditorJson = editorJson;
             originalJsonCanonical = editorJsonCanonical;
             validationResult = null;
-            infoMessage = 'Metadata saved.';
+            infoMessage = "Metadata saved.";
             pendingDataRefresh = true;
             return true;
         } catch (err) {
-            const details = await readErrorDetails(err, 'Failed to save metadata.');
+            const details = await readErrorDetails(err, "Failed to save metadata.");
             errorMessage = details.message;
             return false;
         } finally {
             actionPending = false;
-            actionLabel = '';
+            actionLabel = "";
         }
     };
 
     const validateMetadata = async (): Promise<boolean> => {
         if (!currentMetadataId) {
-            errorMessage = 'No metadata is assigned yet. Save first to validate.';
+            errorMessage = "No metadata is assigned yet. Save first to validate.";
             return false;
         }
         if (!schemaValidationId) {
-            errorMessage = 'No schema is configured for this metadata key.';
+            errorMessage = "No schema is configured for this metadata key.";
             return false;
         }
 
         actionPending = true;
-        actionLabel = 'Validating...';
-        errorMessage = '';
-        infoMessage = '';
+        actionLabel = "Validating...";
+        errorMessage = "";
+        infoMessage = "";
 
         try {
             const repo = new MetaDataRepository(getOrFetchConfig().then(toApiConfig));
@@ -303,15 +307,15 @@
             validationResult = result;
             currentValidated = Boolean(result.succesful);
             if (result.succesful) {
-                infoMessage = 'Validation successful.';
+                infoMessage = "Validation successful.";
             } else {
-                infoMessage = '';
-                errorMessage = 'Validation failed. See reasons below.';
+                infoMessage = "";
+                errorMessage = "Validation failed. See reasons below.";
             }
             pendingDataRefresh = true;
             return Boolean(result.succesful);
         } catch (err) {
-            const details = await readErrorDetails(err, 'Validation failed.');
+            const details = await readErrorDetails(err, "Validation failed.");
             if (details.validation) {
                 validationResult = details.validation;
                 currentValidated = Boolean(details.validation.succesful);
@@ -320,7 +324,7 @@
             return false;
         } finally {
             actionPending = false;
-            actionLabel = '';
+            actionLabel = "";
         }
     };
 
@@ -354,10 +358,14 @@
                 </button>
             </div>
 
-            <div class="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(0,34vh)] gap-4 overflow-hidden px-4 py-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,1fr)] xl:grid-rows-1">
+            <div
+                class="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(0,34vh)] gap-4 overflow-hidden px-4 py-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,1fr)] xl:grid-rows-1"
+            >
                 <div class="flex min-h-0 flex-col gap-3 overflow-hidden">
                     <p class="text-sm text-gray-600">{target.title}</p>
-                    <dl class="grid grid-cols-1 gap-1 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-700 sm:grid-cols-2">
+                    <dl
+                        class="grid grid-cols-1 gap-1 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-700 sm:grid-cols-2"
+                    >
                         <div>
                             <dt class="font-semibold">Target</dt>
                             <dd class="font-mono">{target.targetType} / {target.targetId}</dd>
@@ -368,18 +376,22 @@
                         </div>
                         <div>
                             <dt class="font-semibold">Metadata ID</dt>
-                            <dd class="font-mono break-all">{currentMetadataId || '-'}</dd>
+                            <dd class="font-mono break-all">{currentMetadataId || "-"}</dd>
                         </div>
                         <div>
                             <dt class="font-semibold">Collection schema</dt>
-                            <dd class="font-mono break-all">{schemaDisplayId || '-'}</dd>
+                            <dd class="font-mono break-all">{schemaDisplayId || "-"}</dd>
                         </div>
                     </dl>
 
-                    <div class="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900">
+                    <div
+                        class="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900"
+                    >
                         {#if schemaValidationId}
                             <p>
-                                Validation uses schema <span class="font-mono">{schemaDisplayId || schemaValidationId}</span>.
+                                Validation uses schema <span class="font-mono"
+                                    >{schemaDisplayId || schemaValidationId}</span
+                                >.
                             </p>
                             {#if target.schemaDbId}
                                 <a
@@ -392,7 +404,10 @@
                                 </a>
                             {/if}
                         {:else}
-                            <p>No schema is configured for this metadata key, so validation cannot run.</p>
+                            <p>
+                                No schema is configured for this metadata key, so validation cannot
+                                run.
+                            </p>
                         {/if}
                     </div>
 
@@ -409,21 +424,33 @@
                     ></textarea>
 
                     {#if !editorJsonValid}
-                        <p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                        <p
+                            class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+                        >
                             Metadata JSON is not valid.
                         </p>
                     {/if}
                 </div>
 
-                <div class="flex min-h-0 flex-col overflow-hidden rounded-md border border-gray-200 bg-gray-50 p-3">
+                <div
+                    class="flex min-h-0 flex-col overflow-hidden rounded-md border border-gray-200 bg-gray-50 p-3"
+                >
                     <h3 class="mb-2 text-sm font-semibold text-gray-800">Validation Output</h3>
                     <div class="min-h-0 flex-1 space-y-3 overflow-auto pr-1">
                         {#if infoMessage}
-                            <p class="break-all rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">{infoMessage}</p>
+                            <p
+                                class="break-all rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"
+                            >
+                                {infoMessage}
+                            </p>
                         {/if}
 
                         {#if errorMessage}
-                            <p class="break-all rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{errorMessage}</p>
+                            <p
+                                class="break-all rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+                            >
+                                {errorMessage}
+                            </p>
                         {/if}
 
                         {#if validationResult}
@@ -439,7 +466,9 @@
                                 class:text-red-900={!validationResult.succesful}
                             >
                                 <p class="font-semibold">
-                                    {validationResult.succesful ? 'Validation succeeded.' : 'Validation failed.'}
+                                    {validationResult.succesful
+                                        ? "Validation succeeded."
+                                        : "Validation failed."}
                                 </p>
 
                                 {#if reasons.length > 0}
@@ -447,7 +476,9 @@
                                         <p class="font-semibold">Reasons</p>
                                         <ul class="list-disc space-y-1 pl-5">
                                             {#each reasons as reason, index (`reason-${index}`)}
-                                                <li class="font-mono text-xs break-all">{reason}</li>
+                                                <li class="font-mono text-xs break-all">
+                                                    {reason}
+                                                </li>
                                             {/each}
                                         </ul>
                                     </div>
@@ -456,7 +487,10 @@
                                 {#if traces.length > 0}
                                     <div>
                                         <p class="font-semibold">Traces</p>
-                                        <pre class="mt-1 overflow-x-auto rounded-md border border-gray-300 bg-white p-2 text-xs">{traces.join('\n')}</pre>
+                                        <pre
+                                            class="mt-1 overflow-x-auto rounded-md border border-gray-300 bg-white p-2 text-xs">{traces.join(
+                                                "\n"
+                                            )}</pre>
                                     </div>
                                 {/if}
                             </div>
@@ -482,7 +516,7 @@
                     onclick={validateMetadata}
                     disabled={validateDisabled}
                 >
-                    {actionPending && actionLabel === 'Validating...' ? actionLabel : 'Validate'}
+                    {actionPending && actionLabel === "Validating..." ? actionLabel : "Validate"}
                 </button>
                 <button
                     class="rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
@@ -490,7 +524,7 @@
                     onclick={saveMetadata}
                     disabled={saveDisabled}
                 >
-                    {actionPending && actionLabel === 'Saving...' ? actionLabel : 'Save'}
+                    {actionPending && actionLabel === "Saving..." ? actionLabel : "Save"}
                 </button>
                 <button
                     class="rounded-md bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
@@ -498,7 +532,7 @@
                     onclick={saveAndValidate}
                     disabled={saveAndValidateDisabled}
                 >
-                    {actionPending && actionLabel !== '' ? actionLabel : 'Save & validate'}
+                    {actionPending && actionLabel !== "" ? actionLabel : "Save & validate"}
                 </button>
             </div>
         </div>

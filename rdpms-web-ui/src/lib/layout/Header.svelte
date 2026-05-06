@@ -3,9 +3,9 @@
     let showMenu = $state(false);
 
     const links = [
-        {name: 'Projects', href: '/projects'},
-        {name: 'Schemas', href: '/schemas'},
-        {name: 'Admin', href: '/admin'},
+        { name: "Projects", href: "/projects" },
+        { name: "Schemas", href: "/schemas" },
+        { name: "Admin", href: "/admin" }
     ];
 </script>
 
@@ -14,17 +14,15 @@
         <div class="flex items-center justify-between h-16">
             <!-- Left: Home Button -->
             <div class="flex-shrink-0">
-                <a href="/" class="text-xl font-bold text-gray-800 hover:text-gray-600">
-                    Home
-                </a>
+                <a href="/" class="text-xl font-bold text-gray-800 hover:text-gray-600"> Home </a>
             </div>
 
             <!-- Center: Links (hidden on small screens) -->
             <div class="hidden md:flex items-center space-x-4 flex-grow mx-5">
                 {#each links as link (link.name)}
                     <a
-                            href={link.href}
-                            class="text-gray-800 hover:text-gray-600 transition duration-150"
+                        href={link.href}
+                        class="text-gray-800 hover:text-gray-600 transition duration-150"
                     >
                         {link.name}
                     </a>
@@ -34,24 +32,48 @@
             <!-- Right: User Icon + Burger Menu -->
             <div class="flex items-center space-x-6">
                 <button
-                        onclick={() => { showMenu = !showMenu;}}
-                        class="md:hidden text-gray-800 hover:text-gray-600"
+                    onclick={() => {
+                        showMenu = !showMenu;
+                    }}
+                    class="md:hidden text-gray-800 hover:text-gray-600"
                 >
                     <!-- Burger Icon -->
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                         class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M4 6h16M4 12h16m-7 6h7"/>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        class="w-6 h-6"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 6h16M4 12h16m-7 6h7"
+                        />
                     </svg>
                 </button>
 
                 <!-- User Icon -->
-                <a href="/profile" class="text-gray-800 hover:text-gray-600" aria-label="Link to user profile">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                         stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998
-                              0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
+                <a
+                    href="/profile"
+                    class="text-gray-800 hover:text-gray-600"
+                    aria-label="Link to user profile"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="size-6"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998
+                              0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                        />
                     </svg>
                 </a>
             </div>
@@ -64,8 +86,8 @@
             <div class="space-y-2">
                 {#each links as link (link.name)}
                     <a
-                            href={link.href}
-                            class="block text-gray-800 hover:text-gray-600 transition duration-150"
+                        href={link.href}
+                        class="block text-gray-800 hover:text-gray-600 transition duration-150"
                     >
                         {link.name}
                     </a>

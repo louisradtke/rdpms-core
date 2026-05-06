@@ -1,23 +1,31 @@
 <script lang="ts">
-    import type { DataSetSummaryDTO, FileSummaryDTO, MetaDateCollectionColumnDTO } from '$lib/api_client';
-    import MetadataAssignmentModal from '$lib/components/collections/MetadataAssignmentModal.svelte';
-    import type { MetadataAssignmentTarget } from '$lib/components/collections/metadata-modal-types';
+    import type {
+        DataSetSummaryDTO,
+        FileSummaryDTO,
+        MetaDateCollectionColumnDTO
+    } from "$lib/api_client";
+    import MetadataAssignmentModal from "$lib/components/collections/MetadataAssignmentModal.svelte";
+    import type { MetadataAssignmentTarget } from "$lib/components/collections/metadata-modal-types";
+    import { preserveDatasetListParams } from "$lib/util/dataset-list-query";
 
     type DataSetWithFiles = DataSetSummaryDTO & { files?: FileSummaryDTO[] | null };
 
-    let { datasets, columns, projectSlug, collectionSlug, onDataChanged } = $props<{
+    let { datasets, columns, projectSlug, collectionSlug, searchParams, onDataChanged } = $props<{
         datasets: DataSetSummaryDTO[];
         columns: MetaDateCollectionColumnDTO[];
         projectSlug: string;
         collectionSlug: string;
+        searchParams: URLSearchParams;
         onDataChanged: () => void;
     }>();
 
     const datasetsWithFiles = $derived(datasets as DataSetWithFiles[]);
 
-    const normalizeKey = (value?: string | null) => (value ?? '').toLowerCase();
+    const normalizeKey = (value?: string | null) => (value ?? "").toLowerCase();
     const findAssignedMeta = (file: FileSummaryDTO, column: MetaDateCollectionColumnDTO) => {
-        return file.metaDates?.find((meta) => normalizeKey(meta.metadataKey) === normalizeKey(column.metadataKey));
+        return file.metaDates?.find(
+            (meta) => normalizeKey(meta.metadataKey) === normalizeKey(column.metadataKey)
+        );
     };
 
     let modalOpen = $state(false);
@@ -34,17 +42,17 @@
         metadataId?: string | null,
         validated?: boolean | null
     ) => {
-        const fileId = file.id ?? '';
+        const fileId = file.id ?? "";
         if (!fileId) {
             return;
         }
 
-        const datasetName = dataset.name ?? dataset.id ?? 'Dataset';
-        const fileName = file.name ?? file.id ?? 'File';
-        const metadataKey = column.metadataKey ?? 'unknown';
+        const datasetName = dataset.name ?? dataset.id ?? "Dataset";
+        const fileName = file.name ?? file.id ?? "File";
+        const metadataKey = column.metadataKey ?? "unknown";
 
         modalTarget = {
-            targetType: 'file',
+            targetType: "file",
             targetId: fileId,
             title: `${datasetName} / ${fileName} / ${metadataKey}`,
             metadataKey,
@@ -55,6 +63,16 @@
         };
 
         modalOpen = true;
+    };
+
+    const datasetHref = (dataset: DataSetSummaryDTO) => {
+        const routeValue = dataset.slug ?? dataset.id ?? "";
+        const url = new URL(
+            `/projects/${projectSlug}/c/${collectionSlug}/${routeValue}`,
+            window.location.origin
+        );
+        preserveDatasetListParams(url, searchParams);
+        return `${url.pathname}${url.search}`;
     };
 </script>
 
@@ -83,8 +101,11 @@
                 <th class="text-left w-48">Dataset</th>
                 <th class="text-left w-56">File</th>
                 {#each columns as column (column.metadataKey)}
-                    <th class="text-center min-w-[140px]" title={column.schema?.schemaId ?? column.schema?.id ?? ''}>
-                        {column.metadataKey ?? 'unknown'}
+                    <th
+                        class="text-center min-w-[140px]"
+                        title={column.schema?.schemaId ?? column.schema?.id ?? ""}
+                    >
+                        {column.metadataKey ?? "unknown"}
                     </th>
                 {/each}
             </tr>
@@ -93,18 +114,23 @@
             {#each datasetsWithFiles as dataset (dataset.id)}
                 <tr class="bg-gray-50">
                     <td class="font-semibold">
-                        <a href="/projects/{projectSlug}/c/{collectionSlug}/{dataset.slug ?? dataset.id}" class="text-blue-500 hover:underline">
+                        <a href={datasetHref(dataset)} class="text-blue-500 hover:underline">
                             {dataset.name}
                         </a>
                     </td>
                     <td colspan={Math.max(columns.length + 1, 1)} class="text-xs text-gray-500">
-                        {(dataset.files?.length ?? 0)} file{(dataset.files?.length ?? 0) === 1 ? '' : 's'}
+                        {dataset.files?.length ?? 0} file{(dataset.files?.length ?? 0) === 1
+                            ? ""
+                            : "s"}
                     </td>
                 </tr>
                 {#if (dataset.files?.length ?? 0) === 0}
                     <tr>
                         <td></td>
-                        <td colspan={Math.max(columns.length + 1, 1)} class="text-sm text-gray-500 italic">
+                        <td
+                            colspan={Math.max(columns.length + 1, 1)}
+                            class="text-sm text-gray-500 italic"
+                        >
                             No files
                         </td>
                     </tr>
@@ -127,8 +153,17 @@
                                         class:text-yellow-800={hasMeta && !Boolean(validated)}
                                         class:bg-gray-100={!hasMeta}
                                         class:text-gray-600={!hasMeta}
-                                        title={hasMeta ? `Open metadata ${assigned?.metadataId ?? ''}` : 'Click to add metadata JSON'}
-                                        onclick={() => openMetadataModal(dataset, file, column, assigned?.metadataId, validated)}
+                                        title={hasMeta
+                                            ? `Open metadata ${assigned?.metadataId ?? ""}`
+                                            : "Click to add metadata JSON"}
+                                        onclick={() =>
+                                            openMetadataModal(
+                                                dataset,
+                                                file,
+                                                column,
+                                                assigned?.metadataId,
+                                                validated
+                                            )}
                                     >
                                         <span
                                             class="inline-block h-2 w-2 rounded-full"
@@ -136,7 +171,7 @@
                                             class:bg-yellow-500={hasMeta && !Boolean(validated)}
                                             class:bg-gray-300={!hasMeta}
                                         ></span>
-                                        {hasMeta ? (validated ? 'valid' : 'set') : 'missing'}
+                                        {hasMeta ? (validated ? "valid" : "set") : "missing"}
                                     </button>
                                 </td>
                             {/each}
@@ -152,5 +187,5 @@
     open={modalOpen}
     target={modalTarget}
     onClose={closeModal}
-    onDataChanged={onDataChanged}
+    {onDataChanged}
 />

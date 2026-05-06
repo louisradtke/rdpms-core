@@ -1,6 +1,5 @@
 <script lang="ts">
-
-import Sidebar from "$lib/layout/Sidebar.svelte";
+    import Sidebar from "$lib/layout/Sidebar.svelte";
 </script>
 
 <!--<div class="flex h-full">-->

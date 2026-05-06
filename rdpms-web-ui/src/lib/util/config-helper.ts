@@ -9,21 +9,21 @@
  * - If a fetch is in progress, callers await the same promise (no concurrent fetches).
  * - On first successful fetch, a simple runtime validation is performed.
  */
-import type {RuntimeConfig} from "../../global";
-import {Configuration} from "$lib/api_client";
+import type { RuntimeConfig } from "../../global";
+import { Configuration } from "$lib/api_client";
 
 // SvelteKit machinery imports files to inspect the value of the ssr/prerender exports, so check this before fetch()
-import { browser } from '$app/environment';
+import { browser } from "$app/environment";
 
 let _runtimeConfig: RuntimeConfig | null = null; // cached config object after successful fetch
 let _fetchPromise: Promise<RuntimeConfig> | null = null; // promise for in-flight fetch to avoid duplicate fetches
 
 function validateConfig(cfg: unknown): asserts cfg is RuntimeConfig {
-    if (!cfg || typeof cfg !== 'object') {
-        throw new Error('Configuration must be an object.');
+    if (!cfg || typeof cfg !== "object") {
+        throw new Error("Configuration must be an object.");
     }
     const obj = cfg as Record<string, unknown>;
-    if (typeof obj.apiBaseUrl !== 'string') {
+    if (typeof obj.apiBaseUrl !== "string") {
         throw new Error('Configuration is missing "apiBaseUrl" string property.');
     }
 }
@@ -31,7 +31,7 @@ function validateConfig(cfg: unknown): asserts cfg is RuntimeConfig {
 async function fetchConfigFromServer(): Promise<RuntimeConfig> {
     if (!browser) return new Promise(() => {});
 
-    const response = await fetch('/config.json'); // optional: { cache: 'no-store' }
+    const response = await fetch("/config.json"); // optional: { cache: 'no-store' }
     if (!response.ok) {
         throw new Error(`Could not load configuration. HTTP ${response.status}`);
     }

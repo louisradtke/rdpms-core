@@ -7,12 +7,14 @@
 
     <ul>
         <li>
-            <a href="/projects">Projects</a><br/>
+            <a href="/projects">Projects</a><br />
             <p class="text-tiny text-gray-400">Projects contain collections and datasets.</p>
         </li>
         <li>
-            <a href="/schemas">Schemas</a><br/>
-            <p class="text-tiny text-gray-400">Manage registered JSON schemas used for metadata validation.</p>
+            <a href="/schemas">Schemas</a><br />
+            <p class="text-tiny text-gray-400">
+                Manage registered JSON schemas used for metadata validation.
+            </p>
         </li>
     </ul>
 </main>

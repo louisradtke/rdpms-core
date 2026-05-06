@@ -1,26 +1,29 @@
 <script lang="ts">
-    import { page } from '$app/state';
-    import { MetadataColumnTargetDTO, type MetadataColumnTargetDTO as MetadataColumnTargetDTOType } from '$lib/api_client';
-    import LoadingCircle from '$lib/layout/LoadingCircle.svelte';
-    import { CollectionsRepository } from '$lib/data/CollectionsRepository';
-    import { SchemasRepository } from '$lib/data/SchemasRepository';
-    import { getOrFetchConfig, toApiConfig } from '$lib/util/config-helper';
+    import { page } from "$app/state";
+    import {
+        MetadataColumnTargetDTO,
+        type MetadataColumnTargetDTO as MetadataColumnTargetDTOType
+    } from "$lib/api_client";
+    import LoadingCircle from "$lib/layout/LoadingCircle.svelte";
+    import { CollectionsRepository } from "$lib/data/CollectionsRepository";
+    import { SchemasRepository } from "$lib/data/SchemasRepository";
+    import { getOrFetchConfig, toApiConfig } from "$lib/util/config-helper";
 
-    let projectSlug = $derived(page.params.project_id ?? '');
-    let collectionSlug = $derived(page.params.collection_id ?? '');
+    let projectSlug = $derived(page.params.project_id ?? "");
+    let collectionSlug = $derived(page.params.collection_id ?? "");
 
     let reloadTick = $state(0);
 
-    let keyInput = $state('');
-    let schemaIdInput = $state('');
-    let newSchemaIdInput = $state('');
-    let defaultMetadataIdInput = $state('');
+    let keyInput = $state("");
+    let schemaIdInput = $state("");
+    let newSchemaIdInput = $state("");
+    let defaultMetadataIdInput = $state("");
     let targetInput = $state<MetadataColumnTargetDTOType>(MetadataColumnTargetDTO.Dataset);
-    let newSchemaJsonInput = $state('');
+    let newSchemaJsonInput = $state("");
 
     let savePending = $state(false);
-    let saveError = $state('');
-    let saveSuccess = $state('');
+    let saveError = $state("");
+    let saveSuccess = $state("");
 
     const dataPromise = $derived.by(async () => {
         void reloadTick; // make $derived.by read it as dependency
@@ -30,7 +33,9 @@
         const schemasRepo = new SchemasRepository(configPromise);
 
         const collections = await collectionsRepo.getCollections({ projectSlug });
-        const collectionSummary = collections.find((entry) => entry.slug === collectionSlug || entry.id === collectionSlug);
+        const collectionSummary = collections.find(
+            (entry) => entry.slug === collectionSlug || entry.id === collectionSlug
+        );
 
         if (!collectionSummary?.id) {
             throw new Error(`Collection ${collectionSlug} not found in project ${projectSlug}.`);
@@ -50,14 +55,14 @@
         defaultFieldId?: string | null,
         target?: MetadataColumnTargetDTOType
     ): void {
-        keyInput = metadataKey ?? '';
-        schemaIdInput = schemaId ?? '';
-        newSchemaIdInput = '';
-        defaultMetadataIdInput = defaultFieldId ?? '';
+        keyInput = metadataKey ?? "";
+        schemaIdInput = schemaId ?? "";
+        newSchemaIdInput = "";
+        defaultMetadataIdInput = defaultFieldId ?? "";
         targetInput = target ?? MetadataColumnTargetDTO.Dataset;
-        newSchemaJsonInput = '';
-        saveSuccess = '';
-        saveError = '';
+        newSchemaJsonInput = "";
+        saveSuccess = "";
+        saveError = "";
     }
 
     async function renameColumn(
@@ -69,15 +74,15 @@
         if (!newKey || newKey === oldKey) return;
 
         savePending = true;
-        saveError = '';
-        saveSuccess = '';
+        saveError = "";
+        saveSuccess = "";
         try {
             const collectionsRepo = new CollectionsRepository(getOrFetchConfig().then(toApiConfig));
             await collectionsRepo.renameMetadataColumn(collectionId, oldKey, newKey, target);
             saveSuccess = `Renamed key "${oldKey}" to "${newKey}".`;
             reloadTick += 1;
         } catch (err) {
-            saveError = err instanceof Error ? err.message : 'Failed to rename metadata key.';
+            saveError = err instanceof Error ? err.message : "Failed to rename metadata key.";
         } finally {
             savePending = false;
         }
@@ -86,14 +91,14 @@
     async function submitColumn(collectionId: string): Promise<void> {
         const key = keyInput.trim();
         if (!key) {
-            saveError = 'Metadata key is required.';
-            saveSuccess = '';
+            saveError = "Metadata key is required.";
+            saveSuccess = "";
             return;
         }
 
         savePending = true;
-        saveError = '';
-        saveSuccess = '';
+        saveError = "";
+        saveSuccess = "";
 
         try {
             let selectedSchemaDbId = schemaIdInput.trim();
@@ -105,7 +110,9 @@
 
                 const schemasRepo = new SchemasRepository(getOrFetchConfig().then(toApiConfig));
                 const before = await schemasRepo.listSchemas();
-                const beforeIds = new Set(before.map((schema) => schema.id).filter((id): id is string => Boolean(id)));
+                const beforeIds = new Set(
+                    before.map((schema) => schema.id).filter((id): id is string => Boolean(id))
+                );
 
                 await schemasRepo.addSchema(newSchemaJson, newSchemaId || undefined);
 
@@ -115,30 +122,32 @@
                     : after.find((schema) => schema.id && !beforeIds.has(schema.id));
 
                 if (!created?.id) {
-                    throw new Error('Could not resolve the newly registered schema id.');
+                    throw new Error("Could not resolve the newly registered schema id.");
                 }
 
                 selectedSchemaDbId = created.id;
             }
 
             if (!selectedSchemaDbId) {
-                throw new Error('Select a registered schema or provide JSON to register a new one.');
+                throw new Error(
+                    "Select a registered schema or provide JSON to register a new one."
+                );
             }
 
             const collectionsRepo = new CollectionsRepository(getOrFetchConfig().then(toApiConfig));
             await collectionsRepo.upsertMetadataColumn(collectionId, key, {
                 schemaId: selectedSchemaDbId,
                 defaultMetadataId: defaultMetadataIdInput.trim() || undefined,
-                target: targetInput,
+                target: targetInput
             });
 
             saveSuccess = `Schema binding for key "${key}" (${targetInput}) has been saved.`;
             schemaIdInput = selectedSchemaDbId;
-            newSchemaIdInput = '';
-            newSchemaJsonInput = '';
+            newSchemaIdInput = "";
+            newSchemaJsonInput = "";
             reloadTick += 1;
         } catch (err) {
-            saveError = err instanceof Error ? err.message : 'Failed to save schema binding.';
+            saveError = err instanceof Error ? err.message : "Failed to save schema binding.";
         } finally {
             savePending = false;
         }
@@ -156,19 +165,30 @@
         <section class="w-full rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-semibold">Schemas</h2>
-                <p class="text-sm text-gray-600">Collection: {data.collection.name ?? data.collection.slug ?? data.collection.id}</p>
+                <p class="text-sm text-gray-600">
+                    Collection: {data.collection.name ?? data.collection.slug ?? data.collection.id}
+                </p>
             </div>
 
             <p class="text-sm text-gray-600">
-                Add or update metadata schema mappings by key. Select an existing registered schema, or register a new
-                schema below and bind it immediately. Re-using an existing key overwrites its settings.
+                Add or update metadata schema mappings by key. Select an existing registered schema,
+                or register a new schema below and bind it immediately. Re-using an existing key
+                overwrites its settings.
             </p>
 
             {#if saveError}
-                <p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{saveError}</p>
+                <p
+                    class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+                >
+                    {saveError}
+                </p>
             {/if}
             {#if saveSuccess}
-                <p class="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">{saveSuccess}</p>
+                <p
+                    class="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"
+                >
+                    {saveSuccess}
+                </p>
             {/if}
 
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -183,7 +203,10 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-sm font-medium">Target</span>
-                    <select class="rounded-md border border-gray-300 px-3 py-2" bind:value={targetInput}>
+                    <select
+                        class="rounded-md border border-gray-300 px-3 py-2"
+                        bind:value={targetInput}
+                    >
                         <option value={MetadataColumnTargetDTO.Dataset}>Dataset</option>
                         <option value={MetadataColumnTargetDTO.File}>File</option>
                     </select>
@@ -192,10 +215,15 @@
                 <div class="flex min-w-0 items-end gap-2">
                     <label class="flex min-w-0 flex-1 flex-col gap-1">
                         <span class="text-sm font-medium">Schema (registered)</span>
-                        <select class="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2" bind:value={schemaIdInput}>
+                        <select
+                            class="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2"
+                            bind:value={schemaIdInput}
+                        >
                             <option value="">None</option>
                             {#each data.schemas as schema (schema.id)}
-                                <option value={schema.id ?? ''}>{schema.schemaId ?? schema.id}</option>
+                                <option value={schema.id ?? ""}
+                                    >{schema.schemaId ?? schema.id}</option
+                                >
                             {/each}
                         </select>
                         <span class="text-xs text-gray-500">
@@ -203,9 +231,11 @@
                         </span>
                     </label>
                     <a
-                        class={`mb-0 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-gray-300 text-sm ${schemaIdInput ? 'hover:bg-gray-50' : 'pointer-events-none opacity-40'}`}
+                        class={`mb-0 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-gray-300 text-sm ${schemaIdInput ? "hover:bg-gray-50" : "pointer-events-none opacity-40"}`}
                         href={schemaIdInput ? `/schemas/${schemaIdInput}` : undefined}
-                        title={schemaIdInput ? 'Open selected schema preview page' : 'Select a schema to preview it'}
+                        title={schemaIdInput
+                            ? "Open selected schema preview page"
+                            : "Select a schema to preview it"}
                         aria-label="Open selected schema preview page"
                     >
                         ↗
@@ -229,7 +259,8 @@
                         bind:value={newSchemaIdInput}
                     />
                     <span class="text-xs text-gray-500">
-                        If filled with JSON below, the UI first registers this schema, then binds it to the key.
+                        If filled with JSON below, the UI first registers this schema, then binds it
+                        to the key.
                     </span>
                 </label>
 
@@ -241,7 +272,8 @@
                         bind:value={newSchemaJsonInput}
                     ></textarea>
                     <span class="text-xs text-gray-500">
-                        Must be a valid JSON object/array. This creates a schema first; it does not send inline schema to the collection endpoint.
+                        Must be a valid JSON object/array. This creates a schema first; it does not
+                        send inline schema to the collection endpoint.
                     </span>
                 </label>
             </div>
@@ -250,9 +282,9 @@
                 <button
                     class="rounded-md bg-gray-800 px-3 py-2 text-sm text-white hover:bg-black/90 disabled:opacity-60"
                     disabled={savePending}
-                    onclick={() => submitColumn(data.collection.id ?? '')}
+                    onclick={() => submitColumn(data.collection.id ?? "")}
                 >
-                    {savePending ? 'Saving...' : 'Save Mapping'}
+                    {savePending ? "Saving..." : "Save Mapping"}
                 </button>
             </div>
 
@@ -273,24 +305,46 @@
                                     <th class="py-2">Action</th>
                                 </tr>
                             </thead>
-                        <tbody>
-                                {#each data.collection.metaDateColumns ?? [] as column, idx (`${column.metadataKey ?? column.schema?.id ?? 'none'}-${idx}`)}
+                            <tbody>
+                                {#each data.collection.metaDateColumns ?? [] as column, idx (`${column.metadataKey ?? column.schema?.id ?? "none"}-${idx}`)}
                                     <tr class="border-b border-gray-100 align-top">
-                                        <td class="py-2 pr-4 font-mono">{column.metadataKey ?? '-'}</td>
-                                        <td class="py-2 pr-4">{column.target ?? MetadataColumnTargetDTO.Dataset}</td>
-                                        <td class="py-2 pr-4">{column.schema?.schemaId ?? column.schema?.id ?? '-'}</td>
-                                        <td class="py-2 pr-4 font-mono">{column.defaultFieldId ?? '-'}</td>
+                                        <td class="py-2 pr-4 font-mono"
+                                            >{column.metadataKey ?? "-"}</td
+                                        >
+                                        <td class="py-2 pr-4"
+                                            >{column.target ?? MetadataColumnTargetDTO.Dataset}</td
+                                        >
+                                        <td class="py-2 pr-4"
+                                            >{column.schema?.schemaId ??
+                                                column.schema?.id ??
+                                                "-"}</td
+                                        >
+                                        <td class="py-2 pr-4 font-mono"
+                                            >{column.defaultFieldId ?? "-"}</td
+                                        >
                                         <td class="py-2 flex items-center gap-2">
                                             <button
                                                 class="rounded-md border border-gray-300 px-2 py-1 hover:bg-gray-50"
-                                                onclick={() => fillFormFromExisting(column.metadataKey, column.schema?.id, column.defaultFieldId, column.target)}
+                                                onclick={() =>
+                                                    fillFormFromExisting(
+                                                        column.metadataKey,
+                                                        column.schema?.id,
+                                                        column.defaultFieldId,
+                                                        column.target
+                                                    )}
                                             >
                                                 Edit in form
                                             </button>
                                             <button
                                                 class="rounded-md border border-gray-300 px-2 py-1 hover:bg-gray-50 disabled:opacity-60"
                                                 disabled={savePending || !column.metadataKey}
-                                                onclick={() => renameColumn(data.collection.id ?? '', column.metadataKey ?? '', column.target ?? MetadataColumnTargetDTO.Dataset)}
+                                                onclick={() =>
+                                                    renameColumn(
+                                                        data.collection.id ?? "",
+                                                        column.metadataKey ?? "",
+                                                        column.target ??
+                                                            MetadataColumnTargetDTO.Dataset
+                                                    )}
                                             >
                                                 Rename key
                                             </button>
@@ -305,7 +359,7 @@
         </section>
     {:catch err}
         <p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-red-700">
-            {err instanceof Error ? err.message : 'Failed to load schema settings.'}
+            {err instanceof Error ? err.message : "Failed to load schema settings."}
         </p>
     {/await}
 </main>

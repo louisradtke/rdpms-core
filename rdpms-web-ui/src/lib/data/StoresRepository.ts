@@ -3,7 +3,7 @@ import {
     type DataStoreSummaryDTO,
     type ApiV1DataStoresGetRequest,
     Configuration
-} from '$lib/api_client';
+} from "$lib/api_client";
 
 export class StoresRepository {
     private readonly ready: Promise<void>;
@@ -15,7 +15,7 @@ export class StoresRepository {
                 this.api = new StoresApi(conf);
             })
             .catch((err) => {
-                console.error('Failed to initialize StoresApi:', err);
+                console.error("Failed to initialize StoresApi:", err);
                 throw err;
             });
     }
@@ -24,12 +24,14 @@ export class StoresRepository {
         if (this.api) return this.api;
         await this.ready;
         if (!this.api) {
-            throw new Error('StoresApi failed to initialize.');
+            throw new Error("StoresApi failed to initialize.");
         }
         return this.api;
     }
 
-    public async listAll(requestParameters?: ApiV1DataStoresGetRequest): Promise<DataStoreSummaryDTO[]> {
+    public async listAll(
+        requestParameters?: ApiV1DataStoresGetRequest
+    ): Promise<DataStoreSummaryDTO[]> {
         const api = await this.ensureReady();
         return api.apiV1DataStoresGet(requestParameters);
     }

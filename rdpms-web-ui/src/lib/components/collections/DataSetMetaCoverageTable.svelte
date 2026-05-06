@@ -1,14 +1,16 @@
 <script lang="ts">
-    import type { DataSetSummaryDTO, MetaDateCollectionColumnDTO } from '$lib/api_client';
-    import MetadataAssignmentModal from '$lib/components/collections/MetadataAssignmentModal.svelte';
-    import type { MetadataAssignmentTarget } from '$lib/components/collections/metadata-modal-types';
-    import { findAssignedMeta } from '$lib/util/meta-date-utils';
+    import type { DataSetSummaryDTO, MetaDateCollectionColumnDTO } from "$lib/api_client";
+    import MetadataAssignmentModal from "$lib/components/collections/MetadataAssignmentModal.svelte";
+    import type { MetadataAssignmentTarget } from "$lib/components/collections/metadata-modal-types";
+    import { preserveDatasetListParams } from "$lib/util/dataset-list-query";
+    import { findAssignedMeta } from "$lib/util/meta-date-utils";
 
-    let { datasets, columns, projectSlug, collectionSlug, onDataChanged } = $props<{
+    let { datasets, columns, projectSlug, collectionSlug, searchParams, onDataChanged } = $props<{
         datasets: DataSetSummaryDTO[];
         columns: MetaDateCollectionColumnDTO[];
         projectSlug: string;
         collectionSlug: string;
+        searchParams: URLSearchParams;
         onDataChanged: () => void;
     }>();
 
@@ -25,16 +27,16 @@
         metadataId?: string | null,
         validated?: boolean | null
     ) => {
-        const metadataKey = column.metadataKey ?? 'unknown';
-        const datasetName = dataset.name ?? dataset.id ?? 'Dataset';
-        const datasetId = dataset.id ?? '';
+        const metadataKey = column.metadataKey ?? "unknown";
+        const datasetName = dataset.name ?? dataset.id ?? "Dataset";
+        const datasetId = dataset.id ?? "";
 
         if (!datasetId) {
             return;
         }
 
         modalTarget = {
-            targetType: 'dataset',
+            targetType: "dataset",
             targetId: datasetId,
             title: `${datasetName} / ${metadataKey}`,
             metadataKey,
@@ -45,6 +47,16 @@
         };
 
         modalOpen = true;
+    };
+
+    const datasetHref = (dataset: DataSetSummaryDTO) => {
+        const routeValue = dataset.slug ?? dataset.id ?? "";
+        const url = new URL(
+            `/projects/${projectSlug}/c/${collectionSlug}/${routeValue}`,
+            window.location.origin
+        );
+        preserveDatasetListParams(url, searchParams);
+        return `${url.pathname}${url.search}`;
     };
 </script>
 
@@ -72,8 +84,11 @@
             <tr>
                 <th class="text-left w-48">Dataset Name</th>
                 {#each columns as column (column.metadataKey)}
-                    <th class="text-center min-w-[140px]" title={column.schema?.schemaId ?? column.schema?.id ?? ''}>
-                        {column.metadataKey ?? 'unknown'}
+                    <th
+                        class="text-center min-w-[140px]"
+                        title={column.schema?.schemaId ?? column.schema?.id ?? ""}
+                    >
+                        {column.metadataKey ?? "unknown"}
                     </th>
                 {/each}
             </tr>
@@ -82,7 +97,7 @@
             {#each datasets as dataset (dataset.id)}
                 <tr>
                     <td class="text-left">
-                        <a href="/projects/{projectSlug}/c/{collectionSlug}/{dataset.slug ?? dataset.id}" class="text-blue-500 hover:underline">
+                        <a href={datasetHref(dataset)} class="text-blue-500 hover:underline">
                             {dataset.name}
                         </a>
                     </td>
@@ -100,8 +115,16 @@
                                 class:text-yellow-800={hasMeta && !Boolean(validated)}
                                 class:bg-gray-100={!hasMeta}
                                 class:text-gray-600={!hasMeta}
-                                title={hasMeta ? `Open metadata ${assigned?.metadataId ?? ''}` : 'Click to add metadata JSON'}
-                                onclick={() => openMetadataModal(dataset, column, assigned?.metadataId, validated)}
+                                title={hasMeta
+                                    ? `Open metadata ${assigned?.metadataId ?? ""}`
+                                    : "Click to add metadata JSON"}
+                                onclick={() =>
+                                    openMetadataModal(
+                                        dataset,
+                                        column,
+                                        assigned?.metadataId,
+                                        validated
+                                    )}
                             >
                                 <span
                                     class="inline-block h-2 w-2 rounded-full"
@@ -109,7 +132,7 @@
                                     class:bg-yellow-500={hasMeta && !Boolean(validated)}
                                     class:bg-gray-300={!hasMeta}
                                 ></span>
-                                {hasMeta ? (validated ? 'valid' : 'set') : 'missing'}
+                                {hasMeta ? (validated ? "valid" : "set") : "missing"}
                             </button>
                         </td>
                     {/each}
@@ -123,5 +146,5 @@
     open={modalOpen}
     target={modalTarget}
     onClose={closeModal}
-    onDataChanged={onDataChanged}
+    {onDataChanged}
 />

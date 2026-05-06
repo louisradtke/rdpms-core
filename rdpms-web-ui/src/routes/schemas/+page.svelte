@@ -1,20 +1,20 @@
 <script lang="ts">
-    import LoadingCircle from '$lib/layout/LoadingCircle.svelte';
-    import { SchemasRepository } from '$lib/data/SchemasRepository';
-    import { getOrFetchConfig, toApiConfig } from '$lib/util/config-helper';
+    import LoadingCircle from "$lib/layout/LoadingCircle.svelte";
+    import { SchemasRepository } from "$lib/data/SchemasRepository";
+    import { getOrFetchConfig, toApiConfig } from "$lib/util/config-helper";
 
     let reloadTick = $state(0);
 
-    let schemaJsonInput = $state('');
+    let schemaJsonInput = $state("");
 
     let createPending = $state(false);
-    let createError = $state('');
-    let createSuccess = $state('');
+    let createError = $state("");
+    let createSuccess = $state("");
 
     let previewPending = $state(false);
-    let previewError = $state('');
-    let previewSchemaText = $state('');
-    let previewSchemaDbId = $state('');
+    let previewError = $state("");
+    let previewSchemaText = $state("");
+    let previewSchemaDbId = $state("");
 
     const schemasPromise = $derived.by(async () => {
         void reloadTick; // make $derived.by read ot as dependency
@@ -27,31 +27,31 @@
         const raw = schemaJsonInput.trim();
 
         if (!raw) {
-            createError = 'Schema JSON is required.';
-            createSuccess = '';
+            createError = "Schema JSON is required.";
+            createSuccess = "";
             return;
         }
 
         try {
             JSON.parse(raw);
         } catch {
-            createError = 'Schema JSON is malformed.';
-            createSuccess = '';
+            createError = "Schema JSON is malformed.";
+            createSuccess = "";
             return;
         }
 
         createPending = true;
-        createError = '';
-        createSuccess = '';
+        createError = "";
+        createSuccess = "";
 
         try {
             const repo = new SchemasRepository(getOrFetchConfig().then(toApiConfig));
             await repo.addSchema(raw);
 
-            createSuccess = 'Schema has been added.';
+            createSuccess = "Schema has been added.";
             reloadTick += 1;
         } catch (err) {
-            createError = err instanceof Error ? err.message : 'Failed to add schema.';
+            createError = err instanceof Error ? err.message : "Failed to add schema.";
         } finally {
             createPending = false;
         }
@@ -59,22 +59,22 @@
 
     async function loadSchemaPreview(schemaRef?: string | null): Promise<void> {
         if (!schemaRef) {
-            previewError = 'Schema id is missing.';
-            previewSchemaText = '';
-            previewSchemaDbId = '';
+            previewError = "Schema id is missing.";
+            previewSchemaText = "";
+            previewSchemaDbId = "";
             return;
         }
 
         previewPending = true;
-        previewError = '';
-        previewSchemaText = '';
+        previewError = "";
+        previewSchemaText = "";
         previewSchemaDbId = schemaRef;
 
         try {
             const repo = new SchemasRepository(getOrFetchConfig().then(toApiConfig));
             previewSchemaText = await repo.getSchemaRaw(schemaRef);
         } catch (err) {
-            previewError = err instanceof Error ? err.message : 'Failed to load schema preview.';
+            previewError = err instanceof Error ? err.message : "Failed to load schema preview.";
         } finally {
             previewPending = false;
         }
@@ -88,10 +88,16 @@
         <h2 class="text-xl font-semibold">Add Schema</h2>
 
         {#if createError}
-            <p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{createError}</p>
+            <p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {createError}
+            </p>
         {/if}
         {#if createSuccess}
-            <p class="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">{createSuccess}</p>
+            <p
+                class="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"
+            >
+                {createSuccess}
+            </p>
         {/if}
 
         <label class="flex flex-col gap-1">
@@ -102,7 +108,8 @@
                 bind:value={schemaJsonInput}
             ></textarea>
             <span class="text-xs text-gray-500">
-                Raw JSON schema document. Must be a valid JSON object. If `$id` is missing, the backend generates and injects one.
+                Raw JSON schema document. Must be a valid JSON object. If `$id` is missing, the
+                backend generates and injects one.
             </span>
         </label>
 
@@ -112,7 +119,7 @@
                 disabled={createPending}
                 onclick={createSchema}
             >
-                {createPending ? 'Adding...' : 'Add Schema'}
+                {createPending ? "Adding..." : "Add Schema"}
             </button>
         </div>
     </section>
@@ -138,15 +145,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {#each schemas as schema, idx (`${schema.id ?? schema.schemaId ?? 'none'}-${idx}`)}
+                            {#each schemas as schema, idx (`${schema.id ?? schema.schemaId ?? "none"}-${idx}`)}
                                 <tr class="border-b border-gray-100 align-top">
-                                    <td class="py-2 pr-4 font-mono">{schema.id ?? '-'}</td>
-                                    <td class="py-2 pr-4">{schema.schemaId ?? '-'}</td>
+                                    <td class="py-2 pr-4 font-mono">{schema.id ?? "-"}</td>
+                                    <td class="py-2 pr-4">{schema.schemaId ?? "-"}</td>
                                     <td class="py-2">
                                         <div class="flex items-center gap-2">
                                             <button
                                                 class="rounded-md border border-gray-300 px-2 py-1 hover:bg-gray-50"
-                                                onclick={() => loadSchemaPreview(schema.id ?? schema.schemaId)}
+                                                onclick={() =>
+                                                    loadSchemaPreview(schema.id ?? schema.schemaId)}
                                             >
                                                 Preview JSON
                                             </button>
@@ -168,7 +176,7 @@
             {/if}
         {:catch err}
             <p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-red-700">
-                {err instanceof Error ? err.message : 'Failed to load schemas.'}
+                {err instanceof Error ? err.message : "Failed to load schemas."}
             </p>
         {/await}
     </section>
@@ -177,7 +185,9 @@
         <h2 class="text-xl font-semibold">Schema Preview</h2>
 
         {#if previewError}
-            <p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{previewError}</p>
+            <p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {previewError}
+            </p>
         {/if}
 
         {#if previewPending}
@@ -186,7 +196,8 @@
             </div>
         {:else if previewSchemaText}
             <p class="text-sm text-gray-600">Previewing schema {previewSchemaDbId}</p>
-            <pre class="max-h-96 overflow-auto rounded-md border border-gray-200 bg-gray-50 p-3 text-xs">{previewSchemaText}</pre>
+            <pre
+                class="max-h-96 overflow-auto rounded-md border border-gray-200 bg-gray-50 p-3 text-xs">{previewSchemaText}</pre>
         {:else}
             <p class="text-sm text-gray-600">Select a schema from the table to preview its JSON.</p>
         {/if}
