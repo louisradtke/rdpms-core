@@ -1,5 +1,6 @@
 using System.Text.Json;
 using RDPMS.Core.Infra;
+using RDPMS.Core.Infra.Configuration;
 using RDPMS.Core.Persistence.MetadataProjection;
 using RDPMS.Core.Persistence.Model;
 
@@ -28,6 +29,55 @@ public class MetadataProjectionTests
                 TimeSeriesDatasetProjectionStrategy.BeginStampOutput,
                 TimeSeriesDatasetProjectionStrategy.EndStampOutput
             }));
+        });
+    }
+
+    [Test]
+    public void TaskCliOptions_RefreshProjections_IsValid()
+    {
+        var options = new TaskCLIOptions
+        {
+            TaskName = TaskCLIOptions.RefreshProjectionsTask
+        };
+
+        var valid = options.Validate(out var reason);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(valid, Is.True);
+            Assert.That(reason, Is.Null);
+        });
+    }
+
+    [Test]
+    public void TaskCliOptions_MissingTask_IsValidForListing()
+    {
+        var options = new TaskCLIOptions();
+
+        var valid = options.Validate(out var reason);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(valid, Is.True);
+            Assert.That(reason, Is.Null);
+            Assert.That(TaskCLIOptions.RegisteredTasks, Does.Contain(TaskCLIOptions.RefreshProjectionsTask));
+        });
+    }
+
+    [Test]
+    public void TaskCliOptions_UnknownTask_IsInvalid()
+    {
+        var options = new TaskCLIOptions
+        {
+            TaskName = "does_not_exist"
+        };
+
+        var valid = options.Validate(out var reason);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(valid, Is.False);
+            Assert.That(reason, Does.Contain("Unknown task"));
         });
     }
 

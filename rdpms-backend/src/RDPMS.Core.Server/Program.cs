@@ -15,6 +15,7 @@ using RDPMS.Core.Infra.AppInitialization;
 using RDPMS.Core.Infra.Configuration;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.MetadataProjection;
+using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Model.Repositories;
@@ -76,44 +77,7 @@ internal class Program
         ArgumentNullException.ThrowIfNull(launchConfig.DatabaseConfiguration);
 
 
-        // add services to the collection.
-        builder.Services.AddSingleton(runtimeConfig);
-        builder.Services.AddSingleton(launchConfig);
-        builder.Services.AddSingleton(launchConfig.DatabaseConfiguration);
-        builder.Services.AddSingleton(new CachedMetadataProjectionRegistry()); // EF otherwise uses wrong ctor
-
-        builder.Services.AddScoped<DbContext, RDPMSPersistenceContext>();
-
-        // file mapper interface, for now
-        builder.Services.AddAttributedServices([typeof(Program).Assembly]);
-        builder.Services.AddSingleton<ContentTypeDTOMapper>();
-        builder.Services.AddSingleton<DataCollectionSummaryDTOMapper>();
-        builder.Services.AddSingleton<DataSetSummaryDTOMapper>();
-        builder.Services.AddSingleton<FileCreateRequestDTOMapper>();
-        builder.Services.AddSingleton<FileCreateResponseDTOMapper>();
-        builder.Services.AddSingleton<FileSummaryDTOMapper>();
-        builder.Services.AddSingleton<StoreSummaryDTOMapper>();
-
-        builder.Services.AddScoped<IDataSetRepository, DataSetRepository>();
-        builder.Services.AddScoped<IDataStoreRepository, DataStoreRepository>();
-        builder.Services.AddScoped<IContentTypeRepository, ContentTypeRepository>();
-        builder.Services.AddScoped<IDataCollectionRepository, DataCollectionRepository>();
-        builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
-        builder.Services.AddScoped<ISlugRepository, SlugRepository>();
-
-        builder.Services.AddScoped<IDataSetService, DataSetService>();
-        builder.Services.AddScoped<IStoreService,StoreService>();
-        builder.Services.AddScoped<IFileService, DataFileService>();
-        builder.Services.AddScoped<IContentTypeService, ContentTypeService>();
-        builder.Services.AddScoped<IDataCollectionEntityService, DataCollectionEntityService>();
-        builder.Services.AddScoped<IProjectService, ProjectService>();
-        builder.Services.AddScoped<ISlugService, SlugService>();
-        builder.Services.AddScoped<IS3Service, S3Service>();
-        builder.Services.AddScoped<ISecretResolverService, SecretResolverService>();
-        builder.Services.AddScoped<IMetadataService, MetadataService>();
-        builder.Services.AddScoped<ISchemaService, SchemaService>();
-        builder.Services.AddScoped<IMetadataDocumentReader, MetadataDocumentReader>();
-        builder.Services.AddScoped<IEntityMetadataProjectionService, EntityMetadataProjectionService>();
+        AddCoreServices(builder.Services, launchConfig, runtimeConfig);
 
 
         // init api and api exploration
@@ -270,12 +234,152 @@ internal class Program
         }
     }
 
+    private static async Task RunTask(TaskCLIOptions taskCliOptions)
+    {
+        if (!taskCliOptions.Validate(out var err))
+        {
+            await Console.Error.WriteLineAsync(err);
+            Environment.Exit(1);
+        }
+
+        if (taskCliOptions.TaskName is null)
+        {
+            Console.WriteLine("Registered tasks:");
+            foreach (var taskName in TaskCLIOptions.RegisteredTasks)
+            {
+                Console.WriteLine($"- {taskName}");
+            }
+
+            return;
+        }
+
+        var launchConfig =
+            LaunchConfiguration.LoadParamsFromYaml(taskCliOptions.ConfigurationFilePath ?? "debug.yaml");
+        taskCliOptions.CopyToLaunchConfiguration(launchConfig);
+
+        var runtimeConfig = new RuntimeConfiguration();
+        launchConfig.CopyToRuntimeConfiguration(runtimeConfig);
+
+        NLog.LogManager.Setup().LoadConfiguration(builder => ConfigureLogging(launchConfig, builder));
+
+        var builder = WebApplication.CreateBuilder();
+        builder.Logging.ClearProviders();
+        builder.Logging.AddNLog();
+        AddCoreServices(builder.Services, launchConfig, runtimeConfig);
+
+        var app = builder.Build();
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+        try
+        {
+            using var scope = app.Services.CreateScope();
+            var ctx = scope.ServiceProvider.GetRequiredService<DbContext>();
+            if (launchConfig.InitDatabase is not LaunchConfiguration.DatabaseInitMode.None)
+            {
+                await ctx.Database.MigrateAsync();
+                await ctx.SaveChangesAsync();
+            }
+
+            switch (taskCliOptions.TaskName)
+            {
+                case TaskCLIOptions.RefreshProjectionsTask:
+                    await RefreshProjections(scope.ServiceProvider);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        nameof(taskCliOptions.TaskName),
+                        $"Unknown task '{taskCliOptions.TaskName}'.");
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogCritical(e, "Task {TaskName} failed. {EMessage}", taskCliOptions.TaskName, e.Message);
+            Environment.Exit(1);
+        }
+    }
+
+    private static async Task RefreshProjections(IServiceProvider serviceProvider)
+    {
+        var ctx = serviceProvider.GetRequiredService<DbContext>();
+        var registry = serviceProvider.GetRequiredService<CachedMetadataProjectionRegistry>();
+        var projectionService = serviceProvider.GetRequiredService<IEntityMetadataProjectionService>();
+        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+
+        var datasetSourceKeys = registry.GetAll()
+            .Where(d => d.EntityType == typeof(DataSet))
+            .Select(d => d.SourceKey)
+            .Distinct()
+            .ToList();
+
+        var datasets = await ctx.Set<DataSet>().ToListAsync();
+        var refreshed = 0;
+        foreach (var dataset in datasets)
+        {
+            foreach (var sourceKey in datasetSourceKeys)
+            {
+                await projectionService.RefreshAsync(dataset, sourceKey);
+                refreshed++;
+            }
+        }
+
+        logger.LogInformation(
+            "Refreshed {RefreshCount} metadata projection source(s) across {DatasetCount} dataset(s).",
+            refreshed,
+            datasets.Count);
+    }
+
+    private static void AddCoreServices(
+        IServiceCollection services,
+        LaunchConfiguration launchConfig,
+        RuntimeConfiguration runtimeConfig)
+    {
+        services.AddSingleton(runtimeConfig);
+        services.AddSingleton(launchConfig);
+        ArgumentNullException.ThrowIfNull(launchConfig.DatabaseConfiguration);
+        services.AddSingleton(launchConfig.DatabaseConfiguration);
+        services.AddSingleton(new CachedMetadataProjectionRegistry()); // EF otherwise uses wrong ctor
+
+        services.AddScoped<DbContext, RDPMSPersistenceContext>();
+
+        // file mapper interface, for now
+        services.AddAttributedServices([typeof(Program).Assembly]);
+        services.AddSingleton<ContentTypeDTOMapper>();
+        services.AddSingleton<DataCollectionSummaryDTOMapper>();
+        services.AddSingleton<DataSetSummaryDTOMapper>();
+        services.AddSingleton<FileCreateRequestDTOMapper>();
+        services.AddSingleton<FileCreateResponseDTOMapper>();
+        services.AddSingleton<FileSummaryDTOMapper>();
+        services.AddSingleton<StoreSummaryDTOMapper>();
+
+        services.AddScoped<IDataSetRepository, DataSetRepository>();
+        services.AddScoped<IDataStoreRepository, DataStoreRepository>();
+        services.AddScoped<IContentTypeRepository, ContentTypeRepository>();
+        services.AddScoped<IDataCollectionRepository, DataCollectionRepository>();
+        services.AddScoped<IProjectRepository, ProjectRepository>();
+        services.AddScoped<ISlugRepository, SlugRepository>();
+
+        services.AddScoped<IDataSetService, DataSetService>();
+        services.AddScoped<IStoreService,StoreService>();
+        services.AddScoped<IFileService, DataFileService>();
+        services.AddScoped<IContentTypeService, ContentTypeService>();
+        services.AddScoped<IDataCollectionEntityService, DataCollectionEntityService>();
+        services.AddScoped<IProjectService, ProjectService>();
+        services.AddScoped<ISlugService, SlugService>();
+        services.AddScoped<IS3Service, S3Service>();
+        services.AddScoped<ISecretResolverService, SecretResolverService>();
+        services.AddScoped<IMetadataService, MetadataService>();
+        services.AddScoped<ISchemaService, SchemaService>();
+        services.AddScoped<IMetadataDocumentReader, MetadataDocumentReader>();
+        services.AddScoped<IEntityMetadataProjectionService, EntityMetadataProjectionService>();
+    }
+
     public static async Task Main(string[] args)
     {
         Task? appTask = null;
-        CommandLine.Parser.Default.ParseArguments<SeedingCLIOptions, ServerCLIOptions>(args)
+        CommandLine.Parser.Default.ParseArguments<SeedingCLIOptions, ServerCLIOptions, TaskCLIOptions>(args)
             .WithParsed<SeedingCLIOptions>(opts => appTask = RunSeeding(opts))
             .WithParsed<ServerCLIOptions>(opts => appTask = RunServer(opts))
+            .WithParsed<TaskCLIOptions>(opts => appTask = RunTask(opts))
             .WithNotParsed(errs =>
             {
                 Console.Error.WriteLine("Failed to parse command line arguments");
