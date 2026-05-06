@@ -71,6 +71,7 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 - Svelte 5 + Vite 6 + Tailwind 4
 - Scripts in `rdpms-web-ui/package.json` (`dev`, `build`, `check`, `lint`)
 - Package manager preference: `npm`
+- Keep `rdpms-web-ui/package.json` and `rdpms-web-ui/package-lock.json` in sync. The container workflow uses `npm ci`, which fails before validation if the lockfile does not match.
 - Dev container:
   - The web UI is intended to run inside the `rdpms-web-ui` service from `rdpms-backend/compose.yaml`
   - Source code is bind-mounted from the host; edit files normally in the repo, but prefer running `npm` commands inside the container
@@ -92,6 +93,12 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 - Async refresh pattern:
   - When using `$derived.by(async () => ...)` for data loads, a no-op read like `reloadTick;` is used intentionally to track a manual refresh dependency.
   - Do not remove this line unless replacing it with another explicit dependency trigger.
+- File preview limits:
+  - `rdpms-web-ui/src/lib/layout/FileDisplay.svelte` owns generic file download/preview handling and the shared plugin policy lookup.
+  - Display-specific limits should stay in the individual preview plugins where practical. For text/code previews, prefer showing the first configured number of bytes over downloading the full file and then rejecting inline display.
+- Plotly previews:
+  - The current time-series preview depends on the npm package `plotly.js-dist-min`, resolved from the public npm registry, and imports it dynamically from `TimeSeriesPlotlyPlugin.svelte`.
+  - Plotly can render before its parent has final dimensions. Keep explicit full-width/full-height container styling and resize handling (`ResizeObserver` / `Plotly.Plots.resize`) for Plotly preview components.
 
 ### Web UI Structure (current)
 - Runtime config:
@@ -124,12 +131,20 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 
 ## Dev Environment Notes
 - CLI is installed/run on the host (not in the compose stack).
+- Docker/Podman mount behavior:
+  - With a Podman machine, host `/tmp` is not necessarily the same filesystem visible inside the VM. Mounting `/tmp/...:/work` can produce misleading "file does not exist" errors inside containers even when the host path exists.
+  - Prefer normal/rootless Docker for workflows that bind-mount temporary host work directories into ROS/tool containers, or place temporary work directories under a path known to be shared with the container engine.
 - JetBrains Rider setup:
   - Rider project is in `rdpms-backend/`.
   - "Full Dev-Stack" runs the native backend, compose `deps`, and browser debugging for the web UI.
   - The web UI dev server is expected to come from the `rdpms-web-ui` compose service, not a host-side `npm run dev`.
   - Dev deps: .NET, Docker or Podman (plus a Podman VM if using Podman). Host-side Node/npm is optional if you intentionally bypass the container workflow.
   - If using Podman VM, set the Engine API URL (unix socket path) in the IDE/plugin settings.
+
+## Prototype Tooling Notes
+- `plugins/tools/develop/README.md` is the entrypoint for prototype tool and workflow conventions. Check it before adding new tools or workflow scripts.
+- `plugins/tools/develop/workflow_rosbag_linear.sh` wires prototype tools by collection IDs and tracker IDs. New reusable tools should expose source/target collection CLI arguments and a caller-provided `--tracker-id` instead of assuming a single global cache.
+- Tool caches that record "already processed" datasets must be scoped by tracker ID because the same tool can be called from different workflows against different collection interfaces.
 
 ## Migrations
 - Add a new EF migration:
