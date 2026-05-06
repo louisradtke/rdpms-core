@@ -1345,6 +1345,10 @@ components:
           type: integer
           description: Amount of files in the dataset.
           format: int32
+        totalSizeBytes:
+          type: integer
+          description: Sum of the plain file sizes in the dataset.
+          format: int64
         collectionId:
           type: string
           description: Id of the collection this dataset belongs to.

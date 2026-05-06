@@ -86,6 +86,7 @@ public class DataSetSummaryDTOMapper
             DeletionState = (DeletionStateDTO) (int) domain.DeletionState,
             IsTimeSeries = domain.Files.Any(file => file.BeginStamp.HasValue),
             FileCount = domain.Files.Count,
+            TotalSizeBytes = domain.Files.Sum(file => file.SizeBytes),
             CollectionId = domain.ParentId
         };
     }

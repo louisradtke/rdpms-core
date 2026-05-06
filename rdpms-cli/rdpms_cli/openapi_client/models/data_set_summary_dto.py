@@ -46,8 +46,9 @@ class DataSetSummaryDTO(BaseModel):
     meta_dates: Optional[List[AssignedMetaDateDTO]] = Field(default=None, description="Fields, for which metadata exists. Only to be set by server.", alias="metaDates")
     files: Optional[List[FileSummaryDTO]] = Field(default=None, description="Files of the dataset. Null means this information is not included. Empty means this dataset has no files.")
     file_count: Optional[StrictInt] = Field(default=None, description="Amount of files in the dataset.", alias="fileCount")
+    total_size_bytes: Optional[StrictInt] = Field(default=None, description="Sum of the plain file sizes in the dataset.", alias="totalSizeBytes")
     collection_id: Optional[UUID] = Field(default=None, description="Id of the collection this dataset belongs to.", alias="collectionId")
-    __properties: ClassVar[List[str]] = ["id", "slug", "name", "assignedTags", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "lifecycleState", "deletionState", "isTimeSeries", "metaDates", "files", "fileCount", "collectionId"]
+    __properties: ClassVar[List[str]] = ["id", "slug", "name", "assignedTags", "createdStampUTC", "deletedStampUTC", "beginStampUTC", "endStampUTC", "lifecycleState", "deletionState", "isTimeSeries", "metaDates", "files", "fileCount", "totalSizeBytes", "collectionId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -200,6 +201,7 @@ class DataSetSummaryDTO(BaseModel):
             "metaDates": [AssignedMetaDateDTO.from_dict(_item) for _item in obj["metaDates"]] if obj.get("metaDates") is not None else None,
             "files": [FileSummaryDTO.from_dict(_item) for _item in obj["files"]] if obj.get("files") is not None else None,
             "fileCount": obj.get("fileCount"),
+            "totalSizeBytes": obj.get("totalSizeBytes"),
             "collectionId": obj.get("collectionId")
         })
         return _obj

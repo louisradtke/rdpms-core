@@ -21,6 +21,7 @@ Name | Type
 `metaDates` | [Array&lt;AssignedMetaDateDTO&gt;](AssignedMetaDateDTO.md)
 `files` | [Array&lt;FileSummaryDTO&gt;](FileSummaryDTO.md)
 `fileCount` | number
+`totalSizeBytes` | number
 `collectionId` | string
 
 ## Example
@@ -44,6 +45,7 @@ const example = {
   "metaDates": null,
   "files": null,
   "fileCount": null,
+  "totalSizeBytes": null,
   "collectionId": null,
 } satisfies DataSetSummaryDTO
 

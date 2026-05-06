@@ -31,6 +31,7 @@ public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper)
             Files = domain.Files.Select(fileMapper.Export).ToList(),
             CollectionId = domain.ParentId,
             FileCount = domain.Files.Count,
+            TotalSizeBytes = domain.Files.Sum(file => file.SizeBytes),
             DeletionState = (DeletionStateDTO) (int) domain.DeletionState
         };
     }

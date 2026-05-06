@@ -144,6 +144,12 @@ export interface DataSetSummaryDTO {
      */
     fileCount?: number;
     /**
+     * Sum of the plain file sizes in the dataset.
+     * @type {number}
+     * @memberof DataSetSummaryDTO
+     */
+    totalSizeBytes?: number;
+    /**
      * Id of the collection this dataset belongs to.
      * @type {string}
      * @memberof DataSetSummaryDTO
@@ -184,6 +190,7 @@ export function DataSetSummaryDTOFromJSONTyped(json: any, ignoreDiscriminator: b
         'metaDates': json['metaDates'] == null ? undefined : ((json['metaDates'] as Array<any>).map(AssignedMetaDateDTOFromJSON)),
         'files': json['files'] == null ? undefined : ((json['files'] as Array<any>).map(FileSummaryDTOFromJSON)),
         'fileCount': json['fileCount'] == null ? undefined : json['fileCount'],
+        'totalSizeBytes': json['totalSizeBytes'] == null ? undefined : json['totalSizeBytes'],
         'collectionId': json['collectionId'] == null ? undefined : json['collectionId'],
     };
 }
@@ -213,6 +220,7 @@ export function DataSetSummaryDTOToJSONTyped(value?: DataSetSummaryDTO | null, i
         'metaDates': value['metaDates'] == null ? undefined : ((value['metaDates'] as Array<any>).map(AssignedMetaDateDTOToJSON)),
         'files': value['files'] == null ? undefined : ((value['files'] as Array<any>).map(FileSummaryDTOToJSON)),
         'fileCount': value['fileCount'],
+        'totalSizeBytes': value['totalSizeBytes'],
         'collectionId': value['collectionId'],
     };
 }

@@ -162,7 +162,7 @@ public class DataSetsController(
             }
 
             reference = field.Field.Value.References
-                .FirstOrDefault(r => r.StorageType != StorageType.S3);
+                .FirstOrDefault(r => r.StorageType == StorageType.S3);
             if (reference is not S3FileStorageReference s3Reference) continue;
             if (reference.StoreFid is null) continue;
             if (!storesCache.TryGetValue(reference.StoreFid.Value, out var store))

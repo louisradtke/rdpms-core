@@ -91,6 +91,11 @@ public record DataSetSummaryDTO
     public int FileCount { get; set; }
 
     /// <summary>
+    /// Sum of the plain file sizes in the dataset.
+    /// </summary>
+    public long TotalSizeBytes { get; set; }
+
+    /// <summary>
     /// Id of the collection this dataset belongs to.
     /// </summary>
     public Guid? CollectionId { get; set; }
