@@ -792,16 +792,15 @@ public class DataSetsController(
             return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for newName."});
         }
 
-        var normalizedKey = key.ToLowerInvariant();
-        var normalizedNewKey = newKey.ToLowerInvariant();
-        var field = dataSet.MetadataJsonFields
-            .SingleOrDefault(f =>
-                f.MetadataKey.Equals(normalizedKey, StringComparison.OrdinalIgnoreCase));
-        if (field == null) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
-
-        field.MetadataKey = normalizedNewKey;
-        await dataSetService.UpdateAsync(dataSet);
-        return Ok();
+        try
+        {
+            await metadataService.RenameMetadate(dataSet, key, newKey);
+            return Ok();
+        }
+        catch (InvalidOperationException)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
+        }
     }
 
     /// <summary>
@@ -827,10 +826,8 @@ public class DataSetsController(
 
         if (!SlugUtil.IsValidSlug(key)) return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for key."});
 
-        var removed = dataSet.MetadataJsonFields.RemoveAll(f =>
-            f.MetadataKey.Equals(key, StringComparison.OrdinalIgnoreCase));
-        if (removed == 0) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
-        await dataSetService.UpdateAsync(dataSet);
+        var removed = await metadataService.RemoveMetadate(dataSet, key);
+        if (!removed) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
         return Ok();
     }
         private static IQueryable<DataSet> QueryDatasets(IQueryable<DataSet> datasetsQuery,

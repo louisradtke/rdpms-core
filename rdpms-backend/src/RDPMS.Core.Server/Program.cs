@@ -14,10 +14,12 @@ using RDPMS.Core.Infra;
 using RDPMS.Core.Infra.AppInitialization;
 using RDPMS.Core.Infra.Configuration;
 using RDPMS.Core.Persistence;
+using RDPMS.Core.Persistence.MetadataProjection;
 using RDPMS.Core.Server.Model.DTO.V1;
 using RDPMS.Core.Server.Model.Mappers;
 using RDPMS.Core.Server.Model.Repositories;
 using RDPMS.Core.Server.Services;
+using RDPMS.Core.Server.Services.MetadataProjection;
 using RDPMS.Core.Server.Util;
 
 namespace RDPMS.Core.Server;
@@ -78,6 +80,7 @@ internal class Program
         builder.Services.AddSingleton(runtimeConfig);
         builder.Services.AddSingleton(launchConfig);
         builder.Services.AddSingleton(launchConfig.DatabaseConfiguration);
+        builder.Services.AddSingleton(new CachedMetadataProjectionRegistry()); // EF otherwise uses wrong ctor
 
         builder.Services.AddScoped<DbContext, RDPMSPersistenceContext>();
 
@@ -109,6 +112,8 @@ internal class Program
         builder.Services.AddScoped<ISecretResolverService, SecretResolverService>();
         builder.Services.AddScoped<IMetadataService, MetadataService>();
         builder.Services.AddScoped<ISchemaService, SchemaService>();
+        builder.Services.AddScoped<IMetadataDocumentReader, MetadataDocumentReader>();
+        builder.Services.AddScoped<IEntityMetadataProjectionService, EntityMetadataProjectionService>();
 
 
         // init api and api exploration

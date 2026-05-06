@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using RDPMS.Core.Infra;
+using RDPMS.Core.Persistence.MetadataProjection;
 
 namespace RDPMS.Core.Persistence.Model;
 
@@ -7,6 +9,28 @@ namespace RDPMS.Core.Persistence.Model;
 /// files, and finally seals the dataset. Only sealed datasets can be used for further processing.
 /// </summary>
 /// <param name="name"></param>
+[CachedMetadataProjection(
+    id: "dataset.timeseries.v1",
+    sourceKey: RDPMSMetadataKeys.TimeSeriesData,
+    strategyType: typeof(TimeSeriesDatasetProjectionStrategy),
+    RequiredSchemaId = RDPMSSchemaIds.TimeSeriesContainerV1,
+    OutputNames = new[]
+    {
+        TimeSeriesDatasetProjectionStrategy.IsTimeSeriesOutput,
+        TimeSeriesDatasetProjectionStrategy.BeginStampOutput,
+        TimeSeriesDatasetProjectionStrategy.EndStampOutput
+    },
+    OutputProperties = new[]
+    {
+        "IsTimeSeries",
+        "BeginStamp",
+        "EndStamp"
+    },
+    RefreshedAtProperty = "TimeSeriesCacheRefreshedAt",
+    SourceStampProperty = "TimeSeriesCacheSourceStamp",
+    SourceMetadataFieldIdProperty = "TimeSeriesCacheSourceMetadataFieldId",
+    VersionProperty = "TimeSeriesCacheVersion",
+    ErrorProperty = "TimeSeriesCacheError")]
 public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParent
 {
     public Guid Id { get; init; } = Guid.NewGuid();
@@ -39,6 +63,27 @@ public class DataSet(string name) : IUniqueEntity, IUniqueEntityWithSlugAndParen
     public List<Tag> AssignedTags { get; set; } = [];
     public List<Label> AssignedLabels { get; set; } = [];
     public DateTime CreatedStamp { get; set; } = DateTime.UtcNow;
+    
+    /// <summary>
+    /// Stamp of the first data point represented by this dataset, if known.
+    /// </summary>
+    public DateTime? BeginStamp { get; set; }
+
+    /// <summary>
+    /// Stamp of the last data point represented by this dataset, if known.
+    /// </summary>
+    public DateTime? EndStamp { get; set; }
+
+    /// <summary>
+    /// True when this dataset has time-series metadata assigned under the canonical metadata key.
+    /// </summary>
+    public bool IsTimeSeries { get; set; }
+
+    public DateTime? TimeSeriesCacheRefreshedAt { get; set; }
+    public DateTime? TimeSeriesCacheSourceStamp { get; set; }
+    public Guid? TimeSeriesCacheSourceMetadataFieldId { get; set; }
+    public string? TimeSeriesCacheVersion { get; set; }
+    public string? TimeSeriesCacheError { get; set; }
 
     /// <summary>
     /// Stamp in <b>UTC</b>, where the dataset was selected for deletion

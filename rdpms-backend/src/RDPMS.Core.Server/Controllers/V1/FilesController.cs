@@ -271,16 +271,15 @@ public class FilesController(
             return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for newName." });
         }
 
-        var normalizedKey = key.ToLowerInvariant();
-        var normalizedNewKey = newKey.ToLowerInvariant();
-        var field = file.MetadataJsonFields
-            .SingleOrDefault(f =>
-                f.MetadataKey.Equals(normalizedKey, StringComparison.OrdinalIgnoreCase));
-        if (field == null) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
-
-        field.MetadataKey = normalizedNewKey;
-        await fileService.UpdateAsync(file);
-        return Ok();
+        try
+        {
+            await metadataService.RenameMetadate(file, key, newKey);
+            return Ok();
+        }
+        catch (InvalidOperationException)
+        {
+            return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
+        }
     }
 
     /// <summary>
@@ -306,10 +305,8 @@ public class FilesController(
 
         if (!SlugUtil.IsValidSlug(key)) return BadRequest(new ErrorMessageDTO { Message = "Invalid slug for key." });
 
-        var removed = file.MetadataJsonFields.RemoveAll(f =>
-            f.MetadataKey.Equals(key, StringComparison.OrdinalIgnoreCase));
-        if (removed == 0) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
-        await fileService.UpdateAsync(file);
+        var removed = await metadataService.RemoveMetadate(file, key);
+        if (!removed) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
         return Ok();
     }
 }

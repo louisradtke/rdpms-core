@@ -10,8 +10,6 @@ public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper)
 {
     public DataSetSummaryDTO Export(DataSet domain)
     {
-        var beginStamp = domain.Files.Min(f => f.BeginStamp);
-        var endStamp = domain.Files.Max(f => f.EndStamp);
         return new DataSetSummaryDTO
         {
             Id = domain.Id,
@@ -24,10 +22,10 @@ public class DataSetDetailedDTOMapper(FileSummaryDTOMapper fileMapper)
             }).ToList(),
             CreatedStampUTC = domain.CreatedStamp,
             DeletedStampUTC = domain.DeletedStamp,
-            BeginStampUTC = beginStamp,
-            EndStampUTC = endStamp,
+            BeginStampUTC = domain.BeginStamp,
+            EndStampUTC = domain.EndStamp,
             LifecycleState = domain.LifecycleState.ToString(),
-            IsTimeSeries = domain.Files.Any(file => file.BeginStamp.HasValue),
+            IsTimeSeries = domain.IsTimeSeries,
             Files = domain.Files.Select(fileMapper.Export).ToList(),
             CollectionId = domain.ParentId,
             FileCount = domain.Files.Count,

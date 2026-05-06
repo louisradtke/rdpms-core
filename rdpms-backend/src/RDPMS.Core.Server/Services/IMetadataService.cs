@@ -20,6 +20,10 @@ public interface IMetadataService : IGenericCollectionService<MetadataJsonField>
     /// <param name="value">value of meta date</param>
     Task AssignMetadate(IUniqueEntity entity, string key, MetadataJsonField value);
 
+    Task RenameMetadate(IUniqueEntity entity, string key, string newKey);
+
+    Task<bool> RemoveMetadate(IUniqueEntity entity, string key);
+
     /// <summary>
     /// Checks, whether the given schemaId is valid for the given metadataId and updates the meta dates validated
     /// schemas accordingly. If schema was already valid, returns true.

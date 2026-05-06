@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RDPMS.Core.Persistence;
 using RDPMS.Core.Persistence.Model;
 using RDPMS.Core.Server.Model.Logic;
+using RDPMS.Core.Server.Services.MetadataProjection;
 using RDPMS.Core.Server.Services.Infra;
 
 namespace RDPMS.Core.Server.Services;
@@ -13,6 +14,7 @@ public class MetadataService(
     DbContext context,
     IFileService fileService,
     ISchemaService schemaService,
+    IEntityMetadataProjectionService metadataProjectionService,
     ILogger<MetadataService> logger)
     : GenericCollectionService<MetadataJsonField>(context, q => q
         .Include(f => f.Value)
@@ -37,6 +39,8 @@ public class MetadataService(
         var field = new MetadataJsonField()
         {
             Value = file,
+            CreatedStamp = DateTime.UtcNow,
+            UpdatedStamp = DateTime.UtcNow,
         };
 
         Context.Add(file);
@@ -55,22 +59,8 @@ public class MetadataService(
             Field = value,
         };
 
-        var existingRefs = Context.Set<DataEntityMetadataJsonField>()
-            .Where(l => l.MetadataKey == normalizedKey)
-            .AsQueryable();
-        switch (entity)
-        {
-            case DataSet dataSet:
-                existingRefs = existingRefs.Where(l => l.DataSetId == dataSet.Id);
-                link.DataSetId = dataSet.Id;
-                break;
-            case DataFile dataFile:
-                existingRefs = existingRefs.Where(l => l.DataFileId == dataFile.Id);
-                link.DataFileId = dataFile.Id;
-                break;
-            default:
-                throw new ArgumentException("Unknown entity type");
-        }
+        var existingRefs = BuildMetadataLinkQuery(entity, normalizedKey);
+        SetMetadataLinkTarget(entity, link);
         
         Context.RemoveRange(existingRefs.Cast<object>().AsEnumerable());
 
@@ -78,9 +68,48 @@ public class MetadataService(
         await Context.SaveChangesAsync();
 
         var schemaId = await ResolveCollectionColumnSchemaId(entity, normalizedKey);
-        if (schemaId is null) return;
+        if (schemaId is not null)
+        {
+            await VerifySchema(value.Id, schemaId.Value);
+        }
 
-        await VerifySchema(value.Id, schemaId.Value);
+        await metadataProjectionService.RefreshAsync(entity, normalizedKey);
+    }
+
+    public async Task RenameMetadate(IUniqueEntity entity, string key, string newKey)
+    {
+        var normalizedKey = key.ToLowerInvariant();
+        var normalizedNewKey = newKey.ToLowerInvariant();
+        var field = await BuildMetadataLinkQuery(entity, normalizedKey)
+            .SingleOrDefaultAsync();
+
+        if (field is null)
+        {
+            throw new InvalidOperationException("No such metadata key.");
+        }
+
+        field.MetadataKey = normalizedNewKey;
+        await Context.SaveChangesAsync();
+
+        await metadataProjectionService.RefreshAsync(entity, normalizedKey);
+        await metadataProjectionService.RefreshAsync(entity, normalizedNewKey);
+    }
+
+    public async Task<bool> RemoveMetadate(IUniqueEntity entity, string key)
+    {
+        var normalizedKey = key.ToLowerInvariant();
+        var fields = await BuildMetadataLinkQuery(entity, normalizedKey)
+            .ToListAsync();
+
+        if (fields.Count == 0)
+        {
+            return false;
+        }
+
+        Context.RemoveRange(fields);
+        await Context.SaveChangesAsync();
+        await metadataProjectionService.RefreshAsync(entity, normalizedKey);
+        return true;
     }
 
     public async Task<ValidationResult> VerifySchema(Guid metadateId, Guid schemaId, bool verbose = false)
@@ -259,5 +288,34 @@ public class MetadataService(
                 c.Target == target)
             .Select(c => (Guid?)c.SchemaId)
             .SingleOrDefaultAsync();
+    }
+
+    private IQueryable<DataEntityMetadataJsonField> BuildMetadataLinkQuery(IUniqueEntity entity, string normalizedKey)
+    {
+        var query = Context.Set<DataEntityMetadataJsonField>()
+            .Where(l => l.MetadataKey == normalizedKey)
+            .AsQueryable();
+
+        return entity switch
+        {
+            DataSet dataSet => query.Where(l => l.DataSetId == dataSet.Id),
+            DataFile dataFile => query.Where(l => l.DataFileId == dataFile.Id),
+            _ => throw new ArgumentException("Unknown entity type")
+        };
+    }
+
+    private static void SetMetadataLinkTarget(IUniqueEntity entity, DataEntityMetadataJsonField link)
+    {
+        switch (entity)
+        {
+            case DataSet dataSet:
+                link.DataSetId = dataSet.Id;
+                break;
+            case DataFile dataFile:
+                link.DataFileId = dataFile.Id;
+                break;
+            default:
+                throw new ArgumentException("Unknown entity type");
+        }
     }
 }

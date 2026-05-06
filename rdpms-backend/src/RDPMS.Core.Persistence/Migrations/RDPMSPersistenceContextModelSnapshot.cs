@@ -202,6 +202,9 @@ namespace RDPMS.Core.Persistence.Migrations
                     b.Property<Guid?>("CreateJobId")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("BeginStamp")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedStamp")
                         .HasColumnType("TEXT");
 
@@ -209,6 +212,12 @@ namespace RDPMS.Core.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("DeletionState")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("EndStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsTimeSeries")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("LifecycleState")
@@ -222,6 +231,21 @@ namespace RDPMS.Core.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Slug")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TimeSeriesCacheError")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("TimeSeriesCacheRefreshedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("TimeSeriesCacheSourceMetadataFieldId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("TimeSeriesCacheSourceStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TimeSeriesCacheVersion")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -493,6 +517,12 @@ namespace RDPMS.Core.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedStamp")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("ValueId")
