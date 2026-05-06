@@ -33,13 +33,14 @@ from common_rosbag_tooling import (
     find_schema_guid_by_urn,
     get_dataset_details,
     list_collection_datasets,
+    load_failed_source_ids,
     load_successful_source_ids,
     metadata_id_to_uuid,
     resolve_download_uri,
     stamp_from_ns,
     upload_file_to_dataset,
 )
-from common_develop_tooling import add_develop_directory_options, temporary_directory
+from common_develop_tooling import add_develop_directory_options, add_retry_failed_option, temporary_directory
 from rdpms_cli.openapi_client.exceptions import ApiException
 from rdpms_cli.openapi_client.models.metadata_column_target_dto import MetadataColumnTargetDTO
 from rdpms_cli.openapi_client.models.metadata_query_dto import MetadataQueryDTO
@@ -77,6 +78,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument('--tracker-id', help='Optional tracker id to isolate processed-state for this workflow')
     parser.add_argument('--force', action='store_true', help='Process datasets even if tracker has status=success')
+    add_retry_failed_option(parser)
     parser.add_argument('--limit', type=int, default=0, help='Optional max number of source datasets to process')
     parser.add_argument('--name-suffix', default='speed-csv', help='Suffix for generated target dataset names')
     add_develop_directory_options(parser)
@@ -401,6 +403,7 @@ def main() -> int:
         ],
     )
     processed_success = load_successful_source_ids(tracker)
+    processed_failed = load_failed_source_ids(tracker)
 
     client, ds_api, files_api, meta_api = build_client()
     types = get_types('', client)
@@ -426,6 +429,7 @@ def main() -> int:
     processed_count = 0
     success_count = 0
     skipped_count = 0
+    skipped_failed_count = 0
 
     for source_dataset in source_datasets:
         source_dataset_id = str(source_dataset.id)
@@ -434,6 +438,13 @@ def main() -> int:
         if not args.force and source_dataset_id in processed_success:
             skipped_count += 1
             print(f'[skip] already processed successfully: {source_dataset_name} ({source_dataset_id})')
+            continue
+        if not args.retry_failed and source_dataset_id in processed_failed:
+            skipped_failed_count += 1
+            print(
+                f'[skip] previous processing failed, use --retry-failed to process again: '
+                f'{source_dataset_name} ({source_dataset_id})'
+            )
             continue
         if args.limit > 0 and processed_count >= args.limit:
             break
@@ -485,6 +496,7 @@ def main() -> int:
     print(
         '[summary] '
         f'processed={processed_count}, success={success_count}, skipped_already_processed={skipped_count}, '
+        f'skipped_failed={skipped_failed_count}, '
         f'tracker={tracker}'
     )
     return 0

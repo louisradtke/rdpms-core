@@ -24,7 +24,13 @@ for candidate in (CLI_SRC_ROOT, DEV_TOOLS_ROOT):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from common_develop_tooling import add_develop_directory_options, build_cache_path, temporary_directory
+from common_develop_tooling import (
+    add_develop_directory_options,
+    add_retry_failed_option,
+    build_cache_path,
+    load_source_ids_by_status,
+    temporary_directory,
+)
 
 from rdpms_cli.openapi_client.api_client import ApiClient
 from rdpms_cli.openapi_client.configuration import Configuration
@@ -91,6 +97,7 @@ def parse_args() -> argparse.Namespace:
         help='Optional max number of source datasets to process this run (0 = unlimited)',
     )
     parser.add_argument('--tracker-id', help='Optional tracker id to isolate processed-state for this workflow')
+    add_retry_failed_option(parser)
     add_develop_directory_options(parser)
     return parser.parse_args()
 
@@ -214,19 +221,11 @@ def ensure_tracker_header(path: Path) -> None:
 
 
 def load_successful_source_ids(path: Path) -> set[str]:
-    if not path.exists():
-        return set()
+    return load_source_ids_by_status(path, 'success')
 
-    success_ids: set[str] = set()
-    with path.open('r', newline='', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if (row.get('status') or '').strip().lower() != 'success':
-                continue
-            source_id = (row.get('source_dataset_id') or '').strip()
-            if source_id:
-                success_ids.add(source_id)
-    return success_ids
+
+def load_failed_source_ids(path: Path) -> set[str]:
+    return load_source_ids_by_status(path, 'failed')
 
 
 def append_tracker_row(
@@ -735,6 +734,7 @@ def main() -> int:
     tracker = tracker_path(args.tracker_id, args.cache_dir)
     ensure_tracker_header(tracker)
     processed_success = load_successful_source_ids(tracker)
+    processed_failed = load_failed_source_ids(tracker)
 
     client, ds_api, files_api, meta_api = build_client()
     types = get_types('', client)
@@ -768,6 +768,7 @@ def main() -> int:
     processed_count = 0
     success_count = 0
     skipped_count = 0
+    skipped_failed_count = 0
 
     for source_dataset in source_datasets:
         source_dataset_id = str(source_dataset.id)
@@ -776,6 +777,13 @@ def main() -> int:
         if not args.force and source_dataset_id in processed_success:
             skipped_count += 1
             print(f'[skip] already processed successfully: {source_dataset_name} ({source_dataset_id})')
+            continue
+        if not args.retry_failed and source_dataset_id in processed_failed:
+            skipped_failed_count += 1
+            print(
+                f'[skip] previous processing failed, use --retry-failed to process again: '
+                f'{source_dataset_name} ({source_dataset_id})'
+            )
             continue
 
         if args.limit > 0 and processed_count >= args.limit:
@@ -830,6 +838,7 @@ def main() -> int:
     print(
         '[summary] '
         f'processed={processed_count}, success={success_count}, skipped_already_processed={skipped_count}, '
+        f'skipped_failed={skipped_failed_count}, '
         f'tracker={tracker}'
     )
     return 0

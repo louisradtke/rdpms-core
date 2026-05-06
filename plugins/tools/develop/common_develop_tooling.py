@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import csv
 import os
 import tempfile
 from contextlib import contextmanager
@@ -32,6 +33,46 @@ def add_develop_directory_options(parser) -> None:
             f'Defaults to the system temp directory, or ${TMP_DOWNLOAD_BASE_DIR_ENV} when set.'
         ),
     )
+
+
+def add_retry_failed_option(parser) -> None:
+    parser.add_argument(
+        '--retry-failed',
+        action='store_true',
+        help='Process datasets whose latest tracker row has status=failed. By default they are skipped.',
+    )
+
+
+def load_source_statuses(
+    path: Path,
+    source_field: str = 'source_dataset_id',
+    status_field: str = 'status',
+) -> dict[str, str]:
+    if not path.exists():
+        return {}
+
+    statuses: dict[str, str] = {}
+    with path.open('r', newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            source_id = (row.get(source_field) or '').strip()
+            status = (row.get(status_field) or '').strip().lower()
+            if source_id and status:
+                statuses[source_id] = status
+    return statuses
+
+
+def load_source_ids_by_status(
+    path: Path,
+    status: str,
+    source_field: str = 'source_dataset_id',
+) -> set[str]:
+    expected_status = status.strip().lower()
+    return {
+        source_id
+        for source_id, source_status in load_source_statuses(path, source_field).items()
+        if source_status == expected_status
+    }
 
 
 def build_cache_path(

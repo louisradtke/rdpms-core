@@ -12,7 +12,7 @@ from pathlib import Path
 
 import requests
 
-from common_develop_tooling import build_cache_path
+from common_develop_tooling import build_cache_path, load_source_ids_by_status
 from rdpms_cli.openapi_client.api_client import ApiClient
 from rdpms_cli.openapi_client.api.data_sets_api import DataSetsApi
 from rdpms_cli.openapi_client.api.files_api import FilesApi
@@ -249,19 +249,11 @@ def ensure_tracker_header(path: Path, header: list[str]) -> None:
 
 
 def load_successful_source_ids(path: Path, source_field: str = 'source_dataset_id') -> set[str]:
-    if not path.exists():
-        return set()
+    return load_source_ids_by_status(path, 'success', source_field)
 
-    success_ids: set[str] = set()
-    with path.open('r', newline='', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if (row.get('status') or '').strip().lower() != 'success':
-                continue
-            source_id = (row.get(source_field) or '').strip()
-            if source_id:
-                success_ids.add(source_id)
-    return success_ids
+
+def load_failed_source_ids(path: Path, source_field: str = 'source_dataset_id') -> set[str]:
+    return load_source_ids_by_status(path, 'failed', source_field)
 
 
 def append_tracker_row(path: Path, row: list[str]) -> None:

@@ -17,6 +17,7 @@ declare -A COLLECTIONS=(
 # Optional knobs shared across patterns.
 PYTHON_BIN="${PYTHON_BIN:-python}"
 FORCE_FLAG="${FORCE_FLAG:-0}"
+RETRY_FAILED_FLAG="${RETRY_FAILED_FLAG:-0}"
 LIMIT="${LIMIT:-0}"
 SLEEP_SECONDS="${SLEEP_SECONDS:-5}"
 RUN_FOREVER="${RUN_FOREVER:-1}"
@@ -80,6 +81,12 @@ tracker_id() {
 maybe_force_args() {
   if [[ "$FORCE_FLAG" == "1" ]]; then
     printf '%s\n' '--force'
+  fi
+}
+
+maybe_retry_failed_args() {
+  if [[ "$RETRY_FAILED_FLAG" == "1" ]]; then
+    printf '%s\n' '--retry-failed'
   fi
 }
 
@@ -160,6 +167,10 @@ tool_annotate_rosbag_tsdata() {
 
   while IFS= read -r arg; do
     args+=("$arg")
+  done < <(maybe_retry_failed_args)
+
+  while IFS= read -r arg; do
+    args+=("$arg")
   done < <(maybe_limit_args)
 
   run_tool "annotate_rosbag_tsdata/annotate_rosbag_tsdata.py" "${args[@]}" "$@"
@@ -181,6 +192,10 @@ tool_trim_motion_rosbag() {
   while IFS= read -r arg; do
     args+=("$arg")
   done < <(maybe_force_args)
+
+  while IFS= read -r arg; do
+    args+=("$arg")
+  done < <(maybe_retry_failed_args)
 
   while IFS= read -r arg; do
     args+=("$arg")
@@ -207,6 +222,10 @@ tool_extract_rosbag_gnss_imu_to_csv() {
 
   while IFS= read -r arg; do
     args+=("$arg")
+  done < <(maybe_retry_failed_args)
+
+  while IFS= read -r arg; do
+    args+=("$arg")
   done < <(maybe_limit_args)
 
   run_tool "extract_rosbag_gnss_imu_to_csv/extract_rosbag_gnss_imu_to_csv.py" "${args[@]}" "$@"
@@ -227,6 +246,10 @@ tool_extract_speed_csv_plotly() {
   while IFS= read -r arg; do
     args+=("$arg")
   done < <(maybe_force_args)
+
+  while IFS= read -r arg; do
+    args+=("$arg")
+  done < <(maybe_retry_failed_args)
 
   while IFS= read -r arg; do
     args+=("$arg")
@@ -340,6 +363,7 @@ Commands:
 Environment overrides:
   PYTHON_BIN=python3
   FORCE_FLAG=1
+  RETRY_FAILED_FLAG=1
   LIMIT=10
   SLEEP_SECONDS=30
   MAX_CYCLES=5
