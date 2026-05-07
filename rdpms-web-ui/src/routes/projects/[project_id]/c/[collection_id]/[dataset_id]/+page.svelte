@@ -18,6 +18,7 @@
     import { FilesRepository } from "$lib/data/FilesRepository";
     import DatasetMetadataPanel from "$lib/components/datasets/DatasetMetadataPanel.svelte";
     import DatasetFilesBrowser from "$lib/components/datasets/DatasetFilesBrowser.svelte";
+    import DatasetTimeSeriesOverview from "$lib/components/datasets/DatasetTimeSeriesOverview.svelte";
     import DatasetListControls from "$lib/components/collections/DatasetListControls.svelte";
     import {
         applyDatasetListQuery,
@@ -29,6 +30,7 @@
 
     const VISUALIZATION_SCHEMA_ID = "urn:rdpms:core:schema:visualization-manifest:v1";
     const VISUALIZATION_KEY = "rdpms.viz";
+    const TIME_SERIES_KEY = "rdpms.tsdata";
 
     type DisplayItem = {
         itemId: string;
@@ -44,6 +46,11 @@
     type VisualizationViewState = {
         title?: string;
         items: DisplayItem[];
+    } | null;
+
+    type TimeSeriesViewState = {
+        metadata: unknown;
+        validated: boolean;
     } | null;
 
     // Reactive params
@@ -169,14 +176,33 @@
         return mapManifestToDisplayItems(dataset, manifest);
     };
 
+    const getTimeSeriesView = async (dataset: DataSetSummaryDTO): Promise<TimeSeriesViewState> => {
+        const assignedTimeSeries = dataset.metaDates?.find(
+            (entry) => normalize(entry.metadataKey) === TIME_SERIES_KEY
+        );
+
+        const metadataId = assignedTimeSeries?.metadataId;
+        if (!metadataId) return null;
+
+        const metadataRepo = new MetaDataRepository(getOrFetchConfig().then(toApiConfig));
+        const metadata = await metadataRepo.getById(metadataId);
+        if (!metadata.fileId) return null;
+
+        return {
+            metadata: await metadataRepo.getJsonValueByFileId(metadata.fileId),
+            validated: Boolean(assignedTimeSeries.collectionSchemaVerified)
+        };
+    };
+
     let datasetPageReq = $derived.by(async () => {
         const dsDetail = await datasetDetailedReq;
         const visualization = await getVisualizationView(dsDetail);
+        const timeSeries = await getTimeSeriesView(dsDetail);
         const collection = await collectionReq;
         const datasetColumns = (collection.metaDateColumns ?? []).filter(
             (column) => column.target === MetadataColumnTargetDTO.Dataset
         );
-        return { dsDetail, visualization, datasetColumns };
+        return { dsDetail, visualization, timeSeries, datasetColumns };
     });
 
     let allDataSets = $derived.by(async () => {
@@ -306,6 +332,16 @@
             />
 
             <div class="my-6"></div>
+
+            {#if pageData.timeSeries}
+                <DatasetTimeSeriesOverview
+                    dataset={pageData.dsDetail}
+                    metadata={pageData.timeSeries.metadata}
+                    validated={pageData.timeSeries.validated}
+                />
+
+                <div class="my-6"></div>
+            {/if}
 
             {#if pageData.visualization}
                 <section class="mb-6">
