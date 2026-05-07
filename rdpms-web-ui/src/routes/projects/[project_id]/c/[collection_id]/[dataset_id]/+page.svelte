@@ -19,6 +19,7 @@
     import DatasetMetadataPanel from "$lib/components/datasets/DatasetMetadataPanel.svelte";
     import DatasetFilesBrowser from "$lib/components/datasets/DatasetFilesBrowser.svelte";
     import DatasetTimeSeriesOverview from "$lib/components/datasets/DatasetTimeSeriesOverview.svelte";
+    import DatasetProvenanceOverview from "$lib/components/datasets/DatasetProvenanceOverview.svelte";
     import DatasetListControls from "$lib/components/collections/DatasetListControls.svelte";
     import {
         applyDatasetListQuery,
@@ -330,6 +331,10 @@
                 columns={pageData.datasetColumns}
                 onDataChanged={onDatasetMetadataChanged}
             />
+
+            <div class="my-6"></div>
+
+            <DatasetProvenanceOverview dataset={pageData.dsDetail} projectId={projectId} />
 
             <div class="my-6"></div>
 
