@@ -266,7 +266,7 @@ declare_rosbag_pipelines() {
 
   register_pipeline \
     'plot_raw_speed' \
-    'Extract raw bag speed CSV and attach a Plotly visualization manifest' \
+    'Extract raw bag velocity CSV and attach a Plotly visualization manifest' \
     "tool_extract_speed_csv_plotly raw viz speed_raw"
 
   register_pipeline \
@@ -286,7 +286,7 @@ declare_rosbag_pipelines() {
 
   register_pipeline \
     'plot_trimmed_speed' \
-    'Extract trimmed bag speed CSV and attach a Plotly visualization manifest' \
+    'Extract trimmed bag velocity CSV and attach a Plotly visualization manifest' \
     "tool_extract_speed_csv_plotly truncated viz speed_truncated"
 }
 
@@ -298,7 +298,7 @@ declare_join_demo_pipelines() {
 
   register_pipeline \
     'plot_raw_speed' \
-    'Extract raw bag speed CSV and attach a Plotly visualization manifest' \
+    'Extract raw bag velocity CSV and attach a Plotly visualization manifest' \
     "tool_extract_speed_csv_plotly raw viz speed_raw"
 
   register_pipeline \
@@ -318,7 +318,7 @@ declare_join_demo_pipelines() {
 
   register_pipeline \
     'plot_trimmed_speed' \
-    'Extract trimmed bag speed CSV and attach a Plotly visualization manifest' \
+    'Extract trimmed bag velocity CSV and attach a Plotly visualization manifest' \
     "tool_extract_speed_csv_plotly truncated viz speed_truncated"
 }
 

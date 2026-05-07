@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract a speed topic to CSV and attach a Plotly visualization manifest."""
+"""Extract velocity topics to CSV and attach a Plotly visualization manifest."""
 
 from __future__ import annotations
 
@@ -51,16 +51,49 @@ from rdpms_cli.util.TypeStore import get_types
 TSDATA_KEY = 'rdpms.tsdata'
 VISUALIZATION_SCHEMA_URN = 'urn:rdpms:core:schema:visualization-manifest:v1'
 TRACKER_FILENAME = 'cache/extracted_speed_csv_plotly.csv'
+SPEED_TOPIC = '/speed'
+FILTER_TOPIC = '/filter/twist'
+SPEED_TYPE = 'std_msgs/msg/Float32'
+TWIST_STAMPED_TYPE = 'geometry_msgs/msg/TwistStamped'
+CSV_HEADERS = [
+    'stamp',
+    'speed',
+    'filter_twist_linear_x',
+    'filter_twist_linear_y',
+    'filter_twist_linear_z',
+]
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description='Extract a ROS2 Float32 speed topic to CSV and assign Plotly visualization metadata.'
+        description='Extract /speed Float32 and/or /filter/twist TwistStamped velocity topics to CSV and assign Plotly metadata.'
     )
     parser.add_argument('--source-collection', '-s', required=True, help='Source collection id containing bag datasets')
     parser.add_argument('--target-collection', '-t', required=True, help='Target collection id for generated CSV datasets')
-    parser.add_argument('--topic', default='/speed', help='Speed topic name (default: /speed)')
-    parser.add_argument('--topic-type', default='std_msgs/msg/Float32', help='Speed topic ROS type')
+    parser.add_argument(
+        '--speed-topic',
+        '--topic',
+        dest='speed_topic',
+        default=SPEED_TOPIC,
+        help=f'Speed topic name (default: {SPEED_TOPIC})',
+    )
+    parser.add_argument(
+        '--filter-topic',
+        default=FILTER_TOPIC,
+        help=f'Filter topic name (default: {FILTER_TOPIC})',
+    )
+    parser.add_argument(
+        '--speed-topic-type',
+        '--topic-type',
+        dest='speed_topic_type',
+        default=SPEED_TYPE,
+        help=f'Speed topic ROS type (default: {SPEED_TYPE})',
+    )
+    parser.add_argument(
+        '--filter-topic-type',
+        default=TWIST_STAMPED_TYPE,
+        help=f'Filter topic ROS type (default: {TWIST_STAMPED_TYPE})',
+    )
     parser.add_argument(
         '--source-metadata-key',
         default=TSDATA_KEY,
@@ -80,14 +113,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--force', action='store_true', help='Process datasets even if tracker has status=success')
     add_retry_failed_option(parser)
     parser.add_argument('--limit', type=int, default=0, help='Optional max number of source datasets to process')
-    parser.add_argument('--name-suffix', default='speed-csv', help='Suffix for generated target dataset names')
+    parser.add_argument('--name-suffix', default='velocity-csv', help='Suffix for generated target dataset names')
     add_develop_directory_options(parser)
     return parser.parse_args()
 
 
 def slugify(value: str) -> str:
     slug = re.sub(r'[^a-z0-9]+', '-', value.lower()).strip('-')
-    return slug or 'speed-csv'
+    return slug or 'velocity-csv'
 
 
 def tracker_path(tracker_id: str | None, cache_dir: str | None) -> Path:
@@ -120,13 +153,18 @@ def build_topic_query(topic_name: str, topic_type: str) -> dict[str, object]:
     }
 
 
+def build_velocity_topic_query(topic_specs: list[tuple[str, str]]) -> dict[str, object]:
+    return {
+        '$or': [build_topic_query(topic_name, topic_type) for topic_name, topic_type in topic_specs]
+    }
+
+
 def query_eligible_dataset_ids(
     ds_api,
     *,
     source_collection_id: uuid.UUID,
     source_metadata_key: str,
-    topic_name: str,
-    topic_type: str,
+    topic_specs: list[tuple[str, str]],
 ) -> set[str]:
     query_dto = MetadataQueryDTO(
         mode=QueryMode.AND,
@@ -134,7 +172,7 @@ def query_eligible_dataset_ids(
             MetadataQueryPartDTO(
                 metadata_key=source_metadata_key,
                 target=MetadataColumnTargetDTO.DATASET,
-                query=build_topic_query(topic_name, topic_type),
+                query=build_velocity_topic_query(topic_specs),
             )
         ],
     )
@@ -142,12 +180,14 @@ def query_eligible_dataset_ids(
     return {str(ds.id) for ds in candidates if ds.id}
 
 
-def extract_speed_csv(
+def extract_velocity_csv(
     *,
     bag_inputs: list[Path],
     output_path: Path,
-    topic_name: str,
-    topic_type: str,
+    speed_topic: str,
+    speed_topic_type: str,
+    filter_topic: str,
+    filter_topic_type: str,
 ) -> int:
     try:
         from rosbags.highlevel import AnyReader
@@ -155,45 +195,82 @@ def extract_speed_csv(
         raise RuntimeError('missing dependency: rosbags. Install it with `pip install rosbags`.') from exc
 
     row_count = 0
+    topic_specs = [
+        (speed_topic, speed_topic_type, 'speed'),
+        (filter_topic, filter_topic_type, 'filter_twist'),
+    ]
+    topic_to_spec = {topic_name: (topic_type, prefix) for topic_name, topic_type, prefix in topic_specs}
     with AnyReader(bag_inputs) as reader:
         selected_connections = [
-            conn for conn in reader.connections if conn.topic == topic_name and conn.msgtype == topic_type
+            conn
+            for conn in reader.connections
+            if conn.topic in topic_to_spec and conn.msgtype == topic_to_spec[conn.topic][0]
         ]
         if not selected_connections:
-            raise RuntimeError(f'bag does not contain {topic_name} with type {topic_type}')
+            raise RuntimeError(
+                f'bag does not contain either {speed_topic}:{speed_topic_type} '
+                f'or {filter_topic}:{filter_topic_type}'
+            )
+
+        missing_topics = [
+            f'{topic_name}:{topic_type}'
+            for topic_name, topic_type, _ in topic_specs
+            if topic_name not in {conn.topic for conn in selected_connections}
+        ]
+        if missing_topics:
+            missing = ', '.join(missing_topics)
+            print(f'[warn] bag does not contain optional velocity topic(s), writing sparse CSV: {missing}')
 
         with output_path.open('w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
-            writer.writerow(['stamp', 'speed'])
+            writer.writerow(CSV_HEADERS)
             for connection, timestamp, raw_data in reader.messages(connections=selected_connections):
                 msg = reader.deserialize(raw_data, connection.msgtype)
-                writer.writerow([stamp_from_ns(timestamp), f'{float(msg.data):.9f}'])
+                row = {header: '' for header in CSV_HEADERS}
+                row['stamp'] = stamp_from_ns(timestamp)
+
+                _, prefix = topic_to_spec[connection.topic]
+                if prefix == 'speed':
+                    row['speed'] = f'{float(msg.data):.9f}'
+                else:
+                    twist = getattr(msg, 'twist', None)
+                    linear = getattr(twist, 'linear', None) if twist is not None else None
+                    if linear is None:
+                        raise RuntimeError(f'message on {connection.topic} does not contain twist.linear')
+                    row[f'{prefix}_linear_x'] = f'{float(linear.x):.9f}'
+                    row[f'{prefix}_linear_y'] = f'{float(linear.y):.9f}'
+                    row[f'{prefix}_linear_z'] = f'{float(linear.z):.9f}'
+                writer.writerow([row[header] for header in CSV_HEADERS])
                 row_count += 1
 
     if row_count == 0:
-        raise RuntimeError(f'topic {topic_name} produced no speed rows')
+        raise RuntimeError(f'topics {speed_topic} and {filter_topic} produced no velocity rows')
     return row_count
 
 
-def build_speed_visualization_item(
+def build_velocity_visualization_item(
     *,
     source_dataset_name: str,
     csv_file_id: uuid.UUID,
-    topic_name: str,
 ) -> dict[str, object]:
     return {
-        'title': f'{topic_name} CSV',
+        'title': 'Velocity CSV',
         'source': {'fileId': str(csv_file_id)},
         'renderer': {
             'kind': ['rdpms.timeseries-plotly', 'rdpms.table', 'rdpms.code'],
             'default': 'rdpms.timeseries-plotly',
             'options': {
                 'timeField': 'stamp',
-                'series': [{'field': 'speed', 'label': topic_name}],
+                'series': [
+                    {'field': 'speed', 'label': '/speed'},
+                    {'field': 'filter_twist_linear_x', 'label': '/filter/twist linear.x'},
+                    {'field': 'filter_twist_linear_y', 'label': '/filter/twist linear.y'},
+                    {'field': 'filter_twist_linear_z', 'label': '/filter/twist linear.z'},
+                ],
                 'mode': 'lines',
-                'title': f'Speed: {source_dataset_name}',
+                'title': f'Velocity: {source_dataset_name}',
                 'xAxisTitle': 'stamp',
-                'yAxisTitle': 'speed',
+                'yAxisTitle': 'linear velocity',
             },
         },
         'collapsible': False,
@@ -235,26 +312,24 @@ def load_existing_visualization_manifest(
     return manifest
 
 
-def build_or_extend_speed_manifest(
+def build_or_extend_velocity_manifest(
     *,
     existing_manifest: dict[str, object] | None,
     source_dataset_name: str,
     csv_file_id: uuid.UUID,
-    topic_name: str,
 ) -> dict[str, object]:
-    item = build_speed_visualization_item(
+    item = build_velocity_visualization_item(
         source_dataset_name=source_dataset_name,
         csv_file_id=csv_file_id,
-        topic_name=topic_name,
     )
 
     if not existing_manifest:
         return {
             'id': str(uuid.uuid4()),
-            'title': f'Speed plot for {source_dataset_name}',
+            'title': f'Velocity plot for {source_dataset_name}',
             'views': [
                 {
-                    'title': 'Speed',
+                    'title': 'Velocity',
                     'items': [item],
                 }
             ],
@@ -263,20 +338,21 @@ def build_or_extend_speed_manifest(
     manifest = dict(existing_manifest)
     views = manifest.get('views')
     if not isinstance(views, list) or not views:
-        manifest['views'] = [{'title': 'Speed', 'items': [item]}]
+        manifest['views'] = [{'title': 'Velocity', 'items': [item]}]
         return manifest
 
-    first_view = dict(views[0]) if isinstance(views[0], dict) else {'title': 'Speed'}
+    first_view = dict(views[0]) if isinstance(views[0], dict) else {'title': 'Velocity'}
     existing_items = first_view.get('items')
     items = list(existing_items) if isinstance(existing_items, list) else []
 
-    # Replace an older speed item from the same tool, but preserve other visualization items.
+    # Replace an older generated velocity item from this workflow, but preserve other visualization items.
     items = [
         existing_item
         for existing_item in items
         if not (
             isinstance(existing_item, dict)
-            and str(existing_item.get('title', '')).strip().lower() == f'{topic_name} csv'.lower()
+            and str(existing_item.get('title', '')).strip().lower()
+            in {'/speed csv', 'velocity csv', 'twiststamped velocity csv'}
         )
     ]
     items.append(item)
@@ -286,7 +362,7 @@ def build_or_extend_speed_manifest(
     return manifest
 
 
-def assign_speed_visualization_manifest(
+def assign_velocity_visualization_manifest(
     ds_api,
     meta_api,
     *,
@@ -296,7 +372,6 @@ def assign_speed_visualization_manifest(
     source_dataset_name: str,
     csv_file_id: uuid.UUID,
     metadata_key: str,
-    topic_name: str,
     schema_guid: uuid.UUID | None,
 ) -> uuid.UUID:
     existing_manifest = load_existing_visualization_manifest(
@@ -305,11 +380,10 @@ def assign_speed_visualization_manifest(
         source_dataset_details=source_dataset_details,
         metadata_key=metadata_key,
     )
-    manifest = build_or_extend_speed_manifest(
+    manifest = build_or_extend_velocity_manifest(
         existing_manifest=existing_manifest,
         source_dataset_name=source_dataset_name,
         csv_file_id=csv_file_id,
-        topic_name=topic_name,
     )
 
     metadata_result = ds_api.api_v1_data_datasets_id_metadata_key_put(
@@ -338,23 +412,31 @@ def process_source_dataset(
     types,
     target_collection_id: uuid.UUID,
     viz_schema_guid: uuid.UUID | None,
+    dataset_index: int,
+    dataset_total: int,
 ) -> tuple[str, str, str, str, int]:
     source_dataset_id = uuid.UUID(str(source_dataset.id))
     source_dataset_details = get_dataset_details(ds_api, source_dataset_id)
     source_dataset_name = str(source_dataset_details.name or source_dataset_id)
 
-    with temporary_directory('rdpms-speed-csv-', args.tmp_download_base_dir) as tmp:
+    with temporary_directory('rdpms-velocity-csv-', args.tmp_download_base_dir) as tmp:
+        print(
+            f'[info] downloading dataset ({dataset_index:02d}/{dataset_total:02d}): '
+            f'{source_dataset_name} ({source_dataset_id})'
+        )
         downloaded = download_dataset_files(source_dataset_details, files_api, tmp / 'input')
         bag_inputs = rosbag_input_paths(downloaded)
-        csv_path = tmp / f'{slugify(source_dataset_name)}-speed.csv'
+        csv_path = tmp / f'{slugify(source_dataset_name)}-velocity.csv'
 
-        row_count = extract_speed_csv(
+        row_count = extract_velocity_csv(
             bag_inputs=bag_inputs,
             output_path=csv_path,
-            topic_name=args.topic,
-            topic_type=args.topic_type,
+            speed_topic=args.speed_topic,
+            speed_topic_type=args.speed_topic_type,
+            filter_topic=args.filter_topic,
+            filter_topic_type=args.filter_topic_type,
         )
-        print(f'[info] extracted {row_count} speed rows from {source_dataset_name}')
+        print(f'[info] extracted {row_count} velocity rows from {source_dataset_name}')
 
         target_dataset_id = create_target_dataset(
             ds_api,
@@ -366,7 +448,7 @@ def process_source_dataset(
         csv_file_id = upload_file_to_dataset(ds_api, types, target_dataset_id, csv_path)
         ds_api.api_v1_data_datasets_id_seal_put(target_dataset_id)
 
-        metadata_id = assign_speed_visualization_manifest(
+        metadata_id = assign_velocity_visualization_manifest(
             ds_api,
             meta_api,
             files_api=files_api,
@@ -375,10 +457,9 @@ def process_source_dataset(
             source_dataset_name=source_dataset_name,
             csv_file_id=csv_file_id,
             metadata_key=args.metadata_key,
-            topic_name=args.topic,
             schema_guid=viz_schema_guid,
         )
-        print(f'[ok] assigned speed Plotly manifest metadata={metadata_id} on source dataset={source_dataset_id}')
+        print(f'[ok] assigned velocity Plotly manifest metadata={metadata_id} on source dataset={source_dataset_id}')
 
     return str(source_dataset_id), source_dataset_name, str(target_dataset_id), str(csv_file_id), row_count
 
@@ -397,7 +478,7 @@ def main() -> int:
             'source_dataset_id',
             'source_dataset_name',
             'target_dataset_id',
-            'target_speed_csv_file_id',
+            'target_velocity_csv_file_id',
             'row_count',
             'message',
         ],
@@ -420,18 +501,24 @@ def main() -> int:
         ds_api,
         source_collection_id=source_collection_id,
         source_metadata_key=args.source_metadata_key,
-        topic_name=args.topic,
-        topic_type=args.topic_type,
+        topic_specs=[
+            (args.speed_topic, args.speed_topic_type),
+            (args.filter_topic, args.filter_topic_type),
+        ],
     )
     source_datasets = [ds for ds in source_datasets if str(ds.id) in eligible_ids]
-    print(f'[info] query filter matched {len(source_datasets)} dataset(s) for {args.topic}:{args.topic_type}')
+    print(
+        f'[info] query filter matched {len(source_datasets)} dataset(s) for '
+        f'{args.speed_topic}:{args.speed_topic_type} or {args.filter_topic}:{args.filter_topic_type}'
+    )
 
     processed_count = 0
     success_count = 0
     skipped_count = 0
     skipped_failed_count = 0
 
-    for source_dataset in source_datasets:
+    total_source_datasets = len(source_datasets)
+    for dataset_index, source_dataset in enumerate(source_datasets, start=1):
         source_dataset_id = str(source_dataset.id)
         source_dataset_name = str(source_dataset.name or source_dataset_id)
 
@@ -460,6 +547,8 @@ def main() -> int:
                 types=types,
                 target_collection_id=target_collection_id,
                 viz_schema_guid=viz_schema_guid,
+                dataset_index=dataset_index,
+                dataset_total=total_source_datasets,
             )
             append_tracker_row(
                 tracker,
@@ -475,7 +564,7 @@ def main() -> int:
                 ],
             )
             success_count += 1
-            print(f'[ok] source={source_id} -> speed_csv_file={csv_file_id}')
+            print(f'[ok] source={source_id} -> velocity_csv_file={csv_file_id}')
         except Exception as exc:
             append_tracker_row(
                 tracker,

@@ -70,7 +70,7 @@ Outline:
 | Tool   | Annotate Rosbag TSData | `annotate_rosbag_tsdata/annotate_rosbag_tsdata.py` | Manual trigger or cyclic / repeated run | Downloads rosbag dataset files, summarizes all contained topics, and assigns minimal `rdpms.tsdata` metadata with topic name, message count, first/last timestamp, and `messageType.name`. |
 | Tool   | Register Existing S3 Rosbags | `register_existing_s3_rosbags/register_existing_s3_rosbags.py` | Manual trigger | Recursively scans an S3 prefix for rosbag directories identified by `metadata.yaml`, skips already registered dataset slugs, and registers each bag as a sealed S3-backed dataset through the API. |
 | Tool   | Trim Motion Rosbag | `trim_motion_rosbag/trim_motion_rosbag.py` | Cyclic / repeated run | Queries source datasets by `rdpms.tsdata` for a configured topic/type, detects a movement window from a `Float32` topic, rewrites a new uncompressed bag by record timestamp and configured topics, uploads the result dataset to a target collection, and assigns minimal `rdpms.tsdata` on the derived bag. |
-| Tool   | Extract Speed CSV Plotly | `extract_speed_csv_plotly/extract_speed_csv_plotly.py` | Cyclic / repeated run | Queries bag datasets by `rdpms.tsdata`, extracts a configured `Float32` speed topic to CSV, uploads the CSV to a target collection, and assigns a Plotly visualization manifest on the source dataset. |
+| Tool   | Extract Speed CSV Plotly | `extract_speed_csv_plotly/extract_speed_csv_plotly.py` | Cyclic / repeated run | Queries bag datasets by `rdpms.tsdata` for `/speed` `Float32` or `/filter/twist` `TwistStamped`, extracts present velocity topics into one sparse CSV, uploads the CSV to a target collection, and assigns a Plotly visualization manifest on the source dataset. |
 | Template | Workflow Template | `workflow_template.sh` | Manual trigger | Bash template for wiring tool-call patterns together by logical collection roles such as `raw`, `intermediate`, and `visualization`. |
 
 ## Workflow Template
@@ -291,7 +291,7 @@ python plugins/tools/develop/extract_speed_csv_plotly/extract_speed_csv_plotly.p
 ```
 
 Purpose:
-- query source datasets by `rdpms.tsdata` for a configured speed topic,
-- extract that `Float32` topic into a `stamp,speed` CSV,
+- query source datasets by `rdpms.tsdata` for at least one of `/speed` `std_msgs/msg/Float32` or `/filter/twist` `geometry_msgs/msg/TwistStamped`,
+- extract `/speed` from `data` and `/filter/twist` from `twist.linear.*` into a single sparse CSV with empty cells for missing asynchronous samples or absent optional topics,
 - upload the CSV as a derived dataset,
 - assign a `rdpms.viz` manifest on the source dataset that opens the CSV with `rdpms.timeseries-plotly`.

@@ -117,6 +117,23 @@ def resolve_download_uri(files_api: FilesApi, file_id: uuid.UUID, inline_downloa
     raise RuntimeError(f'file {file_id} has no download URI')
 
 
+def format_bytes(size_bytes: int | None) -> str:
+    if size_bytes is None:
+        return 'unknown size'
+
+    units = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
+    size = float(size_bytes)
+    unit = units[0]
+    for unit in units:
+        if abs(size) < 1024.0 or unit == units[-1]:
+            break
+        size /= 1024.0
+
+    if unit == 'B':
+        return f'{int(size)} {unit}'
+    return f'{size:.1f} {unit}'
+
+
 def download_dataset_files(dataset_detailed, files_api: FilesApi, target_dir: Path) -> list[Path]:
     target_dir.mkdir(parents=True, exist_ok=True)
     downloaded: list[Path] = []
@@ -124,17 +141,27 @@ def download_dataset_files(dataset_detailed, files_api: FilesApi, target_dir: Pa
     if not files:
         raise RuntimeError('dataset has no files')
 
-    for file in files:
+    total_files = len(files)
+    for index, file in enumerate(files, start=1):
         if not file.id:
             raise RuntimeError('dataset file entry has no id')
         file_id = uuid.UUID(str(file.id))
         file_name = file.name or str(file_id)
+        expected_size = getattr(file, 'size_bytes', None)
+        print(
+            f'[info] downloading file ({index:02d}/{total_files:02d}): '
+            f'{file_name} ({format_bytes(expected_size)})'
+        )
         download_uri = resolve_download_uri(files_api, file_id, file.download_uri)
         response = requests.get(download_uri, allow_redirects=True, timeout=600)
         response.raise_for_status()
         out_path = target_dir / file_name
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_bytes(response.content)
+        print(
+            f'[info] downloaded file ({index:02d}/{total_files:02d}): '
+            f'{file_name} ({format_bytes(len(response.content))})'
+        )
         downloaded.append(out_path)
     return downloaded
 
