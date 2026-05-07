@@ -85,7 +85,9 @@ RDPMS centers on a data store and catalog for research/robotics datasets. The ba
 ### Web UI Layout Guardrails
 - App shell scrolling:
   - `body` is configured as fixed-height with hidden overflow.
-  - Therefore, route content must remain scrollable via the post-header container in `rdpms-web-ui/src/routes/+layout.svelte` (keep `overflow-y-auto` on the `h-[calc(100vh-4rem)]` wrapper).
+  - `rdpms-web-ui/src/routes/+layout.svelte` owns the fixed post-header viewport (`h-[calc(100vh-4rem)]`) and intentionally hides overflow at that shell boundary.
+  - Therefore, each full-page route must provide its own vertical scroll container, typically on the top-level route `<main>`/content wrapper with `flex-1 min-h-0 overflow-y-auto` (and `h-full`/`min-w-0` where needed).
+  - Do not rely on `body` or the app shell to scroll route content; pages like `/schemas` will otherwise clip when their content exceeds the viewport.
 - Page width consistency:
   - Full-page route content should use the same centered container pattern as the header for stable responsive behavior:
     - `mx-auto w-full max-w-screen-xl px-4 sm:px-6 lg:px-8`

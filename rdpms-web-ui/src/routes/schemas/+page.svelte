@@ -81,7 +81,7 @@
     }
 </script>
 
-<main class="mx-auto my-5 w-full max-w-screen-xl px-4 sm:px-6 lg:px-8 space-y-6">
+<main class="mx-auto my-5 flex min-h-0 w-full max-w-screen-xl flex-1 flex-col overflow-y-auto px-4 space-y-6 sm:px-6 lg:px-8">
     <h1 class="text-2xl font-bold">Schemas</h1>
 
     <section class="w-full rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">

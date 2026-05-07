@@ -32,7 +32,7 @@
     });
 </script>
 
-<main class="w-full px-4 py-5 sm:px-6 lg:px-8 space-y-4">
+<main class="flex h-full min-w-0 flex-1 flex-col overflow-y-auto px-4 py-5 space-y-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">Schema</h1>
         <a
