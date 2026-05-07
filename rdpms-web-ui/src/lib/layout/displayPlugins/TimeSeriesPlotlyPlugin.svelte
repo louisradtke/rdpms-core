@@ -84,6 +84,27 @@
         return value.trim().toLowerCase();
     }
 
+    function parseNumericCell(value: string | undefined): number | null {
+        const trimmed = (value ?? "").trim();
+        if (trimmed.length === 0) {
+            return null;
+        }
+
+        const parsed = Number.parseFloat(trimmed);
+        return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    function compareTimestampStrings(left: string, right: string): number {
+        const leftMs = Date.parse(left);
+        const rightMs = Date.parse(right);
+
+        if (Number.isFinite(leftMs) && Number.isFinite(rightMs) && leftMs !== rightMs) {
+            return leftMs - rightMs;
+        }
+
+        return left.localeCompare(right);
+    }
+
     function resolveSeriesOptions(
         headers: string[],
         rows: Record<string, string>[],
@@ -164,7 +185,6 @@
             throw new Error("No numeric series columns available for plotting");
         }
 
-        const xValues = rows.map((row) => row[timeFieldHeader] ?? "");
         const data: Partial<Data>[] = seriesOptions.map((series) => {
             const seriesHeader = headers.find(
                 (header) => normalizeHeader(header) === normalizeHeader(series.field)
@@ -173,16 +193,21 @@
                 throw new Error(`Series field "${series.field}" not found in CSV header`);
             }
 
+            const points = rows
+                .map((row, index) => ({
+                    x: row[timeFieldHeader] ?? "",
+                    y: parseNumericCell(row[seriesHeader]),
+                    index
+                }))
+                .filter((point) => point.x.length > 0 && point.y !== null)
+                .sort((left, right) => compareTimestampStrings(left.x, right.x) || left.index - right.index);
+
             return {
                 type: "scatter",
                 mode: series.mode ?? parsedOptions.mode ?? "lines",
                 name: series.label ?? seriesHeader,
-                x: xValues,
-                y: rows.map((row) => {
-                    const value = row[seriesHeader] ?? "";
-                    const numeric = Number.parseFloat(value);
-                    return Number.isFinite(numeric) ? numeric : null;
-                }),
+                x: points.map((point) => point.x),
+                y: points.map((point) => point.y as number),
                 connectgaps: false
             };
         });
@@ -220,7 +245,7 @@
         plotData: ParsedPlotData;
     };
 
-    const plotlyChart: Action<HTMLDivElement, PlotlyActionParams> = (node, params) => {
+    const plotlyChartAction: Action<HTMLDivElement, PlotlyActionParams> = (node, params) => {
         let cancelled = false;
         let currentRun = 0;
 
@@ -321,6 +346,7 @@
             }
         };
     };
+
 </script>
 
 {#await plotDataPromise}
@@ -338,7 +364,7 @@
             <div><span class="font-medium text-gray-800">Rows:</span> {plotData.pointCount}</div>
         </div>
         <div class="rounded border border-gray-200 bg-white p-2">
-            <div use:plotlyChart={{ plotData }} class="h-[28rem] w-full"></div>
+            <div use:plotlyChartAction={{ plotData }} class="h-[28rem] w-full"></div>
             {#if plotError}
                 <p class="px-2 pb-1 text-xs text-red-700">{plotError}</p>
             {:else if !renderedPlot}
