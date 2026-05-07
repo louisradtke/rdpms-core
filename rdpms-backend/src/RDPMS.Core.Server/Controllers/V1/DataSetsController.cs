@@ -44,6 +44,8 @@ public class DataSetsController(
     /// <param name="deleted">comma-separated list of strings, case-insensitive.
     /// Default is <see cref="DeletionState.Active"/>
     /// Valid values can be found in <see cref="DeletionState"/>.</param>
+    /// <param name="ancestorOf">Return direct source datasets of the given dataset id.</param>
+    /// <param name="childOf">Return direct output datasets derived from the given dataset id.</param>
     /// <param name="view">Whether to only return dataset summaries (default), or metadata as well.</param>
     /// <param name="metadataTarget">If view is set to yield metadata,
     /// they will be set either on datasets or files.</param>
@@ -53,6 +55,8 @@ public class DataSetsController(
     public async Task<ActionResult<IEnumerable<DataSetSummaryDTO>>> Get(
         [FromQuery] Guid? collectionId = null,
         [FromQuery] string? deleted = null,
+        [FromQuery] Guid? ancestorOf = null,
+        [FromQuery] Guid? childOf = null,
         [FromQuery] DataSetListViewMode view = DataSetListViewMode.Summary,
         [FromQuery] MetadataColumnTargetDTO metadataTarget = MetadataColumnTargetDTO.Dataset
     )
@@ -61,7 +65,7 @@ public class DataSetsController(
 
         try
         {
-            datasetsQuery = QueryDatasets(datasetsQuery, collectionId, deleted);
+            datasetsQuery = QueryDatasets(datasetsQuery, collectionId, deleted, ancestorOf, childOf);
         }
         catch (QueryException ex)
         {
@@ -89,6 +93,8 @@ public class DataSetsController(
     /// <param name="deleted">comma-separated list of strings, case-insensitive.
     /// Default is <see cref="DeletionState.Active"/>
     /// Valid values can be found in <see cref="DeletionState"/>.</param>
+    /// <param name="ancestorOf">Return direct source datasets of the given dataset id.</param>
+    /// <param name="childOf">Return direct output datasets derived from the given dataset id.</param>
     /// <param name="view">Whether to only return dataset summaries (default), or metadata as well.</param>
     /// <param name="metadataTarget">If view is set to yield metadata,
     /// they will be set either on datasets or files.</param>
@@ -100,6 +106,8 @@ public class DataSetsController(
         [FromBody] MetadataQueryDTO query,
         [FromQuery] Guid? collectionId = null,
         [FromQuery] string? deleted = null,
+        [FromQuery] Guid? ancestorOf = null,
+        [FromQuery] Guid? childOf = null,
         [FromQuery] DataSetListViewMode view = DataSetListViewMode.Summary,
         [FromQuery] MetadataColumnTargetDTO metadataTarget = MetadataColumnTargetDTO.Dataset
     )
@@ -109,7 +117,7 @@ public class DataSetsController(
         List<DataSet> datasets;
         try
         {
-            datasetsQuery = QueryDatasets(datasetsQuery, collectionId, deleted);
+            datasetsQuery = QueryDatasets(datasetsQuery, collectionId, deleted, ancestorOf, childOf);
             datasets = (await FilterByMetadata(await datasetsQuery.ToListAsync(), query)).ToList();
         }
         catch (QueryException ex)
@@ -830,8 +838,9 @@ public class DataSetsController(
         if (!removed) return BadRequest(new ErrorMessageDTO { Message = "No such metadata key." });
         return Ok();
     }
-        private static IQueryable<DataSet> QueryDatasets(IQueryable<DataSet> datasetsQuery,
-        Guid? collectionId, string? deleted)
+
+    private static IQueryable<DataSet> QueryDatasets(IQueryable<DataSet> datasetsQuery,
+        Guid? collectionId, string? deleted, Guid? ancestorOf, Guid? childOf)
     {
         // filter for deletion state
         try
@@ -861,6 +870,20 @@ public class DataSetsController(
         if (collectionId is not null)
         {
             datasetsQuery = datasetsQuery.Where(ds => ds.ParentCollectionId == collectionId);
+        }
+
+        if (ancestorOf is not null)
+        {
+            datasetsQuery = datasetsQuery
+                .Where(ds => ds.SourceForJobs.Any(job =>
+                    job.OutputDatasets.Any(outputDataset => outputDataset.Id == ancestorOf.Value)));
+        }
+
+        if (childOf is not null)
+        {
+            datasetsQuery = datasetsQuery
+                .Where(ds => ds.CreateJob != null
+                             && ds.CreateJob.SourceDatasets.Any(sourceDataset => sourceDataset.Id == childOf.Value));
         }
 
         return datasetsQuery;

@@ -20,7 +20,7 @@ All URIs are relative to *http://localhost*
 
 ## apiV1DataDatasetsGet
 
-> Array&lt;DataSetSummaryDTO&gt; apiV1DataDatasetsGet(collectionId, deleted, view, metadataTarget)
+> Array&lt;DataSetSummaryDTO&gt; apiV1DataDatasetsGet(collectionId, deleted, ancestorOf, childOf, view, metadataTarget)
 
 Query data sets.
 
@@ -42,6 +42,10 @@ async function example() {
     collectionId: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
     // string | comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState. (optional)
     deleted: deleted_example,
+    // string | Return direct source datasets of the given dataset id. (optional)
+    ancestorOf: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
+    // string | Return direct output datasets derived from the given dataset id. (optional)
+    childOf: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
     // DataSetListViewMode | Whether to only return dataset summaries (default), or metadata as well. (optional)
     view: ...,
     // MetadataColumnTargetDTO | If view is set to yield metadata,             they will be set either on datasets or files. (optional)
@@ -67,6 +71,8 @@ example().catch(console.error);
 |------------- | ------------- | ------------- | -------------|
 | **collectionId** | `string` |  | [Optional] [Defaults to `undefined`] |
 | **deleted** | `string` | comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState. | [Optional] [Defaults to `undefined`] |
+| **ancestorOf** | `string` | Return direct source datasets of the given dataset id. | [Optional] [Defaults to `undefined`] |
+| **childOf** | `string` | Return direct output datasets derived from the given dataset id. | [Optional] [Defaults to `undefined`] |
 | **view** | `DataSetListViewMode` | Whether to only return dataset summaries (default), or metadata as well. | [Optional] [Defaults to `undefined`] [Enum: Summary, Metadata] |
 | **metadataTarget** | `MetadataColumnTargetDTO` | If view is set to yield metadata,             they will be set either on datasets or files. | [Optional] [Defaults to `undefined`] [Enum: Dataset, File] |
 
@@ -710,7 +716,7 @@ No authorization required
 
 ## apiV1DataDatasetsPost
 
-> Array&lt;DataSetSummaryDTO&gt; apiV1DataDatasetsPost(collectionId, deleted, view, metadataTarget, metadataQueryDTO)
+> Array&lt;DataSetSummaryDTO&gt; apiV1DataDatasetsPost(collectionId, deleted, ancestorOf, childOf, view, metadataTarget, metadataQueryDTO)
 
 Query datasets, with additional metadata-based query.
 
@@ -732,6 +738,10 @@ async function example() {
     collectionId: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
     // string | comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState. (optional)
     deleted: deleted_example,
+    // string | Return direct source datasets of the given dataset id. (optional)
+    ancestorOf: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
+    // string | Return direct output datasets derived from the given dataset id. (optional)
+    childOf: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
     // DataSetListViewMode | Whether to only return dataset summaries (default), or metadata as well. (optional)
     view: ...,
     // MetadataColumnTargetDTO | If view is set to yield metadata,             they will be set either on datasets or files. (optional)
@@ -759,6 +769,8 @@ example().catch(console.error);
 |------------- | ------------- | ------------- | -------------|
 | **collectionId** | `string` |  | [Optional] [Defaults to `undefined`] |
 | **deleted** | `string` | comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState. | [Optional] [Defaults to `undefined`] |
+| **ancestorOf** | `string` | Return direct source datasets of the given dataset id. | [Optional] [Defaults to `undefined`] |
+| **childOf** | `string` | Return direct output datasets derived from the given dataset id. | [Optional] [Defaults to `undefined`] |
 | **view** | `DataSetListViewMode` | Whether to only return dataset summaries (default), or metadata as well. | [Optional] [Defaults to `undefined`] [Enum: Summary, Metadata] |
 | **metadataTarget** | `MetadataColumnTargetDTO` | If view is set to yield metadata,             they will be set either on datasets or files. | [Optional] [Defaults to `undefined`] [Enum: Dataset, File] |
 | **metadataQueryDTO** | [MetadataQueryDTO](MetadataQueryDTO.md) | Query over metadata items. | [Optional] |

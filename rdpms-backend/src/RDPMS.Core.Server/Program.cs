@@ -369,6 +369,7 @@ internal class Program
         services.AddScoped<ISecretResolverService, SecretResolverService>();
         services.AddScoped<IMetadataService, MetadataService>();
         services.AddScoped<ISchemaService, SchemaService>();
+        services.AddScoped<IExecutionService, ExecutionService>();
         services.AddScoped<IMetadataDocumentReader, MetadataDocumentReader>();
         services.AddScoped<IEntityMetadataProjectionService, EntityMetadataProjectionService>();
     }

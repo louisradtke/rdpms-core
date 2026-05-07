@@ -53,6 +53,8 @@ class DataSetsApi:
         self,
         collection_id: Optional[UUID] = None,
         deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
+        ancestor_of: Annotated[Optional[UUID], Field(description="Return direct source datasets of the given dataset id.")] = None,
+        child_of: Annotated[Optional[UUID], Field(description="Return direct output datasets derived from the given dataset id.")] = None,
         view: Annotated[Optional[DataSetListViewMode], Field(description="Whether to only return dataset summaries (default), or metadata as well.")] = None,
         metadata_target: Annotated[Optional[MetadataColumnTargetDTO], Field(description="If view is set to yield metadata,             they will be set either on datasets or files.")] = None,
         _request_timeout: Union[
@@ -75,6 +77,10 @@ class DataSetsApi:
         :type collection_id: UUID
         :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
+        :param ancestor_of: Return direct source datasets of the given dataset id.
+        :type ancestor_of: UUID
+        :param child_of: Return direct output datasets derived from the given dataset id.
+        :type child_of: UUID
         :param view: Whether to only return dataset summaries (default), or metadata as well.
         :type view: DataSetListViewMode
         :param metadata_target: If view is set to yield metadata,             they will be set either on datasets or files.
@@ -104,6 +110,8 @@ class DataSetsApi:
         _param = self._api_v1_data_datasets_get_serialize(
             collection_id=collection_id,
             deleted=deleted,
+            ancestor_of=ancestor_of,
+            child_of=child_of,
             view=view,
             metadata_target=metadata_target,
             _request_auth=_request_auth,
@@ -131,6 +139,8 @@ class DataSetsApi:
         self,
         collection_id: Optional[UUID] = None,
         deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
+        ancestor_of: Annotated[Optional[UUID], Field(description="Return direct source datasets of the given dataset id.")] = None,
+        child_of: Annotated[Optional[UUID], Field(description="Return direct output datasets derived from the given dataset id.")] = None,
         view: Annotated[Optional[DataSetListViewMode], Field(description="Whether to only return dataset summaries (default), or metadata as well.")] = None,
         metadata_target: Annotated[Optional[MetadataColumnTargetDTO], Field(description="If view is set to yield metadata,             they will be set either on datasets or files.")] = None,
         _request_timeout: Union[
@@ -153,6 +163,10 @@ class DataSetsApi:
         :type collection_id: UUID
         :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
+        :param ancestor_of: Return direct source datasets of the given dataset id.
+        :type ancestor_of: UUID
+        :param child_of: Return direct output datasets derived from the given dataset id.
+        :type child_of: UUID
         :param view: Whether to only return dataset summaries (default), or metadata as well.
         :type view: DataSetListViewMode
         :param metadata_target: If view is set to yield metadata,             they will be set either on datasets or files.
@@ -182,6 +196,8 @@ class DataSetsApi:
         _param = self._api_v1_data_datasets_get_serialize(
             collection_id=collection_id,
             deleted=deleted,
+            ancestor_of=ancestor_of,
+            child_of=child_of,
             view=view,
             metadata_target=metadata_target,
             _request_auth=_request_auth,
@@ -209,6 +225,8 @@ class DataSetsApi:
         self,
         collection_id: Optional[UUID] = None,
         deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
+        ancestor_of: Annotated[Optional[UUID], Field(description="Return direct source datasets of the given dataset id.")] = None,
+        child_of: Annotated[Optional[UUID], Field(description="Return direct output datasets derived from the given dataset id.")] = None,
         view: Annotated[Optional[DataSetListViewMode], Field(description="Whether to only return dataset summaries (default), or metadata as well.")] = None,
         metadata_target: Annotated[Optional[MetadataColumnTargetDTO], Field(description="If view is set to yield metadata,             they will be set either on datasets or files.")] = None,
         _request_timeout: Union[
@@ -231,6 +249,10 @@ class DataSetsApi:
         :type collection_id: UUID
         :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
+        :param ancestor_of: Return direct source datasets of the given dataset id.
+        :type ancestor_of: UUID
+        :param child_of: Return direct output datasets derived from the given dataset id.
+        :type child_of: UUID
         :param view: Whether to only return dataset summaries (default), or metadata as well.
         :type view: DataSetListViewMode
         :param metadata_target: If view is set to yield metadata,             they will be set either on datasets or files.
@@ -260,6 +282,8 @@ class DataSetsApi:
         _param = self._api_v1_data_datasets_get_serialize(
             collection_id=collection_id,
             deleted=deleted,
+            ancestor_of=ancestor_of,
+            child_of=child_of,
             view=view,
             metadata_target=metadata_target,
             _request_auth=_request_auth,
@@ -282,6 +306,8 @@ class DataSetsApi:
         self,
         collection_id,
         deleted,
+        ancestor_of,
+        child_of,
         view,
         metadata_target,
         _request_auth,
@@ -313,6 +339,14 @@ class DataSetsApi:
         if deleted is not None:
             
             _query_params.append(('deleted', deleted))
+            
+        if ancestor_of is not None:
+            
+            _query_params.append(('ancestorOf', ancestor_of))
+            
+        if child_of is not None:
+            
+            _query_params.append(('childOf', child_of))
             
         if view is not None:
             
@@ -2860,6 +2894,8 @@ class DataSetsApi:
         self,
         collection_id: Optional[UUID] = None,
         deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
+        ancestor_of: Annotated[Optional[UUID], Field(description="Return direct source datasets of the given dataset id.")] = None,
+        child_of: Annotated[Optional[UUID], Field(description="Return direct output datasets derived from the given dataset id.")] = None,
         view: Annotated[Optional[DataSetListViewMode], Field(description="Whether to only return dataset summaries (default), or metadata as well.")] = None,
         metadata_target: Annotated[Optional[MetadataColumnTargetDTO], Field(description="If view is set to yield metadata,             they will be set either on datasets or files.")] = None,
         metadata_query_dto: Annotated[Optional[MetadataQueryDTO], Field(description="Query over metadata items.")] = None,
@@ -2883,6 +2919,10 @@ class DataSetsApi:
         :type collection_id: UUID
         :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
+        :param ancestor_of: Return direct source datasets of the given dataset id.
+        :type ancestor_of: UUID
+        :param child_of: Return direct output datasets derived from the given dataset id.
+        :type child_of: UUID
         :param view: Whether to only return dataset summaries (default), or metadata as well.
         :type view: DataSetListViewMode
         :param metadata_target: If view is set to yield metadata,             they will be set either on datasets or files.
@@ -2914,6 +2954,8 @@ class DataSetsApi:
         _param = self._api_v1_data_datasets_post_serialize(
             collection_id=collection_id,
             deleted=deleted,
+            ancestor_of=ancestor_of,
+            child_of=child_of,
             view=view,
             metadata_target=metadata_target,
             metadata_query_dto=metadata_query_dto,
@@ -2942,6 +2984,8 @@ class DataSetsApi:
         self,
         collection_id: Optional[UUID] = None,
         deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
+        ancestor_of: Annotated[Optional[UUID], Field(description="Return direct source datasets of the given dataset id.")] = None,
+        child_of: Annotated[Optional[UUID], Field(description="Return direct output datasets derived from the given dataset id.")] = None,
         view: Annotated[Optional[DataSetListViewMode], Field(description="Whether to only return dataset summaries (default), or metadata as well.")] = None,
         metadata_target: Annotated[Optional[MetadataColumnTargetDTO], Field(description="If view is set to yield metadata,             they will be set either on datasets or files.")] = None,
         metadata_query_dto: Annotated[Optional[MetadataQueryDTO], Field(description="Query over metadata items.")] = None,
@@ -2965,6 +3009,10 @@ class DataSetsApi:
         :type collection_id: UUID
         :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
+        :param ancestor_of: Return direct source datasets of the given dataset id.
+        :type ancestor_of: UUID
+        :param child_of: Return direct output datasets derived from the given dataset id.
+        :type child_of: UUID
         :param view: Whether to only return dataset summaries (default), or metadata as well.
         :type view: DataSetListViewMode
         :param metadata_target: If view is set to yield metadata,             they will be set either on datasets or files.
@@ -2996,6 +3044,8 @@ class DataSetsApi:
         _param = self._api_v1_data_datasets_post_serialize(
             collection_id=collection_id,
             deleted=deleted,
+            ancestor_of=ancestor_of,
+            child_of=child_of,
             view=view,
             metadata_target=metadata_target,
             metadata_query_dto=metadata_query_dto,
@@ -3024,6 +3074,8 @@ class DataSetsApi:
         self,
         collection_id: Optional[UUID] = None,
         deleted: Annotated[Optional[StrictStr], Field(description="comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.")] = None,
+        ancestor_of: Annotated[Optional[UUID], Field(description="Return direct source datasets of the given dataset id.")] = None,
+        child_of: Annotated[Optional[UUID], Field(description="Return direct output datasets derived from the given dataset id.")] = None,
         view: Annotated[Optional[DataSetListViewMode], Field(description="Whether to only return dataset summaries (default), or metadata as well.")] = None,
         metadata_target: Annotated[Optional[MetadataColumnTargetDTO], Field(description="If view is set to yield metadata,             they will be set either on datasets or files.")] = None,
         metadata_query_dto: Annotated[Optional[MetadataQueryDTO], Field(description="Query over metadata items.")] = None,
@@ -3047,6 +3099,10 @@ class DataSetsApi:
         :type collection_id: UUID
         :param deleted: comma-separated list of strings, case-insensitive.             Default is RDPMS.Core.Persistence.Model.DeletionState.Active             Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState.
         :type deleted: str
+        :param ancestor_of: Return direct source datasets of the given dataset id.
+        :type ancestor_of: UUID
+        :param child_of: Return direct output datasets derived from the given dataset id.
+        :type child_of: UUID
         :param view: Whether to only return dataset summaries (default), or metadata as well.
         :type view: DataSetListViewMode
         :param metadata_target: If view is set to yield metadata,             they will be set either on datasets or files.
@@ -3078,6 +3134,8 @@ class DataSetsApi:
         _param = self._api_v1_data_datasets_post_serialize(
             collection_id=collection_id,
             deleted=deleted,
+            ancestor_of=ancestor_of,
+            child_of=child_of,
             view=view,
             metadata_target=metadata_target,
             metadata_query_dto=metadata_query_dto,
@@ -3101,6 +3159,8 @@ class DataSetsApi:
         self,
         collection_id,
         deleted,
+        ancestor_of,
+        child_of,
         view,
         metadata_target,
         metadata_query_dto,
@@ -3133,6 +3193,14 @@ class DataSetsApi:
         if deleted is not None:
             
             _query_params.append(('deleted', deleted))
+            
+        if ancestor_of is not None:
+            
+            _query_params.append(('ancestorOf', ancestor_of))
+            
+        if child_of is not None:
+            
+            _query_params.append(('childOf', child_of))
             
         if view is not None:
             

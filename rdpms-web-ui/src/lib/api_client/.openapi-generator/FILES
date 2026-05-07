@@ -2,6 +2,7 @@
 apis/CollectionsApi.ts
 apis/ContentTypesApi.ts
 apis/DataSetsApi.ts
+apis/ExecutionsApi.ts
 apis/FilesApi.ts
 apis/MetaDataApi.ts
 apis/ProjectsApi.ts
@@ -20,6 +21,9 @@ docs/DataSetsApi.md
 docs/DataStoreSummaryDTO.md
 docs/DeletionStateDTO.md
 docs/ErrorMessageDTO.md
+docs/ExecutionFinishedRequestDTO.md
+docs/ExecutionSummaryDTO.md
+docs/ExecutionsApi.md
 docs/FileCreateRequestDTO.md
 docs/FileCreateResponseDTO.md
 docs/FileListViewMode.md
@@ -27,6 +31,7 @@ docs/FileStorageReferenceSummaryDTO.md
 docs/FileSummaryDTO.md
 docs/FilesApi.md
 docs/HttpValidationProblemDetails.md
+docs/JobState.md
 docs/MetaDataApi.md
 docs/MetaDateCollectionColumnDTO.md
 docs/MetaDateDTO.md
@@ -55,12 +60,15 @@ models/DataSetSummaryDTO.ts
 models/DataStoreSummaryDTO.ts
 models/DeletionStateDTO.ts
 models/ErrorMessageDTO.ts
+models/ExecutionFinishedRequestDTO.ts
+models/ExecutionSummaryDTO.ts
 models/FileCreateRequestDTO.ts
 models/FileCreateResponseDTO.ts
 models/FileListViewMode.ts
 models/FileStorageReferenceSummaryDTO.ts
 models/FileSummaryDTO.ts
 models/HttpValidationProblemDetails.ts
+models/JobState.ts
 models/MetaDateCollectionColumnDTO.ts
 models/MetaDateDTO.ts
 models/MetadataColumnTargetDTO.ts

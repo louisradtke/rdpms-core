@@ -269,6 +269,18 @@ paths:
           description: "comma-separated list of strings, case-insensitive.\n            Default is RDPMS.Core.Persistence.Model.DeletionState.Active\n            Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState."
           schema:
             type: string
+        - name: ancestorOf
+          in: query
+          description: Return direct source datasets of the given dataset id.
+          schema:
+            type: string
+            format: uuid
+        - name: childOf
+          in: query
+          description: Return direct output datasets derived from the given dataset id.
+          schema:
+            type: string
+            format: uuid
         - name: view
           in: query
           description: 'Whether to only return dataset summaries (default), or metadata as well.'
@@ -304,6 +316,18 @@ paths:
           description: "comma-separated list of strings, case-insensitive.\n            Default is RDPMS.Core.Persistence.Model.DeletionState.Active\n            Valid values can be found in RDPMS.Core.Persistence.Model.DeletionState."
           schema:
             type: string
+        - name: ancestorOf
+          in: query
+          description: Return direct source datasets of the given dataset id.
+          schema:
+            type: string
+            format: uuid
+        - name: childOf
+          in: query
+          description: Return direct output datasets derived from the given dataset id.
+          schema:
+            type: string
+            format: uuid
         - name: view
           in: query
           description: 'Whether to only return dataset summaries (default), or metadata as well.'
@@ -602,6 +626,79 @@ paths:
           description: OK
         '400':
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+  /api/v1/executions/finished:
+    post:
+      tags:
+        - Executions
+      summary: Register a finished execution and its direct source/output artifacts.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecutionFinishedRequestDTO'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionSummaryDTO'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessageDTO'
+  /api/v1/executions:
+    get:
+      tags:
+        - Executions
+      summary: 'Get all executions, optionally filtered by the dataset they produced or consumed.'
+      parameters:
+        - name: ancestorOf
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: childOf
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExecutionSummaryDTO'
+  '/api/v1/executions/{id}':
+    get:
+      tags:
+        - Executions
+      summary: Get a single execution by id.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionSummaryDTO'
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
@@ -1414,6 +1511,96 @@ components:
           description: 'A message dedicated to the user. If null, use RDPMS.Core.Server.Model.DTO.V1.ErrorMessageDTO.Message as fallback.'
           nullable: true
       additionalProperties: false
+    ExecutionFinishedRequestDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        pipelineKey:
+          type: string
+          nullable: true
+        trackerId:
+          type: string
+          nullable: true
+        sourceDatasetIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          nullable: true
+        outputDatasetIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          nullable: true
+        metadataIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          nullable: true
+        outputCollectionId:
+          type: string
+          format: uuid
+          nullable: true
+        startedStampUtc:
+          type: string
+          format: date-time
+          nullable: true
+        terminatedStampUtc:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+    ExecutionSummaryDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          nullable: true
+        pipelineKey:
+          type: string
+          nullable: true
+        trackerId:
+          type: string
+          nullable: true
+        state:
+          $ref: '#/components/schemas/JobState'
+        createdStampUtc:
+          type: string
+          format: date-time
+        startedStampUtc:
+          type: string
+          format: date-time
+          nullable: true
+        terminatedStampUtc:
+          type: string
+          format: date-time
+          nullable: true
+        sourceDatasetIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          nullable: true
+        outputDatasetIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          nullable: true
+        metadataIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          nullable: true
+      additionalProperties: false
     FileCreateRequestDTO:
       type: object
       properties:
@@ -1547,6 +1734,16 @@ components:
                   type: string
               nullable: true
           additionalProperties: { }
+    JobState:
+      enum:
+        - Created
+        - Pending
+        - Running
+        - Failed
+        - Finished
+        - Terminated
+        - RunnerNotResponding
+      type: string
     MetaDateCollectionColumnDTO:
       type: object
       properties:

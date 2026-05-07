@@ -55,6 +55,8 @@ import {
 export interface ApiV1DataDatasetsGetRequest {
     collectionId?: string;
     deleted?: string;
+    ancestorOf?: string;
+    childOf?: string;
     view?: DataSetListViewMode;
     metadataTarget?: MetadataColumnTargetDTO;
 }
@@ -104,6 +106,8 @@ export interface ApiV1DataDatasetsNewSealedS3PostRequest {
 export interface ApiV1DataDatasetsPostRequest {
     collectionId?: string;
     deleted?: string;
+    ancestorOf?: string;
+    childOf?: string;
     view?: DataSetListViewMode;
     metadataTarget?: MetadataColumnTargetDTO;
     metadataQueryDTO?: MetadataQueryDTO;
@@ -126,6 +130,14 @@ export class DataSetsApi extends runtime.BaseAPI {
 
         if (requestParameters['deleted'] != null) {
             queryParameters['deleted'] = requestParameters['deleted'];
+        }
+
+        if (requestParameters['ancestorOf'] != null) {
+            queryParameters['ancestorOf'] = requestParameters['ancestorOf'];
+        }
+
+        if (requestParameters['childOf'] != null) {
+            queryParameters['childOf'] = requestParameters['childOf'];
         }
 
         if (requestParameters['view'] != null) {
@@ -520,6 +532,14 @@ export class DataSetsApi extends runtime.BaseAPI {
 
         if (requestParameters['deleted'] != null) {
             queryParameters['deleted'] = requestParameters['deleted'];
+        }
+
+        if (requestParameters['ancestorOf'] != null) {
+            queryParameters['ancestorOf'] = requestParameters['ancestorOf'];
+        }
+
+        if (requestParameters['childOf'] != null) {
+            queryParameters['childOf'] = requestParameters['childOf'];
         }
 
         if (requestParameters['view'] != null) {
