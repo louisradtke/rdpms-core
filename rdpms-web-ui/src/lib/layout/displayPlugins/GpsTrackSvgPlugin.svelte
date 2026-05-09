@@ -13,7 +13,7 @@
     const DEFAULT_MAX_SIZE = 2 * 1024 * 1024;
     const SVG_WIDTH = 900;
     const SVG_HEIGHT = 320;
-    const SVG_PADDING = 24;
+    const SVG_PADDING = 8;
     let maxSize = $derived(policy?.display?.maxBytes ?? DEFAULT_MAX_SIZE);
     let oversizeMessage = $derived(
         policy?.display?.oversizeMessage ?? "File too large for GPS preview (max 2 MiB)"
@@ -64,20 +64,6 @@
 
         result.push(current.trim());
         return result;
-    }
-
-    function project(
-        value: number,
-        minValue: number,
-        maxValue: number,
-        outMin: number,
-        outMax: number
-    ): number {
-        if (maxValue - minValue === 0) {
-            return (outMin + outMax) / 2;
-        }
-
-        return outMin + ((value - minValue) / (maxValue - minValue)) * (outMax - outMin);
     }
 
     function haversineKm(a: TrackPoint, b: TrackPoint): number {
@@ -188,15 +174,31 @@
             }
         }
 
-        const minX = SVG_PADDING;
-        const maxX = SVG_WIDTH - SVG_PADDING;
-        const minY = SVG_PADDING;
-        const maxY = SVG_HEIGHT - SVG_PADDING;
+        const drawableWidth = SVG_WIDTH - SVG_PADDING * 2;
+        const drawableHeight = SVG_HEIGHT - SVG_PADDING * 2;
+        const lonSpan = maxLon - minLon;
+        const latSpan = maxLat - minLat;
+        const centerLon = (minLon + maxLon) / 2;
+        const centerLat = (minLat + maxLat) / 2;
+        const centerLatRad = (centerLat * Math.PI) / 180;
+        const lonScaleAtLat = Math.max(Math.cos(centerLatRad), 1e-6);
+        const lonSpanIsometric = lonSpan * lonScaleAtLat;
+        const centerX = SVG_WIDTH / 2;
+        const centerY = SVG_HEIGHT / 2;
+
+        const scaleCandidates: number[] = [];
+        if (lonSpanIsometric > 0) {
+            scaleCandidates.push(drawableWidth / lonSpanIsometric);
+        }
+        if (latSpan > 0) {
+            scaleCandidates.push(drawableHeight / latSpan);
+        }
+        const scale = scaleCandidates.length > 0 ? Math.min(...scaleCandidates) : 1;
 
         const pathData = points
             .map((point, index) => {
-                const x = project(point.lon, minLon, maxLon, minX, maxX);
-                const y = project(point.lat, minLat, maxLat, maxY, minY);
+                const x = centerX + (point.lon - centerLon) * lonScaleAtLat * scale;
+                const y = centerY - (point.lat - centerLat) * scale;
                 const prefix = index === 0 ? "M" : "L";
                 return `${prefix}${x.toFixed(2)} ${y.toFixed(2)}`;
             })
@@ -241,7 +243,6 @@
                 role="img"
                 aria-label="GPS track preview"
             >
-                <rect x="0" y="0" width={SVG_WIDTH} height={SVG_HEIGHT} fill="#f8fafc" />
                 <path
                     d={track.pathData}
                     fill="none"
