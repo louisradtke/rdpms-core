@@ -7,6 +7,7 @@
     import PdfPlugin from "$lib/layout/displayPlugins/PdfPlugin.svelte";
     import CodePlugin from "$lib/layout/displayPlugins/CodePlugin.svelte";
     import GpsTrackSvgPlugin from "$lib/layout/displayPlugins/GpsTrackSvgPlugin.svelte";
+    import GpsTrackOsmPlugin from "$lib/layout/displayPlugins/GpsTrackOsmPlugin.svelte";
     import TimeSeriesPlotlyPlugin from "$lib/layout/displayPlugins/TimeSeriesPlotlyPlugin.svelte";
     import {
         autoPluginCandidates,
@@ -60,6 +61,7 @@
         preferredPluginIds = [],
         preferredDefaultPluginId,
         rendererOptions,
+        onMaximize,
         includeHiddenMode = false,
         defaultDisplayMode = "auto"
     }: {
@@ -69,6 +71,7 @@
         preferredPluginIds?: string[];
         preferredDefaultPluginId?: string;
         rendererOptions?: Record<string, unknown>;
+        onMaximize?: (() => void) | undefined;
         includeHiddenMode?: boolean;
         defaultDisplayMode?: "auto" | "hidden";
     } = $props();
@@ -82,6 +85,7 @@
         [CORE_PLUGIN_IDS.pdf]: "PDF",
         [CORE_PLUGIN_IDS.code]: "Code",
         [CORE_PLUGIN_IDS.gpsTrackSvg]: "GPS Track (SVG)",
+        [CORE_PLUGIN_IDS.gpsTrackOsm]: "GPS Track (OSM)",
         [CORE_PLUGIN_IDS.timeSeriesPlotly]: "Time Series"
     };
 
@@ -271,6 +275,29 @@
                         />
                     </svg>
                 </button>
+                {#if onMaximize}
+                    <button
+                        type="button"
+                        class="text-gray-500 hover:text-gray-700 cursor-pointer"
+                        onclick={onMaximize}
+                        aria-label="Maximize visualization"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 3H5a2 2 0 00-2 2v3m16 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M8 21H5a2 2 0 01-2-2v-3"
+                            />
+                        </svg>
+                    </button>
+                {/if}
                 <CodeCopyField
                     text={file.downloadURI ?? ""}
                     copyOnly={true}
@@ -336,6 +363,15 @@
                         <GpsTrackSvgPlugin
                             dataUri={file.downloadURI ?? ""}
                             policy={getCorePluginPolicy(CORE_PLUGIN_IDS.gpsTrackSvg)}
+                        />
+                    </div>
+                {/if}
+                {#if !selectedPluginDownloadBlocked && selectablePluginIds.includes(CORE_PLUGIN_IDS.gpsTrackOsm) && isMounted(CORE_PLUGIN_IDS.gpsTrackOsm)}
+                    <div class={isSelected(CORE_PLUGIN_IDS.gpsTrackOsm) ? "block" : "hidden"}>
+                        <GpsTrackOsmPlugin
+                            dataUri={file.downloadURI ?? ""}
+                            policy={getCorePluginPolicy(CORE_PLUGIN_IDS.gpsTrackOsm)}
+                            options={rendererOptions}
                         />
                     </div>
                 {/if}

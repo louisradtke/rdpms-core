@@ -6,6 +6,7 @@ export const CORE_PLUGIN_IDS = {
     pdf: "rdpms.pdf",
     code: "rdpms.code",
     gpsTrackSvg: "rdpms.gps-track-svg",
+    gpsTrackOsm: "rdpms.gps-track-osm",
     timeSeriesPlotly: "rdpms.timeseries-plotly"
 } as const;
 
@@ -78,6 +79,18 @@ const corePluginPolicies: Partial<Record<CorePluginId, CorePluginPolicy>> = {
         display: {
             maxBytes: 25 * MEBIBYTE,
             oversizeMessage: "File too large for Plotly time-series preview (max 25 MiB)"
+        }
+    },
+    [CORE_PLUGIN_IDS.gpsTrackOsm]: {
+        download: {
+            maxBytes: 25 * MEBIBYTE,
+            description:
+                "OpenStreetMap previews download and parse the full CSV file in the browser before rendering it.",
+            overrideLabel: "Download anyway"
+        },
+        display: {
+            maxBytes: 25 * MEBIBYTE,
+            oversizeMessage: "File too large for OpenStreetMap preview (max 25 MiB)"
         }
     }
 };

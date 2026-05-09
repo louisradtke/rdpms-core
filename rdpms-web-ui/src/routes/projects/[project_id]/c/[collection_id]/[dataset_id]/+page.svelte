@@ -59,6 +59,7 @@
     let projectId = $derived(page.params.project_id ?? "");
     let dataSetId = $derived(page.params.dataset_id ?? "");
     let reloadTick = $state(0);
+    let maximizedItem = $state<DisplayItem | null>(null);
     const datasetQuery = $derived(parseDatasetListQuery(page.url.searchParams));
 
     // Validate required params
@@ -223,6 +224,20 @@
         reloadTick += 1;
     };
 
+    const openVisualizationModal = (item: DisplayItem) => {
+        maximizedItem = item;
+    };
+
+    const closeVisualizationModal = () => {
+        maximizedItem = null;
+    };
+
+    const onWindowKeydown = (event: KeyboardEvent) => {
+        if (maximizedItem && event.key === "Escape") {
+            closeVisualizationModal();
+        }
+    };
+
     const setDatasetQuery = async (query: DatasetListQuery) => {
         const url = writeDatasetListQuery(page.url, query);
         await goto(url, { replaceState: true, keepFocus: true, noScroll: true });
@@ -251,6 +266,7 @@
 <svelte:head>
     <title>{title}</title>
 </svelte:head>
+<svelte:window onkeydown={onWindowKeydown} />
 
 <aside class="w-72 shrink-0 overflow-y-auto border-r border-gray-200 bg-gray-100 p-4 text-gray-800">
     <a
@@ -372,6 +388,7 @@
                                         preferredPluginIds={item.preferredPluginIds}
                                         preferredDefaultPluginId={item.preferredDefaultPluginId}
                                         rendererOptions={item.rendererOptions}
+                                        onMaximize={() => openVisualizationModal(item)}
                                         defaultDisplayMode="auto"
                                     />
                                 </div>
@@ -384,6 +401,7 @@
                                 preferredPluginIds={item.preferredPluginIds}
                                 preferredDefaultPluginId={item.preferredDefaultPluginId}
                                 rendererOptions={item.rendererOptions}
+                                onMaximize={() => openVisualizationModal(item)}
                                 defaultDisplayMode="auto"
                             />
                         {/if}
@@ -397,3 +415,43 @@
         {/await}
     </main>
 </div>
+
+{#if maximizedItem}
+    <div
+        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    >
+        <button
+            type="button"
+            class="absolute inset-0 bg-black/45"
+            aria-label="Close maximized visualization"
+            onclick={closeVisualizationModal}
+        ></button>
+        <div
+            class="relative max-h-[92vh] w-full max-w-screen-xl overflow-y-auto rounded-2xl bg-white p-4 shadow-xl"
+            role="dialog"
+            tabindex="-1"
+            aria-modal="true"
+            aria-label={`Maximized visualization: ${maximizedItem.title}`}
+        >
+            <div class="mb-3 flex items-center justify-between gap-3">
+                <h2 class="text-lg font-semibold text-gray-800">{maximizedItem.title}</h2>
+                <button
+                    type="button"
+                    class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+                    onclick={closeVisualizationModal}
+                >
+                    Close
+                </button>
+            </div>
+            <FileDisplay
+                title={maximizedItem.title}
+                fileSlug={`file-modal-${maximizedItem.file.id}`}
+                file={maximizedItem.file}
+                preferredPluginIds={maximizedItem.preferredPluginIds}
+                preferredDefaultPluginId={maximizedItem.preferredDefaultPluginId}
+                rendererOptions={maximizedItem.rendererOptions}
+                defaultDisplayMode="auto"
+            />
+        </div>
+    </div>
+{/if}
