@@ -1,6 +1,6 @@
 # Research Data and Pipeline Management System (RDPMS)
 
-![A visualization meta date is used to display files extracted from a ROS2 bag](docs/images/screenshot-mcap-viz.png)
+![A visualization meta date is used to display files extracted from a ROS2 bag](docs/images/screenshot-pedal-tudo-campus.png)
 
 RDPMS is an early-stage project for research data and pipeline management. The long-term goal is to treat data, metadata, and workflows as one connected system instead of separate tools.
 
